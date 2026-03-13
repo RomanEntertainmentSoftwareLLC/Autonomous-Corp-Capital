@@ -1,0 +1,10 @@
+[
+  {
+    "id": "backlog-101",
+    "title": "Improve EMA strategy metadata",
+    "description": "Add richer metadata and registry validation for each EMA-based strategy.",
+    "priority": "high",
+    "files": ["tradebot/strategies/ema_crossover.py"],
+    "tests": [".venv/bin/python3 tools/list_strategies.py"]
+  }
+]

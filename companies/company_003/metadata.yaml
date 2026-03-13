@@ -1,0 +1,12 @@
+company_id: company_003
+created_at: '2026-03-13T00:33:22.063032+00:00'
+generation: 3
+mutation_source: clone_of_company_001
+notes: 'Cloned from company_001 on 2026-03-13T00:33:22.063032+00:00
+
+  2026-03-13T00:33:22.243032+00:00: mutated 11 parameters (BTC-USD.ema_fast: 5->7;
+  BTC-USD.rsi_buy: 35->37; BTC-USD.rsi_sell: 64->62; BTC-USD.order_size: 1.569082695707757->1.7826964342792675;
+  ETH-USD.ema_fast: 5->4; ETH-USD.ema_slow: 28->26; ETH-USD.rsi_period: 12->11; ETH-USD.rsi_buy:
+  32->30; ETH-USD.order_size: 0.7257025144759043->0.7167238465560571; risk.max_position_size:
+  0.22653445549840673->0.2035704613500186; risk.max_daily_trades: 3->5)'
+parent_company: company_001

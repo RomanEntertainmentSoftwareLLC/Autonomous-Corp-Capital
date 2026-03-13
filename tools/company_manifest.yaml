@@ -1,0 +1,8 @@
+companies:
+  - company: company_001
+    mode: backtest
+    iterations: 4
+    loop_feed: true
+  - company: company_002
+    mode: paper
+    iterations: 3

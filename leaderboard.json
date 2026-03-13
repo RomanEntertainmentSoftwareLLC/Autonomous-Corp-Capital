@@ -1,0 +1,56 @@
+{
+  "rows": [
+    {
+      "company": "company_002",
+      "mode": "paper",
+      "trades": 0,
+      "account_value": 150.0,
+      "realized_pnl": 0.0,
+      "unrealized_pnl": 0.0,
+      "win_rate": null,
+      "max_drawdown": null,
+      "fitness": 0.0,
+      "recommendation": "KEEP",
+      "regime": "low_volatility"
+    },
+    {
+      "company": "company_004",
+      "mode": "backtest",
+      "trades": 2,
+      "account_value": 120.0,
+      "realized_pnl": 0.0,
+      "unrealized_pnl": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.012498437695288562,
+      "fitness": -0.12499687539057713,
+      "recommendation": "TEST_MORE",
+      "regime": "low_volatility"
+    },
+    {
+      "company": "company_001",
+      "mode": "paper",
+      "trades": 0,
+      "account_value": 80.0,
+      "realized_pnl": 0.0,
+      "unrealized_pnl": 0.0,
+      "win_rate": null,
+      "max_drawdown": 33.33333333333333,
+      "fitness": -66.66666666666666,
+      "recommendation": "RETIRE",
+      "regime": "high_volatility"
+    },
+    {
+      "company": "company_001",
+      "mode": "backtest",
+      "trades": 4,
+      "account_value": 80.0,
+      "realized_pnl": 0.0,
+      "unrealized_pnl": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 33.34337293231351,
+      "fitness": -66.88674586462702,
+      "recommendation": "RETIRE",
+      "regime": "low_volatility"
+    }
+  ]
+}

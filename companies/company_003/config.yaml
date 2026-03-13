@@ -1,0 +1,33 @@
+symbols:
+- name: BTC-USD
+  strategy: ema_crossover
+  exchange: robinhood
+  order_size: 1.7826964342792675
+  starting_balance: 120.0
+  ema_fast: 7
+  ema_slow: 20
+  rsi_period: 12
+  rsi_buy: 37
+  rsi_sell: 62
+- name: ETH-USD
+  strategy: rsi_mean_reversion
+  exchange: robinhood
+  order_size: 0.7167238465560571
+  starting_balance: 80.0
+  ema_fast: 4
+  ema_slow: 26
+  rsi_period: 11
+  rsi_buy: 30
+  rsi_sell: 70
+feed:
+  mode: sim
+  poll_interval_seconds: 10
+risk:
+  max_position_size: 0.2035704613500186
+  max_daily_trades: 5
+  min_balance: 50.0
+results_dir: results
+logging:
+  structured_console: true
+reporting:
+  summary_interval_ticks: 20

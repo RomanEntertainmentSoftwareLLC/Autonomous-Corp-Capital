@@ -1,0 +1,18 @@
+symbols:
+  - name: BTC-USD
+    exchange: robinhood
+    order_size: 3.0
+    starting_balance: 150.0
+    ema_fast: 8
+    ema_slow: 34
+    rsi_period: 21
+    rsi_buy: 40
+    rsi_sell: 60
+
+logging:
+  structured_console: false
+
+risk:
+  max_position_size: 0.6
+  max_daily_trades: 15
+  cooldown_seconds: 30

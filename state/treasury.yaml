@@ -1,0 +1,6 @@
+total_capital: 1000000.0
+reserve_capital: 250000.0
+allocatable_capital: 750000.0
+company_allocations: {}
+unallocated_capital: 750000.0
+last_updated: '2026-03-13T03:30:37.187581Z'

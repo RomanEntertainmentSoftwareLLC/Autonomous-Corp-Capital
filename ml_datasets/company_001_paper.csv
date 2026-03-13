@@ -1,0 +1,11 @@
+company,mode,symbol,strategy,ema_fast,ema_slow,ema_spread,rsi,price_change_1,price_change_2,price_change_3,momentum_3,slope_3,pattern_three_rising,pattern_three_falling,pattern_reversal_after_two_decline,pattern_reversal_after_two_rise,pattern_short_momentum_burst,pattern_short_exhaustion,higher_highs,higher_lows,lower_highs,lower_lows,future_direction_5_ticks
+company_001,paper,BTC-USD,,,,0.0,,0.0,0.0,0.0,0.0,0.0,False,False,False,False,False,False,False,False,False,False,1
+company_001,paper,BTC-USD,,,,0.0,,-8.118113,0.0,0.0,0.0,0.0,False,False,False,False,False,False,False,False,False,False,1
+company_001,paper,BTC-USD,,,,0.0,,10.00135,1.883236,0.0,0.0,0.0,False,False,False,False,False,False,False,True,False,False,1
+company_001,paper,BTC-USD,,,,0.0,,-0.028914,9.972435,1.854322,1.854322,0.618107,False,False,False,False,False,False,False,True,False,False,1
+company_001,paper,BTC-USD,,,,0.0,,43.551424,43.52251,53.523859,53.523859,17.841286,False,False,False,False,False,False,False,True,False,False,-1
+company_001,paper,BTC-USD,,70451.801427,,0.0,,-0.621529,42.929896,42.900981,42.900981,14.300327,False,False,False,False,False,False,False,True,False,False,1
+company_001,paper,BTC-USD,,70461.226323,,0.0,,2.504489,1.882961,45.434385,45.434385,15.144795,False,False,False,False,True,False,False,True,False,False,-1
+company_001,paper,BTC-USD,,70467.752891,,0.0,,-0.719255,1.785234,1.163705,1.163705,0.387902,False,False,False,False,False,False,False,True,False,False,-1
+company_001,paper,BTC-USD,,70472.414725,,0.0,,0.0,-0.719255,1.785234,1.785234,0.595078,False,False,False,False,True,False,False,False,True,False,-1
+company_001,paper,BTC-USD,,70475.064408,,0.0,,-2.380694,-2.380694,-3.099949,-3.099949,-1.033316,False,False,False,False,True,False,False,False,True,False,-1

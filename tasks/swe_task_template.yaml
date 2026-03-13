@@ -1,0 +1,20 @@
+task_id: SWE-001
+title: Refactor trading strategy pipeline
+description: |
+  Improve the structure, readability, and extensibility of the existing strategy pipeline.
+  Ensure each strategy is a plugin, add metadata, and validate inputs before execution.
+allowed_files:
+  - tradebot/strategies/**
+  - tools/**
+forbidden_files:
+  - .git/**
+  - results/**
+acceptance_criteria:
+  - Strategy registry exposes all plugins by name with metadata.
+  - Strategy configurations are validated against required fields.
+  - No regressions when running unit tests listed below.
+test_commands:
+  - ".venv/bin/python3 -m pytest tests"
+  - ".venv/bin/python3 tools/leaderboard.py"
+reviewer_notes: |
+  Focus on modularity and documentation. Bonus points for adding metadata-driven manifests.

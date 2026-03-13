@@ -1,0 +1,13 @@
+participants:
+  - company: company_001
+    alias: baseline
+    strategy: ema_crossover
+    overrides:
+      ema_fast: 6
+      ema_slow: 21
+  - company: company_004
+    alias: ml_challenger
+    strategy: ml_trader
+    overrides:
+      ml_confidence_threshold: 0.5
+      model_path: models/ml_model.pkl

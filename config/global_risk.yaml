@@ -1,0 +1,8 @@
+# Global risk guardrails for the AI trading organization
+max_daily_loss_percent: 3.0
+max_position_size_percent: 2.0
+max_total_open_positions: 5
+max_trades_per_hour: 12
+max_company_drawdown_percent: 8.0
+max_system_drawdown_percent: 15.0
+halt_on_violation: true

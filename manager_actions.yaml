@@ -1,0 +1,44 @@
+generated_at: /opt/openclaw/.openclaw/workspace
+actions:
+- company: company_001
+  parent: base_team
+  generation: 2
+  mode: backtest
+  account_value: 200.0
+  realized_pnl: 0.0
+  recommendation: CLONE
+  reason: "Strong occupant\u2014recommend cloning"
+  tester_status: pending
+  reviewer_status: pending
+  strategies:
+  - ema_crossover
+  - rsi_mean_reversion
+  target_child: company_001_gen3_clone
+  details: Clone company_001 into company_001_gen3_clone.
+- company: company_002
+  parent: <none>
+  generation: <unknown>
+  mode: paper
+  account_value: 150.0
+  realized_pnl: 0.0
+  recommendation: KEEP
+  reason: Stable; keep running
+  tester_status: pass
+  reviewer_status: pass
+  strategies:
+  - ema_crossover
+  details: Continue monitoring company_002.
+- company: company_003
+  parent: company_001
+  generation: 3
+  mode: <none>
+  account_value: 0.0
+  realized_pnl: 0.0
+  recommendation: KEEP
+  reason: Stable; keep running
+  tester_status: pass
+  reviewer_status: pass
+  strategies:
+  - ema_crossover
+  - rsi_mean_reversion
+  details: Continue monitoring company_003.

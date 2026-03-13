@@ -1,0 +1,8 @@
+[
+  {
+    "task_id": "SWE-001",
+    "status": "needs_changes",
+    "approved_at": null,
+    "notes": "Waiting for reviewer feedback on strategy metadata before merging."
+  }
+]

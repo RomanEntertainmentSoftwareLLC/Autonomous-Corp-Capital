@@ -1,0 +1,22 @@
+symbols:
+  - name: BTC-USD
+    strategy: ml_trader
+    exchange: robinhood
+    order_size: 2.0
+    starting_balance: 120.0
+    ema_fast: 6
+    ema_slow: 21
+    rsi_period: 14
+    ml_confidence_threshold: 0.6
+feed:
+  mode: sim
+  poll_interval_seconds: 5
+risk:
+  max_position_size: 0.3
+  max_daily_trades: 10
+  min_balance: 25.0
+results_dir: results
+logging:
+  structured_console: true
+reporting:
+  summary_interval_ticks: 20

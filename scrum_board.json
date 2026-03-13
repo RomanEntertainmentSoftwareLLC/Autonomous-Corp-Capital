@@ -1,0 +1,30 @@
+{
+  "BACKLOG": [
+    {
+      "company": "company_001",
+      "action": "Clone company_001 into next generation (keep strategies ['ema_crossover', 'rsi_mean_reversion']).",
+      "details": "Last mode backtest, account $200.00, trades 4, win rate 0.0%",
+      "recommendation": "CLONE",
+      "priority": "high"
+    },
+    {
+      "company": "company_002",
+      "action": "Continue monitoring company_002 with current strategy mix ['ema_crossover']. Consider increasing backtest iterations if volatility grows.",
+      "details": "Last mode paper, account $150.00, trades 0",
+      "recommendation": "KEEP",
+      "priority": "medium"
+    },
+    {
+      "company": "company_003",
+      "action": "Continue monitoring company_003 with current strategy mix ['ema_crossover', 'rsi_mean_reversion']. Consider increasing backtest iterations if volatility grows.",
+      "details": "Last mode <none>, account $0.00, trades 0",
+      "recommendation": "KEEP",
+      "priority": "medium"
+    }
+  ],
+  "READY": [],
+  "IN_PROGRESS": [],
+  "TESTING": [],
+  "REVIEW": [],
+  "DONE": []
+}

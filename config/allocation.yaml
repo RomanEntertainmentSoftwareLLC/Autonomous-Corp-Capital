@@ -1,0 +1,7 @@
+reserve_percent: 0.25
+max_company_allocation_percent: 0.3
+min_company_allocation_percent: 0.05
+top_percent_bonus: 0.05
+bottom_percent_penalty: 0.03
+promoted_company_bonus: 0.05
+retired_company_allocation: 0.0

@@ -1,0 +1,6 @@
+promotion_percentile: 90
+retirement_percentile: 20
+decline_strike_count: 3
+promotion_min_runs: 2
+retirement_min_runs: 5
+pause_after_decline: 2

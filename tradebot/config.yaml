@@ -1,0 +1,36 @@
+feed:
+  mode: robinhood
+  poll_interval_seconds: 5
+  sim_feed_file: tradebot/data/sim-feed.json
+  loop_sim_feed: false
+  max_tick_age_seconds: 30
+  request_timeout_seconds: 6
+  retry_backoff_seconds: 3
+
+execution:
+  mode: paper
+
+symbols:
+  - name: BTC-USD
+    exchange: robinhood
+    order_size: 2.5
+    starting_balance: 100.0
+    ema_fast: 6
+    ema_slow: 21
+    rsi_period: 14
+    rsi_buy: 35
+    rsi_sell: 65
+
+risk:
+  max_position_size: 0.5
+  max_daily_trades: 10
+  min_balance: 30.0
+  cooldown_seconds: 60
+
+results_dir: results
+data_dir: tradebot/data
+logging:
+  structured_console: true
+reporting:
+  summary_interval_ticks: 30
+live_trading_enabled: false

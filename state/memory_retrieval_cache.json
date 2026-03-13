@@ -1,0 +1,22 @@
+{
+  "6c06a36c0ede0ff755cbb90bd1889bb9c631a7580ad7e5814984453d66e8daf1": {
+    "timestamp": "2026-03-13T04:31:33.189963+00:00",
+    "chunks": [
+      {
+        "source_file": "vector_memory_plan.md",
+        "chunk_index": 0,
+        "text": "# Vector Memory Architecture Plan\n\nThis document describes the vector-backed memory retrieval roadmap. Each phase builds on the previous so the agent can query only the most relevant memory snippets.\n\n## Phase 1 — Chunking foundation (completed)\n- Chunk workspace memory files (`AGENT_HANDOFF.md`, `NEXT_STEPS.md`, `README.md`, `docs/*.md`) into readable pieces via `tools/index_memory.py`.\n- Persist chunk metadata (`source_file`, `chunk_index`, `text`) in `memory/index_chunks.jsonl` for inspection.\n- Provide `tradebot/memory_store.py` as the shared abstraction for indexing (`index_chunks`) and querying (`query_chunks`).\n- Implement `tools/query_memory.py` as a placeholder keyword search to verify the pipeline and keep the interface stable for future upgrades."
+      },
+      {
+        "source_file": "vector_memory_plan.md",
+        "chunk_index": 1,
+        "text": "## Phase 2 — Embeddings + Qdrant ingestion (completed)\n- Add `sentence-transformers/all-MiniLM-L6-v2` embeddings via `SentenceTransformer` and store vectors in a local Qdrant instance (`qdrant/qdrant` on port 6333).\n- Update `tradebot/memory_store.py` to:\n  - Lazily load the embedding model and chunk vectors in batches.\n  - Recreate the `memory_chunks` Qdrant collection (cosine distance, 384d) before each index run and upsert vectors with metadata (`source_file`, `chunk_index`, `text`).\n  - Perform nearest-neighbor searches by embedding the query and hitting Qdrant with `client.search`, falling back to keyword lookup when Qdrant is unavailable.\n- `tools/index_memory.py` now leverages the same `index_chunks` helper, so running it refreshes both the local JSONL archive and the Qdrant collection.\n- `tools/query_memory.py` calls `memory_store.query_chunks` to fetch the top 5 semantically similar chunks, so you can verify retrieval\nenvironments before rerouting prompts."
+      },
+      {
+        "source_file": "vector_memory_plan.md",
+        "chunk_index": 2,
+        "text": "## Phase 3 — Prompt injection & retrieval caching (completed)\n- `tools/prompt_builder.py` now wraps `memory_store.query_chunks(...)`, embeds each user query, and injects just the top few chunks (with source annotations) into the prompt instead of dumping entire files.\n- Retrieval caching is handled automatically via `state/memory_retrieval_cache.json`, so repeated queries reuse cached chunk lists without hitting Qdrant until the TTL expires.\n- Every prompt build is logged to `state/memory_usage_log.jsonl`, keeping an audit trail of which chunk IDs were used and whether the cache satisfied the request.\n- `tools/build_agent_prompt.py` demonstrates the integration by printing the final prompt and the retrieved chunk references for debugging or downstream reuse.\n- Future iterations can expand the cache invalidation logic (e.g., hash comparison vs. `index_chunks.jsonl`) and filter retrieval results by metadata tags.\n\nWith Phase 3 in place, the prompt builder only sees relevant snippets, keeping token usage low while still giving the agent the memory it needs."
+      }
+    ]
+  }
+}

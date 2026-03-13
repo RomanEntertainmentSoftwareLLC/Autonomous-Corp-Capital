@@ -1,0 +1,12 @@
+company_id: company_001
+parent_company: base_team
+generation: 2
+lifecycle_state: ACTIVE
+allocation_percent: 15.0
+allocation_amount: 150000.0
+allocation_status: active
+last_rebalance_at: 2026-03-13T03:22:00Z
+mutation_source: hybrid evolution
+created_at: 2026-03-13 00:00:00+00:00
+notes: |
+  Mixes BTC EMA crossover with ETH RSI mean-reversion to explore strategy competition.

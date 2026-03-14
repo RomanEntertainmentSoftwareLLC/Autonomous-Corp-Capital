@@ -183,13 +183,11 @@ def build_memory_prompt() -> None:
     print("=== MEMORY-AWARE PROMPT ===")
     print(prompt_payload.prompt)
     if prompt_payload.chunks:
-        print("
-=== CHUNKS INCLUDED ===")
+        print("\n=== CHUNKS INCLUDED ===")
         for chunk in prompt_payload.chunks:
             print(f"- {chunk.source_file}#{chunk.chunk_index} (cache hit={prompt_payload.cache_hit})")
     else:
-        print("
-(no memory chunks were retrieved)")
+        print("\n(no memory chunks were retrieved)")
 
 
 def execute_actions() -> None:

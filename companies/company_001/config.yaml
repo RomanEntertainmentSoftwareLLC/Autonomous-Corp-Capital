@@ -2,19 +2,19 @@ symbols:
 - name: BTC-USD
   strategy: ema_crossover
   exchange: robinhood
-  order_size: 1.546307922798876
+  order_size: 1.5434844184002288
   starting_balance: 120.0
   ema_fast: 3
-  ema_slow: 29
+  ema_slow: 30
   rsi_period: 5
   rsi_buy: 35
   rsi_sell: 60
-  rsi_oversold: 43
-  rsi_overbought: 73
-  momentum_period: 19
+  rsi_oversold: 44
+  rsi_overbought: 74
+  momentum_period: 20
   volatility_period: 5
   use_ema_spread: true
-  use_rsi: true
+  use_rsi: false
   use_price_change_1: true
   use_price_change_2: false
   use_price_change_3: false
@@ -30,7 +30,7 @@ feed:
   mode: sim
   poll_interval_seconds: 10
 risk:
-  max_position_size: 0.5638244969930692
+  max_position_size: 0.6318953368134844
   max_daily_trades: 7
   min_balance: 50.0
   max_position_fraction: 0.3

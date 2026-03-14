@@ -13,7 +13,6 @@ from typing import Any, Dict, List, Optional
 from urllib.parse import quote
 
 import requests
-from nacl.signing import SigningKey
 
 
 class FeedError(Exception):
@@ -142,6 +141,11 @@ class RobinhoodPriceFeed(BasePriceFeed):
             raise FeedFatalError("ROBINHOOD_PRIVATE_KEY must be base64 encoded") from exc
 
         seed = private_bytes[:32]
+        try:
+            from nacl.signing import SigningKey
+        except ImportError as exc:
+            raise FeedFatalError("pynacl is required for Robinhood feeds; install pynacl when using robinhood mode") from exc
+
         try:
             self.signing_key = SigningKey(seed)
         except Exception as exc:

@@ -92,6 +92,15 @@ notes: 'Mixes BTC EMA crossover with ETH RSI mean-reversion to explore strategy 
   True, ''use_price_change_2'': False, ''use_price_change_3'': False, ''use_momentum_3'':
   True, ''use_slope_3'': True, ''use_pattern_flags'': True}; risk.max_position_size:
   0.5030865791993034->0.5638244969930692; risk.max_daily_trades: 5->7; risk.cooldown_seconds:
-  60->58)'
+  60->58)
+
+  2026-03-14T03:46:47.801444+00:00: mutated 10 parameters (BTC-USD.ema_slow: 29->31;
+  BTC-USD.order_size: 1.546307922798876->1.5434844184002288; BTC-USD.parameter ema_slow
+  -> 30; BTC-USD.parameter rsi_oversold -> 44; BTC-USD.parameter rsi_overbought ->
+  74; BTC-USD.parameter momentum_period -> 20; BTC-USD.feature flags -> {''use_ema_spread'':
+  True, ''use_rsi'': False, ''use_price_change_1'': True, ''use_price_change_2'':
+  False, ''use_price_change_3'': False, ''use_momentum_3'': True, ''use_slope_3'':
+  True, ''use_pattern_flags'': True}; risk.max_position_size: 0.5638244969930692->0.6318953368134844;
+  risk.max_daily_trades: 5->7; risk.cooldown_seconds: 60->58)'
 parent_company: base_team
-promotion_streak: 6
+promotion_streak: 7

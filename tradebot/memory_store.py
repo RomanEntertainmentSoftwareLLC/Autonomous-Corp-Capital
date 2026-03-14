@@ -1,30 +1,45 @@
-"""Memory chunk store with JSONL persistence + Qdrant vector backend."""
+"""Memory chunk store with JSONL persistence + optional Qdrant vector backend."""
 from __future__ import annotations
 
 import json
-import torch
-import uuid
-
 import os
+import uuid
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import List, Sequence
 
+try:
+    import torch
+except ImportError:  # pragma: no cover - optional
+    torch = None
 
-_pytree = getattr(torch.utils, "_pytree", None)
-if _pytree:
-    def _patched_register_pytree_node(*args, **kwargs):
-        kwargs.pop("serialized_type_name", None)
-        return _pytree._register_pytree_node(*args, **kwargs)
+if torch is not None:
+    _pytree = getattr(torch.utils, "_pytree", None)
+    if _pytree:
+        def _patched_register_pytree_node(*args, **kwargs):
+            kwargs.pop("serialized_type_name", None)
+            return _pytree._register_pytree_node(*args, **kwargs)
 
-    if not hasattr(_pytree, "register_pytree_node"):
-        setattr(_pytree, "register_pytree_node", _patched_register_pytree_node)
-    elif not hasattr(_pytree, "_register_pytree_node"):
-        setattr(_pytree, "_register_pytree_node", _patched_register_pytree_node)
+        if not hasattr(_pytree, "register_pytree_node"):
+            setattr(_pytree, "register_pytree_node", _patched_register_pytree_node)
+        elif not hasattr(_pytree, "_register_pytree_node"):
+            setattr(_pytree, "_register_pytree_node", _patched_register_pytree_node)
 
-from qdrant_client import QdrantClient
-from qdrant_client.http import models as rest
-from sentence_transformers import SentenceTransformer
+try:
+    from qdrant_client import QdrantClient
+    from qdrant_client.http import models as rest
+    QDRANT_AVAILABLE = True
+except ImportError:  # pragma: no cover - optional
+    QdrantClient = None
+    rest = None
+    QDRANT_AVAILABLE = False
+
+try:
+    from sentence_transformers import SentenceTransformer
+    SENTENCE_TRANSFORMER_AVAILABLE = True
+except ImportError:  # pragma: no cover - optional
+    SentenceTransformer = None
+    SENTENCE_TRANSFORMER_AVAILABLE = False
 
 ROOT = Path(__file__).resolve().parent.parent
 CHUNK_STORE_PATH = ROOT / "memory" / "index_chunks.jsonl"
@@ -49,14 +64,18 @@ def _ensure_store_path() -> None:
     CHUNK_STORE_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 
-def _get_embedding_model() -> SentenceTransformer:
+def _get_embedding_model() -> SentenceTransformer | None:
     global _embedding_model
+    if not SENTENCE_TRANSFORMER_AVAILABLE or SentenceTransformer is None:
+        return None
     if _embedding_model is None:
         _embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
     return _embedding_model
 
 
 def _get_qdrant_client() -> QdrantClient | None:
+    if not QDRANT_AVAILABLE or QdrantClient is None:
+        return None
     global _qdrant_client
     if _qdrant_client is not None:
         return _qdrant_client
@@ -86,6 +105,9 @@ def _search_qdrant(query: str, limit: int) -> List[MemoryChunk]:
         print("[memory] Qdrant unavailable; using keyword search")
         return []
     model = _get_embedding_model()
+    if model is None:
+        print("[memory] Embeddings unavailable; using keyword search")
+        return []
     try:
         vector = model.encode([query], convert_to_numpy=True, show_progress_bar=False)[0].tolist()
         response = client.query_points(
@@ -109,6 +131,8 @@ def _search_qdrant(query: str, limit: int) -> List[MemoryChunk]:
 
 
 def _ensure_qdrant_collection(client: QdrantClient, vector_size: int) -> None:
+    if not QDRANT_AVAILABLE or rest is None:
+        return
     client.recreate_collection(
         collection_name=COLLECTION_NAME,
         vectors_config=rest.VectorParams(size=vector_size, distance=rest.Distance.COSINE),
@@ -123,7 +147,13 @@ def _index_to_qdrant(chunks: Sequence[MemoryChunk]) -> None:
         print("[memory] Qdrant unavailable; skipping vector indexing")
         return
     model = _get_embedding_model()
+    if model is None:
+        print("[memory] Embeddings unavailable; skipping vector indexing")
+        return
     vector_size = model.get_sentence_embedding_dimension()
+    if rest is None:
+        print("[memory] Qdrant models unavailable; skipping vector indexing")
+        return
     _ensure_qdrant_collection(client, vector_size)
     for start in range(0, len(chunks), EMBEDDING_BATCH_SIZE):
         batch = chunks[start : start + EMBEDDING_BATCH_SIZE]

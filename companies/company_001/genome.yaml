@@ -5,15 +5,15 @@ indicator_flags:
   use_volatility: true
 indicator_parameters:
   ema_fast: 3
-  ema_slow: 29
+  ema_slow: 30
   rsi_period: 5
-  rsi_oversold: 43
-  rsi_overbought: 73
-  momentum_period: 19
+  rsi_oversold: 44
+  rsi_overbought: 74
+  momentum_period: 20
   volatility_period: 5
 feature_flags:
   use_ema_spread: true
-  use_rsi: true
+  use_rsi: false
   use_price_change_1: true
   use_price_change_2: false
   use_price_change_3: false

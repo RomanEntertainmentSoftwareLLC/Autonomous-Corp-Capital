@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any, Dict
 
@@ -12,18 +13,17 @@ import sqlite3
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.reporting_utils import compute_fitness, determine_evaluation_state
+
 WAREHOUSE = ROOT / "data" / "warehouse.sqlite"
 COMPANIES_DIR = ROOT / "companies"
 LIFECYCLE_CONFIG = ROOT / "config" / "lifecycle.yaml"
 
-FITNESS_WEIGHTS = {
-    "realized_pnl": 1.0,
-    "unrealized_pnl": 0.25,
-    "win_rate": 0.5,
-    "drawdown": -2.0,
-}
-
 LIFECYCLE_RULES = [
+    "UNTESTED",
     "NEW",
     "TESTING",
     "ACTIVE",
@@ -60,59 +60,9 @@ def load_metadata() -> Dict[str, Dict[str, Any]]:
 
 def save_metadata(company: str, data: Dict[str, Any]) -> None:
     path = COMPANIES_DIR / company / "metadata.yaml"
+    path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as fh:
         yaml.safe_dump(data, fh)
-
-
-def fitness(metrics: Dict[str, float]) -> float:
-    score = 0.0
-    score += metrics.get("realized_pnl", 0.0) * FITNESS_WEIGHTS["realized_pnl"]
-    score += metrics.get("unrealized_pnl", 0.0) * FITNESS_WEIGHTS["unrealized_pnl"]
-    score += metrics.get("win_rate", 0.0) * FITNESS_WEIGHTS["win_rate"]
-    score += metrics.get("drawdown", 0.0) * FITNESS_WEIGHTS["drawdown"]
-    return score
-
-
-def load_latest_results(conn: sqlite3.Connection) -> Dict[str, Dict[str, float]]:
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        SELECT companies.name AS company,
-               runs.strategy,
-               results.account_value,
-               results.realized_pnl,
-               results.unrealized_pnl,
-               results.drawdown,
-               results.metrics
-        FROM companies
-        JOIN runs ON runs.company_id = companies.id
-        JOIN results ON results.run_id = runs.id
-        WHERE runs.id = (
-            SELECT id FROM runs r2
-            WHERE r2.company_id = runs.company_id
-            ORDER BY r2.start_time DESC
-            LIMIT 1
-        )
-        """
-    )
-    data = {}
-    for company, strategy, account, realized, unrealized, drawdown, raw_metrics in cursor.fetchall():
-        metrics = {}
-        if raw_metrics:
-            try:
-                metrics = json.loads(raw_metrics)
-            except json.JSONDecodeError:
-                metrics = {}
-        data[company] = {
-            "strategy": strategy,
-            "account": account or 0.0,
-            "realized_pnl": realized or 0.0,
-            "unrealized_pnl": unrealized or 0.0,
-            "drawdown": drawdown or 0.0,
-            "win_rate": float(metrics.get("win_rate", 0.0)),
-            "trade_count": int(metrics.get("trade_count", 0)),
-        }
-    return data
 
 
 def evaluate_state(
@@ -127,18 +77,17 @@ def evaluate_state(
 ) -> str:
     if state not in LIFECYCLE_RULES:
         state = "NEW"
-    metrics_available = bool(metrics)
-    score = fitness(metrics) if metrics_available else 0.0
+    if not metrics:
+        return "UNTESTED"
+    score = compute_fitness(metrics)
     account = metrics.get("account", 0)
     drawdown = metrics.get("drawdown", 0)
     decline_limit = int(config.get("decline_strike_count", 3))
     pause_after_decline = config.get("pause_after_decline", 8)
     promotion_min_runs = int(config.get("promotion_min_runs", 2))
 
-    if state == "NEW":
-        return "TESTING" if metrics_available else "NEW"
-    if not metrics_available:
-        return state
+    if state in {"NEW", "UNTESTED"}:
+        return "TESTING"
     if state == "TESTING":
         if account > 105 and metrics.get("trade_count", 0) >= promotion_min_runs:
             return "ACTIVE"
@@ -187,21 +136,66 @@ def main() -> None:
         raise SystemExit("Warehouse not initialized; run tools/init_warehouse.py first")
 
     metadata = load_metadata()
-    with sqlite3.connect(WAREHOUSE) as conn:
-        latest = load_latest_results(conn)
     config = load_lifecycle_config()
     promotion_percentile = float(config.get("promotion_percentile", 90))
     retirement_percentile = float(config.get("retirement_percentile", 20))
-    fitness_scores = [fitness(metrics) for metrics in latest.values() if metrics]
-    promotion_threshold = percentile_value(fitness_scores, promotion_percentile)
-    retirement_threshold = percentile_value(fitness_scores, retirement_percentile)
     transitions = []
-    for company, meta in metadata.items():
-        current_state = meta.get("lifecycle_state", "NEW")
-        metrics = latest.get(company, {})
+
+    with sqlite3.connect(WAREHOUSE) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT latest_fitness FROM company_performance WHERE latest_fitness IS NOT NULL")
+        fitness_scores = [row[0] for row in cursor.fetchall() if row[0] is not None]
+        promotion_threshold = percentile_value(fitness_scores, promotion_percentile)
+        retirement_threshold = percentile_value(fitness_scores, retirement_percentile)
+        cursor.execute(
+            """
+            SELECT c.name,
+                   cp.latest_account_value,
+                   cp.latest_realized_pnl,
+                   cp.latest_unrealized_pnl,
+                   cp.latest_trade_count,
+                   cp.latest_win_rate,
+                   cp.latest_drawdown,
+                   cp.latest_regime,
+                   cp.lifecycle_state,
+                   cp.latest_fitness,
+                   ac.strategy_name
+            FROM companies c
+            LEFT JOIN company_performance cp ON cp.company_id = c.id
+            LEFT JOIN analytics_companies ac ON ac.company_id = c.id
+            """
+        )
+        rows = cursor.fetchall()
+
+    for row in rows:
+        (
+            company,
+            account_value,
+            realized,
+            row_unrealized,
+            trade_count,
+            win_rate,
+            drawdown,
+            regime,
+            canonical_state,
+            fitness_value,
+            strategy_hint,
+        ) = row
+        meta = metadata.setdefault(company, {})
+        current_state = meta.get("lifecycle_state") or canonical_state or "NEW"
         decline_strikes = int(meta.get("decline_strikes", 0))
         promotion_streak = int(meta.get("promotion_streak", 0))
-        score_value = fitness(metrics)
+        metrics: Dict[str, float] = {}
+        if account_value is not None:
+            metrics = {
+                "account": account_value,
+                "realized_pnl": realized or 0.0,
+                "unrealized_pnl": row_unrealized or 0.0,
+                "win_rate": win_rate or 0.0,
+                "drawdown": drawdown or 0.0,
+                "trade_count": int(trade_count or 0),
+            }
+        eval_state, eval_reason = determine_evaluation_state(metrics)
         new_state = evaluate_state(
             company,
             current_state,
@@ -217,9 +211,12 @@ def main() -> None:
                 "company": company,
                 "current_state": current_state,
                 "new_state": new_state,
-                "strategy": metrics.get("strategy"),
-                "account": metrics.get("account"),
-                "fitness": score_value,
+                "strategy": strategy_hint,
+                "account": account_value,
+                "fitness": fitness_value,
+                "evaluation_state": eval_state,
+                "evaluation_reason": eval_reason,
+                "unrealized": row_unrealized,
             }
         )
         decline_strikes = decline_strikes + 1 if new_state == "DECLINING" else 0
@@ -227,12 +224,22 @@ def main() -> None:
         meta["lifecycle_state"] = new_state
         meta["decline_strikes"] = decline_strikes
         meta["promotion_streak"] = promotion_streak
-        meta["last_fitness"] = score_value
-        save_metadata(company, meta)
-        print(
-            f"{company:<12} {current_state:<10} -> {new_state:<10}  strategy={metrics.get('strategy', '<none>')}" 
-            f" account={metrics.get('account', 0):>8.2f} fitness={score_value:>6.2f}"
-        )
+        meta["last_fitness"] = fitness_value
+        meta["evaluation_state"] = eval_state
+        meta["evaluation_reason"] = eval_reason
+        company_path = COMPANIES_DIR / company
+        if company_path.exists():
+            save_metadata(company, meta)
+        account_display = f"{account_value:>8.2f}" if account_value is not None else "N/A"
+        fitness_display = f"{fitness_value:>6.2f}" if fitness_value is not None else "N/A"
+        strategy_label = strategy_hint or meta.get("strategy") or "N/A"
+        print(f"Company: {company}")
+        print(f"  Lifecycle: {current_state} -> {new_state}")
+        print(f"  Eval state: {eval_state}")
+        if eval_reason:
+            print(f"  Reason: {eval_reason}")
+        print(f"  Strategy: {strategy_label:<12} account={account_display} fitness={fitness_display}")
+        print()
     if args.json:
         args.json.parent.mkdir(parents=True, exist_ok=True)
         args.json.write_text(json.dumps(transitions, indent=2))

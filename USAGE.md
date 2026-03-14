@@ -135,15 +135,16 @@ python3 trade-bot.py --company company_001 --mode backtest --iterations 4
 python3 tools/init_warehouse.py
 python3 tools/ingest_results_to_db.py
 ```
-- Creates `data/warehouse.sqlite` with tables/views (`latest_company_results`, `leaderboard_basis`, `latest_run_summary`).
+- Creates `data/warehouse.sqlite` with tables/views (`latest_company_results`, `leaderboard_basis`, `latest_run_summary`) plus canonical analytics tables (`analytics_companies`, `evaluations`, `trade_facts`, `company_performance`). These new tables drive the reporting tools so that "no data yet" companies look like untested entrants instead of slow performers.
 
 ### Queries
 ```
 python3 tools/query_warehouse.py strategy_performance
 python3 tools/query_warehouse.py best_strategy_by_symbol
 python3 tools/query_warehouse.py ema_param_profitability
+python3 tools/query_warehouse.py company_profit_ranking
 ```
-- Outputs readable tables for strategy analyses and mutation tracking.
+- Outputs readable tables for strategy analyses and canonical profit rankings.
 
 ### Leaderboard
 ```

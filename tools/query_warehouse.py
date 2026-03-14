@@ -49,15 +49,18 @@ def query_strategy_performance(conn: sqlite3.Connection) -> None:
     cursor = conn.cursor()
     cursor.execute(
         """
-        SELECT strategy, COUNT(*) AS runs, AVG(account_value) AS avg_account, AVG(realized_pnl) AS avg_realized
-        FROM runs
-        JOIN results ON runs.id = results.run_id
-        GROUP BY strategy
+        SELECT runs.strategy,
+               COUNT(evaluations.evaluation_id) AS runs,
+               AVG(evaluations.account_value) AS avg_account,
+               AVG(evaluations.realized_pnl) AS avg_realized
+        FROM evaluations
+        JOIN runs ON runs.id = evaluations.run_id
+        GROUP BY runs.strategy
         ORDER BY avg_account DESC
         LIMIT 10
-    """
+        """
     )
-    print("Strategy performance:")
+    print("Strategy performance (from canonical evaluations):")
     print("strategy         runs  avg_account  avg_realized")
     for row in cursor.fetchall():
         strategy, runs, avg_account, avg_realized = row
@@ -127,28 +130,22 @@ def query_best_strategy_by_symbol(conn: sqlite3.Connection) -> None:
     cursor = conn.cursor()
     cursor.execute(
         """
-        SELECT ticks.symbol, runs.strategy,
-               COUNT(DISTINCT runs.id) AS runs,
-               AVG(results.account_value) AS avg_account,
-               AVG(results.realized_pnl) AS avg_realized,
-               AVG(results.drawdown) AS avg_drawdown
-        FROM runs
-        JOIN results ON results.run_id = runs.id
-        JOIN ticks ON ticks.run_id = runs.id
-        GROUP BY ticks.symbol, runs.strategy
-        ORDER BY ticks.symbol, avg_account DESC
-    """
+        SELECT trade_facts.symbol,
+               runs.strategy,
+               COUNT(*) AS trade_count,
+               AVG(trade_facts.pnl) AS avg_pnl
+        FROM trade_facts
+        JOIN runs ON runs.id = trade_facts.run_id
+        GROUP BY trade_facts.symbol, runs.strategy
+        ORDER BY trade_facts.symbol, avg_pnl DESC
+        """
     )
-    print("Best strategy by symbol (ranked by avg account):")
-    print("symbol   strategy           runs  avg_account  avg_realized  avg_drawdown")
+    print("Best strategy by symbol (ranked by avg trade PnL):")
+    print("symbol   strategy           trades  avg_pnl")
     for row in cursor.fetchall():
-        symbol, strategy, runs, avg_account, avg_realized, avg_drawdown = row
-        avg_account = avg_account or 0.0
-        avg_realized = avg_realized or 0.0
-        avg_drawdown = avg_drawdown or 0.0
-        print(
-            f"{symbol:<8} {strategy:<18} {runs:>4}  {avg_account:>11.2f}  {avg_realized:>12.2f}  {avg_drawdown:>12.2f}"
-        )
+        symbol, strategy, trades, avg_pnl = row
+        avg_pnl = avg_pnl or 0.0
+        print(f"{symbol:<8} {strategy:<18} {trades:>6}  {avg_pnl:>9.2f}")
 
 
 def query_ema_param_profitability(conn: sqlite3.Connection) -> None:
@@ -171,7 +168,7 @@ def query_ema_param_profitability(conn: sqlite3.Connection) -> None:
         GROUP BY ticks.symbol, ema_fast, ema_slow, runs.strategy
         ORDER BY avg_realized_pnl DESC
         LIMIT 20
-    """
+        """
     )
     print("Profitable EMA parameter combos:")
     print("symbol   strategy           ema_fast  ema_slow  runs  avg_realized  avg_drawdown  avg_account")
@@ -180,6 +177,30 @@ def query_ema_param_profitability(conn: sqlite3.Connection) -> None:
         print(
             f"{symbol:<8} {strategy:<18} {ema_fast or 0:<9} {ema_slow or 0:<9} {runs:>4}  {avg_realized:>12.2f}  {avg_drawdown or 0:>12.2f}  {avg_account:>11.2f}"
         )
+
+
+def query_company_profit_ranking(conn: sqlite3.Connection) -> None:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT companies.name,
+               SUM(trade_facts.pnl) AS total_profit,
+               COUNT(trade_facts.trade_id) AS trade_count
+        FROM trade_facts
+        JOIN companies ON companies.id = trade_facts.company_id
+        GROUP BY companies.id
+        ORDER BY total_profit DESC
+        """
+    )
+    print("Company profit ranking:")
+    print("company        profit     trades")
+    rows = cursor.fetchall()
+    if not rows:
+        print("No canonical profit data available yet.")
+        return
+    for name, profit, trades in rows:
+        profit = profit or 0.0
+        print(f"{name:<15} {profit:>10.2f}  {trades:>6}")
 
 
 def main() -> None:
@@ -191,6 +212,7 @@ def main() -> None:
         "symbol_trades",
         "best_strategy_by_symbol",
         "ema_param_profitability",
+        "company_profit_ranking",
     ], help="Name of the predefined query to run")
     parser.add_argument("--db", type=Path, default=WAREHOUSE, help="Path to the warehouse.sqlite file")
     args = parser.parse_args()
@@ -212,6 +234,8 @@ def main() -> None:
             query_best_strategy_by_symbol(conn)
         elif args.query == "ema_param_profitability":
             query_ema_param_profitability(conn)
+        elif args.query == "company_profit_ranking":
+            query_company_profit_ranking(conn)
 
 
 if __name__ == "__main__":

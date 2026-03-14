@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-"""Rank companies by performance across results."""
+"""Rank companies by canonical performance state."""
 
 from __future__ import annotations
 
 import argparse
-import json
 import sqlite3
-from pathlib import Path
 import sys
-from typing import Dict, Iterable, List, Optional
+from pathlib import Path
+from typing import Any, Dict, List
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
@@ -17,186 +16,54 @@ if str(ROOT) not in sys.path:
 from tools.python_helper import ensure_repo_root
 
 ensure_repo_root()
+
 WAREHOUSE = ROOT / "data" / "warehouse.sqlite"
-
-from tradebot.regime import classify_regime
-
-RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
+COMPANIES_DIR = ROOT / "companies"
 
 
-def iter_log_entries(path: Path) -> Iterable[Dict[str, object]]:
-    with path.open("r", encoding="utf-8") as fh:
-        for line in fh:
-            line = line.strip()
-            if line:
-                yield json.loads(line)
-
-
-def summarize(path: Path) -> Dict[str, object]:
-    trades = 0
-    wins = 0
-    realized = 0.0
-    account_history: List[float] = []
-    latest_account = 0.0
-    latest_unrealized = 0.0
-
-    prices: List[float] = []
-    starting_account: Optional[float] = None
-    first_price: Optional[float] = None
-    last_price: Optional[float] = None
-
-    for entry in iter_log_entries(path):
-        if entry.get("executed"):
-            trades += 1
-            pnl = entry.get("pnl") or 0.0
-            realized += pnl
-            if pnl > 0:
-                wins += 1
-        cash = entry.get("cash_after", 0.0)
-        position = entry.get("position_after", 0.0)
-        price = entry.get("price", 0.0)
-        account_value = cash + position * price
-        account_history.append(account_value)
-        latest_account = account_value
-        latest_unrealized = entry.get("unrealized_pnl", 0.0)
-        if starting_account is None:
-            starting_account = entry.get("cash_before", cash)
-        if first_price is None and price is not None:
-            first_price = price
-        last_price = price
-        if price is not None:
-            prices.append(price)
-
-    win_rate = wins / trades * 100 if trades else None
-    max_account = max(account_history) if account_history else latest_account
-    drawdown = None
-    if max_account > 0 and latest_account < max_account:
-        drawdown = (max_account - latest_account) / max_account * 100
-
-    regime = classify_regime(prices)
-    company_return = None
-    if starting_account and starting_account != 0:
-        company_return = (latest_account - starting_account) / starting_account
-    benchmark_return = None
-    if first_price and last_price and first_price != 0:
-        benchmark_return = (last_price - first_price) / first_price
-    alpha = None
-    if company_return is not None and benchmark_return is not None:
-        alpha = company_return - benchmark_return
-
-    return {
-        "account_value": latest_account,
-        "realized_pnl": realized,
-        "unrealized_pnl": latest_unrealized,
-        "trades": trades,
-        "win_rate": win_rate,
-        "max_drawdown": drawdown,
-        "regime": regime,
-        "company_return": company_return,
-        "benchmark_return": benchmark_return,
-        "alpha": alpha,
-    }
-
-
-def _parse_metrics(raw: str) -> Dict[str, object]:
-    if not raw:
-        return {}
-    try:
-        return json.loads(raw)
-    except json.JSONDecodeError:
-        return {}
-
-
-def collect_from_warehouse(mode_filter: str | None = None, company_filter: str | None = None) -> List[Dict[str, object]]:
-    if not WAREHOUSE.exists():
-        return []
-    rows: List[Dict[str, object]] = []
-    query = """
-        SELECT companies.name, runs.mode, results.account_value, results.realized_pnl, results.unrealized_pnl, results.drawdown, results.metrics
-        FROM companies
-        JOIN runs ON runs.company_id = companies.id
-        JOIN results ON results.run_id = runs.id
-        ORDER BY runs.start_time DESC
-    """
-    with sqlite3.connect(WAREHOUSE) as conn:
-        cursor = conn.cursor()
-        for company, mode, account, realized, unrealized, drawdown, raw_metrics in cursor.execute(query):
-            if company_filter and company != company_filter:
-                continue
-            if mode_filter and mode != mode_filter:
-                continue
-            metrics = _parse_metrics(raw_metrics)
-            rows.append({
-                "company": company,
-                "mode": mode,
-                "account_value": account or 0.0,
-                "realized_pnl": realized or 0.0,
-                "unrealized_pnl": unrealized or 0.0,
-                "trades": int(metrics.get("trade_count", 0)),
-                "win_rate": metrics.get("win_rate"),
-                "max_drawdown": metrics.get("max_drawdown", drawdown),
-                "drawdown": drawdown,
-                "regime": metrics.get("regime"),
-                "company_return": metrics.get("company_return"),
-                "benchmark_return": metrics.get("benchmark_return"),
-                "alpha": metrics.get("alpha"),
-            })
-    return rows
-
-def collect(mode_filter: str | None = None, company_filter: str | None = None) -> List[Dict[str, object]]:
-    rows = collect_from_warehouse(mode_filter, company_filter)
-    if rows:
-        return rows
-    rows: List[Dict[str, object]] = []
-    for company_dir in sorted(RESULTS_DIR.iterdir()):
-        if not company_dir.is_dir():
-            continue
-        company_name = company_dir.name
-        if company_filter and company_name != company_filter:
-            continue
-        for mode_dir in sorted(company_dir.iterdir()):
-            if not mode_dir.is_dir():
-                continue
-            mode_name = mode_dir.name
-            if mode_filter and mode_name != mode_filter:
-                continue
-            log_path = mode_dir / "trade-log.jsonl"
-            if not log_path.exists():
-                continue
-            summary = summarize(log_path)
-            rows.append(
-                {
-                    "company": company_name,
-                    "mode": mode_name,
-                    **summary,
-                }
-            )
-    return rows
-
-
-# Fitness scoring weights (tweakable)
-FITNESS_WEIGHTS = {
-    "realized_pnl": 1.0,
-    "unrealized_pnl": 0.25,
-    "win_rate": 0.5,
-    "max_drawdown": -2.0,
-    "trades": -0.05,
-}
-
-
-def score(row: Dict[str, object]) -> float:
-    win_rate = row.get("win_rate") or 0.0
-    drawdown = row.get("max_drawdown") or 0.0
-    return (
-        float(row.get("realized_pnl", 0.0)) * FITNESS_WEIGHTS["realized_pnl"]
-        + float(row.get("unrealized_pnl", 0.0)) * FITNESS_WEIGHTS["unrealized_pnl"]
-        + win_rate * FITNESS_WEIGHTS["win_rate"]
-        + drawdown * FITNESS_WEIGHTS["max_drawdown"]
-        + float(row.get("trades", 0)) * FITNESS_WEIGHTS["trades"]
+def load_performance_map(conn: sqlite3.Connection) -> Dict[str, Dict[str, Any]]:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT c.name,
+               cp.latest_account_value,
+               cp.latest_realized_pnl,
+               cp.latest_unrealized_pnl,
+               cp.latest_trade_count,
+               cp.latest_win_rate,
+               cp.latest_drawdown,
+               cp.latest_regime,
+               cp.lifecycle_state,
+               cp.latest_fitness,
+               lrs.mode,
+               ac.strategy_name
+        FROM companies c
+        LEFT JOIN company_performance cp ON cp.company_id = c.id
+        LEFT JOIN analytics_companies ac ON ac.company_id = c.id
+        LEFT JOIN latest_run_summary lrs ON lrs.company = c.name
+        """
     )
+    mapping: Dict[str, Dict[str, Any]] = {}
+    for row in cursor.fetchall():
+        mapping[row[0]] = {
+            "account_value": row[1],
+            "realized_pnl": row[2],
+            "unrealized_pnl": row[3],
+            "trade_count": row[4],
+            "win_rate": row[5],
+            "drawdown": row[6],
+            "regime": row[7],
+            "state": row[8],
+            "fitness": row[9],
+            "latest_mode": row[10],
+            "strategy_name": row[11],
+        }
+    return mapping
 
 
-def recommend(fitness: float) -> str:
+def recommend(fitness: float | None) -> str:
+    if fitness is None:
+        return "N/A"
     if fitness >= 30:
         return "CLONE"
     if fitness <= -40:
@@ -210,35 +77,65 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Leaderboard of companies by performance")
     parser.add_argument("--mode", help="Optional mode filter (backtest/paper)")
     parser.add_argument("--company", help="Optional company filter to narrow the table")
-    parser.add_argument("--json-output", type=Path, help="Optional JSON export path")
     args = parser.parse_args()
 
-    rows = collect(args.mode, args.company)
-    if not rows:
-        print(
-            f"{company_name:<10} {mode_name:<7} {row_trades:>6}  ${row_account:>7.2f}  "
-            f"${row_realized:>7.2f}  ${row_unrealized:>9.2f}  {win:<6} {draw:<6} {fitness:>9.2f} {alpha:>7.2f} {regime:<12}"
-        )
-        export_rows.append(
+    companies = sorted(p.name for p in COMPANIES_DIR.iterdir() if p.is_dir())
+    if args.company:
+        companies = [c for c in companies if c == args.company]
+    if not companies:
+        print("No companies found.")
+        return
+
+    performance_map: Dict[str, Dict[str, Any]] = {}
+    if WAREHOUSE.exists():
+        with sqlite3.connect(WAREHOUSE) as conn:
+            performance_map = load_performance_map(conn)
+
+    display_rows: List[Dict[str, Any]] = []
+    for company in companies:
+        performance = performance_map.get(company, {})
+        fitness_value = performance.get("fitness")
+        strategy_label = performance.get("strategy_name") or "N/A"
+        trades_value = performance.get("trade_count")
+        trades_display = str(trades_value) if trades_value is not None else "-"
+        fitness_label = f"{fitness_value:.2f}" if fitness_value is not None else "N/A"
+        state_label = performance.get("state") or "UNTESTED"
+        mode_label = performance.get("latest_mode") or "<none>"
+        evaluation_reason = None
+        if not performance or performance.get("fitness") is None:
+            evaluation_reason = "Canonical analytics row pending"
+        display_rows.append(
             {
-                'company': row['company'],
-                'mode': row['mode'],
-                'trades': row_trades,
-                'account_value': row_account,
-                'realized_pnl': row_realized,
-                'unrealized_pnl': row_unrealized,
-                'win_rate': win_rate,
-                'max_drawdown': drawdown,
-                'fitness': fitness,
-                'alpha': alpha,
-                'recommendation': rec,
-                'regime': regime,
+                "company": company,
+                "state": state_label,
+                "strategy_display": strategy_label,
+                "trades_display": trades_display,
+                "fitness": fitness_value,
+                "fitness_label": fitness_label,
+                "recommendation": recommend(fitness_value),
+                "mode": mode_label,
+                "evaluation_reason": evaluation_reason,
             }
         )
-    if args.json_output:
-        args.json_output.parent.mkdir(parents=True, exist_ok=True)
-        args.json_output.write_text(json.dumps({"rows": export_rows}, indent=2))
-        print(f"Exported leaderboard to {args.json_output}")
+
+    def fitness_sort_key(row: Dict[str, Any]) -> float:
+        value = row.get("fitness")
+        return value if value is not None else float("-inf")
+
+    display_rows.sort(key=fitness_sort_key, reverse=True)
+
+    print("Leaderboard — company evaluation state")
+    print("=" * 80)
+    print(
+        f"{'company':<14} {'state':<10} {'strategy':<20} {'trades':>6} {'fitness':>8} {'recommend':<10} {'mode':<10}"
+    )
+    for row in display_rows:
+        print(
+            f"{row['company']:<14} {row['state']:<10} {row['strategy_display']:<20} {row['trades_display']:>6} "
+            f"{row['fitness_label']:>8} {row['recommendation']:<10} {row['mode']:<10}"
+        )
+        if row['evaluation_reason']:
+            print(f"  note: {row['evaluation_reason']}")
 
 
 if __name__ == "__main__":

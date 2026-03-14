@@ -4,160 +4,26 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sqlite3
 import sys
 from pathlib import Path
-from statistics import mean
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, List
+
+import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.python_helper import ensure_repo_root
-
-ensure_repo_root()
-WAREHOUSE = ROOT / "data" / "warehouse.sqlite"
-RESULTS_DIR = ROOT / "results"
-COMPANIES_DIR = ROOT / "companies"
-
-import yaml
-
 from tools.company_metadata import read_metadata
+from tools.python_helper import ensure_repo_root
+from tools.reporting_utils import compute_fitness, determine_evaluation_state
 from tradebot.strategies.factory import resolve_strategy_name
 
+ensure_repo_root()
 
-def iter_log_entries(path: Path) -> Iterable[Dict[str, Any]]:
-    with path.open("r", encoding="utf-8") as fh:
-        for line in fh:
-            if not line.strip():
-                continue
-            yield json.loads(line)
-
-
-def summarize_trade_log(path: Path) -> Dict[str, Any]:
-    last_per_symbol: Dict[str, Dict[str, Any]] = {}
-    trades = 0
-    wins = 0
-    losses = 0
-    realized = 0.0
-    account_history: List[float] = []
-
-    for entry in iter_log_entries(path):
-        sym = entry.get("symbol", "UNKNOWN")
-        last_per_symbol[sym] = entry
-        if entry.get("executed"):
-            trades += 1
-            pnl = entry.get("pnl")
-            if isinstance(pnl, (int, float)):
-                realized += pnl
-                if pnl > 0:
-                    wins += 1
-                elif pnl < 0:
-                    losses += 1
-        cash = entry.get("cash_after", 0.0)
-        position = entry.get("position_after", 0.0)
-        price = entry.get("price", 0.0)
-        account_history.append(cash + position * price)
-
-    if not last_per_symbol:
-        return {
-            "account_value": 0.0,
-            "realized_pnl": realized,
-            "unrealized_pnl": 0.0,
-            "total_trades": trades,
-            "win_rate": None,
-            "max_drawdown": None,
-        }
-
-    account_value = sum(
-        e.get("cash_after", 0.0) + e.get("position_after", 0.0) * e.get("price", 0.0)
-        for e in last_per_symbol.values()
-    )
-    unrealized = sum(e.get("unrealized_pnl", 0.0) for e in last_per_symbol.values())
-
-    win_rate = None
-    if wins + losses > 0:
-        win_rate = wins / (wins + losses) * 100
-
-    max_account = max(account_history) if account_history else account_value
-    drawdown = None
-    if max_account > 0:
-        drawdown = max(0.0, (max_account - account_value) / max_account * 100)
-
-    return {
-        "account_value": account_value,
-        "realized_pnl": realized,
-        "unrealized_pnl": unrealized,
-        "total_trades": trades,
-        "win_rate": win_rate,
-        "max_drawdown": drawdown,
-    }
-
-
-def _parse_metrics(raw_metrics: str) -> Dict[str, Any]:
-    metrics: Dict[str, Any] = {}
-    if not raw_metrics:
-        return metrics
-    try:
-        metrics = json.loads(raw_metrics)
-    except json.JSONDecodeError:
-        metrics = {}
-    return metrics
-
-
-def collect_from_warehouse(company: str) -> List[Dict[str, Any]]:
-    if not WAREHOUSE.exists():
-        return []
-    query = """
-        SELECT runs.mode, runs.strategy, results.account_value, results.realized_pnl, results.unrealized_pnl, results.drawdown, results.metrics, runs.start_time
-        FROM companies
-        JOIN runs ON runs.company_id = companies.id
-        JOIN results ON results.run_id = runs.id
-        WHERE companies.name = ?
-        ORDER BY runs.start_time DESC
-        LIMIT 3
-    """
-    rows: List[Dict[str, Any]] = []
-    with sqlite3.connect(WAREHOUSE) as conn:
-        cursor = conn.cursor()
-        for mode, strategy, account, realized, unrealized, drawdown, raw_metrics, timestamp in cursor.execute(query, (company,)):
-            metrics = _parse_metrics(raw_metrics)
-            rows.append({
-                "mode": mode,
-                "strategy": strategy,
-                "account_value": account or 0.0,
-                "realized_pnl": realized or 0.0,
-                "unrealized_pnl": unrealized or 0.0,
-                "total_trades": int(metrics.get("trade_count", 0)),
-                "win_rate": metrics.get("win_rate") or metrics.get("win_rate_percent"),
-                "max_drawdown": metrics.get("max_drawdown", drawdown),
-                "drawdown": drawdown,
-                "timestamp": timestamp,
-            })
-    return rows
-
-def collect_results(company: str) -> List[Dict[str, Any]]:
-    results = collect_from_warehouse(company)
-    if results:
-        return results
-    company_dir = RESULTS_DIR / company
-    if not company_dir.exists():
-        return results
-
-    for mode_dir in sorted(company_dir.iterdir()):
-        if not mode_dir.is_dir():
-            continue
-        log_path = mode_dir / "trade-log.jsonl"
-        if not log_path.exists():
-            continue
-        summary = summarize_trade_log(log_path)
-        summary["mode"] = mode_dir.name
-        summary["log_path"] = log_path
-        summary["timestamp"] = log_path.stat().st_mtime
-        results.append(summary)
-    return results
+WAREHOUSE = ROOT / "data" / "warehouse.sqlite"
+COMPANIES_DIR = ROOT / "companies"
 
 
 def load_config(company: str) -> Dict[str, Any]:
@@ -170,9 +36,8 @@ def load_config(company: str) -> Dict[str, Any]:
 
 def strategies_used(config: Dict[str, Any]) -> List[str]:
     symbols = config.get("symbols", [])
-    seen = []
+    seen: List[str] = []
     for symbol in symbols:
-        name = symbol.get("name") or "UNKNOWN"
         strategy = resolve_strategy_name(symbol)
         if strategy not in seen:
             seen.append(strategy)
@@ -181,6 +46,63 @@ def strategies_used(config: Dict[str, Any]) -> List[str]:
 
 def format_currency(value: float) -> str:
     return f"${value:,.2f}"
+
+
+def load_performance_map(conn: sqlite3.Connection) -> Dict[str, Dict[str, Any]]:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT c.name,
+               cp.latest_account_value,
+               cp.latest_realized_pnl,
+               cp.latest_unrealized_pnl,
+               cp.latest_trade_count,
+               cp.latest_win_rate,
+               cp.latest_drawdown,
+               cp.latest_regime,
+               cp.lifecycle_state,
+               cp.latest_fitness,
+               lrs.mode,
+               ac.strategy_name,
+               ac.parent_company,
+               ac.generation
+        FROM companies c
+        LEFT JOIN company_performance cp ON cp.company_id = c.id
+        LEFT JOIN analytics_companies ac ON ac.company_id = c.id
+        LEFT JOIN latest_run_summary lrs ON lrs.company = c.name
+        """
+    )
+    mapping: Dict[str, Dict[str, Any]] = {}
+    for row in cursor.fetchall():
+        mapping[row[0]] = {
+            "account_value": row[1],
+            "realized_pnl": row[2],
+            "unrealized_pnl": row[3],
+            "trade_count": row[4],
+            "win_rate": row[5],
+            "drawdown": row[6],
+            "regime": row[7],
+            "state": row[8],
+            "fitness": row[9],
+            "latest_mode": row[10],
+            "strategy_name": row[11],
+            "parent_company": row[12],
+            "generation": row[13],
+        }
+    return mapping
+
+
+def build_metrics(performance: Dict[str, Any]) -> Dict[str, float]:
+    metrics: Dict[str, float] = {}
+    if not performance or performance.get("account_value") is None:
+        return metrics
+    metrics["account"] = performance.get("account_value", 0.0)
+    metrics["realized_pnl"] = performance.get("realized_pnl", 0.0) or 0.0
+    metrics["unrealized_pnl"] = performance.get("unrealized_pnl", 0.0) or 0.0
+    metrics["trade_count"] = int(performance.get("trade_count") or 0)
+    metrics["win_rate"] = performance.get("win_rate", 0.0) or 0.0
+    metrics["drawdown"] = performance.get("drawdown", 0.0) or 0.0
+    return metrics
 
 
 def main() -> None:
@@ -193,58 +115,71 @@ def main() -> None:
         print("No companies found.")
         return
 
-    report_rows = []
+    performance_map: Dict[str, Dict[str, Any]] = {}
+    if WAREHOUSE.exists():
+        with sqlite3.connect(WAREHOUSE) as conn:
+            performance_map = load_performance_map(conn)
+    report_rows: List[Dict[str, Any]] = []
+
     for company in companies:
         metadata = read_metadata(company)
-        generation = metadata.get("generation", "<unknown>")
-        parent = metadata.get("parent_company", "<none>")
+        generation = metadata.get("generation") or performance_map.get(company, {}).get("generation", "<unknown>")
+        parent = metadata.get("parent_company") or performance_map.get(company, {}).get("parent_company", "<none>")
         config = load_config(company)
         strategies = strategies_used(config)
-        results = collect_results(company)
-        if not results:
-            latest = {
-                "mode": "<none>",
-                "account_value": 0.0,
-                "realized_pnl": 0.0,
-                "unrealized_pnl": 0.0,
-                "total_trades": 0,
-                "win_rate": None,
-                "max_drawdown": None,
-            }
-        else:
-            latest = max(results, key=lambda r: (r[args.metric], r["timestamp"]))
+        performance = performance_map.get(company, {})
+        metrics = build_metrics(performance)
+        eval_state, eval_reason = determine_evaluation_state(metrics)
+        fitness_value = performance.get("fitness")
+        if fitness_value is None and metrics:
+            fitness_value = compute_fitness(metrics)
+        trades_value = performance.get("trade_count")
+        trades_display = str(trades_value) if trades_value is not None else "-"
+        strategy_label = performance.get("strategy_name") or (", ".join(strategies) if strategies else "N/A")
+        fitness_display = f"{fitness_value:.2f}" if fitness_value is not None else "N/A"
+        state_label = performance.get("state") or metadata.get("lifecycle_state", "UNTESTED")
+        evaluation_note = eval_reason
+        if not performance or performance.get("fitness") is None:
+            evaluation_note = evaluation_note or "Canonical analytics row pending"
+        account_value = performance.get("account_value") or 0.0
         report_rows.append(
             {
                 "company": company,
                 "generation": generation,
                 "parent": parent,
-                "latest_mode": latest["mode"],
-                "account_value": latest["account_value"],
-                "realized_pnl": latest["realized_pnl"],
-                "unrealized_pnl": latest["unrealized_pnl"],
-                "total_trades": latest["total_trades"],
-                "win_rate": latest.get("win_rate"),
-                "max_drawdown": latest.get("max_drawdown"),
+                "latest_mode": performance.get("latest_mode", "<none>"),
+                "account_value": account_value,
+                "realized_pnl": performance.get("realized_pnl", 0.0) or 0.0,
+                "unrealized_pnl": performance.get("unrealized_pnl", 0.0) or 0.0,
+                "total_trades": performance.get("trade_count", 0) or 0,
+                "win_rate": performance.get("win_rate"),
+                "max_drawdown": performance.get("drawdown"),
                 "strategies": strategies,
+                "state": state_label,
+                "strategy_display": strategy_label,
+                "trades_display": trades_display,
+                "fitness_display": fitness_display,
+                "fitness_value": fitness_value,
+                "evaluation_note": evaluation_note,
             }
         )
 
     report_rows.sort(key=lambda r: r[args.metric], reverse=True)
 
-    print("Board report — company status overview")
+    print("Company Status Report")
     print("=" * 60)
     for row in report_rows:
-        print(
-            f"{row['company']} (gen {row['generation']}, parent={row['parent']})"
-        )
-        print(f"  Latest mode: {row['latest_mode']}")
-        print(
-            f"  Account value: {format_currency(row['account_value'])}  Realized PnL: {format_currency(row['realized_pnl'])}"
-        )
+        print(f"{row['company']} (gen {row['generation']}, parent={row['parent']})")
+        print(f" state: {row['state']}")
+        print(f" strategy: {row['strategy_display']}")
+        print(f" trades: {row['trades_display']}  fitness: {row['fitness_display']}")
+        if row['evaluation_note']:
+            print(f" note: {row['evaluation_note']}")
+        print(f"  Latest mode: {row['latest_mode']}  Account value: {format_currency(row['account_value'])}  Realized PnL: {format_currency(row['realized_pnl'])}")
         print(f"  Unrealized PnL: {format_currency(row['unrealized_pnl'])}")
         win = f"{row['win_rate']:.2f}%" if row['win_rate'] is not None else "N/A"
         drawdown = f"{row['max_drawdown']:.2f}%" if row['max_drawdown'] is not None else "N/A"
-        print(f"  Trades: {row['total_trades']}  Win rate: {win}  Max drawdown: {drawdown}")
+        print(f"  Trades recorded: {row['total_trades']}  Win rate: {win}  Max drawdown: {drawdown}")
         print(f"  Strategies: {', '.join(row['strategies']) if row['strategies'] else '<none>'}")
         print("-" * 60)
 

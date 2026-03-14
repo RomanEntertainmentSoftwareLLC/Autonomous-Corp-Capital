@@ -117,6 +117,62 @@ JOIN results ON results.run_id = runs.id
 WHERE runs.start_time IN (
     SELECT MAX(start_time) FROM runs r3 WHERE r3.company_id = runs.company_id
 );
+
+CREATE TABLE IF NOT EXISTS analytics_companies (
+    company_id INTEGER PRIMARY KEY REFERENCES companies(id),
+    created_at TEXT,
+    status TEXT DEFAULT 'active',
+    parent_company TEXT,
+    generation INTEGER,
+    strategy_name TEXT,
+    notes TEXT
+);
+
+CREATE TABLE IF NOT EXISTS evaluations (
+    evaluation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id INTEGER NOT NULL REFERENCES companies(id),
+    run_id INTEGER NOT NULL,
+    timestamp TEXT,
+    symbol TEXT,
+    account_value REAL,
+    realized_pnl REAL,
+    unrealized_pnl REAL,
+    trade_count INTEGER,
+    win_rate REAL,
+    max_drawdown REAL,
+    regime TEXT,
+    fitness REAL,
+    CONSTRAINT unique_run UNIQUE(run_id)
+);
+
+CREATE TABLE IF NOT EXISTS trade_facts (
+    trade_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id INTEGER NOT NULL REFERENCES companies(id),
+    run_id INTEGER NOT NULL,
+    timestamp TEXT,
+    symbol TEXT,
+    action TEXT,
+    price REAL,
+    units REAL,
+    pnl REAL,
+    source TEXT
+);
+
+CREATE TABLE IF NOT EXISTS company_performance (
+    company_id INTEGER PRIMARY KEY REFERENCES companies(id),
+    last_evaluated_at TEXT,
+    latest_fitness REAL,
+    latest_account_value REAL,
+    latest_realized_pnl REAL,
+    latest_unrealized_pnl REAL,
+    latest_trade_count INTEGER,
+    latest_win_rate REAL,
+    latest_drawdown REAL,
+    latest_regime TEXT,
+    lifecycle_state TEXT,
+    allocation_percent REAL,
+    allocation_amount REAL
+);
 """
 
 

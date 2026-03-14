@@ -26,6 +26,10 @@ class TradeDecision:
     trade_count: int = 0
     unrealized_pnl: float = 0.0
     trade_units: float = 0.0
+    strategy_name: str | None = None
+    realized_pnl_total: float = 0.0
+    max_drawdown_percent: float = 0.0
+    win_rate_percent: float = 0.0
 
 
 class RiskManager:

@@ -82,7 +82,7 @@ def load_performance_map(conn: sqlite3.Connection) -> Dict[str, Dict[str, Any]]:
             "win_rate": row[5],
             "drawdown": row[6],
             "regime": row[7],
-            "state": row[8],
+            "lifecycle_state": row[8],
             "fitness": row[9],
             "latest_mode": row[10],
             "strategy_name": row[11],
@@ -137,7 +137,7 @@ def main() -> None:
         trades_display = str(trades_value) if trades_value is not None else "-"
         strategy_label = performance.get("strategy_name") or (", ".join(strategies) if strategies else "N/A")
         fitness_display = f"{fitness_value:.2f}" if fitness_value is not None else "N/A"
-        state_label = performance.get("state") or metadata.get("lifecycle_state", "UNTESTED")
+        lifecycle_state = performance.get("lifecycle_state") or metadata.get("lifecycle_state", "UNTESTED")
         evaluation_note = eval_reason
         if not performance or performance.get("fitness") is None:
             evaluation_note = evaluation_note or "Canonical analytics row pending"
@@ -155,7 +155,8 @@ def main() -> None:
                 "win_rate": performance.get("win_rate"),
                 "max_drawdown": performance.get("drawdown"),
                 "strategies": strategies,
-                "state": state_label,
+                "lifecycle_state": lifecycle_state,
+                "evaluation_state": eval_state,
                 "strategy_display": strategy_label,
                 "trades_display": trades_display,
                 "fitness_display": fitness_display,
@@ -170,7 +171,7 @@ def main() -> None:
     print("=" * 60)
     for row in report_rows:
         print(f"{row['company']} (gen {row['generation']}, parent={row['parent']})")
-        print(f" state: {row['state']}")
+        print(f" lifecycle: {row['lifecycle_state']}  evaluation: {row['evaluation_state']}")
         print(f" strategy: {row['strategy_display']}")
         print(f" trades: {row['trades_display']}  fitness: {row['fitness_display']}")
         if row['evaluation_note']:

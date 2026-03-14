@@ -13,6 +13,14 @@ class ExecutionEngine:
     def __init__(self, portfolio: Portfolio) -> None:
         self.portfolio = portfolio
 
+    def _finalize_decision(self, decision: TradeDecision, price: float) -> TradeDecision:
+        self.portfolio.update_stats(price)
+        snapshot = self.portfolio.snapshot(price)
+        decision.realized_pnl_total = snapshot["realized_pnl"]
+        decision.max_drawdown_percent = snapshot["max_drawdown_percent"]
+        decision.win_rate_percent = snapshot["win_rate_percent"]
+        return decision
+
     def apply(self, decision: TradeDecision, tick: Dict[str, Any]) -> TradeDecision:
         price = tick["price"]
         now = time.time()
@@ -23,11 +31,10 @@ class ExecutionEngine:
             decision.executed = False
             decision.cash_after = round(self.portfolio.cash, 2)
             decision.position_after = round(self.portfolio.position_units, 6)
-            self.portfolio.update_stats(price)
             decision.account_value = round(self.portfolio.account_value(price), 2)
             decision.unrealized_pnl = round(self.portfolio.unrealized_pnl(price), 2)
             decision.trade_count = self.portfolio.trade_count
-            return decision
+            return self._finalize_decision(decision, price)
 
         if decision.action == "BUY":
             units = decision.trade_units
@@ -64,11 +71,10 @@ class ExecutionEngine:
         else:
             decision.executed = False
 
-        self.portfolio.update_stats(price)
         decision.account_value = round(self.portfolio.account_value(price), 2)
         decision.unrealized_pnl = round(self.portfolio.unrealized_pnl(price), 2)
         decision.trade_count = self.portfolio.trade_count
-        return decision
+        return self._finalize_decision(decision, price)
 
     def portfolio_snapshot(self, price: float) -> Dict[str, Any]:
         return self.portfolio.snapshot(price)

@@ -64,5 +64,5 @@ def determine_evaluation_state(metrics: Mapping[str, Any]) -> Tuple[str, Optiona
     if not metrics:
         return "UNTESTED", "No evaluation results available"
     if trades == 0:
-        return "TESTED", "Results recorded but no trades executed yet"
+        return "TESTED_NO_TRADES", "Results recorded but no trades executed yet"
     return "ACTIVE", None

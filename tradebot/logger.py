@@ -35,6 +35,12 @@ class TradeLogger:
             "position_before": decision.get("position_before"),
             "position_after": decision.get("position_after"),
             "unrealized_pnl": decision.get("unrealized_pnl"),
+            "strategy": decision.get("strategy_name"),
+            "account_value": decision.get("account_value"),
+            "realized_pnl_total": decision.get("realized_pnl_total"),
+            "max_drawdown_percent": decision.get("max_drawdown_percent"),
+            "trade_units": decision.get("trade_units"),
+            "win_rate_percent": decision.get("win_rate_percent"),
         }
 
     def log_signal(self, tick: Dict[str, Any], signal: Dict[str, Any], decision: Dict[str, Any]) -> None:

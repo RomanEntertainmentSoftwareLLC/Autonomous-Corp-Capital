@@ -122,7 +122,7 @@ def record_trade_facts(
                 entry.get("symbol"),
                 entry.get("signal") or entry.get("direction"),
                 entry.get("price"),
-                entry.get("position_after", 0.0),
+                entry.get("trade_units", 0.0),
                 entry.get("pnl"),
                 entry.get("source"),
             ),
@@ -234,7 +234,12 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
         print(f"Run {company}-{mode} already ingested")
         return
 
-    strategy = entries[0].get("strategy", "unknown")
+    strategy = "unknown"
+    for entry in entries:
+        strat = entry.get("strategy")
+        if strat:
+            strategy = strat
+            break
     cursor.execute(
         "INSERT INTO runs (company_id, mode, strategy, start_time, status) VALUES (?,?,?,?,?)",
         (company_id, mode, strategy, start_time, "completed"),
@@ -271,7 +276,7 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
                 run_id,
                 tick_id,
                 entry.get("signal"),
-                entry.get("position_after", 0.0),
+                entry.get("trade_units", 0.0),
                 entry.get("price"),
                 entry.get("pnl"),
             ),
@@ -289,12 +294,12 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
     if trade_log:
         last = trade_log[-1]
         metrics_payload = {
-            "account_value": last.get("cash_after", 0.0),
-            "realized_pnl": last.get("pnl", 0.0) or 0.0,
+            "account_value": last.get("account_value", last.get("cash_after", 0.0)) or 0.0,
+            "realized_pnl": last.get("realized_pnl_total", last.get("pnl", 0.0)) or 0.0,
             "unrealized_pnl": last.get("unrealized_pnl", 0.0) or 0.0,
             "drawdown": last.get("max_drawdown_percent", 0.0) or 0.0,
-            "trade_count": trade_count,
-            "win_rate": win_rate,
+            "trade_count": last.get("trade_count", trade_count),
+            "win_rate": last.get("win_rate_percent") or last.get("win_rate") or win_rate,
         }
         cursor.execute(
             "INSERT INTO results (run_id, account_value, realized_pnl, unrealized_pnl, drawdown) VALUES (?,?,?,?,?)",

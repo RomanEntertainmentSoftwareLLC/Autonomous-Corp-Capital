@@ -199,6 +199,7 @@ def run(
             signal = runner.strategy.update(tick["price"])
             risk_decision = runner.risk_manager.evaluate_signal(signal.__dict__, tick)
             decision = runner.execution_engine.apply(risk_decision, tick)
+            decision.strategy_name = runner.strategy_name
 
             logger.log_signal(tick, signal.__dict__, decision.__dict__)
             logger.log_trade(tick, signal.__dict__, decision.__dict__)

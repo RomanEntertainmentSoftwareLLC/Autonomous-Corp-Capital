@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tools.python_helper import ensure_repo_root
+from tools.reporting_utils import compute_fitness, determine_evaluation_state
 
 ensure_repo_root()
 
@@ -53,7 +54,7 @@ def load_performance_map(conn: sqlite3.Connection) -> Dict[str, Dict[str, Any]]:
             "win_rate": row[5],
             "drawdown": row[6],
             "regime": row[7],
-            "state": row[8],
+            "lifecycle_state": row[8],
             "fitness": row[9],
             "latest_mode": row[10],
             "strategy_name": row[11],
@@ -71,6 +72,19 @@ def recommend(fitness: float | None) -> str:
     if fitness >= 0:
         return "KEEP"
     return "TEST_MORE"
+
+
+def build_metrics(performance: Dict[str, Any]) -> Dict[str, float]:
+    metrics: Dict[str, float] = {}
+    if not performance or performance.get("account_value") is None:
+        return metrics
+    metrics["account"] = performance.get("account_value", 0.0) or 0.0
+    metrics["realized_pnl"] = performance.get("realized_pnl", 0.0) or 0.0
+    metrics["unrealized_pnl"] = performance.get("unrealized_pnl", 0.0) or 0.0
+    metrics["trade_count"] = int(performance.get("trade_count") or 0)
+    metrics["win_rate"] = performance.get("win_rate", 0.0) or 0.0
+    metrics["drawdown"] = performance.get("drawdown", 0.0) or 0.0
+    return metrics
 
 
 def main() -> None:
@@ -94,20 +108,25 @@ def main() -> None:
     display_rows: List[Dict[str, Any]] = []
     for company in companies:
         performance = performance_map.get(company, {})
+        metrics = build_metrics(performance)
+        eval_state, eval_reason = determine_evaluation_state(metrics)
         fitness_value = performance.get("fitness")
+        if fitness_value is None and metrics:
+            fitness_value = compute_fitness(metrics)
         strategy_label = performance.get("strategy_name") or "N/A"
         trades_value = performance.get("trade_count")
         trades_display = str(trades_value) if trades_value is not None else "-"
         fitness_label = f"{fitness_value:.2f}" if fitness_value is not None else "N/A"
-        state_label = performance.get("state") or "UNTESTED"
+        lifecycle_state = performance.get("lifecycle_state") or "UNTESTED"
         mode_label = performance.get("latest_mode") or "<none>"
-        evaluation_reason = None
+        evaluation_reason = eval_reason
         if not performance or performance.get("fitness") is None:
-            evaluation_reason = "Canonical analytics row pending"
+            evaluation_reason = evaluation_reason or "Canonical analytics row pending"
         display_rows.append(
             {
                 "company": company,
-                "state": state_label,
+                "lifecycle_state": lifecycle_state,
+                "evaluation_state": eval_state,
                 "strategy_display": strategy_label,
                 "trades_display": trades_display,
                 "fitness": fitness_value,
@@ -125,13 +144,13 @@ def main() -> None:
     display_rows.sort(key=fitness_sort_key, reverse=True)
 
     print("Leaderboard — company evaluation state")
-    print("=" * 80)
+    print("=" * 100)
     print(
-        f"{'company':<14} {'state':<10} {'strategy':<20} {'trades':>6} {'fitness':>8} {'recommend':<10} {'mode':<10}"
+        f"{'company':<14} {'lifecycle':<12} {'evaluation':<18} {'strategy':<20} {'trades':>6} {'fitness':>8} {'recommend':<10} {'mode':<10}"
     )
     for row in display_rows:
         print(
-            f"{row['company']:<14} {row['state']:<10} {row['strategy_display']:<20} {row['trades_display']:>6} "
+            f"{row['company']:<14} {row['lifecycle_state']:<12} {row['evaluation_state']:<18} {row['strategy_display']:<20} {row['trades_display']:>6} "
             f"{row['fitness_label']:>8} {row['recommendation']:<10} {row['mode']:<10}"
         )
         if row['evaluation_reason']:

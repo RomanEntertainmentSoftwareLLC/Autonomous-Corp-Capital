@@ -142,6 +142,10 @@ def main() -> None:
         print("Warehouse not initialized. Run tools/init_warehouse.py first.")
         return
 
+    if not RESULTS_DIR.exists():
+        print("No results directory found; nothing to ingest.")
+        return
+
     with sqlite3.connect(WAREHOUSE) as conn:
         cursor = conn.cursor()
         for company_dir in sorted(RESULTS_DIR.iterdir()):

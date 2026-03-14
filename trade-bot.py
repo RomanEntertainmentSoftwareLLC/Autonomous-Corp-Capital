@@ -109,7 +109,12 @@ def run(
     poll_interval = float(
         feed_config.get("poll_interval_seconds", config.get("timing", {}).get("loop_interval_seconds", 5))
     )
-    loop_interval = interval_override if interval_override is not None else poll_interval
+    default_interval = 0.01 if mode == "backtest" else poll_interval
+    loop_interval = (
+        interval_override
+        if interval_override is not None
+        else default_interval
+    )
     if loop_interval <= 0:
         raise ValueError("Loop interval must be greater than zero")
 

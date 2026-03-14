@@ -120,6 +120,12 @@ python3 tools/self_play_batch.py --manifest tools/self_play_manifest.yaml --regi
 ```
 - Runs same participant set across multiple regimes and prints aggregated fitness metrics.
 
+### Trade backtests
+```
+python3 trade-bot.py --company company_001 --mode backtest --iterations 4
+```
+- Backtests now default to a 0.01s loop interval so command-line runs stay snappy; pass `--interval` when you need a slower pacing.
+
 ---
 
 ## Warehouse & Analytics
@@ -136,7 +142,6 @@ python3 tools/ingest_results_to_db.py
 python3 tools/query_warehouse.py strategy_performance
 python3 tools/query_warehouse.py best_strategy_by_symbol
 python3 tools/query_warehouse.py ema_param_profitability
-python3 tools/query_warehouse.py mutation_performance
 ```
 - Outputs readable tables for strategy analyses and mutation tracking.
 

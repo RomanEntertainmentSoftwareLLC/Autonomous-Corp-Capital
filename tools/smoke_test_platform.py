@@ -52,7 +52,9 @@ TRADE_COMMAND = SmokeCommand(
         "--mode",
         "backtest",
         "--iterations",
-        "20",
+        "3",
+        "--interval",
+        "0.01",
         "--loop-feed",
     ]),
 )

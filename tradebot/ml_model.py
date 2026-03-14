@@ -6,7 +6,10 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
-import joblib
+try:
+    import joblib
+except ModuleNotFoundError:  # pragma: no cover
+    joblib = None  # type: ignore[assignment]
 
 MODEL_PATH = Path(__file__).resolve().parent.parent / "models" / "ml_model.pkl"
 NUMERIC_COLUMNS = [
@@ -38,6 +41,10 @@ logger = logging.getLogger(__name__)
 
 class MLModel:
     def __init__(self, path: Optional[Path] = None) -> None:
+        if joblib is None:
+            raise ImportError(
+                "ML models require joblib. Install joblib or run without ml_trader strategies."
+            )
         self.path = (path or MODEL_PATH).resolve()
         if not self.path.exists():
             raise FileNotFoundError(f"ML model not found at {self.path}")

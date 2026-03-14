@@ -12,22 +12,22 @@ class HybridEMARsiStrategy(StrategyProtocol):
     name = "hybrid_ema_rsi"
     metadata = StrategyMetadata(
         name=name,
-        description="EMA crossover confirmed by RSI extremes.",
+        description="EMA crossover confirmed by RSI confirmation zones.",
         category="hybrid",
-        required_config=("ema_fast", "ema_slow", "rsi_period", "rsi_buy", "rsi_sell"),
+        required_config=("ema_fast", "ema_slow", "rsi_period", "rsi_oversold", "rsi_overbought"),
         supports_ml=False,
         version="1.0",
         author="OpenClaw Hybrid",
         risk_profile="medium",
-        parameters=("ema_fast", "ema_slow", "rsi_period", "rsi_buy", "rsi_sell"),
+        parameters=("ema_fast", "ema_slow", "rsi_period", "rsi_oversold", "rsi_overbought"),
     )
 
     def __init__(self, symbol_config: Dict[str, object]) -> None:
         self.fast_period = int(symbol_config.get("ema_fast", 6))
         self.slow_period = int(symbol_config.get("ema_slow", 21))
         self.rsi_period = int(symbol_config.get("rsi_period", 14))
-        self.rsi_buy = int(symbol_config.get("rsi_buy", 30))
-        self.rsi_sell = int(symbol_config.get("rsi_sell", 70))
+        self.rsi_oversold = int(symbol_config.get("rsi_oversold", symbol_config.get("rsi_buy", 30)))
+        self.rsi_overbought = int(symbol_config.get("rsi_overbought", symbol_config.get("rsi_sell", 70)))
         lookback = max(self.fast_period, self.slow_period) + 5
         self.prices: Deque[float] = deque(maxlen=lookback)
         self.rsi_vals: Deque[float] = deque(maxlen=self.rsi_period)
@@ -73,12 +73,12 @@ class HybridEMARsiStrategy(StrategyProtocol):
         confidence = 0.0
         reason = "Awaiting confirmation"
         if fast and slow and rsi is not None:
-            if fast > slow and rsi > self.rsi_buy:
+            if fast > slow and rsi < self.rsi_overbought:
                 signal = "BUY"
-                confidence = min(1.0, (fast - slow) / slow + (rsi / 100))
-                reason = "Bullish EMA + RSI confirmation"
-            elif fast < slow and rsi < self.rsi_sell:
+                confidence = min(1.0, (fast - slow) / slow + (1 - (rsi / 100)))
+                reason = "Bullish EMA while RSI remains below overbought"
+            elif fast < slow and rsi > self.rsi_oversold:
                 signal = "SELL"
-                confidence = min(1.0, (slow - fast) / slow + ((100 - rsi) / 100))
-                reason = "Bearish EMA + RSI confirmation"
+                confidence = min(1.0, (slow - fast) / slow + (rsi / 100))
+                reason = "Bearish EMA while RSI is above oversold"
         return Signal(direction=signal, confidence=confidence, reason=reason)

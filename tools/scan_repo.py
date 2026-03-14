@@ -28,7 +28,7 @@ def scan_files() -> List[str]:
             if marker in text:
                 issues.append(f"{path}: contains marker {marker}")
         if "argparse" in text and "help=" not in text:
-            issues.append(f"{path}: argparse helper missing prowding help text")
+            issues.append(f"{path}: argparse helper missing descriptive help text")
         if "DEFAULT_CONFIG_PATH" in text and not str(path.parent).startswith(str(ROOT)):
             issues.append(f"{path}: references DEFAULT_CONFIG_PATH but not in repo? check {text}")
     return issues

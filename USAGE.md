@@ -15,6 +15,8 @@
 
 ## Overview
 This workspace now contains a comprehensive autonomous trading lab:
+- Use `python3 ...` commands (activate your venv first if you rely on python3 aliases).
+
 - **Genome-based strategy evolution** across EMA/RSI/ML/breakout hybrids.
 - **Lifecycle governance** with promotions, decline tracking, retirement, and capital allocations.
 - **Synthetic self-play tournaments** with optional interaction effects.
@@ -32,15 +34,15 @@ Use the sections below as your quick-start reference.
 
 ### Sandbox Preparation
 ```
-.venv/bin/python3 tools/run_swe_task.py tasks/SWE-001.yaml
+python3 tools/run_swe_task.py tasks/SWE-001.yaml
 ```
 - Validates required fields, prints allowed/forbidden files, creates a sandbox worktree, logs metadata.
 
 ### Testing, Coverage & Review
 ```
-.venv/bin/python3 tools/test_swe_task.py tasks/SWE-001.yaml
-.venv/bin/python3 tools/summarize_patch.py
-.venv/bin/python3 tools/review_swe_task.py SWE-001
+python3 tools/test_swe_task.py tasks/SWE-001.yaml
+python3 tools/summarize_patch.py
+python3 tools/review_swe_task.py SWE-001
 ```
 - Tests are defined per task. Patch summary shows files + failed commands. Review report notes status/notes.
 
@@ -48,7 +50,7 @@ Use the sections below as your quick-start reference.
 - Record approval via `tasks/approval_manifest.json` (status: `approved/needs_changes/rejected`).
 - Apply only when tests pass and review exists:
 ```
-.venv/bin/python3 tools/apply_swe_task.py SWE-001
+python3 tools/apply_swe_task.py SWE-001
 ```
 
 ---
@@ -56,19 +58,19 @@ Use the sections below as your quick-start reference.
 ## Strategy & Genome Toolbox
 ### Strategy Plugins
 - `tradebot/strategies/` contains EMA, RSI, ML, breakout, hybrid plugins with metadata in `strategies/manifest.py`.
-- List strategies: `.venv/bin/python3 tools/list_strategies.py`.
+- List strategies: `python3 tools/list_strategies.py`.
 
 ### Genomes & Evolution
 - Genomes stored at `companies/<name>/genome.yaml` (strategy, indicators, features, models, risk knobs).
 - Validate and compile genomes:
 ```
-.venv/bin/python3 tools/validate_genome.py company_001
-.venv/bin/python3 tools/compile_genome.py company_001
+python3 tools/validate_genome.py company_001
+python3 tools/compile_genome.py company_001
 ```
 - Mutate genomes (strategy, indicators, features, models) via `tools/mutate_company.py company_001 --seed 42 --strategy-switch`.
 - Evolution workflow:
 ```
-.venv/bin/python3 tools/evolve_genome.py company_001 company_005 --strategy-switch --seed 123
+python3 tools/evolve_genome.py company_001 company_005 --strategy-switch --seed 123
 ```
 - The command validates, compiles, updates metadata, and prints a mutation summary.
 
@@ -88,8 +90,8 @@ Use the sections below as your quick-start reference.
 
 ### Evaluator & Summary
 ```
-.venv/bin/python3 tools/evaluate_lifecycle.py
-.venv/bin/python3 tools/lifecycle_summary.py
+python3 tools/evaluate_lifecycle.py
+python3 tools/lifecycle_summary.py
 ```
 - Updates metadata, writes transition notes, exports JSON if requested.
 
@@ -107,46 +109,47 @@ Use the sections below as your quick-start reference.
 
 ### Self-Play Runner
 ```
-.venv/bin/python3 tools/self_play.py --manifest tools/self_play_manifest.yaml --regime high_volatility --interaction --include-paused
+python3 tools/self_play.py --manifest tools/self_play_manifest.yaml --regime high_volatility --interaction --include-paused
 ```
 - Writes run summary JSON in `results/self_play/` (regime, seed, participants, metrics).
 - Mutation-aware lifecycle filters skip retired/archived companies unless `--include-paused` is specified.
 
 ### Batch Tournament
 ```
-.venv/bin/python3 tools/self_play_batch.py --manifest tools/self_play_manifest.yaml --regimes trending_up ranging high_volatility --iterations 50
+python3 tools/self_play_batch.py --manifest tools/self_play_manifest.yaml --regimes trending_up ranging high_volatility --iterations 50
 ```
 - Runs same participant set across multiple regimes and prints aggregated fitness metrics.
 
 ---
 
 ## Warehouse & Analytics
+- Manager, leaderboard, and boardroom reports now read from `data/warehouse.sqlite` (with a log file fallback) so the analytics you see are the canonical source of truth.
 ### Setup
 ```
-.venv/bin/python3 tools/init_warehouse.py
-.venv/bin/python3 tools/ingest_results_to_db.py
+python3 tools/init_warehouse.py
+python3 tools/ingest_results_to_db.py
 ```
 - Creates `data/warehouse.sqlite` with tables/views (`latest_company_results`, `leaderboard_basis`, `latest_run_summary`).
 
 ### Queries
 ```
-.venv/bin/python3 tools/query_warehouse.py strategy_performance
-.venv/bin/python3 tools/query_warehouse.py best_strategy_by_symbol
-.venv/bin/python3 tools/query_warehouse.py ema_param_profitability
-.venv/bin/python3 tools/query_warehouse.py mutation_performance
+python3 tools/query_warehouse.py strategy_performance
+python3 tools/query_warehouse.py best_strategy_by_symbol
+python3 tools/query_warehouse.py ema_param_profitability
+python3 tools/query_warehouse.py mutation_performance
 ```
 - Outputs readable tables for strategy analyses and mutation tracking.
 
 ### Leaderboard
 ```
-.venv/bin/python3 tools/leaderboard.py --json-output leaderboard.json
+python3 tools/leaderboard.py --json-output leaderboard.json
 ```
 - Prints fitness/alpha/regime/recommendation + optional JSON export.
 
 ### Economy Report
 ```
-.venv/bin/python3 tools/economy_report.py
-.venv/bin/python3 tools/db_status.py
+python3 tools/economy_report.py
+python3 tools/db_status.py
 ```
 - Reports capital, allocations, fitness, and table counts.
 
@@ -161,7 +164,7 @@ Use the sections below as your quick-start reference.
 - Configurable via `config/allocation.yaml` (preserve reserve, min/max caps, bonuses, penalties, retired defunding).
 - Run allocations:
 ```
-.venv/bin/python3 tools/allocate_capital.py
+python3 tools/allocate_capital.py
 ```
 - Updates treasury and company metadata with new percentages/amounts and logs history.
 - Manager decisions now include capital hints (e.g., `allocate +10% (promoted)`).
@@ -173,20 +176,22 @@ Use the sections below as your quick-start reference.
 - Run a local Qdrant instance (e.g., `docker run --rm -d --name qdrant -p 6333:6333 qdrant/qdrant`).
 - Chunk & index files with embeddings in one pass:
 ```
-.venv/bin/python3 tools/index_memory.py
+python3 tools/index_memory.py
 ```
   This writes `memory/index_chunks.jsonl` plus populates the `memory_chunks` collection in Qdrant using `sentence-transformers/all-MiniLM-L6-v2`.
 - Query semantically relevant passages via:
 - Build memory-aware prompts with `tools/build_agent_prompt.py` (or import `tools.prompt_builder.MemoryPromptBuilder`) so only the retrieved chunks become part of the user or system instructions.
+- Use the Control Center menu option "Build memory-aware prompt" to interactively craft prompts that include the retrieved stretch of context.
 - Context retrieval is cached in `state/memory_retrieval_cache.json`, and each prompt use is recorded in `state/memory_usage_log.jsonl` for auditing.
 
 ```
-.venv/bin/python3 tools/query_memory.py "your question"
+python3 tools/query_memory.py "your question"
 ```
   The tool uses `tradebot/memory_store.py` to call Qdrant first and fall back to the JSONL store if the vector backend is unavailable.
 - The abstraction (`tradebot/memory_store.py`) also exposes `query_chunks(...)` for future prompt builder integration so you can inject just the retrieved snippets (with source attribution) into any conversation context.
 
 ## Automation Utilities
+- Run `python3 tools/smoke_test_platform.py` (add `--skip-trade` to avoid the long backtest) to exercise compile, validation, ingestion, leaderboard, manager, and backlog scripts in one go.
 - `tools/scan_repo.py`: scans for TODO/FIXME, missing help text, missing logs, and missing config files.
 - Task governance: creation (`tools/run_swe_task.py`), testing (`tools/test_swe_task.py`), patch summary/update (`tools/summarize_patch.py`), review report (`tools/review_swe_task.py`), gatekeeper manifest (`tasks/approval_manifest.json`), and safe apply (`tools/apply_swe_task.py`).
 - `tools/backlog_to_task.py` converts backlog JSON to structured task YAML, while `tasks/backlog_example.json` illustrates the format.

@@ -8,40 +8,20 @@ import sys
 from pathlib import Path
 from typing import Dict, Tuple
 
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.python_helper import ensure_repo_root
+from tools.genome_schema import FEATURE_FLAGS, INDICATOR_PARAMS, MODEL_OPTIONS
+
+ensure_repo_root()
+
 import yaml
 
 from tradebot.strategies.registry import STRATEGY_REGISTRY
 
-COMPANIES_DIR = Path("companies")
-MODEL_OPTIONS = {
-    "logistic_regression": {
-        "penalty": (0.01, 10.0),
-        "C": (0.01, 5.0),
-    },
-    "random_forest": {
-        "n_estimators": (10, 200),
-        "max_depth": (3, 20),
-    },
-}
-FEATURE_FLAGS = [
-    "use_ema_spread",
-    "use_rsi",
-    "use_price_change_1",
-    "use_price_change_2",
-    "use_price_change_3",
-    "use_momentum_3",
-    "use_slope_3",
-    "use_pattern_flags",
-]
-INDICATOR_PARAMS = {
-    "ema_fast": (3, 30),
-    "ema_slow": (10, 60),
-    "rsi_period": (5, 30),
-    "rsi_buy": (10, 50),
-    "rsi_sell": (60, 90),
-    "momentum_period": (2, 20),
-    "volatility_period": (5, 60),
-}
+COMPANIES_DIR = ROOT / "companies"
 
 def load_genome(path: Path) -> Dict[str, any]:
     if not path.exists():

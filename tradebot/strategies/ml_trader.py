@@ -101,7 +101,8 @@ class MLTraderStrategy(StrategyProtocol):
         momentum = changes[-1]
         slope = momentum / 3 if len(history) >= 3 else 0.0
 
-        window = history[-3:] if len(history) >= 3 else []
+        prior_prices = history[:-1]
+        window = prior_prices[-3:] if len(prior_prices) >= 3 else prior_prices
         rising = len(window) == 3 and window[0] < window[1] < window[2]
         falling = len(window) == 3 and window[0] > window[1] > window[2]
         reversal_after_decline = (

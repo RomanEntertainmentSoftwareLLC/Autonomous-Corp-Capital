@@ -10,10 +10,16 @@ import sys
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
 
+from tools.prompt_builder import MemoryPromptBuilder
+from tools.python_helper import ensure_repo_root, python_executable
+
 ROOT = Path(__file__).resolve().parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+ensure_repo_root()
 TOOLS_DIR = ROOT / "tools"
 COMPANIES_DIR = ROOT / "companies"
-VENV_PYTHON = ROOT / ".venv" / "bin" / "python3" if (ROOT / ".venv").exists() else sys.executable
+PYTHON_EXECUTABLE = python_executable()
 
 MENU_OPTIONS: Dict[int, Tuple[str, Callable[[], None]]] = {}
 
@@ -66,7 +72,7 @@ def run_one_company() -> None:
     mode = prompt("Mode", choices=["paper", "backtest", "live"], default="backtest")
     iterations = prompt("Iterations", default="20")
     loop = prompt("Loop feed?", choices=["y", "n"], default="n")
-    cmd = [VENV_PYTHON, str(ROOT / "trade-bot.py"), "--company", company, "--mode", mode, "--iterations", iterations]
+    cmd = [PYTHON_EXECUTABLE, str(ROOT / "trade-bot.py"), "--company", company, "--mode", mode, "--iterations", iterations]
     if loop.lower() == "y":
         cmd.append("--loop-feed")
     run_command(cmd)
@@ -82,7 +88,7 @@ def run_multiple_companies() -> None:
     if not companies:
         print("No companies provided")
         return
-    cmd = [VENV_PYTHON, str(TOOLS_DIR / "run_companies.py")]
+    cmd = [PYTHON_EXECUTABLE, str(TOOLS_DIR / "run_companies.py")]
     for comp in companies:
         cmd.extend(["--company", comp])
     run_command(cmd)
@@ -90,21 +96,21 @@ def run_multiple_companies() -> None:
 
 def create_company() -> None:
     company_id = prompt("New company id", default="company_new")
-    cmd = [VENV_PYTHON, str(TOOLS_DIR / "create_company.py"), company_id]
+    cmd = [PYTHON_EXECUTABLE, str(TOOLS_DIR / "create_company.py"), company_id]
     run_command(cmd)
 
 
 def clone_company() -> None:
     parent = choose_company("Parent company")
     child = prompt("Child company id")
-    cmd = [VENV_PYTHON, str(TOOLS_DIR / "clone_company.py"), parent, child]
+    cmd = [PYTHON_EXECUTABLE, str(TOOLS_DIR / "clone_company.py"), parent, child]
     run_command(cmd)
 
 
 def mutate_company() -> None:
     company = choose_company("Company to mutate")
     seed = prompt("Seed (optional)", default="")
-    cmd = [VENV_PYTHON, str(TOOLS_DIR / "mutate_company.py"), company]
+    cmd = [PYTHON_EXECUTABLE, str(TOOLS_DIR / "mutate_company.py"), company]
     if seed:
         cmd.extend(["--seed", seed])
     run_command(cmd)
@@ -114,7 +120,7 @@ def evolve_company() -> None:
     parent = choose_company("Parent company")
     child = prompt("Child company id")
     seed = prompt("Seed (optional)", default="")
-    cmd = [VENV_PYTHON, str(TOOLS_DIR / "evolve_company.py"), parent, child]
+    cmd = [PYTHON_EXECUTABLE, str(TOOLS_DIR / "evolve_company.py"), parent, child]
     if seed:
         cmd.extend(["--seed", seed])
     run_command(cmd)
@@ -122,43 +128,72 @@ def evolve_company() -> None:
 
 def validate_company() -> None:
     company = choose_company("Company to validate")
-    cmd = [VENV_PYTHON, str(TOOLS_DIR / "validate_company.py"), company]
+    cmd = [PYTHON_EXECUTABLE, str(TOOLS_DIR / "validate_company.py"), company]
     run_command(cmd)
 
 
 def run_tester() -> None:
     company = choose_company("Company to test")
-    cmd = [VENV_PYTHON, str(TOOLS_DIR / "test_company.py"), company]
+    cmd = [PYTHON_EXECUTABLE, str(TOOLS_DIR / "test_company.py"), company]
     run_command(cmd)
 
 
 def show_leaderboard() -> None:
-    cmd = [VENV_PYTHON, str(TOOLS_DIR / "leaderboard.py")]
+    cmd = [PYTHON_EXECUTABLE, str(TOOLS_DIR / "leaderboard.py")]
     run_command(cmd)
 
 
 def manager_report() -> None:
-    cmd = [VENV_PYTHON, str(TOOLS_DIR / "manager_report.py")]
+    cmd = [PYTHON_EXECUTABLE, str(TOOLS_DIR / "manager_report.py")]
     run_command(cmd)
 
 
 def manager_decisions() -> None:
-    cmd = [VENV_PYTHON, str(TOOLS_DIR / "manager_decide.py")]
+    cmd = [PYTHON_EXECUTABLE, str(TOOLS_DIR / "manager_decide.py")]
     run_command(cmd)
 
 
 def generate_backlog() -> None:
-    cmd = [VENV_PYTHON, str(TOOLS_DIR / "generate_backlog.py")]
+    cmd = [PYTHON_EXECUTABLE, str(TOOLS_DIR / "generate_backlog.py")]
     run_command(cmd)
 
 
 def scrum_board() -> None:
-    cmd = [VENV_PYTHON, str(TOOLS_DIR / "scrum_board.py"), "show"]
+    cmd = [PYTHON_EXECUTABLE, str(TOOLS_DIR / "scrum_board.py"), "show"]
     run_command(cmd)
 
 
+def build_memory_prompt() -> None:
+    builder = MemoryPromptBuilder()
+    system_instructions = prompt(
+        "System instructions",
+        default="You are the OpenClaw assistant. Stay concise, data-driven, and reference relevant memory.",
+    )
+    extra_instructions = prompt("Extra instructions (optional)", default="")
+    query_hint = prompt("Query hint (optional)", default="")
+    user_message = prompt("User message", default="Summarize the current economy status.")
+
+    prompt_payload = builder.build_prompt(
+        user_message=user_message,
+        system_instructions=system_instructions,
+        extra_instructions=extra_instructions or None,
+        query_hint=query_hint or None,
+    )
+
+    print("=== MEMORY-AWARE PROMPT ===")
+    print(prompt_payload.prompt)
+    if prompt_payload.chunks:
+        print("
+=== CHUNKS INCLUDED ===")
+        for chunk in prompt_payload.chunks:
+            print(f"- {chunk.source_file}#{chunk.chunk_index} (cache hit={prompt_payload.cache_hit})")
+    else:
+        print("
+(no memory chunks were retrieved)")
+
+
 def execute_actions() -> None:
-    cmd = [VENV_PYTHON, str(TOOLS_DIR / "execute_manager_actions.py"), "--dry-run"]
+    cmd = [PYTHON_EXECUTABLE, str(TOOLS_DIR / "execute_manager_actions.py"), "--dry-run"]
     run_command(cmd)
 
 
@@ -177,8 +212,9 @@ def build_menu() -> Dict[int, Tuple[str, Callable[[], None]]]:
         11: ("Manager decisions", manager_decisions),
         12: ("Generate backlog", generate_backlog),
         13: ("Scrum board", scrum_board),
-        14: ("Execute manager actions (dry run)", execute_actions),
-        15: ("Exit", lambda: sys.exit(0)),
+        14: ("Build memory-aware prompt", build_memory_prompt),
+        15: ("Execute manager actions (dry run)", execute_actions),
+        16: ("Exit", lambda: sys.exit(0)),
     }
 
 
@@ -190,7 +226,7 @@ def interactive_menu() -> None:
         print("=" * 40)
         for num, (label, _) in menu.items():
             print(f"{num}. {label}")
-        choice = prompt("Select option", default="15")
+        choice = prompt("Select option", default="16")
         if not choice.isdigit() or int(choice) not in menu:
             print("Invalid selection")
             continue

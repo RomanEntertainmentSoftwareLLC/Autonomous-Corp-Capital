@@ -5,20 +5,27 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
+import sys
 import yaml
 from pathlib import Path
-import sys
+from typing import Any, Dict, Iterable, List, Tuple
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from typing import Any, Dict, Iterable, List, Tuple
+
+from tools.python_helper import ensure_repo_root
+
+ensure_repo_root()
 
 from tools.company_metadata import read_metadata
-from tradebot.strategies.factory import resolve_strategy_name
 
-RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
-COMPANIES_DIR = Path(__file__).resolve().parent.parent / "companies"
+WAREHOUSE = ROOT / "data" / "warehouse.sqlite"
+RESULTS_DIR = ROOT / "results"
+COMPANIES_DIR = ROOT / "companies"
+
+from tradebot.strategies.factory import resolve_strategy_name
 
 
 def iter_log_entries(path: Path) -> Iterable[Dict[str, Any]]:
@@ -77,11 +84,39 @@ def summarize(path: Path) -> Dict[str, Any]:
     }
 
 
-def collect(company: str) -> List[Dict[str, Any]]:
+def collect_from_warehouse(company: str) -> List[Dict[str, Any]]:
+    if not WAREHOUSE.exists():
+        return []
+    query = """
+        SELECT mode, strategy, account_value, realized_pnl, unrealized_pnl, drawdown
+        FROM latest_company_results
+        WHERE company = ?
+        ORDER BY start_time DESC
+        LIMIT 3
+    """
     results = []
+    with sqlite3.connect(WAREHOUSE) as conn:
+        cursor = conn.cursor()
+        for mode, strategy, account, realized, unrealized, drawdown in cursor.execute(query, (company,)):
+            results.append({
+                "mode": mode,
+                "strategy": strategy,
+                "account_value": account or 0.0,
+                "realized_pnl": realized or 0.0,
+                "unrealized_pnl": unrealized or 0.0,
+                "trades": 0,
+                "win_rate": None,
+                "drawdown": drawdown,
+            })
+    return results
+
+def collect(company: str) -> List[Dict[str, Any]]:
+    results = collect_from_warehouse(company)
+    if results:
+        return results
     base = RESULTS_DIR / company
     if not base.exists():
-        return results
+        return []
     for mode_dir in sorted(base.iterdir()):
         if not mode_dir.is_dir():
             continue

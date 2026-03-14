@@ -61,6 +61,8 @@ def query_strategy_performance(conn: sqlite3.Connection) -> None:
     print("strategy         runs  avg_account  avg_realized")
     for row in cursor.fetchall():
         strategy, runs, avg_account, avg_realized = row
+        avg_account = avg_account or 0.0
+        avg_realized = avg_realized or 0.0
         print(f"{strategy:<15} {runs:>4}  {avg_account:>11.2f}  {avg_realized:>12.2f}")
 
 
@@ -141,8 +143,11 @@ def query_best_strategy_by_symbol(conn: sqlite3.Connection) -> None:
     print("symbol   strategy           runs  avg_account  avg_realized  avg_drawdown")
     for row in cursor.fetchall():
         symbol, strategy, runs, avg_account, avg_realized, avg_drawdown = row
+        avg_account = avg_account or 0.0
+        avg_realized = avg_realized or 0.0
+        avg_drawdown = avg_drawdown or 0.0
         print(
-            f"{symbol:<8} {strategy:<18} {runs:>4}  {avg_account:>11.2f}  {avg_realized:>12.2f}  {avg_drawdown or 0:>12.2f}"
+            f"{symbol:<8} {strategy:<18} {runs:>4}  {avg_account:>11.2f}  {avg_realized:>12.2f}  {avg_drawdown:>12.2f}"
         )
 
 
@@ -186,7 +191,6 @@ def main() -> None:
         "symbol_trades",
         "best_strategy_by_symbol",
         "ema_param_profitability",
-        "mutation_performance",
     ], help="Name of the predefined query to run")
     parser.add_argument("--db", type=Path, default=WAREHOUSE, help="Path to the warehouse.sqlite file")
     args = parser.parse_args()

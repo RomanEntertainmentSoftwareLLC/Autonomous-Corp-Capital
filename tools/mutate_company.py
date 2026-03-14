@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import random
 import sys
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -14,6 +13,11 @@ from typing import Any, Dict, List, Optional
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+from tools.python_helper import ensure_repo_root
+from tools.genome_schema import FEATURE_FLAGS, INDICATOR_FLAGS, INDICATOR_PARAMS
+
+ensure_repo_root()
 
 import yaml
 
@@ -23,6 +27,7 @@ from tools.validate_company import ValidationError, validate_config
 from tradebot.strategies.registry import available_strategies, strategy_by_name
 
 COMPANIES_DIR = Path(__file__).resolve().parent.parent / "companies"
+GENOME_DIR = COMPANIES_DIR
 
 
 def load_config(path: Path) -> Dict[str, Any]:
@@ -99,6 +104,28 @@ def _mutate_feature_flag(genome: Dict[str, Any], flag: str, rnd: random.Random) 
     return False
 
 
+def _mutate_indicator_flag(genome: Dict[str, Any], flag: str, rnd: random.Random) -> bool:
+    indicators = genome.setdefault("indicator_flags", {})
+    current = indicators.get(flag, True)
+    if rnd.random() < 0.35:
+        indicators[flag] = not current
+        return True
+    return False
+
+
+def _mutate_indicator_params(
+    params: Dict[str, Any], param: str, bounds: tuple[float, float], rnd: random.Random
+) -> bool:
+    old = params.get(param)
+    if old is None:
+        return False
+    new = mutate_numeric(float(old), bounds, rnd, isinstance(old, float))
+    if isinstance(old, int):
+        new = int(round(new))
+    if new != old:
+        params[param] = new
+        return True
+    return False
 def mutate_symbols(
     company: str,
     symbols: List[Dict[str, Any]],
@@ -140,9 +167,12 @@ def mutate_symbols(
                 summary.append(f"{name}.indicator {flag} -> {genome_flags[flag]}")
         indicator_params = genome.setdefault("indicator_parameters", {})
         for param, bounds in INDICATOR_PARAMS.items():
-            if _mutate_indicator_params(indicator_params, param, bounds, rnd):
-                summary.append(f"{name}.parameter {param} -> {indicator_params[param]}")
+            if param not in indicator_params:
+                continue
+            changed = _mutate_indicator_params(indicator_params, param, bounds, rnd)
             symbol[param] = indicator_params[param]
+            if changed:
+                summary.append(f"{name}.parameter {param} -> {indicator_params[param]}")
         feature_flags = genome.setdefault("feature_flags", {})
         if any(_mutate_feature_flag(genome, flag, rnd) for flag in FEATURE_FLAGS):
             summary.append(f"{name}.feature flags -> {feature_flags}")
@@ -222,7 +252,7 @@ def main() -> None:
     summary: List[str] = []
     symbols = config.get("symbols", [])
     if isinstance(symbols, list):
-        mutate_symbols(symbols, rnd, summary, strategy_target=args.strategy, strategy_switch=args.strategy_switch)
+        mutate_symbols(args.company, symbols, rnd, summary, strategy_target=args.strategy, strategy_switch=args.strategy_switch)
     risk = config.get("risk", {})
     if isinstance(risk, dict):
         mutate_risk(risk, rnd, summary)
@@ -245,7 +275,7 @@ def main() -> None:
     print(f"Mutation summary for {args.company} (parent={parent}, generation={generation})")
     for item in summary:
         print(f" - {item}")
-    print(f"Run .venv/bin/python3 trade-bot.py --company {args.company} --mode backtest --iterations 4 --loop-feed to test")
+    print(f"Run python3 trade-bot.py --company {args.company} --mode backtest --iterations 4 --loop-feed to test")
 
 
 if __name__ == "__main__":

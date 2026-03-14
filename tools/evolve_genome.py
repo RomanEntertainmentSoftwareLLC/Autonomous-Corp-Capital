@@ -9,10 +9,18 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Dict
+import sys
+
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.python_helper import ensure_repo_root, python_executable
 
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
+ensure_repo_root()
 COMPANIES_DIR = ROOT / "companies"
 METADATA_FILE = "metadata.yaml"
 GENOME_FILE = "genome.yaml"
@@ -52,7 +60,7 @@ def main() -> None:
     shutil.copytree(parent_dir, child_dir)
     print(f"Cloned parent {args.parent} -> child {args.child}")
 
-    mutate_cmd = [".venv/bin/python3", "tools/mutate_company.py", args.child]
+    mutate_cmd = [python_executable(), "tools/mutate_company.py", args.child]
     if args.strategy:
         mutate_cmd.extend(["--strategy", args.strategy])
     if args.strategy_switch:
@@ -61,8 +69,8 @@ def main() -> None:
         mutate_cmd.extend(["--seed", str(args.seed)])
     subprocess.run(mutate_cmd, check=True)
 
-    subprocess.run([".venv/bin/python3", "tools/validate_genome.py", args.child], check=True)
-    subprocess.run([".venv/bin/python3", "tools/compile_genome.py", args.child], check=True)
+    subprocess.run([python_executable(), "tools/validate_genome.py", args.child], check=True)
+    subprocess.run([python_executable(), "tools/compile_genome.py", args.child], check=True)
 
     parent_meta = load_metadata(args.parent)
     child_meta = parent_meta.copy()

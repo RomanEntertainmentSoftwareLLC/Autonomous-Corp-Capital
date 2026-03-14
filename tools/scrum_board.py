@@ -5,8 +5,18 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
+import sys
 from pathlib import Path
 from typing import Dict, List
+
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.python_helper import ensure_repo_root, python_executable
+
+ensure_repo_root()
 
 BOARD_FILE = Path(__file__).resolve().parent.parent / "scrum_board.json"
 BACKLOG_TOOL = Path(__file__).resolve().parent / "generate_backlog.py"
@@ -25,8 +35,7 @@ def save_board(board: Dict[str, List[Dict[str, str]]]) -> None:
 
 
 def initialize_board(metric: str) -> None:
-    import subprocess
-    result = subprocess.run([".venv/bin/python3", str(BACKLOG_TOOL), "--metric", metric], capture_output=True, text=True)
+    result = subprocess.run([python_executable(), str(BACKLOG_TOOL), "--metric", metric], capture_output=True, text=True)
     if result.returncode != 0:
         raise SystemExit("Backlog generation failed")
     data = json.loads(result.stdout)

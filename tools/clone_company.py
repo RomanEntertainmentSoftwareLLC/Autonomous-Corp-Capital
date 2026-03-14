@@ -76,7 +76,7 @@ def main() -> None:
 
     print(f"Cloned '{args.parent}' → '{args.child}'")
     print(f"Child config ready at companies/{args.child}/config.yaml")
-    print(f"Run it via: .venv/bin/python3 trade-bot.py --company {args.child} --mode backtest --iterations 4 --loop-feed")
+    print(f"Run it via: python3 trade-bot.py --company {args.child} --mode backtest --iterations 4 --loop-feed")
 
 
 if __name__ == "__main__":

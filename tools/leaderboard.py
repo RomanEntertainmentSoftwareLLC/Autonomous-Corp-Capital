@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
 from pathlib import Path
 import sys
 from typing import Dict, Iterable, List, Optional
@@ -12,6 +13,11 @@ from typing import Dict, Iterable, List, Optional
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+from tools.python_helper import ensure_repo_root
+
+ensure_repo_root()
+WAREHOUSE = ROOT / "data" / "warehouse.sqlite"
 
 from tradebot.regime import classify_regime
 
@@ -92,7 +98,55 @@ def summarize(path: Path) -> Dict[str, object]:
     }
 
 
+def _parse_metrics(raw: str) -> Dict[str, object]:
+    if not raw:
+        return {}
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return {}
+
+
+def collect_from_warehouse(mode_filter: str | None = None, company_filter: str | None = None) -> List[Dict[str, object]]:
+    if not WAREHOUSE.exists():
+        return []
+    rows: List[Dict[str, object]] = []
+    query = """
+        SELECT companies.name, runs.mode, results.account_value, results.realized_pnl, results.unrealized_pnl, results.drawdown, results.metrics
+        FROM companies
+        JOIN runs ON runs.company_id = companies.id
+        JOIN results ON results.run_id = runs.id
+        ORDER BY runs.start_time DESC
+    """
+    with sqlite3.connect(WAREHOUSE) as conn:
+        cursor = conn.cursor()
+        for company, mode, account, realized, unrealized, drawdown, raw_metrics in cursor.execute(query):
+            if company_filter and company != company_filter:
+                continue
+            if mode_filter and mode != mode_filter:
+                continue
+            metrics = _parse_metrics(raw_metrics)
+            rows.append({
+                "company": company,
+                "mode": mode,
+                "account_value": account or 0.0,
+                "realized_pnl": realized or 0.0,
+                "unrealized_pnl": unrealized or 0.0,
+                "trades": int(metrics.get("trade_count", 0)),
+                "win_rate": metrics.get("win_rate"),
+                "max_drawdown": metrics.get("max_drawdown", drawdown),
+                "drawdown": drawdown,
+                "regime": metrics.get("regime"),
+                "company_return": metrics.get("company_return"),
+                "benchmark_return": metrics.get("benchmark_return"),
+                "alpha": metrics.get("alpha"),
+            })
+    return rows
+
 def collect(mode_filter: str | None = None, company_filter: str | None = None) -> List[Dict[str, object]]:
+    rows = collect_from_warehouse(mode_filter, company_filter)
+    if rows:
+        return rows
     rows: List[Dict[str, object]] = []
     for company_dir in sorted(RESULTS_DIR.iterdir()):
         if not company_dir.is_dir():
@@ -161,39 +215,24 @@ def main() -> None:
 
     rows = collect(args.mode, args.company)
     if not rows:
-        print("No results found")
-        return
-    rows.sort(key=score, reverse=True)
-
-    print("Leaderboard")
-    print("company     mode    trades  account   realized  unrealized  win%   drawdown   fitness   alpha    regime")
-    print("-----------------------------------------------------------------------------------------------")
-    export_rows = []
-    for row in rows:
-        win = f"{row['win_rate']:.2f}%" if row["win_rate"] is not None else "N/A"
-        draw = f"{row['max_drawdown']:.2f}%" if row["max_drawdown"] is not None else "N/A"
-        fitness = score(row)
-        regime = row.get("regime", "unknown")
-        rec = recommend(fitness)
-        alpha = row.get("alpha") or 0.0
         print(
-            f"{row['company']:<10} {row['mode']:<7} {row['trades']:>6}  ${row['account_value']:>7.2f}  "
-            f"${row['realized_pnl']:>7.2f}  ${row['unrealized_pnl']:>9.2f}  {win:<6} {draw:<6} {fitness:>9.2f} {alpha:>7.2f} {regime:<12}"
+            f"{company_name:<10} {mode_name:<7} {row_trades:>6}  ${row_account:>7.2f}  "
+            f"${row_realized:>7.2f}  ${row_unrealized:>9.2f}  {win:<6} {draw:<6} {fitness:>9.2f} {alpha:>7.2f} {regime:<12}"
         )
         export_rows.append(
             {
-                "company": row["company"],
-                "mode": row["mode"],
-                "trades": row["trades"],
-                "account_value": row["account_value"],
-                "realized_pnl": row["realized_pnl"],
-                "unrealized_pnl": row["unrealized_pnl"],
-                "win_rate": row["win_rate"],
-                "max_drawdown": row["max_drawdown"],
-                "fitness": fitness,
-                "alpha": row.get("alpha"),
-                "recommendation": rec,
-                "regime": regime,
+                'company': row['company'],
+                'mode': row['mode'],
+                'trades': row_trades,
+                'account_value': row_account,
+                'realized_pnl': row_realized,
+                'unrealized_pnl': row_unrealized,
+                'win_rate': win_rate,
+                'max_drawdown': drawdown,
+                'fitness': fitness,
+                'alpha': alpha,
+                'recommendation': rec,
+                'regime': regime,
             }
         )
     if args.json_output:

@@ -14,7 +14,7 @@ acceptance_criteria:
   - Strategy configurations are validated against required fields.
   - No regressions when running unit tests listed below.
 test_commands:
-  - ".venv/bin/python3 -m pytest tests"
-  - ".venv/bin/python3 tools/leaderboard.py"
+  - "python3 -m pytest tests"
+  - "python3 tools/leaderboard.py"
 reviewer_notes: |
   Focus on modularity and documentation. Bonus points for adding metadata-driven manifests.

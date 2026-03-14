@@ -1,12 +1,97 @@
-company_id: company_001
-parent_company: base_team
-generation: 2
-lifecycle_state: ACTIVE
-allocation_percent: 15.0
 allocation_amount: 150000.0
+allocation_percent: 15.0
 allocation_status: active
-last_rebalance_at: 2026-03-13T03:22:00Z
-mutation_source: hybrid evolution
+company_id: company_001
 created_at: 2026-03-13 00:00:00+00:00
-notes: |
-  Mixes BTC EMA crossover with ETH RSI mean-reversion to explore strategy competition.
+decline_strikes: 0
+generation: 2
+last_fitness: 0.0
+last_rebalance_at: 2026-03-13 03:22:00+00:00
+lifecycle_state: PROMOTED
+mutation_source: hybrid evolution
+notes: 'Mixes BTC EMA crossover with ETH RSI mean-reversion to explore strategy competition.
+
+
+  2026-03-14T03:09:30.703439+00:00: mutated 16 parameters (BTC-USD.ema_fast: 6->5;
+  BTC-USD.ema_slow: 21->23; BTC-USD.rsi_period: 14->12; BTC-USD.rsi_sell: 64->62;
+  BTC-USD.order_size: 1.569082695707757->1.5662176053671777; BTC-USD.parameter ema_fast
+  -> 4; BTC-USD.parameter ema_slow -> 22; BTC-USD.parameter rsi_period -> 12; BTC-USD.parameter
+  rsi_oversold -> 36; BTC-USD.parameter rsi_overbought -> 66; BTC-USD.parameter momentum_period
+  -> 5; BTC-USD.parameter volatility_period -> 18; BTC-USD.feature flags -> {''use_ema_spread'':
+  True, ''use_rsi'': False, ''use_price_change_1'': True, ''use_price_change_2'':
+  False, ''use_price_change_3'': False, ''use_momentum_3'': True, ''use_slope_3'':
+  True, ''use_pattern_flags'': True}; risk.max_position_size: 0.22653445549840673->0.253884084179451;
+  risk.max_daily_trades: 5->7; risk.cooldown_seconds: 60->58)
+
+  2026-03-14T03:09:48.331270+00:00: mutated 16 parameters (BTC-USD.ema_fast: 4->3;
+  BTC-USD.ema_slow: 22->24; BTC-USD.rsi_period: 12->10; BTC-USD.rsi_sell: 62->60;
+  BTC-USD.order_size: 1.5662176053671777->1.5633577465817496; BTC-USD.parameter ema_fast
+  -> 3; BTC-USD.parameter ema_slow -> 23; BTC-USD.parameter rsi_period -> 10; BTC-USD.parameter
+  rsi_oversold -> 37; BTC-USD.parameter rsi_overbought -> 67; BTC-USD.parameter momentum_period
+  -> 7; BTC-USD.parameter volatility_period -> 16; BTC-USD.feature flags -> {''use_ema_spread'':
+  True, ''use_rsi'': True, ''use_price_change_1'': True, ''use_price_change_2'': False,
+  ''use_price_change_3'': False, ''use_momentum_3'': True, ''use_slope_3'': True,
+  ''use_pattern_flags'': True}; risk.max_position_size: 0.253884084179451->0.2845356484858963;
+  risk.max_daily_trades: 5->7; risk.cooldown_seconds: 60->58)
+
+  2026-03-14T03:10:16.153372+00:00: mutated 13 parameters (BTC-USD.ema_slow: 23->25;
+  BTC-USD.rsi_period: 10->8; BTC-USD.order_size: 1.5633577465817496->1.5605031097988356;
+  BTC-USD.parameter ema_slow -> 24; BTC-USD.parameter rsi_period -> 8; BTC-USD.parameter
+  rsi_oversold -> 38; BTC-USD.parameter rsi_overbought -> 68; BTC-USD.parameter momentum_period
+  -> 9; BTC-USD.parameter volatility_period -> 14; BTC-USD.feature flags -> {''use_ema_spread'':
+  True, ''use_rsi'': False, ''use_price_change_1'': True, ''use_price_change_2'':
+  False, ''use_price_change_3'': False, ''use_momentum_3'': True, ''use_slope_3'':
+  True, ''use_pattern_flags'': True}; risk.max_position_size: 0.2845356484858963->0.31888779291129093;
+  risk.max_daily_trades: 5->7; risk.cooldown_seconds: 60->58)
+
+  2026-03-14T03:11:00.103638+00:00: mutated 13 parameters (BTC-USD.ema_slow: 24->26;
+  BTC-USD.rsi_period: 8->6; BTC-USD.order_size: 1.5605031097988356->1.5576536854832408;
+  BTC-USD.parameter ema_slow -> 25; BTC-USD.parameter rsi_period -> 6; BTC-USD.parameter
+  rsi_oversold -> 39; BTC-USD.parameter rsi_overbought -> 69; BTC-USD.parameter momentum_period
+  -> 11; BTC-USD.parameter volatility_period -> 12; BTC-USD.feature flags -> {''use_ema_spread'':
+  True, ''use_rsi'': True, ''use_price_change_1'': True, ''use_price_change_2'': False,
+  ''use_price_change_3'': False, ''use_momentum_3'': True, ''use_slope_3'': True,
+  ''use_pattern_flags'': True}; risk.max_position_size: 0.31888779291129093->0.35738729051686774;
+  risk.max_daily_trades: 5->7; risk.cooldown_seconds: 60->58)
+
+  2026-03-14T03:12:16.288692+00:00: mutated 13 parameters (BTC-USD.ema_slow: 25->27;
+  BTC-USD.rsi_period: 6->5; BTC-USD.order_size: 1.5576536854832408->1.5548094641171815;
+  BTC-USD.parameter ema_slow -> 26; BTC-USD.parameter rsi_period -> 5; BTC-USD.parameter
+  rsi_oversold -> 40; BTC-USD.parameter rsi_overbought -> 70; BTC-USD.parameter momentum_period
+  -> 13; BTC-USD.parameter volatility_period -> 10; BTC-USD.feature flags -> {''use_ema_spread'':
+  True, ''use_rsi'': False, ''use_price_change_1'': True, ''use_price_change_2'':
+  False, ''use_price_change_3'': False, ''use_momentum_3'': True, ''use_slope_3'':
+  True, ''use_pattern_flags'': True}; risk.max_position_size: 0.35738729051686774->0.400534853519837;
+  risk.max_daily_trades: 5->7; risk.cooldown_seconds: 60->58)
+
+  2026-03-14T03:12:31.324640+00:00: mutated 11 parameters (BTC-USD.ema_slow: 26->28;
+  BTC-USD.order_size: 1.5548094641171815->1.551970436200253; BTC-USD.parameter ema_slow
+  -> 27; BTC-USD.parameter rsi_oversold -> 41; BTC-USD.parameter rsi_overbought ->
+  71; BTC-USD.parameter momentum_period -> 15; BTC-USD.parameter volatility_period
+  -> 8; BTC-USD.feature flags -> {''use_ema_spread'': True, ''use_rsi'': True, ''use_price_change_1'':
+  True, ''use_price_change_2'': False, ''use_price_change_3'': False, ''use_momentum_3'':
+  True, ''use_slope_3'': True, ''use_pattern_flags'': True}; risk.max_position_size:
+  0.400534853519837->0.4488916453971814; risk.max_daily_trades: 5->7; risk.cooldown_seconds:
+  60->58)
+
+  2026-03-14T03:13:23.636628+00:00: mutated 11 parameters (BTC-USD.ema_slow: 27->29;
+  BTC-USD.order_size: 1.551970436200253->1.5491365922493985; BTC-USD.parameter ema_slow
+  -> 28; BTC-USD.parameter rsi_oversold -> 42; BTC-USD.parameter rsi_overbought ->
+  72; BTC-USD.parameter momentum_period -> 17; BTC-USD.parameter volatility_period
+  -> 6; BTC-USD.feature flags -> {''use_ema_spread'': True, ''use_rsi'': False, ''use_price_change_1'':
+  True, ''use_price_change_2'': False, ''use_price_change_3'': False, ''use_momentum_3'':
+  True, ''use_slope_3'': True, ''use_pattern_flags'': True}; risk.max_position_size:
+  0.4488916453971814->0.5030865791993034; risk.max_daily_trades: 5->7; risk.cooldown_seconds:
+  60->58)
+
+  2026-03-14T03:18:04.886905+00:00: mutated 11 parameters (BTC-USD.ema_slow: 28->30;
+  BTC-USD.order_size: 1.5491365922493985->1.546307922798876; BTC-USD.parameter ema_slow
+  -> 29; BTC-USD.parameter rsi_oversold -> 43; BTC-USD.parameter rsi_overbought ->
+  73; BTC-USD.parameter momentum_period -> 19; BTC-USD.parameter volatility_period
+  -> 5; BTC-USD.feature flags -> {''use_ema_spread'': True, ''use_rsi'': True, ''use_price_change_1'':
+  True, ''use_price_change_2'': False, ''use_price_change_3'': False, ''use_momentum_3'':
+  True, ''use_slope_3'': True, ''use_pattern_flags'': True}; risk.max_position_size:
+  0.5030865791993034->0.5638244969930692; risk.max_daily_trades: 5->7; risk.cooldown_seconds:
+  60->58)'
+parent_company: base_team
+promotion_streak: 6

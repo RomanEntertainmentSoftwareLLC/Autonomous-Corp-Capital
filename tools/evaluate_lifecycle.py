@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import Dict
+from typing import Any, Dict
 
 import sqlite3
 import yaml
@@ -33,6 +33,16 @@ LIFECYCLE_RULES = [
     "RETIRED",
     "ARCHIVED",
 ]
+
+
+def percentile_value(values: list[float], percentile: float) -> float:
+    if not values:
+        return 0.0
+    sorted_values = sorted(values)
+    index = int(round((percentile / 100.0) * (len(sorted_values) - 1)))
+    index = max(0, min(len(sorted_values) - 1, index))
+    return sorted_values[index]
+
 
 
 def load_metadata() -> Dict[str, Dict[str, Any]]:
@@ -66,16 +76,41 @@ def fitness(metrics: Dict[str, float]) -> float:
 def load_latest_results(conn: sqlite3.Connection) -> Dict[str, Dict[str, float]]:
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT company, strategy, account_value, realized_pnl, drawdown FROM latest_company_results"
+        """
+        SELECT companies.name AS company,
+               runs.strategy,
+               results.account_value,
+               results.realized_pnl,
+               results.unrealized_pnl,
+               results.drawdown,
+               results.metrics
+        FROM companies
+        JOIN runs ON runs.company_id = companies.id
+        JOIN results ON results.run_id = runs.id
+        WHERE runs.id = (
+            SELECT id FROM runs r2
+            WHERE r2.company_id = runs.company_id
+            ORDER BY r2.start_time DESC
+            LIMIT 1
+        )
+        """
     )
     data = {}
-    for company, strategy, account, realized, drawdown in cursor.fetchall():
+    for company, strategy, account, realized, unrealized, drawdown, raw_metrics in cursor.fetchall():
+        metrics = {}
+        if raw_metrics:
+            try:
+                metrics = json.loads(raw_metrics)
+            except json.JSONDecodeError:
+                metrics = {}
         data[company] = {
             "strategy": strategy,
             "account": account or 0.0,
             "realized_pnl": realized or 0.0,
+            "unrealized_pnl": unrealized or 0.0,
             "drawdown": drawdown or 0.0,
-            "win_rate": 0.0,
+            "win_rate": float(metrics.get("win_rate", 0.0)),
+            "trade_count": int(metrics.get("trade_count", 0)),
         }
     return data
 
@@ -84,25 +119,28 @@ def evaluate_state(
     company: str,
     state: str,
     metrics: Dict[str, float],
+    promotion_threshold: float,
+    retirement_threshold: float,
     config: Dict[str, float],
     decline_strikes: int,
     promotion_streak: int,
 ) -> str:
     if state not in LIFECYCLE_RULES:
         state = "NEW"
-    score = fitness(metrics)
+    metrics_available = bool(metrics)
+    score = fitness(metrics) if metrics_available else 0.0
     account = metrics.get("account", 0)
     drawdown = metrics.get("drawdown", 0)
-    promotion_threshold = config.get("promotion_percentile", 90)
-    retirement_threshold = config.get("retirement_percentile", 20)
     decline_limit = int(config.get("decline_strike_count", 3))
     pause_after_decline = config.get("pause_after_decline", 8)
     promotion_min_runs = int(config.get("promotion_min_runs", 2))
 
     if state == "NEW":
-        return "TESTING" if metrics else "NEW"
+        return "TESTING" if metrics_available else "NEW"
+    if not metrics_available:
+        return state
     if state == "TESTING":
-        if metrics and account > 105 and metrics.get("trade_count", 0) >= promotion_min_runs:
+        if account > 105 and metrics.get("trade_count", 0) >= promotion_min_runs:
             return "ACTIVE"
         return "TESTING"
     if state == "ACTIVE":
@@ -152,6 +190,11 @@ def main() -> None:
     with sqlite3.connect(WAREHOUSE) as conn:
         latest = load_latest_results(conn)
     config = load_lifecycle_config()
+    promotion_percentile = float(config.get("promotion_percentile", 90))
+    retirement_percentile = float(config.get("retirement_percentile", 20))
+    fitness_scores = [fitness(metrics) for metrics in latest.values() if metrics]
+    promotion_threshold = percentile_value(fitness_scores, promotion_percentile)
+    retirement_threshold = percentile_value(fitness_scores, retirement_percentile)
     transitions = []
     for company, meta in metadata.items():
         current_state = meta.get("lifecycle_state", "NEW")
@@ -159,7 +202,16 @@ def main() -> None:
         decline_strikes = int(meta.get("decline_strikes", 0))
         promotion_streak = int(meta.get("promotion_streak", 0))
         score_value = fitness(metrics)
-        new_state = evaluate_state(company, current_state, metrics, config, decline_strikes, promotion_streak)
+        new_state = evaluate_state(
+            company,
+            current_state,
+            metrics,
+            promotion_threshold,
+            retirement_threshold,
+            config,
+            decline_strikes,
+            promotion_streak,
+        )
         transitions.append(
             {
                 "company": company,

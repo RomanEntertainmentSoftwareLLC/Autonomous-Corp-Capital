@@ -2,20 +2,28 @@ strategy_type: hybrid_ema_rsi
 indicator_flags:
   use_ema: true
   use_rsi: true
-  use_volatility: false
+  use_volatility: true
 indicator_parameters:
-  ema_fast: 6
-  ema_slow: 21
-  rsi_short_period: 14
-  rsi_buy_threshold: 35
-  rsi_sell_threshold: 65
+  ema_fast: 3
+  ema_slow: 29
+  rsi_period: 5
+  rsi_oversold: 43
+  rsi_overbought: 73
+  momentum_period: 19
+  volatility_period: 5
 feature_flags:
-  track_momentum: true
-  include_pattern_flags: true
-model_type: rule_based
+  use_ema_spread: true
+  use_rsi: true
+  use_price_change_1: true
+  use_price_change_2: false
+  use_price_change_3: false
+  use_momentum_3: true
+  use_slope_3: true
+  use_pattern_flags: true
+model_type: logistic_regression
 model_parameters:
-  use_volatility_filter: true
-  volatility_threshold: 0.015
+  penalty: 1.0
+  C: 1.5
 decision_thresholds:
   entry_confidence: 0.5
   exit_confidence: 0.4

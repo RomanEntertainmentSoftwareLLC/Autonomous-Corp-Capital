@@ -4,25 +4,25 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 from typing import Any, Dict
 
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.python_helper import ensure_repo_root
+
+ensure_repo_root()
+
 import yaml
 
+from tools.genome_schema import FEATURE_FLAGS, INDICATOR_PARAMS, MODEL_OPTIONS
 from tradebot.strategies.registry import strategy_by_name
 
-COMPANIES_DIR = Path("companies")
-DEFAULT_CONFIG = Path("tradebot/config.yaml")
-GENOME_FIELDS = [
-    "strategy_type",
-    "indicator_parameters",
-    "feature_flags",
-    "model_type",
-    "model_parameters",
-    "decision_thresholds",
-    "risk_profile",
-]
-
+COMPANIES_DIR = ROOT / "companies"
+DEFAULT_CONFIG = ROOT / "tradebot" / "config.yaml"
 STRATEGY_ALIASES = {
     "hybrid_ema_rsi": "ema_crossover",
     "ml": "ml_trader",
@@ -60,14 +60,22 @@ def apply_genome(company: str, genome: Dict[str, Any], config: Dict[str, Any]) -
     symbol["name"] = symbol.get("name", company)
     symbol["strategy"] = strategy_name or symbol.get("strategy", "ema_crossover")
 
-    indicator = genome.get("indicator_parameters", {})
-    symbol.update(indicator)
+    indicator_params = genome.get("indicator_parameters", {})
+    for param in INDICATOR_PARAMS:
+        if param in indicator_params:
+            symbol[param] = indicator_params[param]
     features = genome.get("feature_flags", {})
-    symbol.update(features)
+    for flag in FEATURE_FLAGS:
+        if flag in features:
+            symbol[flag] = bool(features[flag])
     model_params = genome.get("model_parameters", {})
-    symbol.update(model_params)
+    model_type = genome.get("model_type")
+    for param in MODEL_OPTIONS.get(model_type, {}):
+        if param in model_params:
+            symbol[param] = model_params[param]
     decision = genome.get("decision_thresholds", {})
-    symbol.update(decision)
+    for key, value in decision.items():
+        symbol[key] = value
     config["symbols"] = [symbol]
 
     risk_profile = genome.get("risk_profile", {})

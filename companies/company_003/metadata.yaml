@@ -1,6 +1,9 @@
 company_id: company_003
 created_at: '2026-03-13T00:33:22.063032+00:00'
+decline_strikes: 0
 generation: 3
+last_fitness: 0.0
+lifecycle_state: NEW
 mutation_source: clone_of_company_001
 notes: 'Cloned from company_001 on 2026-03-13T00:33:22.063032+00:00
 
@@ -10,3 +13,4 @@ notes: 'Cloned from company_001 on 2026-03-13T00:33:22.063032+00:00
   32->30; ETH-USD.order_size: 0.7257025144759043->0.7167238465560571; risk.max_position_size:
   0.22653445549840673->0.2035704613500186; risk.max_daily_trades: 3->5)'
 parent_company: company_001
+promotion_streak: 0

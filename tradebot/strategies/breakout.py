@@ -25,18 +25,20 @@ class BreakoutStrategy(StrategyProtocol):
         self.last_signal = "HOLD"
 
     def update(self, price: float) -> Signal:
-        self.prices.append(price)
         if len(self.prices) < self.lookback:
+            self.prices.append(price)
             return Signal(direction="HOLD", confidence=0.0, reason="warming up")
 
         high = max(self.prices)
         low = min(self.prices)
 
+        signal = Signal(direction="HOLD", confidence=0.1, reason="Within range")
         if price > high * (1 + self.threshold):
             self.last_signal = "BUY"
-            return Signal(direction="BUY", confidence=0.7, reason="Breakout above recent high")
-        if price < low * (1 - self.threshold):
+            signal = Signal(direction="BUY", confidence=0.7, reason="Breakout above recent high")
+        elif price < low * (1 - self.threshold):
             self.last_signal = "SELL"
-            return Signal(direction="SELL", confidence=0.7, reason="Breakout below recent low")
+            signal = Signal(direction="SELL", confidence=0.7, reason="Breakout below recent low")
 
-        return Signal(direction="HOLD", confidence=0.1, reason="Within range")
+        self.prices.append(price)
+        return signal

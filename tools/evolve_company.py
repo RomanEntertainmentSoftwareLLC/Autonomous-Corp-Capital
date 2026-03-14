@@ -58,7 +58,7 @@ def main() -> None:
     print("Evolution complete")
     print(f"Child config ready at companies/{args.child}/config.yaml")
     print(f"Summary: parent={parent}, child={args.child}, generation={generation}")
-    print(f"Run: .venv/bin/python3 trade-bot.py --company {args.child} --mode backtest --iterations 4 --loop-feed")
+    print(f"Run: python3 trade-bot.py --company {args.child} --mode backtest --iterations 4 --loop-feed")
 
 
 if __name__ == "__main__":

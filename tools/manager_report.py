@@ -5,22 +5,27 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
+import sqlite3
 import sys
+from pathlib import Path
+from statistics import mean
+from typing import Any, Dict, Iterable, List, Optional
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from statistics import mean
-from typing import Any, Dict, Iterable, List, Optional
+
+from tools.python_helper import ensure_repo_root
+
+ensure_repo_root()
+WAREHOUSE = ROOT / "data" / "warehouse.sqlite"
+RESULTS_DIR = ROOT / "results"
+COMPANIES_DIR = ROOT / "companies"
 
 import yaml
 
 from tools.company_metadata import read_metadata
 from tradebot.strategies.factory import resolve_strategy_name
-
-RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
-COMPANIES_DIR = Path(__file__).resolve().parent.parent / "companies"
 
 
 def iter_log_entries(path: Path) -> Iterable[Dict[str, Any]]:
@@ -91,8 +96,52 @@ def summarize_trade_log(path: Path) -> Dict[str, Any]:
     }
 
 
+def _parse_metrics(raw_metrics: str) -> Dict[str, Any]:
+    metrics: Dict[str, Any] = {}
+    if not raw_metrics:
+        return metrics
+    try:
+        metrics = json.loads(raw_metrics)
+    except json.JSONDecodeError:
+        metrics = {}
+    return metrics
+
+
+def collect_from_warehouse(company: str) -> List[Dict[str, Any]]:
+    if not WAREHOUSE.exists():
+        return []
+    query = """
+        SELECT runs.mode, runs.strategy, results.account_value, results.realized_pnl, results.unrealized_pnl, results.drawdown, results.metrics, runs.start_time
+        FROM companies
+        JOIN runs ON runs.company_id = companies.id
+        JOIN results ON results.run_id = runs.id
+        WHERE companies.name = ?
+        ORDER BY runs.start_time DESC
+        LIMIT 3
+    """
+    rows: List[Dict[str, Any]] = []
+    with sqlite3.connect(WAREHOUSE) as conn:
+        cursor = conn.cursor()
+        for mode, strategy, account, realized, unrealized, drawdown, raw_metrics, timestamp in cursor.execute(query, (company,)):
+            metrics = _parse_metrics(raw_metrics)
+            rows.append({
+                "mode": mode,
+                "strategy": strategy,
+                "account_value": account or 0.0,
+                "realized_pnl": realized or 0.0,
+                "unrealized_pnl": unrealized or 0.0,
+                "total_trades": int(metrics.get("trade_count", 0)),
+                "win_rate": metrics.get("win_rate") or metrics.get("win_rate_percent"),
+                "max_drawdown": metrics.get("max_drawdown", drawdown),
+                "drawdown": drawdown,
+                "timestamp": timestamp,
+            })
+    return rows
+
 def collect_results(company: str) -> List[Dict[str, Any]]:
-    results = []
+    results = collect_from_warehouse(company)
+    if results:
+        return results
     company_dir = RESULTS_DIR / company
     if not company_dir.exists():
         return results

@@ -229,20 +229,21 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
         print(f"Skipping {company}-{mode}: no timestamps")
         return
     start_time = min(timestamps)
+    latest_timestamp = max(timestamps)
 
     if existing_run(cursor, company_id, mode, start_time):
         print(f"Run {company}-{mode} already ingested")
         return
 
-    strategy = "unknown"
+    strategy_names: set[str] = set()
     for entry in entries:
         strat = entry.get("strategy")
         if strat:
-            strategy = strat
-            break
+            strategy_names.add(strat)
+    strategy_label = ", ".join(sorted(strategy_names)) if strategy_names else "unknown"
     cursor.execute(
         "INSERT INTO runs (company_id, mode, strategy, start_time, status) VALUES (?,?,?,?,?)",
-        (company_id, mode, strategy, start_time, "completed"),
+        (company_id, mode, strategy_label, start_time, "completed"),
     )
     run_id = cursor.lastrowid
 
@@ -264,6 +265,7 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
 
     executed_trades, trade_count, wins, win_rate = summarize_trades(trade_log)
 
+    symbol_latest: Dict[str, Dict[str, Any]] = {}
     for entry in trade_log:
         if not entry.get("executed"):
             continue
@@ -281,6 +283,20 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
                 entry.get("pnl"),
             ),
         )
+        if not symbol:
+            continue
+        entry_ts = timestamp
+        prev = symbol_latest.get(symbol, {}).get("timestamp")
+        if not prev or entry_ts >= prev:
+            symbol_latest[symbol] = {
+                "timestamp": entry_ts,
+                "account_value": entry.get("account_value", entry.get("cash_after", 0.0)) or 0.0,
+                "realized_pnl_total": entry.get("realized_pnl_total", entry.get("pnl", 0.0)) or 0.0,
+                "unrealized_pnl": entry.get("unrealized_pnl", 0.0) or 0.0,
+                "drawdown": entry.get("max_drawdown_percent", 0.0) or 0.0,
+                "trade_count": entry.get("trade_count", 0) or 0,
+            }
+        symbol_latest[symbol]["strategy"] = entry.get("strategy") or symbol_latest[symbol].get("strategy")
 
     for entry in feature_log:
         timestamp = parse_timestamp(entry.get("timestamp", ""))
@@ -293,13 +309,23 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
 
     if trade_log:
         last = trade_log[-1]
+        aggregated_account = sum(m.get("account_value", 0.0) for m in symbol_latest.values()) or (
+            last.get("account_value", last.get("cash_after", 0.0)) or 0.0
+        )
+        aggregated_realized = sum(m.get("realized_pnl_total", 0.0) for m in symbol_latest.values()) or (
+            last.get("realized_pnl_total", last.get("pnl", 0.0)) or 0.0
+        )
+        aggregated_unrealized = sum(m.get("unrealized_pnl", 0.0) for m in symbol_latest.values()) or (
+            last.get("unrealized_pnl", 0.0) or 0.0
+        )
+        aggregated_drawdown = max((m.get("drawdown", 0.0) for m in symbol_latest.values()), default=0.0)
         metrics_payload = {
-            "account_value": last.get("account_value", last.get("cash_after", 0.0)) or 0.0,
-            "realized_pnl": last.get("realized_pnl_total", last.get("pnl", 0.0)) or 0.0,
-            "unrealized_pnl": last.get("unrealized_pnl", 0.0) or 0.0,
-            "drawdown": last.get("max_drawdown_percent", 0.0) or 0.0,
-            "trade_count": last.get("trade_count", trade_count),
-            "win_rate": last.get("win_rate_percent") or last.get("win_rate") or win_rate,
+            "account_value": aggregated_account,
+            "realized_pnl": aggregated_realized,
+            "unrealized_pnl": aggregated_unrealized,
+            "drawdown": aggregated_drawdown,
+            "trade_count": trade_count,
+            "win_rate": win_rate,
         }
         cursor.execute(
             "INSERT INTO results (run_id, account_value, realized_pnl, unrealized_pnl, drawdown) VALUES (?,?,?,?,?)",
@@ -312,15 +338,17 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
             ),
         )
         metadata = load_company_metadata(company)
+        latest_regime = metadata.get("regime") or "unknown"
+        metadata["regime"] = latest_regime
         eval_state, _ = determine_evaluation_state(metrics_payload)
         fitness_value = compute_fitness(metrics_payload)
-        ensure_analytics_company(cursor, company_id, metadata, strategy, start_time)
+        ensure_analytics_company(cursor, company_id, metadata, strategy_label, start_time)
         record_trade_facts(cursor, company_id, run_id, executed_trades)
         record_evaluation(
             cursor,
             company_id,
             run_id,
-            start_time,
+            latest_timestamp,
             last.get("symbol"),
             metrics_payload["account_value"],
             metrics_payload["realized_pnl"],
@@ -330,10 +358,11 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
             metrics_payload["drawdown"],
             fitness_value,
         )
+        latest_regime = metadata.get("regime") or "unknown"
         upsert_company_performance(
             cursor,
             company_id,
-            start_time,
+            latest_timestamp,
             metrics_payload,
             fitness_value,
             metadata,

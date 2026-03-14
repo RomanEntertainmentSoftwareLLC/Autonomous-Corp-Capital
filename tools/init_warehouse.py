@@ -118,6 +118,7 @@ WHERE runs.start_time IN (
     SELECT MAX(start_time) FROM runs r3 WHERE r3.company_id = runs.company_id
 );
 
+-- Canonical analytics layer keeps enhanced company data alongside the legacy schema.
 CREATE TABLE IF NOT EXISTS analytics_companies (
     company_id INTEGER PRIMARY KEY REFERENCES companies(id),
     created_at TEXT,
@@ -128,6 +129,7 @@ CREATE TABLE IF NOT EXISTS analytics_companies (
     notes TEXT
 );
 
+-- evaluations: one aggregated row per run with company-level metrics across symbols.
 CREATE TABLE IF NOT EXISTS evaluations (
     evaluation_id INTEGER PRIMARY KEY AUTOINCREMENT,
     company_id INTEGER NOT NULL REFERENCES companies(id),
@@ -145,6 +147,7 @@ CREATE TABLE IF NOT EXISTS evaluations (
     CONSTRAINT unique_run UNIQUE(run_id)
 );
 
+-- trade_facts: one row per executed trade, used for profit/ranking queries.
 CREATE TABLE IF NOT EXISTS trade_facts (
     trade_id INTEGER PRIMARY KEY AUTOINCREMENT,
     company_id INTEGER NOT NULL REFERENCES companies(id),
@@ -158,6 +161,7 @@ CREATE TABLE IF NOT EXISTS trade_facts (
     source TEXT
 );
 
+-- company_performance: latest aggregated snapshot (account/fitness/trades/regime) per company.
 CREATE TABLE IF NOT EXISTS company_performance (
     company_id INTEGER PRIMARY KEY REFERENCES companies(id),
     last_evaluated_at TEXT,

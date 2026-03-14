@@ -136,6 +136,10 @@ python3 tools/init_warehouse.py
 python3 tools/ingest_results_to_db.py
 ```
 - Creates `data/warehouse.sqlite` with tables/views (`latest_company_results`, `leaderboard_basis`, `latest_run_summary`) plus canonical analytics tables (`analytics_companies`, `evaluations`, `trade_facts`, `company_performance`). These new tables drive the reporting tools so that "no data yet" companies look like untested entrants instead of slow performers.
+  * `analytics_companies` stores canonical strategy/lineage info per company.
+  * `evaluations` keeps one aggregated row per run (symbol=`MULTI` when multiple symbols share the run).
+  * `trade_facts` records each executed trade so profit summaries stay honest.
+  * `company_performance` is the latest company-level snapshot (account/fitness/trade counts); `latest_regime` is currently a placeholder (`unknown`) until a proper classifier runs.
 
 ### Queries
 ```

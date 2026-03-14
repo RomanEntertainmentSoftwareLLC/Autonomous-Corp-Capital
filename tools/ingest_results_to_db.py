@@ -173,6 +173,7 @@ def upsert_company_performance(
     fitness: float | None,
     metadata: Dict[str, Any],
     evaluation_state: str,
+    latest_regime: str,
 ) -> None:
     allocation_percent = metadata.get("allocation_percent") or metadata.get("allocation", {}).get("percent")
     allocation_amount = metadata.get("allocation_amount") or metadata.get("allocation", {}).get("amount")
@@ -205,7 +206,7 @@ def upsert_company_performance(
             metrics.get("trade_count", 0),
             metrics.get("win_rate", 0.0),
             metrics.get("drawdown", 0.0),
-            metadata.get("regime"),
+            latest_regime,
             lifecycle_state,
             allocation_percent,
             allocation_amount,
@@ -219,12 +220,14 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
     trade_log = load_json_lines(path / "trade-log.jsonl")
     feature_log = load_json_lines(path / "feature-log.jsonl")
 
-    entries = signal_log or trade_log or feature_log
-    if not entries:
+    all_entries: List[Dict[str, Any]] = []
+    all_entries.extend(signal_log)
+    all_entries.extend(trade_log)
+    if not all_entries:
         print(f"Skipping {company}-{mode}: no logs")
         return
 
-    timestamps = [parse_timestamp(entry.get("timestamp", "")) for entry in entries if entry.get("timestamp")]
+    timestamps = [parse_timestamp(entry.get("timestamp", "")) for entry in all_entries if entry.get("timestamp")]
     if not timestamps:
         print(f"Skipping {company}-{mode}: no timestamps")
         return
@@ -236,7 +239,7 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
         return
 
     strategy_names: set[str] = set()
-    for entry in entries:
+    for entry in all_entries:
         strat = entry.get("strategy")
         if strat:
             strategy_names.add(strat)
@@ -266,7 +269,27 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
     executed_trades, trade_count, wins, win_rate = summarize_trades(trade_log)
 
     symbol_latest: Dict[str, Dict[str, Any]] = {}
+
+    def update_symbol_state(entry: Dict[str, Any]) -> None:
+        symbol = entry.get("symbol")
+        if not symbol:
+            return
+        entry_ts = parse_timestamp(entry.get("timestamp", ""))
+        prev = symbol_latest.get(symbol, {}).get("timestamp")
+        if prev and entry_ts < prev:
+            return
+        symbol_latest[symbol] = {
+            "timestamp": entry_ts,
+            "account_value": entry.get("account_value", entry.get("cash_after", 0.0)) or 0.0,
+            "realized_pnl_total": entry.get("realized_pnl_total", entry.get("pnl", 0.0)) or 0.0,
+            "unrealized_pnl": entry.get("unrealized_pnl", 0.0) or 0.0,
+            "drawdown": entry.get("max_drawdown_percent", 0.0) or 0.0,
+            "trade_count": entry.get("trade_count", 0) or 0,
+            "strategy": entry.get("strategy"),
+        }
+
     for entry in trade_log:
+        update_symbol_state(entry)
         if not entry.get("executed"):
             continue
         timestamp = parse_timestamp(entry.get("timestamp", ""))
@@ -283,20 +306,9 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
                 entry.get("pnl"),
             ),
         )
-        if not symbol:
-            continue
-        entry_ts = timestamp
-        prev = symbol_latest.get(symbol, {}).get("timestamp")
-        if not prev or entry_ts >= prev:
-            symbol_latest[symbol] = {
-                "timestamp": entry_ts,
-                "account_value": entry.get("account_value", entry.get("cash_after", 0.0)) or 0.0,
-                "realized_pnl_total": entry.get("realized_pnl_total", entry.get("pnl", 0.0)) or 0.0,
-                "unrealized_pnl": entry.get("unrealized_pnl", 0.0) or 0.0,
-                "drawdown": entry.get("max_drawdown_percent", 0.0) or 0.0,
-                "trade_count": entry.get("trade_count", 0) or 0,
-            }
-        symbol_latest[symbol]["strategy"] = entry.get("strategy") or symbol_latest[symbol].get("strategy")
+
+    for entry in signal_log:
+        update_symbol_state(entry)
 
     for entry in feature_log:
         timestamp = parse_timestamp(entry.get("timestamp", ""))
@@ -338,18 +350,21 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
             ),
         )
         metadata = load_company_metadata(company)
-        latest_regime = metadata.get("regime") or "unknown"
-        metadata["regime"] = latest_regime
         eval_state, _ = determine_evaluation_state(metrics_payload)
         fitness_value = compute_fitness(metrics_payload)
         ensure_analytics_company(cursor, company_id, metadata, strategy_label, start_time)
         record_trade_facts(cursor, company_id, run_id, executed_trades)
+        symbol_field = None
+        if len(symbol_latest) > 1:
+            symbol_field = "MULTI"
+        elif symbol_latest:
+            symbol_field = next(iter(symbol_latest))
         record_evaluation(
             cursor,
             company_id,
             run_id,
             latest_timestamp,
-            last.get("symbol"),
+            symbol_field,
             metrics_payload["account_value"],
             metrics_payload["realized_pnl"],
             metrics_payload["unrealized_pnl"],
@@ -358,7 +373,7 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
             metrics_payload["drawdown"],
             fitness_value,
         )
-        latest_regime = metadata.get("regime") or "unknown"
+        latest_regime = "unknown"
         upsert_company_performance(
             cursor,
             company_id,
@@ -367,6 +382,7 @@ def ingest_run(cursor: sqlite3.Cursor, company_id: int, company: str, mode: str)
             fitness_value,
             metadata,
             eval_state,
+            latest_regime,
         )
     print(f"Ingested {company}-{mode} to run {run_id}")
 

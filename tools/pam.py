@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import uuid
 from datetime import datetime
@@ -65,6 +66,12 @@ ROLE_SPECS = {
     "Analyst": (
         "Iris is the company Analyst. She reads company data, explains what is happening, identifies risks, highlights missing evidence, and suggests next areas for review. She does not make executive decisions."
     ),
+    "Manager": (
+        "Vera is the company Manager. She reviews Iris’s analyses, proposes practical next steps, highlights uncertainties, and escalates or requests follow-up when needed without making final approvals."
+    ),
+    "Researcher": (
+        "Rowan is the company Researcher. She explores strategic experiments, hypotheses, and alternative paths based on Iris and Vera’s work, reporting evidence-backed possibilities without pretending they are approved."
+    ),
 }
 
 ROLE_STRUCTURED_OUTPUT = {
@@ -93,6 +100,35 @@ ROLE_STRUCTURED_OUTPUT = {
         ],
         "default_queue_action": "none",
         "description": "Return diagnostic insights, evidence, and follow-ups.",
+    },
+    "Manager": {
+        "required_keys": [
+            "reply_text",
+            "recommendation",
+            "rationale",
+            "evidence",
+            "missing_data",
+            "suggested_followup",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return action proposals and escalation advice.",
+    },
+    "Researcher": {
+        "required_keys": [
+            "reply_text",
+            "research_summary",
+            "ideas",
+            "hypotheses",
+            "evidence",
+            "missing_data",
+            "suggested_followup",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return exploratory research insights and experiment ideas.",
     },
 }
 
@@ -234,9 +270,15 @@ def append_log(path: Path, entry: Dict[str, Any]) -> None:
         fh.write(json.dumps(entry) + "\n")
 
 
-def gather_company_insights(scope: str) -> Dict[str, Any]:
-    insights: Dict[str, Any] = {"scope": scope}
-    comp_dir = ROOT / "companies" / scope
+
+def detect_target_scope(message: str, default: str) -> str:
+    lowered = message.lower()
+    match = re.search(r"(company_\d+)", lowered)
+    return match.group(1) if match else default
+
+def gather_company_insights(scope: str, target_scope: str) -> Dict[str, Any]:
+    insights: Dict[str, Any] = {"scope": scope, "target_scope": target_scope}
+    comp_dir = ROOT / "companies" / target_scope
     metadata = load_yaml_file(comp_dir / "metadata.yaml")
     config = load_yaml_file(comp_dir / "config.yaml")
     insights["metadata_summary"] = metadata.get("lifecycle_state") or "unknown"
@@ -250,24 +292,45 @@ def gather_company_insights(scope: str) -> Dict[str, Any]:
         "symbols": config.get("symbols"),
         "timing": config.get("timing"),
     }
-    results_dir = ROOT / "results" / scope
+    leaderboard_path = ROOT / "leaderboard.json"
+    insights["leaderboard_entries"] = []
+    if leaderboard_path.exists():
+        try:
+            board_data = json.loads(leaderboard_path.read_text())
+            rows = board_data.get("rows") if isinstance(board_data, dict) else board_data
+            for entry in rows or []:
+                if entry.get("company") == target_scope:
+                    insights["leaderboard_entries"].append(entry)
+        except Exception:
+            pass
+    insights["leaderboard_summary"] = (
+        insights["leaderboard_entries"][0] if insights["leaderboard_entries"] else None
+    )
+    manager_actions = load_yaml_file(Path("manager_actions.yaml"))
+    insights["manager_action"] = None
+    for action in manager_actions.get("actions", []):
+        if action.get("company") == target_scope:
+            insights["manager_action"] = action
+            break
+    results_dir = ROOT / "results" / target_scope
     if results_dir.exists():
         insights["logs_present"] = True
         insights["log_paths"] = [str(p) for p in results_dir.rglob("*.jsonl")]
     else:
         insights["logs_present"] = False
-    manager_actions_path = ROOT / "tools" / "manager_actions.py"
-    insights["manager_actions_loaded"] = manager_actions_path.exists()
     missing = []
     if not metadata:
         missing.append("metadata")
     if not config:
         missing.append("config")
+    if not insights["leaderboard_entries"]:
+        missing.append("leaderboard")
     if not insights["logs_present"]:
         missing.append("logs")
+    if not insights.get("manager_action"):
+        missing.append("manager_action")
     insights["missing_data"] = missing
     return insights
-
 
 def create_prompt(
     agent_info: Dict[str, str],
@@ -277,10 +340,12 @@ def create_prompt(
     inbox: List[Dict[str, Any]],
     outbox: List[Dict[str, Any]],
     persona: Dict[str, Any],
+    target_scope: str,
 ) -> Dict[str, Any]:
     role_type = agent_info.get("role", "").strip()
     role_spec = ROLE_SPECS.get(role_type, ROLE_SPECS.get("administrative_coordinator", ""))
     structured = ROLE_STRUCTURED_OUTPUT.get(role_type, ROLE_STRUCTURED_OUTPUT["administrative_coordinator"])
+    insights = gather_company_insights(scope, target_scope)
     return {
         "role_type": role_type,
         "role_spec": role_spec,
@@ -288,15 +353,14 @@ def create_prompt(
         "persona": persona,
         "persona_description": persona_description(persona),
         "scope": scope,
+        "target_scope": target_scope,
         "allowed_recipients": ALLOWED_RECIPIENTS,
         "queue_summary": summarize_queue(queue),
         "recent_inbox": inbox,
         "recent_outbox": outbox,
-        "company_insights": gather_company_insights(scope),
+        "company_insights": insights,
         "message": message,
     }
-
-
 def choose_adapter(agent_id: str) -> SimpleLLMAdapter | OpenAIAdapter:
     if agent_id.startswith("pam_company_") or agent_id.startswith("iris_company_"):
         try:
@@ -336,7 +400,8 @@ def main() -> None:
     inbox_history = read_history(state_path / "inbox.jsonl")
     outbox_history = read_history(state_path / "outbox.jsonl")
     persona = load_persona(agent_info)
-    prompt = create_prompt(agent_info, scope, message, queue, inbox_history, outbox_history, persona)
+    target_scope = detect_target_scope(message, scope)
+    prompt = create_prompt(agent_info, scope, message, queue, inbox_history, outbox_history, persona, target_scope)
     adapter = choose_adapter(args.agent)
     response = adapter.reason(message, prompt)
 
@@ -369,6 +434,19 @@ def main() -> None:
     role_type = prompt.get("role_type", "").lower()
     if role_type == "analyst":
         packet["analysis_summary"] = response.get("analysis_summary", "")
+        packet["evidence"] = response.get("evidence", [])
+        packet["missing_data"] = response.get("missing_data", [])
+        packet["suggested_followup"] = response.get("suggested_followup", "")
+    elif role_type == "manager":
+        packet["recommendation"] = response.get("recommendation", "")
+        packet["rationale"] = response.get("rationale", "")
+        packet["evidence"] = response.get("evidence", [])
+        packet["missing_data"] = response.get("missing_data", [])
+        packet["suggested_followup"] = response.get("suggested_followup", "")
+    elif role_type == "researcher":
+        packet["research_summary"] = response.get("research_summary", "")
+        packet["ideas"] = response.get("ideas", [])
+        packet["hypotheses"] = response.get("hypotheses", [])
         packet["evidence"] = response.get("evidence", [])
         packet["missing_data"] = response.get("missing_data", [])
         packet["suggested_followup"] = response.get("suggested_followup", "")

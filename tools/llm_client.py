@@ -66,7 +66,7 @@ class OpenAIAdapter(LLMAdapter):
 class SimpleLLMAdapter(LLMAdapter):
     def _format(self, template: str, prompt: Dict[str, Any]) -> str:
         try:
-            return template.format(scope=prompt.get("scope", ""))
+            return template.format(scope=prompt.get("target_scope", prompt.get("scope", "")))
         except Exception:
             return template
 
@@ -75,47 +75,36 @@ class SimpleLLMAdapter(LLMAdapter):
         persona = prompt.get("persona", {})
         examples = persona.get("example_responses", {})
         role_type = prompt.get("role_type", "").lower()
+        target_scope = prompt.get("target_scope", prompt.get("scope", ""))
+
         if role_type == "analyst":
             insights = prompt.get("company_insights", {})
             queue_summary = prompt.get("queue_summary", {})
             missing = insights.get("missing_data", [])
-            analysis_summary = (
-                f"{insights.get('metadata_summary', 'Unknown status')} with {queue_summary.get('new', 0)} new tasks."
-            )
+            lifecycle = insights.get("metadata_summary", "unknown")
+            new_tasks = queue_summary.get("new", 0)
+            analysis_summary = f"{target_scope} lifecycle is {lifecycle} with {new_tasks} new task(s)."
             evidence = []
-            if insights.get("metadata_summary"):
-                evidence.append(f"Lifecycle: {insights['metadata_summary']}")
+            if lifecycle:
+                evidence.append(f"Lifecycle: {lifecycle}")
+            if insights.get("leaderboard_summary"):
+                evidence.append("Leaderboard data available")
             if insights.get("logs_present"):
                 evidence.append("Results logs are present")
-            if insights.get("config_summary"):
-                symbols = insights["config_summary"].get("symbols")
-                if symbols:
-                    evidence.append(f"Symbols: {symbols}")
-            missing_data = missing or ["metadata","config","logs"]
+            if insights.get("manager_action"):
+                recommendation = insights["manager_action"].get("recommendation")
+                if recommendation:
+                    evidence.append(f"Manager recommendation: {recommendation}")
+            missing_data = missing or ["metadata", "config", "leaderboard", "logs"]
             suggested_followup = (
                 "Check for missing logs and refresh the leaderboard before Manager acts."
-                if missing else "None—data looks complete."
+                if missing else "Data looks sufficiently complete for now."
             )
-            reply_template = (
-                examples.get("summary", ["Here are the current analytics."])[0]
-                if examples.get("summary")
-                else "Here are the current analytics."
-            )
+            reply_template = examples.get("summary", ["Here are the current analytics for {scope}."])[0]
             reply = self._format(reply_template, prompt)
             if any(greet in lowered for greet in ("hi", "hello", "glorious", "how are")):
                 reply_template = examples.get("greeting", [reply])[0]
                 reply = self._format(reply_template, prompt)
-                return {
-                    "reply_text": reply,
-                    "analysis_summary": reply,
-                    "evidence": evidence,
-                    "missing_data": missing_data,
-                    "suggested_followup": suggested_followup,
-                    "escalation": False,
-                    "queue_action": "none",
-                    "task_type": "analysis",
-                    "priority": "low",
-                }
             return {
                 "reply_text": reply,
                 "analysis_summary": analysis_summary,
@@ -127,6 +116,85 @@ class SimpleLLMAdapter(LLMAdapter):
                 "task_type": "analysis",
                 "priority": "medium",
             }
+
+        if role_type == "manager":
+            insights = prompt.get("company_insights", {})
+            queue_summary = prompt.get("queue_summary", {})
+            missing = insights.get("missing_data", [])
+            lifecycle = insights.get("metadata_summary", "unknown")
+            new_tasks = queue_summary.get("new", 0)
+            evidence = [f"Lifecycle: {lifecycle}"] if lifecycle else []
+            if insights.get("leaderboard_summary"):
+                evidence.append("Leaderboard data available")
+            manager_action = insights.get("manager_action")
+            if manager_action:
+                recommendation = manager_action.get("recommendation") or "Hold"
+                reason = manager_action.get("reason")
+                if recommendation:
+                    evidence.append(f"Manager recommendation: {recommendation}")
+            else:
+                recommendation = "Hold"
+                reason = "Awaiting clearer evidence before proposing action."
+            rationale = f"{lifecycle} lifecycle with {new_tasks} new queue item(s)."
+            missing_data = missing or ["metadata", "config", "leaderboard", "logs"]
+            suggested_followup = (
+                "Ask Bob for the latest logs or have Iris refresh the leaderboard before deciding."
+                if missing else "Proceed to implement the recommended action."
+            )
+            reply_template = examples.get("recommendation", ["Based on the data, I suggest {recommendation}."])[0]
+            reply = self._format(reply_template, prompt)
+            reply = reply.replace("{recommendation}", recommendation)
+            return {
+                "reply_text": reply,
+                "recommendation": recommendation,
+                "rationale": rationale + (" Reason: " + reason + "." if reason else ""),
+                "evidence": evidence,
+                "missing_data": missing_data,
+                "suggested_followup": suggested_followup,
+                "escalation": False,
+                "queue_action": "none",
+                "task_type": "management",
+                "priority": "medium",
+            }
+
+        if role_type == "researcher":
+            insights = prompt.get("company_insights", {})
+            queue_summary = prompt.get("queue_summary", {})
+            missing = insights.get("missing_data", [])
+            lifecycle = insights.get("metadata_summary", "unknown")
+            new_tasks = queue_summary.get("new", 0)
+            evidence = [f"Lifecycle: {lifecycle}"] if lifecycle else []
+            if insights.get("leaderboard_summary"):
+                evidence.append("Leaderboard data available")
+            if insights.get("manager_action"):
+                recommendation = insights["manager_action"].get("recommendation")
+                if recommendation:
+                    evidence.append(f"Manager recommendation: {recommendation}")
+            missing_data = missing or ["metadata", "config", "leaderboard", "logs"]
+            suggested_followup = (
+                "Design a focused backtest or data sweep to resolve the missing pieces."
+                if missing else "Explore a controlled experiment based on current insights."
+            )
+            research_summary = f"{target_scope} shows {lifecycle} status with {new_tasks} open tickets."
+            ideas = ["Test the current strategy variation with tighter stop rules."]
+            hypotheses = ["The mixed EMA/RSI approach may underperform in volatile regimes."]
+            reply_template = examples.get("recommendation", ["Based on the data, I suggest exploring {recommendation}."])[0]
+            reply = self._format(reply_template, prompt)
+            reply = reply.replace("{recommendation}", ideas[0])
+            return {
+                "reply_text": reply,
+                "research_summary": research_summary,
+                "ideas": ideas,
+                "hypotheses": hypotheses,
+                "evidence": evidence,
+                "missing_data": missing_data,
+                "suggested_followup": suggested_followup,
+                "escalation": False,
+                "queue_action": "none",
+                "task_type": "research",
+                "priority": "medium",
+            }
+
         if any(greet in lowered for greet in ("hi", "hello", "glorious", "how are")):
             reply_template = examples.get("greeting", ["I’m tuned into the queue—what would you like routed?"])[0]
             reply = self._format(reply_template, prompt)
@@ -139,6 +207,7 @@ class SimpleLLMAdapter(LLMAdapter):
                 "queue_action": "none",
                 "escalate": False,
             }
+
         priority = prompt.get("priority", "medium")
         task_type = "general_triage"
         recipient = "Analyst"

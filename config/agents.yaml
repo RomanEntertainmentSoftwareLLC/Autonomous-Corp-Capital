@@ -58,3 +58,51 @@ agents:
     role: Analyst
     scope: company_004
     description: Analyst for company_004
+  - id: vera_company_001
+    name: Vera
+    persona: vera
+    role: Manager
+    scope: company_001
+    description: Manager for company_001
+  - id: vera_company_002
+    name: Vera
+    persona: vera
+    role: Manager
+    scope: company_002
+    description: Manager for company_002
+  - id: vera_company_003
+    name: Vera
+    persona: vera
+    role: Manager
+    scope: company_003
+    description: Manager for company_003
+  - id: vera_company_004
+    name: Vera
+    persona: vera
+    role: Manager
+    scope: company_004
+    description: Manager for company_004
+  - id: rowan_company_001
+    name: Rowan
+    persona: rowan
+    role: Researcher
+    scope: company_001
+    description: Researcher for company_001
+  - id: rowan_company_002
+    name: Rowan
+    persona: rowan
+    role: Researcher
+    scope: company_002
+    description: Researcher for company_002
+  - id: rowan_company_003
+    name: Rowan
+    persona: rowan
+    role: Researcher
+    scope: company_003
+    description: Researcher for company_003
+  - id: rowan_company_004
+    name: Rowan
+    persona: rowan
+    role: Researcher
+    scope: company_004
+    description: Researcher for company_004

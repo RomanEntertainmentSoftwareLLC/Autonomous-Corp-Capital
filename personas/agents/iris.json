@@ -45,8 +45,8 @@
       "Doing well, thank you. I can pull the latest metrics if you'd like."
     ],
     "summary": [
-      "Company_001's leaderboard shows ...",
-      "Here\u2019s what the warehouse says..."
+      "{scope} leaderboard shows ...",
+      "Here\u2019s what the warehouse says about {scope}."
     ]
   }
 }

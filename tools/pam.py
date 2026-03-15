@@ -9,7 +9,7 @@ import os
 import re
 import sys
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -224,7 +224,8 @@ def load_env_file(path: Path) -> None:
         if "=" not in line:
             continue
         key, value = line.split("=", 1)
-        os.environ.setdefault(key.strip(), value.strip())
+        cleaned_value = value.strip().strip('"').strip("'")
+        os.environ.setdefault(key.strip(), cleaned_value)
 
 load_env_file(ROOT / ".env")
 
@@ -511,6 +512,7 @@ def create_prompt(
         "persona": persona,
         "persona_description": persona_description(persona),
         "scope": scope,
+        "agent_scope": scope,
         "target_scope": target_scope,
         "allowed_recipients": ALLOWED_RECIPIENTS,
         "queue_summary": summarize_queue(queue),
@@ -520,7 +522,7 @@ def create_prompt(
         "message": message,
     }
 def choose_adapter(agent_id: str) -> SimpleLLMAdapter | OpenAIAdapter:
-    if any(agent_id.startswith(prefix) for prefix in ("pam_company_", "iris_company_", "bianca_company_", "lucian_company_", "bob_company_")):
+    if any(agent_id.startswith(prefix) for prefix in ("pam_company_", "iris_company_", "vera_company_", "rowan_company_", "bianca_company_", "lucian_company_", "bob_company_")):
         try:
             return OpenAIAdapter()
         except EnvironmentError:
@@ -560,16 +562,19 @@ def main() -> None:
     persona = load_persona(agent_info)
     target_scope = detect_target_scope(message, scope)
     prompt = create_prompt(agent_info, scope, message, queue, inbox_history, outbox_history, persona, target_scope)
+    resolved_target_scope = prompt.get("target_scope", scope)
     adapter = choose_adapter(args.agent)
     response = adapter.reason(message, prompt)
 
-    now = datetime.utcnow().isoformat() + "+00:00"
+    now = datetime.now(timezone.utc).isoformat()
     task_id = str(uuid.uuid4())
     recipient = response.get("recipient", "Analyst")
     priority = response.get("priority", "medium")
     queue_action = response.get("queue_action", prompt["structured_output"]["default_queue_action"])
 
     packet = {
+        "agent_scope": scope,
+        "target_scope": resolved_target_scope,
         "task_id": task_id,
         "from": args.sender,
         "to": recipient,

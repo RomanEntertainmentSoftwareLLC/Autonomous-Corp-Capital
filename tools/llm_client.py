@@ -76,6 +76,7 @@ class SimpleLLMAdapter(LLMAdapter):
         examples = persona.get("example_responses", {})
         role_type = prompt.get("role_type", "").lower()
         target_scope = prompt.get("target_scope", prompt.get("scope", ""))
+        agent_scope = prompt.get("agent_scope", prompt.get("scope", ""))
 
         if role_type == "analyst":
             insights = prompt.get("company_insights", {})
@@ -96,15 +97,16 @@ class SimpleLLMAdapter(LLMAdapter):
                 if recommendation:
                     evidence.append(f"Manager recommendation: {recommendation}")
             missing_data = missing or ["metadata", "config", "leaderboard", "logs"]
+            missing_text = ", ".join(missing_data)
             suggested_followup = (
                 "Check for missing logs and refresh the leaderboard before Manager acts."
                 if missing else "Data looks sufficiently complete for now."
             )
-            reply_template = examples.get("summary", ["Here are the current analytics for {scope}."])[0]
-            reply = self._format(reply_template, prompt)
-            if any(greet in lowered for greet in ("hi", "hello", "glorious", "how are")):
-                reply_template = examples.get("greeting", [reply])[0]
-                reply = self._format(reply_template, prompt)
+            evidence_text = "; ".join(evidence) or "no strong evidence yet"
+            reply = (
+                f"Iris@{agent_scope} reports on {target_scope}: {analysis_summary} "
+                f"Evidence: {evidence_text}. Missing: {missing_text}."
+            )
             return {
                 "reply_text": reply,
                 "analysis_summary": analysis_summary,
@@ -116,7 +118,6 @@ class SimpleLLMAdapter(LLMAdapter):
                 "task_type": "analysis",
                 "priority": "medium",
             }
-
         if role_type == "manager":
             insights = prompt.get("company_insights", {})
             queue_summary = prompt.get("queue_summary", {})
@@ -137,13 +138,16 @@ class SimpleLLMAdapter(LLMAdapter):
                 reason = "Awaiting clearer evidence before proposing action."
             rationale = f"{lifecycle} lifecycle with {new_tasks} new queue item(s)."
             missing_data = missing or ["metadata", "config", "leaderboard", "logs"]
+            missing_text = ", ".join(missing_data)
             suggested_followup = (
                 "Ask Bob for the latest logs or have Iris refresh the leaderboard before deciding."
                 if missing else "Proceed to implement the recommended action."
             )
-            reply_template = examples.get("recommendation", ["Based on the data, I suggest {recommendation}."])[0]
-            reply = self._format(reply_template, prompt)
-            reply = reply.replace("{recommendation}", recommendation)
+            evidence_text = "; ".join(evidence) or "no clear evidence yet"
+            reply = (
+                f"Vera@{agent_scope} recommends {recommendation}. Rationale: {rationale}. "
+                f"Evidence: {evidence_text}. Missing: {missing_text}."
+            )
             return {
                 "reply_text": reply,
                 "recommendation": recommendation,
@@ -156,7 +160,6 @@ class SimpleLLMAdapter(LLMAdapter):
                 "task_type": "management",
                 "priority": "medium",
             }
-
         if role_type == "researcher":
             insights = prompt.get("company_insights", {})
             queue_summary = prompt.get("queue_summary", {})
@@ -171,6 +174,7 @@ class SimpleLLMAdapter(LLMAdapter):
                 if recommendation:
                     evidence.append(f"Manager recommendation: {recommendation}")
             missing_data = missing or ["metadata", "config", "leaderboard", "logs"]
+            missing_text = ", ".join(missing_data)
             suggested_followup = (
                 "Design a focused backtest or data sweep to resolve the missing pieces."
                 if missing else "Explore a controlled experiment based on current insights."
@@ -178,9 +182,11 @@ class SimpleLLMAdapter(LLMAdapter):
             research_summary = f"{target_scope} shows {lifecycle} status with {new_tasks} open tickets."
             ideas = ["Test the current strategy variation with tighter stop rules."]
             hypotheses = ["The mixed EMA/RSI approach may underperform in volatile regimes."]
-            reply_template = examples.get("recommendation", ["Based on the data, I suggest exploring {recommendation}."])[0]
-            reply = self._format(reply_template, prompt)
-            reply = reply.replace("{recommendation}", ideas[0])
+            evidence_text = "; ".join(evidence) or "no strong evidence yet"
+            reply = (
+                f"Rowan@{agent_scope} notes {research_summary} Idea: {ideas[0]}. "
+                f"Evidence: {evidence_text}. Missing: {missing_text}."
+            )
             return {
                 "reply_text": reply,
                 "research_summary": research_summary,
@@ -194,7 +200,6 @@ class SimpleLLMAdapter(LLMAdapter):
                 "task_type": "research",
                 "priority": "medium",
             }
-
         if role_type == "cfo":
             insights = prompt.get("company_insights", {})
             queue_summary = prompt.get("queue_summary", {})
@@ -274,8 +279,13 @@ class SimpleLLMAdapter(LLMAdapter):
             suggested_followup = (
                 f"Revisit after resolving {missing_text}." if missing else "Monitor runway and revisit if new spend is proposed."
             )
+            evidence_text = "; ".join(evidence) or "no strong evidence yet"
+            reply = (
+                f"Bianca@{agent_scope} sees {target_scope} cash posture {caution_text} {recommendation}"
+                f" Evidence: {evidence_text}. Missing: {missing_text}."
+            )
             return {
-                "reply_text": f"{target_scope} cash posture: {caution_text} See packets for next steps.",
+                "reply_text": reply,
                 "task_type": "financial_review",
                 "priority": "medium",
                 "recipient": "Bianca",
@@ -393,7 +403,7 @@ class SimpleLLMAdapter(LLMAdapter):
                     "next_steps": "Advise on risk/treasury limits.",
                 })
             return {
-                "reply_text": f"Lucian decision: {decision}. {action_directive}",
+                "reply_text": f"Lucian@{agent_scope} decision for {target_scope}: {decision}. {action_directive}",
                 "task_type": "executive_decision",
                 "priority": "high" if escalate_flag else "medium",
                 "recipient": "Lucian",
@@ -460,8 +470,12 @@ class SimpleLLMAdapter(LLMAdapter):
             ]
             escalate_flag = bool(missing and new_items > 2)
             requested_action = f"Bob: handle operational_task for {target_scope}"
+            missing_text = ", ".join(missing) if missing else "none"
+            reply = (
+                f"Bob@{agent_scope} report on {target_scope}: {op_summary}. Missing: {missing_text}. Status: {status}."
+            )
             return {
-                "reply_text": f"Bob report: {op_summary}",
+                "reply_text": reply,
                 "task_type": "operational_task",
                 "priority": "medium" if escalate_flag else "low",
                 "recipient": "Bob",

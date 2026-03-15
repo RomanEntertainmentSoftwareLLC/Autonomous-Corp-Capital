@@ -714,10 +714,11 @@ class SimpleLLMAdapter(LLMAdapter):
             merge_plan = ["Wait for Gideon approval before merging."]
             release_notes = ["Tag release after QA sign-off."]
             rollback_guidance = "Keep the previous tag handy in case regressions appear."
+            source = response if "response" in locals() else prompt
             approvals = {
-                "Tester": bool(response.get("tester_signoff")),
-                "Code Reviewer": bool(response.get("reviewer_signoff")),
-                "QA": bool(response.get("qa_signoff")),
+                "Tester": bool(source.get("tester_signoff")),
+                "Code Reviewer": bool(source.get("reviewer_signoff")),
+                "QA": bool(source.get("qa_signoff")),
             }
             pending = [name for name, approved in approvals.items() if not approved]
             gate_status = (
@@ -743,7 +744,7 @@ class SimpleLLMAdapter(LLMAdapter):
                     "summary": f"Gate awaiting {recipient} approval.",
                     "next_steps": "Reach out to the agreement owner and confirm readiness.",
                 })
-            escalation_needed = response.get("gate_breach") or False
+            escalation_needed = source.get("gate_breach") or False
             escalation_payload = bool(pending) and escalation_needed
             return {
                 "reply_text": f"Rhea@{agent_scope} says: {summary} Gate status: {gate_status}",

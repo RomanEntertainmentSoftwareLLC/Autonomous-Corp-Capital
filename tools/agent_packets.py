@@ -20,7 +20,7 @@ def normalize_role(role: str) -> str:
         return ""
     normalized = role.replace("_", " ").replace("-", " ")
     normalized = normalized.title()
-    replacements = {"Cfo": "CFO", "Qa": "QA", "Ceo": "CEO", "Master Ceo": "Master CEO"}
+    replacements = {"Cfo": "CFO", "Qa": "QA", "Ceo": "CEO", "Master Ceo": "Master CEO", "Master Cfo": "Master CFO"}
     if normalized in replacements:
         normalized = replacements[normalized]
     return normalized

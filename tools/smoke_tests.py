@@ -46,6 +46,15 @@ def cleanup_clone(company: str, manifest_path: Path) -> None:
     if manifest_path.exists():
         manifest_path.unlink()
 
+def prune_smoke_agents() -> None:
+    config_path = ROOT / "config" / "agents.yaml"
+    data = yaml.safe_load(config_path.read_text()) or {}
+    entries = data.get("agents", [])
+    filtered = [entry for entry in entries if entry.get("scope") != "company_smoke"]
+    if len(filtered) != len(entries):
+        data["agents"] = filtered
+        config_path.write_text(yaml.safe_dump(data, sort_keys=False))
+
 
 def count_global_agents() -> int:
     config_path = ROOT / "config" / "agents.yaml"
@@ -74,6 +83,7 @@ def smoke_lifecycle() -> None:
     subprocess.run(roster_sync_cmd, check=True, env=ENV)
     post_sync_global = count_global_agents()
     assert post_sync_global == initial_global, "Global agent registry changed after roster-sync"
+    prune_smoke_agents()
     cleanup_clone("company_smoke", manifest_path)
 
 

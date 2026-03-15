@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Per-company Pam front desk coordinator with persona awareness."""
+"""Per-company Pam and Iris front desk coordinator with persona awareness."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import uuid
-import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
@@ -57,7 +57,44 @@ TASK_TYPES = [
 ]
 
 ALLOWED_RECIPIENTS = sorted({entry[2] for entry in TASK_TYPES})
-ROLE_SPEC = "Pam is the front desk admin; she triages, routes, summarizes, and tracks."
+
+ROLE_SPECS = {
+    "administrative_coordinator": (
+        "Pam is the organizational coordinator. She triages, routes, summarizes, and keeps the queue tidy."
+    ),
+    "Analyst": (
+        "Iris is the company Analyst. She reads company data, explains what is happening, identifies risks, highlights missing evidence, and suggests next areas for review. She does not make executive decisions."
+    ),
+}
+
+ROLE_STRUCTURED_OUTPUT = {
+    "administrative_coordinator": {
+        "required_keys": [
+            "reply_text",
+            "task_type",
+            "priority",
+            "recipient",
+            "requested_action",
+            "queue_action",
+            "escalate",
+        ],
+        "default_queue_action": "create",
+        "description": "Return routing packets for the organization.",
+    },
+    "Analyst": {
+        "required_keys": [
+            "reply_text",
+            "analysis_summary",
+            "evidence",
+            "missing_data",
+            "suggested_followup",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return diagnostic insights, evidence, and follow-ups.",
+    },
+}
 
 
 def load_env_file(path: Path) -> None:
@@ -84,6 +121,15 @@ def load_json_file(path: Path) -> Dict[str, Any]:
         return {}
     try:
         return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+
+def load_yaml_file(path: Path) -> Dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        return yaml.safe_load(path.read_text()) or {}
     except Exception:
         return {}
 
@@ -188,17 +234,65 @@ def append_log(path: Path, entry: Dict[str, Any]) -> None:
         fh.write(json.dumps(entry) + "\n")
 
 
-def create_prompt(agent_info: Dict[str, str], scope: str, message: str, queue: Dict[str, Any], inbox: List[Dict[str, Any]], outbox: List[Dict[str, Any]], persona: Dict[str, Any]) -> Dict[str, Any]:
+def gather_company_insights(scope: str) -> Dict[str, Any]:
+    insights: Dict[str, Any] = {"scope": scope}
+    comp_dir = ROOT / "companies" / scope
+    metadata = load_yaml_file(comp_dir / "metadata.yaml")
+    config = load_yaml_file(comp_dir / "config.yaml")
+    insights["metadata_summary"] = metadata.get("lifecycle_state") or "unknown"
+    if metadata:
+        insights["lifecycle_details"] = {
+            "state": metadata.get("lifecycle_state"),
+            "strategy": metadata.get("lifecycle_strategy"),
+            "fitness": metadata.get("last_fitness"),
+        }
+    insights["config_summary"] = {
+        "symbols": config.get("symbols"),
+        "timing": config.get("timing"),
+    }
+    results_dir = ROOT / "results" / scope
+    if results_dir.exists():
+        insights["logs_present"] = True
+        insights["log_paths"] = [str(p) for p in results_dir.rglob("*.jsonl")]
+    else:
+        insights["logs_present"] = False
+    manager_actions_path = ROOT / "tools" / "manager_actions.py"
+    insights["manager_actions_loaded"] = manager_actions_path.exists()
+    missing = []
+    if not metadata:
+        missing.append("metadata")
+    if not config:
+        missing.append("config")
+    if not insights["logs_present"]:
+        missing.append("logs")
+    insights["missing_data"] = missing
+    return insights
+
+
+def create_prompt(
+    agent_info: Dict[str, str],
+    scope: str,
+    message: str,
+    queue: Dict[str, Any],
+    inbox: List[Dict[str, Any]],
+    outbox: List[Dict[str, Any]],
+    persona: Dict[str, Any],
+) -> Dict[str, Any]:
+    role_type = agent_info.get("role", "").strip()
+    role_spec = ROLE_SPECS.get(role_type, ROLE_SPECS.get("administrative_coordinator", ""))
+    structured = ROLE_STRUCTURED_OUTPUT.get(role_type, ROLE_STRUCTURED_OUTPUT["administrative_coordinator"])
     return {
-        "role_spec": ROLE_SPEC,
+        "role_type": role_type,
+        "role_spec": role_spec,
+        "structured_output": structured,
+        "persona": persona,
+        "persona_description": persona_description(persona),
         "scope": scope,
         "allowed_recipients": ALLOWED_RECIPIENTS,
         "queue_summary": summarize_queue(queue),
         "recent_inbox": inbox,
         "recent_outbox": outbox,
-        "task_rules": TASK_TYPES,
-        "persona": persona,
-        "persona_description": persona_description(persona),
+        "company_insights": gather_company_insights(scope),
         "message": message,
     }
 
@@ -231,8 +325,6 @@ def main() -> None:
     state_path = ensure_state(args.agent)
     queue_path = state_path / "queue.json"
     queue = read_queue(queue_path)
-    inbox_history = read_history(state_path / "inbox.jsonl")
-    outbox_history = read_history(state_path / "outbox.jsonl")
 
     if args.show_queue:
         print(json.dumps(queue, indent=2))
@@ -241,6 +333,8 @@ def main() -> None:
     if not message:
         parser.error("Message cannot be empty")
 
+    inbox_history = read_history(state_path / "inbox.jsonl")
+    outbox_history = read_history(state_path / "outbox.jsonl")
     persona = load_persona(agent_info)
     prompt = create_prompt(agent_info, scope, message, queue, inbox_history, outbox_history, persona)
     adapter = choose_adapter(args.agent)
@@ -250,7 +344,7 @@ def main() -> None:
     task_id = str(uuid.uuid4())
     recipient = response.get("recipient", "Analyst")
     priority = response.get("priority", "medium")
-    queue_action = response.get("queue_action", "create")
+    queue_action = response.get("queue_action", prompt["structured_output"]["default_queue_action"])
 
     packet = {
         "task_id": task_id,
@@ -267,9 +361,17 @@ def main() -> None:
         ],
         "requested_action": response.get("requested_action", ""),
         "status": "new",
-        "escalate_to": "YamYam" if response.get("escalate") else "",
+        "escalate_to": "YamYam" if response.get("escalation") else "",
         "reply_text": response.get("reply_text", ""),
+        "queue_action": queue_action,
     }
+
+    role_type = prompt.get("role_type", "").lower()
+    if role_type == "analyst":
+        packet["analysis_summary"] = response.get("analysis_summary", "")
+        packet["evidence"] = response.get("evidence", [])
+        packet["missing_data"] = response.get("missing_data", [])
+        packet["suggested_followup"] = response.get("suggested_followup", "")
 
     if queue_action in ("create", "update"):
         queue_entry = {
@@ -283,7 +385,7 @@ def main() -> None:
         queue.setdefault("new", []).append(queue_entry)
         write_queue(queue_path, queue)
 
-    if response.get("escalate"):
+    if response.get("escalation"):
         append_log(state_path / "escalations.jsonl", {
             "timestamp": now,
             "task_id": task_id,

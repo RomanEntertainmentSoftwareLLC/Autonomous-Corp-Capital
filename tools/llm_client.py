@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import os
 import urllib.request
-from urllib.error import HTTPError, URLError
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
@@ -23,24 +22,22 @@ class OpenAIAdapter(LLMAdapter):
         self._endpoint = "https://api.openai.com/v1/chat/completions"
 
     def reason(self, message: str, prompt: Dict[str, Any]) -> Dict[str, Any]:
+        structured = prompt.get("structured_output", {})
+        role_spec = prompt.get("role_spec", "")
+        persona_description = prompt.get("persona_description", "")
+        description = structured.get("description", "")
+        required_keys = structured.get("required_keys", [])
+        system_text = (
+            f"{role_spec}\n{persona_description}\n{description}\n"
+            f"Produce a valid JSON object with the following keys exactly: {required_keys}."
+            "Stick to the persona and do not invent unauthorized actions."
+        )
+        user_text = json.dumps({"message": message, "prompt": prompt})
         payload = {
             "model": self._model,
             "messages": [
-                {
-                    "role": "system",
-                    "content": (
-                        "You are Pam, the organizational coordinator. "
-                        "Return a JSON object with keys reply_text, task_type, priority, recipient, requested_action, queue_action, escalate. "
-                        "Follow policy: no capital allocations, no risk overrides, no final strategy decisions."
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": json.dumps({
-                        "message": message,
-                        "prompt": prompt,
-                    }),
-                },
+                {"role": "system", "content": system_text},
+                {"role": "user", "content": user_text},
             ],
             "temperature": 0.3,
         }
@@ -56,23 +53,83 @@ class OpenAIAdapter(LLMAdapter):
         try:
             with urllib.request.urlopen(request, timeout=60) as response:
                 data = json.loads(response.read().decode())
-        except (HTTPError, URLError, TimeoutError):
+        except Exception:
             return SimpleLLMAdapter().reason(message, prompt)
         choice = data["choices"][0]["message"]["content"]
         try:
             result = json.loads(choice)
         except json.JSONDecodeError:
-            raise ValueError("OpenAI response did not contain valid JSON")
+            return SimpleLLMAdapter().reason(message, prompt)
         return result
 
 
 class SimpleLLMAdapter(LLMAdapter):
+    def _format(self, template: str, prompt: Dict[str, Any]) -> str:
+        try:
+            return template.format(scope=prompt.get("scope", ""))
+        except Exception:
+            return template
+
     def reason(self, message: str, prompt: Dict[str, Any]) -> Dict[str, Any]:
         lowered = message.lower()
         persona = prompt.get("persona", {})
         examples = persona.get("example_responses", {})
+        role_type = prompt.get("role_type", "").lower()
+        if role_type == "analyst":
+            insights = prompt.get("company_insights", {})
+            queue_summary = prompt.get("queue_summary", {})
+            missing = insights.get("missing_data", [])
+            analysis_summary = (
+                f"{insights.get('metadata_summary', 'Unknown status')} with {queue_summary.get('new', 0)} new tasks."
+            )
+            evidence = []
+            if insights.get("metadata_summary"):
+                evidence.append(f"Lifecycle: {insights['metadata_summary']}")
+            if insights.get("logs_present"):
+                evidence.append("Results logs are present")
+            if insights.get("config_summary"):
+                symbols = insights["config_summary"].get("symbols")
+                if symbols:
+                    evidence.append(f"Symbols: {symbols}")
+            missing_data = missing or ["metadata","config","logs"]
+            suggested_followup = (
+                "Check for missing logs and refresh the leaderboard before Manager acts."
+                if missing else "None—data looks complete."
+            )
+            reply_template = (
+                examples.get("summary", ["Here are the current analytics."])[0]
+                if examples.get("summary")
+                else "Here are the current analytics."
+            )
+            reply = self._format(reply_template, prompt)
+            if any(greet in lowered for greet in ("hi", "hello", "glorious", "how are")):
+                reply_template = examples.get("greeting", [reply])[0]
+                reply = self._format(reply_template, prompt)
+                return {
+                    "reply_text": reply,
+                    "analysis_summary": reply,
+                    "evidence": evidence,
+                    "missing_data": missing_data,
+                    "suggested_followup": suggested_followup,
+                    "escalation": False,
+                    "queue_action": "none",
+                    "task_type": "analysis",
+                    "priority": "low",
+                }
+            return {
+                "reply_text": reply,
+                "analysis_summary": analysis_summary,
+                "evidence": evidence,
+                "missing_data": missing_data,
+                "suggested_followup": suggested_followup,
+                "escalation": False,
+                "queue_action": "none",
+                "task_type": "analysis",
+                "priority": "medium",
+            }
         if any(greet in lowered for greet in ("hi", "hello", "glorious", "how are")):
-            reply = examples.get("greeting", ["I’m tuned into the queue—what would you like routed?"])[0]
+            reply_template = examples.get("greeting", ["I’m tuned into the queue—what would you like routed?"])[0]
+            reply = self._format(reply_template, prompt)
             return {
                 "reply_text": reply,
                 "task_type": "greeting",
@@ -90,10 +147,8 @@ class SimpleLLMAdapter(LLMAdapter):
                 task_type, recipient = tt, rcpt
                 break
         action = f"{recipient}: handle {task_type} for {prompt['scope']}"
-        reply_options = examples.get("followup", [f"Routing to {recipient} for {task_type} (priority {priority})."])
-        reply = reply_options[0]
         return {
-            "reply_text": reply,
+            "reply_text": f"Routing to {recipient} for {task_type} (priority {priority}).",
             "task_type": task_type,
             "priority": priority,
             "recipient": recipient,

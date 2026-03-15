@@ -171,300 +171,116 @@ ROLE_SPECS = {
 }
 ROLE_STRUCTURED_OUTPUT = {
     "administrative_coordinator": {
-        "required_keys": [
-            "reply_text",
-            "task_type",
-            "priority",
-            "recipient",
-            "requested_action",
-            "queue_action",
-            "escalate",
-        ],
+        "required_keys": ["reply_text", "packets", "queue_action"],
         "default_queue_action": "create",
-        "description": "Return routing packets for the organization.",
+        "description": "Handle routing, queue triage, and packet creation for incoming tasks."
     },
     "Analyst": {
-        "required_keys": [
-            "reply_text",
-            "analysis_summary",
-            "evidence",
-            "missing_data",
-            "suggested_followup",
-            "escalation",
-            "queue_action",
-        ],
+        "required_keys": ["reply_text", "analysis_summary", "evidence", "missing_data", "suggested_followup"],
         "default_queue_action": "none",
-        "description": "Return diagnostic insights, evidence, and follow-ups.",
+        "description": "Iris analyzes data, surfaces evidence, and flags missing information."
     },
     "Manager": {
-        "required_keys": [
-            "reply_text",
-            "recommendation",
-            "rationale",
-            "evidence",
-            "missing_data",
-            "suggested_followup",
-            "escalation",
-            "queue_action",
-        ],
+        "required_keys": ["reply_text", "recommendation", "rationale", "evidence", "missing_data", "suggested_followup"],
         "default_queue_action": "none",
-        "description": "Return action proposals and escalation advice.",
+        "description": "Vera delivers management recommendations grounded in Iris and Rowan input."
     },
     "Researcher": {
-        "required_keys": [
-            "reply_text",
-            "research_summary",
-            "ideas",
-            "hypotheses",
-            "evidence",
-            "missing_data",
-            "suggested_followup",
-            "escalation",
-            "queue_action",
-        ],
+        "required_keys": ["reply_text", "research_summary", "ideas", "hypotheses", "evidence", "missing_data", "suggested_followup"],
         "default_queue_action": "none",
-        "description": "Return exploratory research insights and experiment ideas.",
+        "description": "Rowan returns research-backed ideas and experiments without claiming approvals."
     },
     "Evolution": {
-        "required_keys": [
-            "reply_text",
-            "mutation_proposal",
-            "evolution_summary",
-            "candidate_parameters",
-            "candidate_strategies",
-            "rationale",
-            "risk_notes",
-            "suggested_followup",
-            "packets",
-            "escalation",
-            "queue_action",
-        ],
+        "required_keys": ["reply_text", "mutation_proposal", "evolution_summary", "candidate_parameters", "candidate_strategies", "rationale", "risk_notes", "packets"],
         "default_queue_action": "none",
-        "description": "Return disciplined mutation proposals, candidate forks, rationale, and packets for Pam, Atlas, Vera, and Lucian.",
+        "description": "Sloane crafts controlled mutation proposals for Atlas and the engineering branch."
     },
     "Market Simulator": {
-        "required_keys": [
-            "reply_text",
-            "simulation_summary",
-            "scenario_results",
-            "comparative_outcomes",
-            "confidence",
-            "limitations",
-            "recommendation",
-            "suggested_followup",
-            "packets",
-            "escalation",
-            "queue_action",
-        ],
+        "required_keys": ["reply_text", "simulation_summary", "scenario_results", "comparative_outcomes", "confidence", "limitations", "recommendation", "packets"],
         "default_queue_action": "none",
-        "description": "Return simulation summaries, confidence notes, and packets for Pam, June, Vera, Sloane, and Lucian.",
-    },
-    "Master Treasurer": {
-        "required_keys": [
-            "reply_text",
-            "global_treasury_summary",
-            "allocation_recommendation",
-            "reserve_posture",
-            "allowance_recommendation",
-            "overexposure_warnings",
-            "financial_rationale",
-            "packets",
-            "escalation",
-            "queue_action",
-        ],
-        "default_queue_action": "none",
-        "description": "Return cross-company treasury posture, allocation guidance, and caution warnings for YamYam, Risk Officer, Master CFO, and company CFOs.",
-    },
-    "Master CFO": {
-        "required_keys": [
-            "reply_text",
-            "global_financial_summary",
-            "portfolio_efficiency",
-            "capital_recommendation",
-            "sustainability_note",
-            "inefficient_companies",
-            "ship_to_risk",
-            "packets",
-            "escalation",
-            "queue_action",
-        ],
-        "default_queue_action": "none",
-        "description": "Return portfolio financial intelligence, efficiency notes, and guidance for Selene, Helena, YamYam, and company CFOs/CEOs.",
-    },
-    "Scrum Master": {
-        "required_keys": [
-            "reply_text",
-            "task_summary",
-            "task_breakdown",
-            "blockers",
-            "next_steps",
-            "packets",
-            "escalation",
-            "queue_action",
-        ],
-        "default_queue_action": "none",
-        "description": "Return sprint/task summaries, blockers, and coordination packets for the SWE crew.",
-    },
-    "Senior Software Architect": {
-        "required_keys": [
-            "reply_text",
-            "architecture_summary",
-            "refactor_recommendation",
-            "module_guidance",
-            "tech_debt_warnings",
-            "packets",
-            "escalation",
-            "queue_action",
-        ],
-        "default_queue_action": "none",
-        "description": "Return architecture summaries, refactor notes, and technical debt warnings.",
-    },
-    "Senior Software Engineer": { ... },
-    "Junior Software Engineer": { ... },
-    "Tester": {
-        "required_keys": [
-            "reply_text",
-            "test_summary",
-            "pass_fail",
-            "coverage_notes",
-            "blockers",
-            "packets",
-            "escalation",
-            "queue_action",
-        ],
-        "default_queue_action": "none",
-        "description": "Return test results, reproducibility notes, and handoffs for code reviewers and QA.",
-    },
-    "Junior Software Engineer": {
-        "required_keys": [
-            "reply_text",
-            "implementation_summary",
-            "subtask_plan",
-            "blockers",
-            "packets",
-            "escalation",
-            "queue_action",
-        ],
-        "default_queue_action": "none",
-        "description": "Return bounded implementation plans, blockers, and handoff notes for the validation chain.",
-    },
-        "default_queue_action": "none",
-        "description": "Return sprint/task summaries, blockers, and coordination packets for the SWE crew.",
-    },
-    "Risk Officer": {
-        "required_keys": [
-            "reply_text",
-            "global_risk_summary",
-            "veto_decision",
-            "caution_notes",
-            "drawdown_warnings",
-            "overexposure_flags",
-            "recommended_constraints",
-            "packets",
-            "escalation",
-            "queue_action",
-        ],
-        "default_queue_action": "none",
-        "description": "Return risk posture, veto guidance, and escalation packets for Selene, YamYam, Master CFO, and company leaders.",
-    },
-    "Product Manager": {
-        "required_keys": [
-            "reply_text",
-            "product_summary",
-            "priority_backlog",
-            "recommendation",
-            "acceptance_criteria",
-            "packets",
-            "escalation",
-            "queue_action",
-        ],
-        "default_queue_action": "none",
-        "description": "Return prioritized product guidance, scope, and packets for Nadia’s downstream crews.",
-    },
-    "Scrum Master": {
-        "required_keys": [
-            "reply_text",
-            "task_summary",
-            "task_breakdown",
-            "blockers",
-            "next_steps",
-            "packets",
-            "escalation",
-            "queue_action",
-        ],
-        "default_queue_action": "none",
-        "description": "Return sprint/task summaries, blockers, and routing instructions for SWE, QA, or infrastructure.",
+        "description": "Atlas evaluates proposed changes under simulated scenarios and shares confidence notes."
     },
     "Archivist": {
-        "required_keys": [
-            "reply_text",
-            "archival_summary",
-            "decision_record",
-            "event_summary",
-            "memory_digest",
-            "timeline",
-            "lessons_learned",
-            "unresolved_issues",
-            "packets",
-            "escalation",
-            "queue_action",
-        ],
+        "required_keys": ["reply_text", "archival_summary", "decision_record", "event_summary", "memory_digest", "timeline", "lessons_learned", "unresolved_issues", "packets"],
         "default_queue_action": "none",
-        "description": "Return structured archival digests, timelines, and lessons for Pam, Lucian, Vera, and YamYam.",
-    },
-    "CFO": {
-        "required_keys": [
-            "reply_text",
-            "financial_health_summary",
-            "cash_runway_caution",
-            "spending_posture",
-            "recommendation",
-            "financial_rationale",
-            "evidence",
-            "missing_data",
-            "suggested_followup",
-            "packets",
-            "escalation",
-            "queue_action",
-        ],
-        "default_queue_action": "none",
-        "description": "Return financially grounded guidance plus a packets array with {recipient, summary, next_steps} for Pam, the CEO, and the Master Treasurer.",
-    },
-    "Low Tier Operations Worker": {
-        "required_keys": [
-            "reply_text",
-            "op_summary",
-            "artifacts",
-            "missing_data",
-            "status",
-            "packets",
-            "escalation",
-            "queue_action",
-        ],
-        "default_queue_action": "none",
-        "description": "Return operational completion notes with artifacts, missing data, and packets for the requesting agents.",
+        "description": "June preserves memory, summarizing decisions, lessons, and unresolved issues."
     },
     "CEO": {
-        "required_keys": [
-            "reply_text",
-            "decision",
-            "executive_summary",
-            "approval_decision",
-            "rationale",
-            "action_directive",
-            "request_more_evidence",
-            "packets",
-            "evidence",
-            "missing_data",
-            "suggested_followup",
-            "escalation",
-            "queue_action",
-        ],
+        "required_keys": ["reply_text", "decision", "executive_summary", "approval_decision", "rationale", "action_directive", "request_more_evidence", "packets"],
         "default_queue_action": "none",
-        "description": "Return a final company decision with rationale, action directive, and packets for Pam, Vera, Bianca, Rowan, and YamYam.",
+        "description": "Lucian weighs all inputs plus global stewards before giving company direction."
     },
+    "CFO": {
+        "required_keys": ["reply_text", "financial_health_summary", "cash_runway_caution", "spending_posture", "recommendation", "financial_rationale", "packets"],
+        "default_queue_action": "none",
+        "description": "Bianca protects company runway and financial discipline."
+    },
+    "Master Treasurer": {
+        "required_keys": ["reply_text", "global_treasury_summary", "allocation_recommendation", "reserve_posture", "allowance_recommendation", "packets"],
+        "default_queue_action": "none",
+        "description": "Selene safeguards the parent treasury, balancing capital across companies."
+    },
+    "Risk Officer": {
+        "required_keys": ["reply_text", "global_risk_summary", "veto_decision", "caution_notes", "packets"],
+        "default_queue_action": "none",
+        "description": "Helena enforces risk boundaries and vetoes unsafe proposals."
+    },
+    "Master CFO": {
+        "required_keys": ["reply_text", "global_financial_summary", "priority_backlog", "recommendation", "packets"],
+        "default_queue_action": "none",
+        "description": "Vivienne provides portfolio-level financial strategy guidance."
+    },
+    "Product Manager": {
+        "required_keys": ["reply_text", "product_summary", "priority_backlog", "recommendation", "acceptance_criteria", "packets"],
+        "default_queue_action": "none",
+        "description": "Nadia turns product requests into scoped work."
+    },
+    "Scrum Master": {
+        "required_keys": ["reply_text", "task_summary", "engineering_tasks", "blockers", "next_handoff", "packets"],
+        "default_queue_action": "none",
+        "description": "Tessa sequences tasks, identifies blockers, and routes work."
+    },
+    "Senior Software Architect": {
+        "required_keys": ["reply_text", "architecture_summary", "refactor_recommendation", "module_guidance", "technical_debt", "packets"],
+        "default_queue_action": "none",
+        "description": "Marek guards architecture and refactor direction."
+    },
+    "Senior Software Engineer": {
+        "required_keys": ["reply_text", "implementation_summary", "code_plan", "integration_notes", "blockers", "packets"],
+        "default_queue_action": "none",
+        "description": "Eli implements the hard shared work under architectural guidance."
+    },
+    "Junior Software Engineer": {
+        "required_keys": ["reply_text", "implementation_summary", "subtasks", "escalation_notes", "blockers", "packets"],
+        "default_queue_action": "none",
+        "description": "Noah handles bounded helper tasks and escalates higher-risk work."
+    },
+    "Tester": {
+        "required_keys": ["reply_text", "test_summary", "failing_cases", "coverage_notes", "recommendation", "packets"],
+        "default_queue_action": "none",
+        "description": "Mina validates test results and reproducibility."
+    },
+    "Code Reviewer": {
+        "required_keys": ["reply_text", "review_summary", "review_findings", "maintainability_notes", "merge_readiness", "packets"],
+        "default_queue_action": "none",
+        "description": "Gideon guards code quality and merge readiness."
+    },
+    "QA": {
+        "required_keys": ["reply_text", "qa_summary", "behavior_notes", "regression_risks", "ship_readiness", "packets"],
+        "default_queue_action": "none",
+        "description": "Sabine evaluates behavior, coverage, and regression safety."
+    },
+    "Infrastructure": {
+        "required_keys": ["reply_text", "infrastructure_summary", "version_control_plan", "release_notes", "rollback_readiness", "packets"],
+        "default_queue_action": "none",
+        "description": "Rhea stewards branch hygiene, release flow, and rollbacks."
+    },
+    "Low Tier Operations Worker": {
+        "required_keys": ["reply_text", "op_summary", "artifacts", "status", "packets"],
+        "default_queue_action": "none",
+        "description": "Bob handles safe operational chores."
+    }
 }
-
 
 def load_agents() -> Dict[str, Dict[str, str]]:
     if not CONFIG_PATH.exists():

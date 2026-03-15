@@ -645,35 +645,6 @@ class SimpleLLMAdapter(LLMAdapter):
                 "queue_action": "none",
             }
 
-        if role_type.lower() == "junior software engineer":
-            insights = prompt.get("company_insights", {})
-            summary = "Noah can take the helper work once blockers clear."
-            subtask_plan = ["Update the helper module and add tests."]
-            blockers = insights.get("missing_data", [])
-            packets = [
-                {
-                    "recipient": "Tester",
-                    "summary": "Junior changes ready for testing.",
-                    "next_steps": "Run the affected suite.",
-                },
-                {
-                    "recipient": "Reviewer",
-                    "summary": "Noah implementation to review.",
-                    "next_steps": "Confirm integration before QA.",
-                },
-            ]
-            return {
-                "reply_text": f"Noah@{agent_scope} reports {len(blockers)} blockers before I proceed.",
-                "implementation_summary": summary,
-                "subtask_plan": subtask_plan,
-                "blockers": blockers or ["None"],
-                "packets": packets,
-                "task_type": "implementation_review",
-                "priority": "medium",
-                "escalation": bool(blockers),
-                "queue_action": "none",
-            }
-
         if role_type.lower() == "senior software engineer":
             insights = prompt.get("company_insights", {})
             implementation_summary = "Implementation plan ready after Marek's approval."
@@ -769,36 +740,68 @@ class SimpleLLMAdapter(LLMAdapter):
             }
 
         if role_type.lower() == "qa":
-            test_insights = prompt.get("global_finance_insights", {})
-            qa_summary = "Sabine sees behavioral cues needing verification."
-            behavior_notes = ["Ensure workflow confirmation steps fire."]
-            regression_risk = prompt.get("company_insights", {}).get("missing_data", [])
-            acceptance_confidence = 0 if regression_risk else 1
+            product_summary = response.get("product_summary") or prompt.get("product_summary") or "Product clarity pending."
+            acceptance_criteria = (
+                response.get("acceptance_criteria") or prompt.get("acceptance_criteria") or []
+            )
+            test_summary = response.get("test_summary") or prompt.get("test_summary") or "Tests pending execution."
+            failing_cases = (
+                response.get("failing_cases")
+                or response.get("blockers")
+                or []
+            )
+            coverage_notes = response.get("coverage_notes") or []
+            review_summary = response.get("review_summary") or prompt.get("review_summary") or "Review pending."
+            review_findings = response.get("review_findings") or []
+            implementation_summary = (
+                response.get("implementation_summary") or prompt.get("implementation_summary") or "Implementation details missing."
+            )
+            blockers = response.get("blockers") or []
+            task_summary = response.get("task_summary") or prompt.get("task_summary") or "No task breakdown yet."
+            engineering_tasks = response.get("engineering_tasks") or prompt.get("engineering_tasks") or []
+            regression_risks = (
+                response.get("regression_risks")
+                or failing_cases
+                or []
+            )
+            ship_readiness = "Ready" if not failing_cases and not regression_risks else "Not ready"
+            behavior_notes = [product_summary, review_summary, implementation_summary]
+            behavior_notes.extend([note for note in acceptance_criteria + coverage_notes + review_findings if note])
+            if task_summary:
+                behavior_notes.append(task_summary)
+            behavior_notes.extend([t for t in engineering_tasks if t])
+            qa_summary = (
+                f"Sabine@{agent_scope} reports {len(failing_cases)} failing case(s); readiness={ship_readiness}."
+            )
             packets = [
                 {
                     "recipient": "Infrastructure",
-                    "summary": "QA signals need for regression follow-up.",
-                    "next_steps": "Pause rollout until fix.",
+                    "summary": "QA status influences release timing.",
+                    "next_steps": "Hold or reroute merges until Sabine has confidence.",
                 },
                 {
-                    "recipient": "Eli",
-                    "summary": "Behavioral validation flagged issues.",
-                    "next_steps": "Address before code reviewer rechecks.",
+                    "recipient": "Code Reviewer",
+                    "summary": "QA flagged behavioral or regression issues.",
+                    "next_steps": "Patch the failing flows and rerun tests.",
+                },
+                {
+                    "recipient": "Scrum Master",
+                    "summary": "QA is tracking blockers for the current sprint.",
+                    "next_steps": "Reprioritize tasks to address the failures first.",
                 },
             ]
             return {
-                "reply_text": f"Sabine@{agent_scope} reports {"failure" if regression_risk else "all good"}.",
+                "reply_text": qa_summary,
                 "qa_summary": qa_summary,
                 "behavior_notes": behavior_notes,
-                "regression_risk": regression_risk,
-                "acceptance_confidence": acceptance_confidence,
+                "regression_risks": regression_risks,
+                "ship_readiness": ship_readiness,
                 "packets": packets,
                 "task_type": "qa_review",
                 "priority": "medium",
-                "escalation": bool(regression_risk),
+                "escalation": bool(regression_risks),
                 "queue_action": "none",
             }
-
         if role_type.lower() == "code reviewer":
             insights = prompt.get("company_insights", {})
             snippet = insights.get("manager_action", {}).get("recommendation")
@@ -967,48 +970,6 @@ class SimpleLLMAdapter(LLMAdapter):
                 "task_type": "finance_review",
                 "priority": "medium",
             }
-
-        if role_type.lower() == "product manager":
-            insights = prompt.get("company_insights", {})
-            global_finance = prompt.get("global_finance_insights", {})
-            problems = insights.get("missing_data", [])
-            backlog = global_finance.get("inefficiencies", [])
-            recommendation = (
-                "Deal with the infrastructure gaps and block repeated work."
-                if problems else "Prioritize the backlog of critical bugs before new features."
-            )
-            priority_backlog = [
-                f"{item.get('company_id', 'global')} inefficiency" for item in backlog[:3]
-            ]
-            acceptance_criteria = [
-                "Define success metrics before writing any code.",
-                "Confirm QA paths and rollout plan.",
-            ]
-            packets = [
-                {
-                    "recipient": "Scrum Master",
-                    "summary": "Product priority set for the engineering crew.",
-                    "next_steps": "Queue these items for the next sprint planning.",
-                },
-                {
-                    "recipient": "YamYam",
-                    "summary": "Shared backlog trimmed to the highest-value work.",
-                    "next_steps": "Review before committing new company directives.",
-                },
-            ]
-            return {
-                "reply_text": f"Nadia@{agent_scope} recommends: {recommendation}",
-                "product_summary": recommendation,
-                "priority_backlog": priority_backlog,
-                "recommendation": recommendation,
-                "acceptance_criteria": acceptance_criteria,
-                "packets": packets,
-                "escalation": False,
-                "queue_action": "none",
-                "task_type": "product_review",
-                "priority": "medium",
-            }
-
         if role_type.lower() == "risk officer":
             risk_insights = prompt.get("global_risk_insights", {})
             companies = risk_insights.get("companies", [])

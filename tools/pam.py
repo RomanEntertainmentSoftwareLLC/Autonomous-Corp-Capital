@@ -19,21 +19,30 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from tools.agent_runtime import (
+    AGENT_PERSONA_DIR,
+    CONFIG_PATH,
+    ROOT as AGENT_ROOT,
+    STATE_ROOT,
+    UNIVERSAL_PERSONA_PATH,
+    append_log,
+    collect_agent_reports,
+    detect_target_scope,
+    ensure_state,
+    gather_company_insights,
+    load_env_file,
+    load_persona,
+    persona_description,
+    read_history,
+    read_queue,
+    summarize_queue,
+    write_queue,
+)
+
 from tools.llm_client import OpenAIAdapter, SimpleLLMAdapter
 
-CONFIG_PATH = ROOT / "config" / "agents.yaml"
-STATE_ROOT = ROOT / "state" / "agents"
-UNIVERSAL_PERSONA_PATH = ROOT / "personas" / "universal.json"
-AGENT_PERSONA_DIR = ROOT / "personas" / "agents"
+load_env_file(AGENT_ROOT / ".env")
 
-DEFAULT_QUEUE = {
-    "new": [],
-    "assigned": [],
-    "in_progress": [],
-    "blocked": [],
-    "completed": [],
-    "escalated": [],
-}
 
 PRIORITY_KEYWORDS = {
     "emergency": "emergency",
@@ -53,6 +62,16 @@ TASK_TYPES = [
     ("cash", "financial_review", "Bianca"),
     ("spend", "financial_review", "Bianca"),
     ("capital", "financial_review", "Bianca"),
+    ("evolution", "evolution", "Sloane"),
+    ("mutation", "evolution", "Sloane"),
+    ("mutate", "evolution", "Sloane"),
+    ("mutations", "evolution", "Sloane"),
+    ("fork", "evolution", "Sloane"),
+    ("simulate", "simulation_review", "Atlas"),
+    ("simulation", "simulation_review", "Atlas"),
+    ("scenario", "simulation_review", "Atlas"),
+    ("backtest", "simulation_review", "Atlas"),
+    ("branch", "evolution", "Sloane"),
     ("artifacts", "operational_task", "Bob"),
     ("artifact", "operational_task", "Bob"),
     ("gather", "operational_task", "Bob"),
@@ -74,6 +93,11 @@ TASK_TYPES = [
     ("meeting", "meeting_prep", "Scrum Master"),
     ("report", "status_report", "Analyst"),
     ("analysis", "analysis", "Analyst"),
+    ("archive", "archival_summary", "June"),
+    ("history", "archival_summary", "June"),
+    ("record", "archival_summary", "June"),
+    ("lessons", "archival_summary", "June"),
+    ("timeline", "archival_summary", "June"),
 ]
 
 
@@ -91,6 +115,15 @@ ROLE_SPECS = {
     ),
     "Researcher": (
         "Rowan is the company Researcher. She explores strategic experiments, hypotheses, and alternative paths based on Iris and Vera’s work, reporting evidence-backed possibilities without pretending they are approved."
+    ),
+    "Evolution": (
+        "Sloane is the company Evolution Specialist. She turns research and management signals into controlled mutation proposals for Atlas while respecting financial and lifecycle guardrails."
+    ),
+    "Market Simulator": (
+        "Atlas is the company Market Simulator. He compares proposed mutations and strategy branches under simulated scenarios, explains what the simulation can and cannot tell us, and passes structured findings to decision-makers."
+    ),
+    "Archivist": (
+        "June is the company Archivist. She records what happened, compiles timelines, and keeps decision memory honest without adding drama or making executive calls."
     ),
     "CFO": (
         "Bianca is the company CFO. She reads allocation, capital usage, reserve posture, lifecycle status, leaderboard data, config, Vera recommendations, Iris analysis, and Rowan proposals. She delivers calm, practical, structured financial guidance, warns about overextension, and prepares packets for Pam, the CEO, and the Master Treasurer without overriding the Treasurer or acting as CEO."
@@ -160,6 +193,57 @@ ROLE_STRUCTURED_OUTPUT = {
         "default_queue_action": "none",
         "description": "Return exploratory research insights and experiment ideas.",
     },
+    "Evolution": {
+        "required_keys": [
+            "reply_text",
+            "mutation_proposal",
+            "evolution_summary",
+            "candidate_parameters",
+            "candidate_strategies",
+            "rationale",
+            "risk_notes",
+            "suggested_followup",
+            "packets",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return disciplined mutation proposals, candidate forks, rationale, and packets for Pam, Atlas, Vera, and Lucian.",
+    },
+    "Market Simulator": {
+        "required_keys": [
+            "reply_text",
+            "simulation_summary",
+            "scenario_results",
+            "comparative_outcomes",
+            "confidence",
+            "limitations",
+            "recommendation",
+            "suggested_followup",
+            "packets",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return simulation summaries, confidence notes, and packets for Pam, June, Vera, Sloane, and Lucian.",
+    },
+    "Archivist": {
+        "required_keys": [
+            "reply_text",
+            "archival_summary",
+            "decision_record",
+            "event_summary",
+            "memory_digest",
+            "timeline",
+            "lessons_learned",
+            "unresolved_issues",
+            "packets",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return structured archival digests, timelines, and lessons for Pam, Lucian, Vera, and YamYam.",
+    },
     "CFO": {
         "required_keys": [
             "reply_text",
@@ -214,22 +298,6 @@ ROLE_STRUCTURED_OUTPUT = {
 }
 
 
-def load_env_file(path: Path) -> None:
-    if not path.exists():
-        return
-    for raw in path.read_text().splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        if "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        cleaned_value = value.strip().strip('"').strip("'")
-        os.environ.setdefault(key.strip(), cleaned_value)
-
-load_env_file(ROOT / ".env")
-
-
 class PamError(Exception):
     pass
 
@@ -252,40 +320,6 @@ def load_yaml_file(path: Path) -> Dict[str, Any]:
         return {}
 
 
-def merge_personas(base: Dict[str, Any], overlay: Dict[str, Any]) -> Dict[str, Any]:
-    merged = dict(base)
-    for key, value in overlay.items():
-        if key in merged and isinstance(merged[key], dict) and isinstance(value, dict):
-            merged[key] = merge_personas(merged[key], value)
-        else:
-            merged[key] = value
-    return merged
-
-
-def load_persona(agent_info: Dict[str, str]) -> Dict[str, Any]:
-    persona_id = agent_info.get("persona", agent_info.get("id"))
-    universal = load_json_file(UNIVERSAL_PERSONA_PATH)
-    agent_persona = load_json_file(AGENT_PERSONA_DIR / f"{persona_id}.json")
-    return merge_personas(universal, agent_persona)
-
-
-def persona_description(persona: Dict[str, Any]) -> str:
-    lines: List[str] = []
-    identity = persona.get("identity", {})
-    if identity:
-        impression = identity.get("core_impression")
-        if impression:
-            lines.append(f"Identity: {impression}")
-    tone = persona.get("tone", {})
-    if tone:
-        lines.append(f"Tone: {tone.get('style')} ({tone.get('formality')})")
-    bias = persona.get("operational_bias", {})
-    if bias:
-        keys = ", ".join([k for k, v in bias.items() if v])
-        if keys:
-            lines.append(f"Bias: {keys}")
-    return " | ".join(lines) if lines else ""
-
 
 def load_agents() -> Dict[str, Dict[str, str]]:
     if not CONFIG_PATH.exists():
@@ -298,198 +332,6 @@ def load_agents() -> Dict[str, Dict[str, str]]:
             agents[agent_id] = entry
     return agents
 
-
-def ensure_state(agent_id: str) -> Path:
-    path = STATE_ROOT / agent_id
-    path.mkdir(parents=True, exist_ok=True)
-    for fname, default in [
-        ("inbox.jsonl", None),
-        ("outbox.jsonl", None),
-        ("queue.json", DEFAULT_QUEUE),
-        ("escalations.jsonl", None),
-        ("meetings.jsonl", None),
-    ]:
-        fpath = path / fname
-        if default is None:
-            if not fpath.exists():
-                fpath.write_text("")
-        else:
-            if not fpath.exists():
-                fpath.write_text(json.dumps(default, indent=2))
-    return path
-
-
-def read_queue(path: Path) -> Dict[str, Any]:
-    try:
-        return json.loads(path.read_text())
-    except Exception:
-        return DEFAULT_QUEUE.copy()
-
-
-def write_queue(path: Path, queue: Dict[str, Any]) -> None:
-    path.write_text(json.dumps(queue, indent=2))
-
-
-def summarize_queue(queue: Dict[str, Any]) -> Dict[str, int]:
-    return {k: len(queue.get(k, [])) for k in DEFAULT_QUEUE.keys()}
-
-
-def read_history(path: Path, limit: int = 5) -> List[Dict[str, Any]]:
-    if not path.exists():
-        return []
-    lines = [line.strip() for line in path.read_text().splitlines() if line.strip()]
-    history: List[Dict[str, Any]] = []
-    for raw in lines[-limit:]:
-        try:
-            history.append(json.loads(raw))
-        except Exception:
-            continue
-    return history
-
-
-def append_log(path: Path, entry: Dict[str, Any]) -> None:
-    with path.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(entry) + "\n")
-
-
-
-def read_agent_outbox_reports(agent_prefix: str, target_scope: str, limit: int = 3) -> List[Dict[str, Any]]:
-    path = STATE_ROOT / f"{agent_prefix}_{target_scope}" / "outbox.jsonl"
-    if not path.exists():
-        return []
-    lines = [line.strip() for line in path.read_text().splitlines() if line.strip()]
-    reports: List[Dict[str, Any]] = []
-    for raw in lines[-limit:]:
-        try:
-            entry = json.loads(raw)
-        except Exception:
-            continue
-        response = entry.get("response", {})
-        report: Dict[str, Any] = {
-            "timestamp": entry.get("timestamp"),
-            "task_type": response.get("task_type"),
-            "priority": response.get("priority"),
-            "summary": response.get("summary"),
-            "reply_text": response.get("reply_text"),
-            "analysis_summary": response.get("analysis_summary"),
-            "recommendation": response.get("recommendation"),
-            "research_summary": response.get("research_summary"),
-            "ideas": response.get("ideas"),
-            "hypotheses": response.get("hypotheses"),
-            "evidence": response.get("evidence"),
-            "missing_data": response.get("missing_data"),
-            "suggested_followup": response.get("suggested_followup"),
-        }
-        report = {k: v for k, v in report.items() if v}
-        if report:
-            reports.append(report)
-    return reports
-
-
-def collect_agent_reports(target_scope: str) -> Dict[str, List[Dict[str, Any]]]:
-    return {
-        "Pam": read_agent_outbox_reports("pam", target_scope),
-        "Iris": read_agent_outbox_reports("iris", target_scope),
-        "Vera": read_agent_outbox_reports("vera", target_scope),
-        "Rowan": read_agent_outbox_reports("rowan", target_scope),
-        "Bianca": read_agent_outbox_reports("bianca", target_scope),
-        "Bob": read_agent_outbox_reports("bob", target_scope),
-    }
-
-
-
-def detect_target_scope(message: str, default: str) -> str:
-    lowered = message.lower()
-    match = re.search(r"(company_\d+)", lowered)
-    return match.group(1) if match else default
-
-def gather_company_insights(scope: str, target_scope: str, queue: Dict[str, Any] | None = None) -> Dict[str, Any]:
-    insights: Dict[str, Any] = {"scope": scope, "target_scope": target_scope}
-    comp_dir = ROOT / "companies" / target_scope
-    metadata = load_yaml_file(comp_dir / "metadata.yaml")
-    config = load_yaml_file(comp_dir / "config.yaml")
-    insights["metadata_summary"] = metadata.get("lifecycle_state") or "unknown"
-    if metadata:
-        insights["lifecycle_details"] = {
-            "state": metadata.get("lifecycle_state"),
-            "strategy": metadata.get("lifecycle_strategy"),
-            "fitness": metadata.get("last_fitness"),
-        }
-    insights["config_summary"] = {
-        "symbols": config.get("symbols"),
-        "timing": config.get("timing"),
-    }
-    leaderboard_path = ROOT / "leaderboard.json"
-    insights["leaderboard_entries"] = []
-    if leaderboard_path.exists():
-        try:
-            board_data = json.loads(leaderboard_path.read_text())
-            rows = board_data.get("rows") if isinstance(board_data, dict) else board_data
-            for entry in rows or []:
-                if entry.get("company") == target_scope:
-                    insights["leaderboard_entries"].append(entry)
-        except Exception:
-            pass
-    insights["leaderboard_summary"] = (
-        insights["leaderboard_entries"][0] if insights["leaderboard_entries"] else None
-    )
-    manager_actions = load_yaml_file(Path("manager_actions.yaml"))
-    manager_action = None
-    for action in manager_actions.get("actions", []):
-        if action.get("company") == target_scope:
-            manager_action = action
-            break
-    insights["manager_action"] = manager_action
-    results_dir = ROOT / "results" / target_scope
-    if results_dir.exists():
-        insights["logs_present"] = True
-        insights["log_paths"] = [str(p) for p in results_dir.rglob("*.jsonl")]
-    else:
-        insights["logs_present"] = False
-    missing = []
-    if not metadata:
-        missing.append("metadata")
-    if not config:
-        missing.append("config")
-    if not insights["leaderboard_entries"]:
-        missing.append("leaderboard")
-    if not insights["logs_present"]:
-        missing.append("logs")
-    if not insights.get("manager_action"):
-        missing.append("manager_action")
-    insights["missing_data"] = missing
-    queue_snapshot = queue or {}
-    insights["queue_entries"] = queue_snapshot
-    insights["allocation"] = {
-        "amount": metadata.get("allocation_amount"),
-        "percent": metadata.get("allocation_percent"),
-        "status": metadata.get("allocation_status"),
-    }
-    capital_usage = {
-        "allocated": metadata.get("allocation_amount"),
-    }
-    if manager_action and manager_action.get("account_value") is not None:
-        capital_usage["manager_account_value"] = manager_action.get("account_value")
-    insights["capital_usage"] = capital_usage
-    insights["budget_posture"] = metadata.get("allocation_status") or "unknown"
-    treasury_path = ROOT / "state" / "treasury.yaml"
-    insights["treasury_snapshot"] = load_yaml_file(treasury_path)
-    insights["agent_reports"] = collect_agent_reports(target_scope)
-    file_checks = {
-        "trade_logs": [],
-        "result_logs": [],
-    }
-    for pattern in ("trade*.jsonl", "trade_log*.jsonl"):
-        for path in comp_dir.rglob(pattern):
-            if path.is_file():
-                file_checks["trade_logs"].append(str(path))
-    results_dir = ROOT / "results" / target_scope
-    if results_dir.exists():
-        for path in results_dir.rglob("*.jsonl"):
-            if path.is_file():
-                file_checks["result_logs"].append(str(path))
-    insights["file_checks"] = file_checks
-    return insights
 
 def create_prompt(
     agent_info: Dict[str, str],
@@ -522,7 +364,7 @@ def create_prompt(
         "message": message,
     }
 def choose_adapter(agent_id: str) -> SimpleLLMAdapter | OpenAIAdapter:
-    if any(agent_id.startswith(prefix) for prefix in ("pam_company_", "iris_company_", "vera_company_", "rowan_company_", "bianca_company_", "lucian_company_", "bob_company_")):
+    if any(agent_id.startswith(prefix) for prefix in ("pam_company_", "iris_company_", "vera_company_", "rowan_company_", "bianca_company_", "lucian_company_", "bob_company_", "sloane_company_", "atlas_company_", "june_company_")):
         try:
             return OpenAIAdapter()
         except EnvironmentError:
@@ -615,6 +457,57 @@ def main() -> None:
         packet["suggested_followup"] = response.get("suggested_followup", "")
 
     elif role_type == "cfo":
+        packet["financial_health_summary"] = response.get("financial_health_summary", "")
+        packet["cash_runway_caution"] = response.get("cash_runway_caution", "")
+        packet["spending_posture"] = response.get("spending_posture", "")
+        packet["recommendation"] = response.get("recommendation", "")
+        packet["financial_rationale"] = response.get("financial_rationale", "")
+        packet["evidence"] = response.get("evidence", [])
+        packet["missing_data"] = response.get("missing_data", [])
+        packet["suggested_followup"] = response.get("suggested_followup", "")
+        packet["packets"] = response.get("packets", [])
+
+    elif role_type == "evolution":
+        packet["mutation_proposal"] = response.get("mutation_proposal", "")
+        packet["evolution_summary"] = response.get("evolution_summary", "")
+        packet["candidate_parameters"] = response.get("candidate_parameters", [])
+        packet["candidate_strategies"] = response.get("candidate_strategies", [])
+        packet["rationale"] = response.get("rationale", "")
+        packet["risk_notes"] = response.get("risk_notes", [])
+        packet["suggested_followup"] = response.get("suggested_followup", "")
+        packet["packets"] = response.get("packets", [])
+
+    elif role_type == "market simulator":
+        packet["simulation_summary"] = response.get("simulation_summary", "")
+        packet["scenario_results"] = response.get("scenario_results", "")
+        packet["comparative_outcomes"] = response.get("comparative_outcomes", [])
+        packet["confidence"] = response.get("confidence", "")
+        packet["limitations"] = response.get("limitations", "")
+        packet["recommendation"] = response.get("recommendation", "")
+        packet["suggested_followup"] = response.get("suggested_followup", "")
+        packet["packets"] = response.get("packets", [])
+
+    elif role_type == "low tier operations worker":
+        packet["cash_runway_caution"] = response.get("cash_runway_caution", "")
+        packet["spending_posture"] = response.get("spending_posture", "")
+        packet["recommendation"] = response.get("recommendation", "")
+        packet["financial_rationale"] = response.get("financial_rationale", "")
+        packet["evidence"] = response.get("evidence", [])
+        packet["missing_data"] = response.get("missing_data", [])
+        packet["suggested_followup"] = response.get("suggested_followup", "")
+        packet["packets"] = response.get("packets", [])
+
+    elif role_type == "evolution":
+        packet["mutation_proposal"] = response.get("mutation_proposal", "")
+        packet["evolution_summary"] = response.get("evolution_summary", "")
+        packet["candidate_parameters"] = response.get("candidate_parameters", [])
+        packet["candidate_strategies"] = response.get("candidate_strategies", [])
+        packet["rationale"] = response.get("rationale", "")
+        packet["risk_notes"] = response.get("risk_notes", [])
+        packet["suggested_followup"] = response.get("suggested_followup", "")
+        packet["packets"] = response.get("packets", [])
+
+    elif role_type == "low tier operations worker":
         packet["financial_health_summary"] = response.get("financial_health_summary", "")
         packet["cash_runway_caution"] = response.get("cash_runway_caution", "")
         packet["spending_posture"] = response.get("spending_posture", "")

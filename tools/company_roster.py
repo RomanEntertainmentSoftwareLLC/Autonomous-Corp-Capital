@@ -49,6 +49,24 @@ REQUIRED_STAFF = [
         "description": "Rowan explores strategic ideas",
     },
     {
+        "persona": "sloane",
+        "display_name": "Sloane",
+        "role": "Evolution",
+        "description": "Sloane proposes controlled mutations",
+    },
+    {
+        "persona": "atlas",
+        "display_name": "Atlas",
+        "role": "Market Simulator",
+        "description": "Atlas runs simulation evaluations",
+    },
+    {
+        "persona": "june",
+        "display_name": "June",
+        "role": "Archivist",
+        "description": "June preserves company memory and decisions",
+    },
+    {
         "persona": "bianca",
         "display_name": "Bianca",
         "role": "CFO",

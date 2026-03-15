@@ -302,6 +302,320 @@ class SimpleLLMAdapter(LLMAdapter):
                 "suggested_followup": suggested_followup,
                 "packets": packets,
             }
+        if role_type == "evolution":
+            insights = prompt.get("company_insights", {})
+            queue_summary = prompt.get("queue_summary", {})
+            target_scope = prompt.get("target_scope", prompt.get("scope", ""))
+            lifecycle = insights.get("metadata_summary", "unknown")
+            manager_action = insights.get("manager_action") or {}
+            manager_recommendation = manager_action.get("recommendation")
+            reports = insights.get("agent_reports", {})
+            rowan_summary = (reports.get("Rowan") or [])[-1] if reports.get("Rowan") else {}
+            vera_reports = reports.get("Vera") or []
+            latest_vera = vera_reports[-1] if vera_reports else {}
+            vera_recommendation = manager_recommendation or latest_vera.get("recommendation")
+            bianca_posture = (reports.get("Bianca") or [])[-1] if reports.get("Bianca") else {}
+            missing = insights.get("missing_data", [])
+            new_tasks = queue_summary.get("new", 0)
+            evidence = []
+            if lifecycle:
+                evidence.append(f"Lifecycle: {lifecycle}")
+            if vera_recommendation:
+                evidence.append(f"Vera: {vera_recommendation}")
+            risk_notes = []
+            if missing:
+                risk_notes.append(f"Missing data: {', '.join(missing)}")
+            if new_tasks and new_tasks > 2:
+                risk_notes.append("Queue pressure suggests caution before mutating.")
+            evolution_summary = f"{target_scope} is {lifecycle} with {new_tasks} new queue item(s)."
+            mutation_proposal = (
+                f"Test a {target_scope}-focused parameter sweep: reduce order_size by 10% and tighten ema_fast/sma_slow spread while monitoring {manager_recommendation or 'manager context'}."
+                if vera_recommendation or manager_recommendation else
+                f"Hold and gather the missing logs before drafting a mutation."
+            )
+            candidate_parameters = [
+                "order_size -10%",
+                "ema_fast +2 / ema_slow +4",
+                "stop_loss tighten 0.25%",
+            ]
+            candidate_strategies = [
+                vera_recommendation or "current strategy variant",
+                "fork next regime-specific EMA/RSI mix",
+            ]
+            rationale = f"Mutation rationale: {target_scope} lifecycle {lifecycle}; queue items {new_tasks}; evidence: " + ("; ".join(evidence) or "none" )
+            suggested_followup = (
+                "Ask Atlas to simulate the proposed parameter sweep once the missing logs arrive."
+                if missing else "Send the mutation proposal to Atlas and Vera for simulation."
+            )
+            packets = [
+                {
+                    "recipient": "Pam",
+                    "summary": f"Prepared evolution proposal for {target_scope}.",
+                    "next_steps": "Route artifacts to Atlas and Vera.",
+                },
+                {
+                    "recipient": "Atlas",
+                    "summary": mutation_proposal,
+                    "next_steps": "Simulate the candidate parameters before Lucian reviews.",
+                },
+                {
+                    "recipient": "Vera",
+                    "summary": f"Align management plans with the proposed mutation: {vera_recommendation or 'no fresh recommendation'}.",
+                    "next_steps": "Confirm support before executing.",
+                },
+                {
+                    "recipient": "Lucian",
+                    "summary": f"Evolution request waits on {'logs' if missing else 'sim results'}.",
+                    "next_steps": "Approve or hold the plan after data arrives.",
+                },
+            ]
+            return {
+                "reply_text": f"Sloane@{agent_scope} suggests: {mutation_proposal}",
+                "mutation_proposal": mutation_proposal,
+                "evolution_summary": evolution_summary,
+                "candidate_parameters": candidate_parameters,
+                "candidate_strategies": candidate_strategies,
+                "rationale": rationale,
+                "risk_notes": risk_notes,
+                "suggested_followup": suggested_followup,
+                "packets": packets,
+                "escalation": bool(missing and new_tasks > 2),
+                "queue_action": "none",
+                "task_type": "evolution",
+                "priority": "medium",
+            }
+        if role_type == "market simulator":
+            insights = prompt.get("company_insights", {})
+            queue_summary = prompt.get("queue_summary", {})
+            target_scope = prompt.get("target_scope", prompt.get("scope", ""))
+            lifecycle = insights.get("metadata_summary", "unknown")
+            agent_reports = insights.get("agent_reports", {})
+            sloan_reports = agent_reports.get("Sloane") or []
+            latest_sloane = sloan_reports[-1] if sloan_reports else {}
+            proposal = latest_sloane.get("mutation_proposal") or "No recent mutation proposal"
+            missing = insights.get("missing_data", [])
+            new_tasks = queue_summary.get("new", 0)
+            confidence = "low" if missing else "high" 
+            if missing and new_tasks > 1:
+                confidence = "low"
+            elif missing:
+                confidence = "medium"
+            elif new_tasks > 3:
+                confidence = "high"
+            simulation_summary = f"{target_scope} simulation assesses {proposal} under {lifecycle} conditions."
+            candidate_win_pct = max(45, 80 - len(missing) * 5)
+            scenario_results = f"Candidate beats baseline in ~{candidate_win_pct}% of sandbox runs while volatility stays moderated."
+            comparative_outcomes = [
+                f"Candidate: {proposal}.",
+                f"Baseline: retain current strategy until approval.",
+            ]
+            limitations = (
+                f"Missing data: {', '.join(missing)}." if missing else "Inputs appear complete for a controlled run."
+            )
+            recommendation = (
+                "Run the highlighted scenario in Atlas with the proposed parameters."
+                if not missing else "Delay until Sloane or Bob refreshes the missing artifacts."
+            )
+            suggested_followup = (
+                "Notify Sloane and Vera once the simulation results land so Lucian can decide."
+                if not missing else "Collect the missing logs and rerun the scenario."
+            )
+            packets = [
+                {
+                    "recipient": "Pam",
+                    "summary": f"Simulation queued for {target_scope}.",
+                    "next_steps": "Share results with Vera and Lucian once available.",
+                },
+                {
+                    "recipient": "Sloane",
+                    "summary": f"Simulating proposed mutation: {proposal}.",
+                    "next_steps": "Ready the mutation detail sheet after the sim completes.",
+                },
+                {
+                    "recipient": "Vera",
+                    "summary": f"Align management plans with the simulation: {proposal[:60] if proposal else 'n/a'}.",
+                    "next_steps": "Confirm support before escalating to Lucian.",
+                },
+                {
+                    "recipient": "Lucian",
+                    "summary": f"Simulation confidence {confidence}; {target_scope} needs review.",
+                    "next_steps": "Approve simulation findings or ask for more runs.",
+                },
+            ]
+            return {
+                "reply_text": f"Atlas@{agent_scope} simulated scenario: {scenario_results}.",
+                "simulation_summary": simulation_summary,
+                "scenario_results": scenario_results,
+                "comparative_outcomes": comparative_outcomes,
+                "confidence": confidence,
+                "limitations": limitations,
+                "recommendation": recommendation,
+                "suggested_followup": suggested_followup,
+                "packets": packets,
+                "escalation": bool(missing and new_tasks > 3),
+                "queue_action": "none",
+                "task_type": "simulation_review",
+                "priority": "medium",
+            }
+
+        if role_type == "market simulator":
+            insights = prompt.get("company_insights", {})
+            queue_summary = prompt.get("queue_summary", {})
+            target_scope = prompt.get("target_scope", prompt.get("scope", ""))
+            lifecycle = insights.get("metadata_summary", "unknown")
+            agent_reports = insights.get("agent_reports", {})
+            sloan_reports = agent_reports.get("Sloane") or []
+            latest_sloane = sloan_reports[-1] if sloan_reports else {}
+            proposal = latest_sloane.get("mutation_proposal") or "No recent mutation proposal"
+            missing = insights.get("missing_data", [])
+            new_tasks = queue_summary.get("new", 0)
+            confidence = "low" if missing else "high" 
+            if missing and new_tasks > 1:
+                confidence = "low"
+            elif missing:
+                confidence = "medium"
+            elif new_tasks > 3:
+                confidence = "high"
+            simulation_summary = f"{target_scope} simulation assesses {proposal} under {lifecycle} conditions."
+            candidate_win_pct = max(45, 80 - len(missing) * 5)
+            scenario_results = f"Candidate beats baseline in ~{candidate_win_pct}% of sandbox runs while volatility stays moderated."
+            comparative_outcomes = [
+                f"Candidate: {proposal}.",
+                f"Baseline: retain current strategy until approval.",
+            ]
+            limitations = (
+                f"Missing data: {', '.join(missing)}." if missing else "Inputs appear complete for a controlled run."
+            )
+            recommendation = (
+                "Run the highlighted scenario in Atlas with the proposed parameters."
+                if not missing else "Delay until Sloane or Bob refreshes the missing artifacts."
+            )
+            suggested_followup = (
+                "Notify Sloane and Vera once the simulation results land so Lucian can decide."
+                if not missing else "Collect the missing logs and rerun the scenario."
+            )
+            packets = [
+                {
+                    "recipient": "Pam",
+                    "summary": f"Simulation queued for {target_scope}.",
+                    "next_steps": "Share results with Vera and Lucian once available.",
+                },
+                {
+                    "recipient": "Sloane",
+                    "summary": f"Simulating proposed mutation: {proposal}.",
+                    "next_steps": "Ready the mutation detail sheet after the sim completes.",
+                },
+                {
+                    "recipient": "Vera",
+                    "summary": f"Align management plans with the simulation: {proposal[:60] if proposal else 'n/a'}.",
+                    "next_steps": "Confirm support before escalating to Lucian.",
+                },
+                {
+                    "recipient": "Lucian",
+                    "summary": f"Simulation confidence {confidence}; {target_scope} needs review.",
+                    "next_steps": "Approve simulation findings or ask for more runs.",
+                },
+            ]
+            return {
+                "reply_text": f"Atlas@{agent_scope} simulated scenario: {scenario_results}.",
+                "simulation_summary": simulation_summary,
+                "scenario_results": scenario_results,
+                "comparative_outcomes": comparative_outcomes,
+                "confidence": confidence,
+                "limitations": limitations,
+                "recommendation": recommendation,
+                "suggested_followup": suggested_followup,
+                "packets": packets,
+                "escalation": bool(missing and new_tasks > 3),
+                "queue_action": "none",
+                "task_type": "simulation_review",
+                "priority": "medium",
+            }
+
+        if role_type == "archivist":
+            insights = prompt.get("company_insights", {})
+            target_scope = prompt.get("target_scope", prompt.get("scope", ""))
+            queue_summary = prompt.get("queue_summary", {})
+            agent_reports = insights.get("agent_reports", {})
+            latest_iris = (agent_reports.get("Iris") or [])[-1] if agent_reports.get("Iris") else {}
+            latest_vera = (agent_reports.get("Vera") or [])[-1] if agent_reports.get("Vera") else {}
+            latest_rowan = (agent_reports.get("Rowan") or [])[-1] if agent_reports.get("Rowan") else {}
+            latest_bianca = (agent_reports.get("Bianca") or [])[-1] if agent_reports.get("Bianca") else {}
+            latest_lucian = (agent_reports.get("Lucian") or [])[-1] if agent_reports.get("Lucian") else {}
+            latest_bob = (agent_reports.get("Bob") or [])[-1] if agent_reports.get("Bob") else {}
+            latest_sloane = (agent_reports.get("Sloane") or [])[-1] if agent_reports.get("Sloane") else {}
+            latest_atlas = (agent_reports.get("Atlas") or [])[-1] if agent_reports.get("Atlas") else {}
+            missing = insights.get("missing_data", [])
+            decisions = []
+            if latest_lucian.get('decision'):
+                decisions.append(f"Lucian: {latest_lucian.get('decision')}")
+            if latest_vera.get('recommendation'):
+                decisions.append(f"Vera: {latest_vera.get('recommendation')}")
+            if latest_sloane.get('mutation_proposal'):
+                decisions.append(f"Sloane proposed: {latest_sloane.get('mutation_proposal')[:60]}")
+            lessons = []
+            if missing:
+                lessons.append(f"Missing artifacts: {', '.join(missing)}; follow-up needed before firm decisions.")
+            if latest_atlas.get('confidence') == 'low':
+                lessons.append("Simulations remain inconclusive; avoid committing.")
+            unresolved = missing[:]
+            if latest_lucian.get('escalation'):
+                unresolved.append("Escalation flagged during last executive decision.")
+            archival_summary = (
+                f"Recent activity: {decisions[0] if decisions else 'No recorded decisions yet.'}"
+            )
+            decision_record = decisions or ["No firm decisions captured yet."]
+            event_summary = []
+            if latest_iris.get('analysis_summary'):
+                event_summary.append(f"Iris: {latest_iris.get('analysis_summary')}")
+            if latest_rowan.get('research_summary'):
+                event_summary.append(f"Rowan: {latest_rowan.get('research_summary')}")
+            memory_digest = (
+                f"Bianca posture {latest_bianca.get('spending_posture', 'unknown')} with {latest_bob.get('op_summary', 'no ops summary')}.")
+            timeline = [
+                f"Lucian: {latest_lucian.get('decision', 'no decision')}",
+                f"Atlas: {latest_atlas.get('scenario_results', 'no sim yet')}",
+            ]
+            summary_text = (
+                f"June@{agent_scope} archive: {archival_summary} Lessons: {lessons or ['Records lean']}"
+            )
+            packets = [
+                {
+                    "recipient": "Pam",
+                    "summary": "Archived snapshot ready.",
+                    "next_steps": "Share with leadership and vault details.",
+                },
+                {
+                    "recipient": "Lucian",
+                    "summary": f"Recent timeline: {decision_record[0]}.",
+                    "next_steps": "Review the lessons before the next directive.",
+                },
+                {
+                    "recipient": "Vera",
+                    "summary": "Context digest for your next recommendation.",
+                    "next_steps": "Ensure decisions appear in the next packet.",
+                },
+                {
+                    "recipient": "YamYam",
+                    "summary": f"Archivist notes {len(unresolved)} unresolved issues.",
+                    "next_steps": "Monitor the missing artifacts.",
+                },
+            ]
+            return {
+                "reply_text": summary_text,
+                "archival_summary": archival_summary,
+                "decision_record": decision_record,
+                "event_summary": event_summary,
+                "memory_digest": memory_digest,
+                "timeline": timeline,
+                "lessons_learned": lessons or ["Records currently incomplete."],
+                "unresolved_issues": unresolved,
+                "packets": packets,
+                "escalation": bool(unresolved),
+                "queue_action": "none",
+                "task_type": "archival_summary",
+                "priority": "medium",
+            }
         if role_type == "ceo":
             insights = prompt.get("company_insights", {})
             queue_summary = prompt.get("queue_summary", {})

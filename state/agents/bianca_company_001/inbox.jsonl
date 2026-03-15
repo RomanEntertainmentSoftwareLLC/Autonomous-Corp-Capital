@@ -2,3 +2,4 @@
 {"timestamp": "2026-03-15T04:23:22.903348+00:00", "sender": "user", "message": "Can company_001 afford to test more aggressively?", "task_id": "6ede3435-4c84-4007-b2d2-6ecb53389d26"}
 {"timestamp": "2026-03-15T04:23:27.971353+00:00", "sender": "user", "message": "Should we preserve cash or request more capital?", "task_id": "1b1007ed-f4ff-411b-b226-eaaaced7d8d5"}
 {"timestamp": "2026-03-15T04:23:30.333420+00:00", "sender": "user", "message": "Is this company at risk of overextending itself?", "task_id": "3d56ba9d-7614-49bb-9a22-741d56ff4b2c"}
+{"timestamp": "2026-03-15T23:00:47.176511+00:00", "sender": "user", "message": "Can you sum up company_001 runway?", "task_id": "8081e567-400b-4d4a-b94f-060942655ac2"}

@@ -714,6 +714,17 @@ class SimpleLLMAdapter(LLMAdapter):
             merge_plan = ["Wait for Gideon approval before merging."]
             release_notes = ["Tag release after QA sign-off."]
             rollback_guidance = "Keep the previous tag handy in case regressions appear."
+            approvals = {
+                "Tester": bool(response.get("tester_signoff")),
+                "Code Reviewer": bool(response.get("reviewer_signoff")),
+                "QA": bool(response.get("qa_signoff")),
+            }
+            pending = [name for name, approved in approvals.items() if not approved]
+            gate_status = (
+                "All approvals present."
+                if not pending
+                else f"Awaiting {', '.join(pending)} approvals."
+            )
             packets = [
                 {
                     "recipient": "Infrastructure",
@@ -726,17 +737,28 @@ class SimpleLLMAdapter(LLMAdapter):
                     "next_steps": "Approve merge once gates pass.",
                 },
             ]
+            for recipient in pending:
+                packets.append({
+                    "recipient": recipient,
+                    "summary": f"Gate awaiting {recipient} approval.",
+                    "next_steps": "Reach out to the agreement owner and confirm readiness.",
+                })
+            escalation_needed = response.get("gate_breach") or False
+            escalation_payload = bool(pending) and escalation_needed
             return {
-                "reply_text": f"Rhea@{agent_scope} says: {summary}",
+                "reply_text": f"Rhea@{agent_scope} says: {summary} Gate status: {gate_status}",
                 "infra_summary": summary,
                 "merge_plan": merge_plan,
                 "release_notes": release_notes,
                 "rollback_guidance": rollback_guidance,
                 "packets": packets,
                 "task_type": "infrastructure_review",
-                "priority": "medium",
-                "escalation": False,
+                "priority": "high" if escalation_payload else "medium",
+                "escalation": escalation_payload,
+                "escalate_to": "Jacob" if escalation_payload else "",
                 "queue_action": "none",
+                "gate_status": gate_status,
+                "approvals": approvals,
             }
 
         if role_type.lower() == "inspector general":

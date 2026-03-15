@@ -107,8 +107,13 @@ def _load_agents_config() -> Dict[str, Any]:
 
 def _save_agents_config(data: Dict[str, Any]) -> None:
     CONFIG_AGENTS.parent.mkdir(parents=True, exist_ok=True)
-    with CONFIG_AGENTS.open("w", encoding="utf-8") as fh:
+    temp_path = CONFIG_AGENTS.with_suffix(".tmp")
+    with temp_path.open("w", encoding="utf-8") as fh:
         yaml.safe_dump(data, fh, sort_keys=False)
+    if CONFIG_AGENTS.exists():
+        backup_path = CONFIG_AGENTS.with_suffix(".bak")
+        shutil.copy2(CONFIG_AGENTS, backup_path)
+    temp_path.replace(CONFIG_AGENTS)
 
 
 def _agent_id(persona: str, company: str) -> str:
@@ -172,6 +177,7 @@ def _add_agent_entry(company: str, persona_info: Dict[str, str], config: Dict[st
         "role": persona_info["role"],
         "scope": company,
         "description": persona_info.get("description", ""),
+        "agent_kind": "company_local",
     }
     agents.append(entry)
     return True
@@ -210,6 +216,7 @@ def ensure_company_roster(
                 "persona": persona_info["persona"],
                 "role": persona_info["role"],
                 "status": AGENT_STATUS_ACTIVE,
+                "agent_kind": "company_local",
                 "lineage": lineage,
                 "updated_at": datetime.now(timezone.utc).isoformat(),
             }
@@ -245,10 +252,11 @@ def roster_sync() -> None:
                 meta["status"] = AGENT_STATUS_ACTIVE
                 meta["updated_at"] = datetime.now(timezone.utc).isoformat()
                 _write_agent_meta(agent_id, meta)
-    active_agent_ids = {entry.get("id") for entry in config.get("agents", []) if entry.get("scope") in active_companies}
     to_remove = []
     for entry in list(config.get("agents", [])):
         scope = entry.get("scope")
+        if not scope or not scope.startswith("company_"):
+            continue
         if scope not in active_companies:
             to_remove.append(entry.get("id"))
     for agent_id in to_remove:

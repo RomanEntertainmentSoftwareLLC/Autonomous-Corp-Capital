@@ -20,9 +20,9 @@ def normalize_role(role: str) -> str:
         return ""
     normalized = role.replace("_", " ").replace("-", " ")
     normalized = normalized.title()
-    replacements = {"Cfo": "CFO", "Qa": "QA", "Treasure": "Treasurer", "Risk Officer": "Risk Officer", "Ceo": "CEO", "Master Ceo": "Master CEO"}
-    for key, value in replacements.items():
-        normalized = normalized.replace(key, value)
+    replacements = {"Cfo": "CFO", "Qa": "QA", "Ceo": "CEO", "Master Ceo": "Master CEO"}
+    if normalized in replacements:
+        normalized = replacements[normalized]
     return normalized
 
 
@@ -57,6 +57,8 @@ def build_packet(
     status = response.get("status")
     escalate_to = response.get("escalate_to") or ("Yam Yam" if response.get("escalation") else "")
     direct_reply = to == "user" and not handoff_to and queue_action == "none"
+    if handoff_to and handoff_to == agent_info.get("name") and to == "user":
+        handoff_to = ""
     if queue_action == "none" and not response.get("escalation"):
         status = "completed"
     elif not status:

@@ -18,6 +18,17 @@ UNIVERSAL_PERSONA_PATH = ROOT / "personas" / "universal.json"
 AGENT_PERSONA_DIR = ROOT / "personas" / "agents"
 COMPANIES_DIR = ROOT / "companies"
 TREASURY_PATH = ROOT / "state" / "treasury.yaml"
+POLICY_DIR = ROOT / "policies"
+GLOBAL_QUEUE_DEFAULT = {'new': 0, 'blocked': 0, 'completed': 0}
+
+COMPANY_STATUS_ACTIVE = "active"
+COMPANY_STATUS_RETIRED = "retired"
+COMPANY_STATUS_ARCHIVED = "archived"
+COMPANY_STATUS_DELETED = "deleted"
+AGENT_STATUS_ACTIVE = "active"
+AGENT_STATUS_DISABLED = "disabled"
+AGENT_STATUS_ARCHIVED = "archived"
+
 DEFAULT_QUEUE = {
     "new": [],
     "assigned": [],
@@ -26,6 +37,23 @@ DEFAULT_QUEUE = {
     "completed": [],
     "escalated": [],
 }
+
+def _collect_company_metadata() -> list[Dict[str, Any]]:
+    entries: list[Dict[str, Any]] = []
+    for company_dir in COMPANIES_DIR.iterdir():
+        if not company_dir.is_dir():
+            continue
+        metadata = load_yaml_file(company_dir / "metadata.yaml")
+        status = metadata.get("company_status", COMPANY_STATUS_ACTIVE)
+        entries.append({
+            "company_id": company_dir.name,
+            "status": status,
+            "lifecycle_state": metadata.get("lifecycle_state"),
+            "allocation_percent": metadata.get("allocation_percent"),
+            "allocation_amount": metadata.get("allocation_amount"),
+            "missing_data": metadata.get("missing_data") or [],
+        })
+    return entries
 
 
 def load_env_file(path: Path) -> None:
@@ -77,6 +105,12 @@ def load_persona(agent_info: Dict[str, str]) -> Dict[str, Any]:
     return merge_personas(universal, agent_persona)
 
 
+def load_policy(agent_info: Dict[str, str]) -> Dict[str, Any]:
+    policy_id = agent_info.get("persona", agent_info.get("id"))
+    policy_path = POLICY_DIR / f"{policy_id}_policy.json"
+    return load_json_file(policy_path)
+
+
 def persona_description(persona: Dict[str, Any]) -> str:
     lines: List[str] = []
     identity = persona.get("identity", {})
@@ -92,6 +126,18 @@ def persona_description(persona: Dict[str, Any]) -> str:
         keys = ", ".join([k for k, v in bias.items() if v])
         if keys:
             lines.append(f"Bias: {keys}")
+    return " | ".join(lines) if lines else ""
+
+
+def policy_description(policy: Dict[str, Any]) -> str:
+    lines: List[str] = []
+    policy_body = policy.get("policy", {})
+    mission = policy_body.get("mission")
+    if mission:
+        lines.append(f"Mission: {mission}")
+    restrictions = policy_body.get("restrictions") or []
+    if restrictions:
+        lines.append(f"Restrictions: {', '.join(restrictions)}")
     return " | ".join(lines) if lines else ""
 
 
@@ -204,6 +250,26 @@ def detect_target_scope(message: str, default: str) -> str:
 
 def gather_company_insights(scope: str, target_scope: str, queue: Dict[str, Any] | None = None) -> Dict[str, Any]:
     insights: Dict[str, Any] = {"scope": scope, "target_scope": target_scope}
+    queue_snapshot = queue or {}
+    if not target_scope.startswith("company_"):
+        companies = _collect_company_metadata()
+        active_companies = [c for c in companies if c.get("status") == COMPANY_STATUS_ACTIVE]
+        insights["company_summary"] = companies
+        insights["active_company_count"] = len(active_companies)
+        insights["active_companies"] = [c.get("company_id") for c in active_companies]
+        insights["metadata_summary"] = "global oversight"
+        insights["manager_action"] = None
+        insights["leaderboard_summary"] = None
+        insights["missing_data"] = []
+        insights["queue_entries"] = queue_snapshot
+        insights["global_notes"] = f"{len(active_companies)} active companies tracked."
+        insights["allocation"] = {}
+        insights["capital_usage"] = {}
+        insights["budget_posture"] = "steady"
+        insights["treasury_snapshot"] = load_yaml_file(ROOT / "state" / "treasury.yaml")
+        insights["agent_reports"] = {"global": []}
+        insights["file_checks"] = {"trade_logs": [], "result_logs": []}
+        return insights
     comp_dir = COMPANIES_DIR / target_scope
     metadata = load_yaml_file(comp_dir / "metadata.yaml")
     config = load_yaml_file(comp_dir / "config.yaml")
@@ -257,7 +323,6 @@ def gather_company_insights(scope: str, target_scope: str, queue: Dict[str, Any]
     if not insights.get("manager_action"):
         missing.append("manager_action")
     insights["missing_data"] = missing
-    queue_snapshot = queue or {}
     insights["queue_entries"] = queue_snapshot
     insights["allocation"] = {
         "amount": metadata.get("allocation_amount"),

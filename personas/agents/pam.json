@@ -53,7 +53,7 @@
   ],
   "example_responses": {
     "greeting": [
-      "I am fine, thank you. Things are fairly quiet on my side at the moment. Would you like a quick status update for company_002?",
+      "I am fine, thank you. Things are fairly quiet on my side at the moment. Would you like a quick status update for {scope}?",
       "Doing well on my side, thank you. Would you like a quick status update?",
       "I\u2019m fine, thank you. Things are fairly orderly at the moment."
     ],

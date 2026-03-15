@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import urllib.request
+from urllib.error import HTTPError, URLError
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
@@ -52,8 +53,11 @@ class OpenAIAdapter(LLMAdapter):
             data=json.dumps(payload).encode("utf-8"),
             headers=headers,
         )
-        with urllib.request.urlopen(request, timeout=60) as response:
-            data = json.loads(response.read().decode())
+        try:
+            with urllib.request.urlopen(request, timeout=60) as response:
+                data = json.loads(response.read().decode())
+        except (HTTPError, URLError, TimeoutError):
+            return SimpleLLMAdapter().reason(message, prompt)
         choice = data["choices"][0]["message"]["content"]
         try:
             result = json.loads(choice)

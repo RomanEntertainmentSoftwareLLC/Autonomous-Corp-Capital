@@ -7,6 +7,7 @@ import argparse
 import json
 import sys
 import uuid
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
@@ -57,6 +58,21 @@ TASK_TYPES = [
 
 ALLOWED_RECIPIENTS = sorted({entry[2] for entry in TASK_TYPES})
 ROLE_SPEC = "Pam is the front desk admin; she triages, routes, summarizes, and tracks."
+
+
+def load_env_file(path: Path) -> None:
+    if not path.exists():
+        return
+    for raw in path.read_text().splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip())
+
+load_env_file(ROOT / ".env")
 
 
 class PamError(Exception):
@@ -188,7 +204,7 @@ def create_prompt(agent_info: Dict[str, str], scope: str, message: str, queue: D
 
 
 def choose_adapter(agent_id: str) -> SimpleLLMAdapter | OpenAIAdapter:
-    if agent_id == "pam_company_001":
+    if agent_id.startswith("pam_company_") or agent_id.startswith("iris_company_"):
         try:
             return OpenAIAdapter()
         except EnvironmentError:
@@ -201,12 +217,10 @@ def main() -> None:
     parser.add_argument("--agent", default="pam", help="Agent ID from config/agents.yaml")
     parser.add_argument("--sender", default="user", help="Identity of the requester")
     parser.add_argument("--show-queue", action="store_true")
-    parser.add_argument("message", nargs="+", help="Message or request for Pam")
+    parser.add_argument("message", nargs="*", help="Message or request for Pam")
     args = parser.parse_args()
 
-    message = " ".join(args.message).strip()
-    if not message:
-        parser.error("Message cannot be empty")
+    message = " ".join(args.message).strip() if args.message else ""
 
     agents = load_agents()
     if args.agent not in agents:
@@ -223,6 +237,9 @@ def main() -> None:
     if args.show_queue:
         print(json.dumps(queue, indent=2))
         return
+
+    if not message:
+        parser.error("Message cannot be empty")
 
     persona = load_persona(agent_info)
     prompt = create_prompt(agent_info, scope, message, queue, inbox_history, outbox_history, persona)

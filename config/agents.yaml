@@ -34,3 +34,27 @@ agents:
     role: administrative_coordinator
     scope: company_004
     description: Front desk admin for company_004
+  - id: iris_company_001
+    name: Iris
+    persona: iris
+    role: Analyst
+    scope: company_001
+    description: Analyst for company_001
+  - id: iris_company_002
+    name: Iris
+    persona: iris
+    role: Analyst
+    scope: company_002
+    description: Analyst for company_002
+  - id: iris_company_003
+    name: Iris
+    persona: iris
+    role: Analyst
+    scope: company_003
+    description: Analyst for company_003
+  - id: iris_company_004
+    name: Iris
+    persona: iris
+    role: Analyst
+    scope: company_004
+    description: Analyst for company_004

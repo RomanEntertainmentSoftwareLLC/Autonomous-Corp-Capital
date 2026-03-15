@@ -5,15 +5,20 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 import uuid
 from datetime import datetime
 from pathlib import Path
+from typing import List
 
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.llm_client import OpenAIAdapter, SimpleLLMAdapter
+
 CONFIG_PATH = ROOT / "config" / "agents.yaml"
 STATE_ROOT = ROOT / "state" / "agents"
 
@@ -47,6 +52,9 @@ TASK_TYPES = [
     ("report", "status_report", "Analyst"),
     ("analysis", "analysis", "Analyst"),
 ]
+
+ALLOWED_RECIPIENTS = sorted({entry[2] for entry in TASK_TYPES})
+ROLE_SPEC = "Pam is the front desk admin; she triages, routes, summarizes, and tracks."
 
 
 class PamError(Exception):
@@ -96,25 +104,48 @@ def write_queue(path: Path, queue: dict) -> None:
     path.write_text(json.dumps(queue, indent=2))
 
 
-def classify_priority(message: str) -> str:
-    lowered = message.lower()
-    for keyword, priority in PRIORITY_KEYWORDS.items():
-        if keyword in lowered:
-            return priority
-    return "medium"
+def summarize_queue(queue: dict) -> dict[str, int]:
+    return {k: len(queue.get(k, [])) for k in DEFAULT_QUEUE.keys()}
 
 
-def classify_task(message: str) -> tuple[str, str]:
-    lowered = message.lower()
-    for keyword, task_type, recipient in TASK_TYPES:
-        if keyword in lowered:
-            return task_type, recipient
-    return "general_triage", "Analyst"
+def read_history(path: Path, limit: int = 5) -> List[dict]:
+    if not path.exists():
+        return []
+    lines = [line.strip() for line in path.read_text().splitlines() if line.strip()]
+    history: List[dict] = []
+    for raw in lines[-limit:]:
+        try:
+            history.append(json.loads(raw))
+        except Exception:
+            continue
+    return history
 
 
 def append_log(path: Path, entry: dict) -> None:
     with path.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(entry) + "\n")
+
+
+def create_prompt(agent_info: dict[str, str], scope: str, message: str, queue: dict, inbox: List[dict], outbox: List[dict]) -> dict[str, object]:
+    return {
+        "role_spec": ROLE_SPEC,
+        "scope": scope,
+        "allowed_recipients": ALLOWED_RECIPIENTS,
+        "queue_summary": summarize_queue(queue),
+        "recent_inbox": inbox,
+        "recent_outbox": outbox,
+        "task_rules": TASK_TYPES,
+        "message": message,
+    }
+
+
+def choose_adapter(agent_id: str, prompt: dict[str, object]):
+    if agent_id == "pam_company_001":
+        try:
+            return OpenAIAdapter()
+        except EnvironmentError:
+            return SimpleLLMAdapter()
+    return SimpleLLMAdapter()
 
 
 def main() -> None:
@@ -133,62 +164,75 @@ def main() -> None:
     if args.agent not in agents:
         raise PamError(f"Unknown agent '{args.agent}' (check config/agents.yaml)")
     agent_info = agents[args.agent]
+    scope = agent_info.get("scope", "global")
+
     state_path = ensure_state(args.agent)
     queue_path = state_path / "queue.json"
     queue = read_queue(queue_path)
+    inbox_history = read_history(state_path / "inbox.jsonl")
+    outbox_history = read_history(state_path / "outbox.jsonl")
 
     if args.show_queue:
         print(json.dumps(queue, indent=2))
         return
 
+    prompt = create_prompt(agent_info, scope, message, queue, inbox_history, outbox_history)
+    adapter = choose_adapter(args.agent, prompt)
+    response = adapter.reason(message, prompt)
+
     now = datetime.utcnow().isoformat() + "+00:00"
-    priority = classify_priority(message)
-    task_type, recipient = classify_task(message)
     task_id = str(uuid.uuid4())
-    scope = agent_info.get("scope", "global")
-    status = "new"
+    recipient = response.get("recipient", "Analyst")
+    priority = response.get("priority", "medium")
+    queue_action = response.get("queue_action", "create")
 
     packet = {
         "task_id": task_id,
         "from": args.sender,
         "to": recipient,
         "company_scope": scope,
-        "task_type": task_type,
+        "task_type": response.get("task_type", "general_triage"),
         "priority": priority,
-        "summary": message if len(message) < 100 else message[:97] + "...",
+        "summary": message if len(message) < 140 else message[:137] + "...",
         "context": [
             f"Captured at {now}",
             f"Agent: {agent_info.get('name', args.agent)}",
+            response.get("reply_text", ""),
         ],
-        "requested_action": f"{recipient}: handle {task_type} for {scope}",
-        "status": status,
-        "escalate_to": "" if priority != "emergency" else "YamYam",
+        "requested_action": response.get("requested_action", ""),
+        "status": "new",
+        "escalate_to": "YamYam" if response.get("escalate") else "",
+        "reply_text": response.get("reply_text", ""),
     }
 
-    queue_entry = {
-        "task_id": task_id,
-        "summary": packet["summary"],
-        "priority": priority,
-        "assigned_to": recipient,
-        "status": status,
-        "timestamp": now,
-    }
-    queue.setdefault("new", []).append(queue_entry)
-    write_queue(queue_path, queue)
+    if queue_action in ("create", "update"):
+        queue_entry = {
+            "task_id": task_id,
+            "summary": packet["summary"],
+            "priority": packet["priority"],
+            "assigned_to": recipient,
+            "status": "new",
+            "timestamp": now,
+        }
+        queue.setdefault("new", []).append(queue_entry)
+        write_queue(queue_path, queue)
 
-    inbox_entry = {
+    if response.get("escalate"):
+        append_log(state_path / "escalations.jsonl", {
+            "timestamp": now,
+            "task_id": task_id,
+            "reason": response.get("reply_text", ""),
+            "recipient": recipient,
+        })
+
+    append_log(state_path / "inbox.jsonl", {
         "timestamp": now,
         "sender": args.sender,
         "message": message,
         "task_id": task_id,
-    }
-    append_log(state_path / "inbox.jsonl", inbox_entry)
+    })
 
-    outbox_entry = {
-        "timestamp": now,
-        "response": packet,
-    }
-    append_log(state_path / "outbox.jsonl", outbox_entry)
+    append_log(state_path / "outbox.jsonl", {"timestamp": now, "response": packet})
 
     print(json.dumps(packet, indent=2))
 

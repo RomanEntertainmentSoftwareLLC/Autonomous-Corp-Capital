@@ -1,7 +1,7 @@
 {
   "agent_id": "june",
   "policy": {
-    "mission": "Capture, summarize, and preserve the company’s operational memory, decisions, and lessons. Deliver structured archival packets for Pam, Lucian, Vera, or YamYam while noting when records are incomplete.",
+    "mission": "Capture, summarize, and preserve the company’s operational memory, decisions, and lessons. Deliver structured archival packets for Pam, Lucian, Vera, or Yam Yam while noting when records are incomplete.",
     "inputs": [
       "Pam coordination packets",
       "Iris analysis summaries",
@@ -32,7 +32,7 @@
       "timeline of actions",
       "lessons learned",
       "unresolved issues list",
-      "structured packets for Pam/Lucian/Vera/YamYam",
+      "structured packets for Pam/Lucian/Vera/Yam Yam",
       "explicit missing-artifacts notes"
     ],
     "authority": [

@@ -596,7 +596,7 @@ class SimpleLLMAdapter(LLMAdapter):
                     "next_steps": "Ensure decisions appear in the next packet.",
                 },
                 {
-                    "recipient": "YamYam",
+                    "recipient": "Yam Yam",
                     "summary": f"Archivist notes {len(unresolved)} unresolved issues.",
                     "next_steps": "Monitor the missing artifacts.",
                 },
@@ -736,6 +736,383 @@ class SimpleLLMAdapter(LLMAdapter):
                 "task_type": "infrastructure_review",
                 "priority": "medium",
                 "escalation": False,
+                "queue_action": "none",
+            }
+
+        if role_type.lower() == "inspector general":
+            target_scope = prompt.get("target_scope", prompt.get("scope", "global"))
+            company_insights = prompt.get("company_insights") or {}
+            queue_summary = prompt.get("queue_summary", {})
+            global_insights = prompt.get("global_insights") or {}
+            risk_insights = prompt.get("global_risk_insights") or {}
+            finance_insights = prompt.get("global_finance_insights") or {}
+            missing_data = company_insights.get("missing_data") or []
+            escalations = risk_insights.get("escalations") or []
+            risk_flags = risk_insights.get("risk_flags") or []
+            queue_new = queue_summary.get("new", 0)
+            overexposed = []
+            for company in (risk_insights.get("companies") or []):
+                pct = company.get("allocation_percent")
+                try:
+                    pct_value = float(str(pct))
+                except (TypeError, ValueError):
+                    pct_value = None
+                if pct_value and pct_value > 70:
+                    overexposed.append(company.get("company_id"))
+            suspicious = bool(missing_data or escalations or risk_flags or overexposed or queue_new > 5)
+            findings = []
+            if missing_data:
+                findings.append(f"missing data: {', '.join(missing_data)}")
+            if escalations:
+                findings.append(f"escalations: {len(escalations)} open items")
+            if risk_flags:
+                findings.append(f"risk flags: {len(risk_flags)}")
+            if overexposed:
+                findings.append(f"overexposed companies: {', '.join(overexposed)}")
+            if queue_new > 5:
+                findings.append(f"queue backlog: {queue_new} new items")
+            if findings:
+                audit_summary = f"Audit notes for {target_scope}: {'; '.join(findings)}."
+            else:
+                audit_summary = f"Audit clean for {target_scope}; no integrity drift observed."
+            integrity_warning = findings[0] if findings else "No integrity concerns detected."
+            branch_overreach_warning = (
+                f"Queue pressure {queue_new} new / {queue_summary.get('blocked', 0)} blocked" if queue_new or queue_summary.get("blocked") else "No overreach detected."
+            )
+            suspicious_pattern_alert = (
+                f"Escalations {len(escalations)}; risk flags {len(risk_flags)}" if escalations or risk_flags else "No suspicious pattern observed."
+            )
+            compliance_concern = (
+                f"Missing compliance artifacts: {', '.join(missing_data)}" if missing_data else "Compliance trail intact."
+            )
+            recommendation = (
+                "Request Justine to rule on the flagged authority loops and loop Jacob for confirmation." if suspicious else
+                "No escalation needed; keep monitoring the logs."
+            )
+            treasury_snapshot = global_insights.get("treasury_snapshot", {})
+            reserve_note = treasury_snapshot.get("reserve_capital") or treasury_snapshot.get("reserve_percent", "unknown")
+            finance_note = finance_insights.get("sustainability", "stable")
+            packets = [
+                {
+                    "recipient": "Jacob",
+                    "summary": audit_summary,
+                    "next_steps": "Confirm the oversight report and authorize any follow-up."
+                },
+                {
+                    "recipient": "Justine",
+                    "summary": recommendation,
+                    "next_steps": "Rule on the disputed authority loops highlighted herein."
+                },
+                {
+                    "recipient": "Helena",
+                    "summary": f"Risk exposure: {len(risk_flags)} flags; {len(escalations)} escalations.",
+                    "next_steps": "Hold approvals until the risk posture is justified."
+                },
+                {
+                    "recipient": "Selene",
+                    "summary": f"Treasury reserves {reserve_note}; watch for favoritism patterns.",
+                    "next_steps": "Ensure allocations stay within policy bounds."
+                },
+                {
+                    "recipient": "Vivienne",
+                    "summary": f"Portfolio sustainability classified as {finance_note}.",
+                    "next_steps": "Double-check the flagged companies before new deployments."
+                },
+                {
+                    "recipient": "Yam Yam",
+                    "summary": "Inspector General report ready.",
+                    "next_steps": "Decide whether to elevate these concerns."
+                },
+            ]
+            return {
+                "reply_text": f"Mara@{agent_scope} reports {audit_summary}",
+                "audit_summary": audit_summary,
+                "integrity_warning": integrity_warning,
+                "branch_overreach_warning": branch_overreach_warning,
+                "suspicious_pattern_alert": suspicious_pattern_alert,
+                "compliance_concern": compliance_concern,
+                "recommendation": recommendation,
+                "packets": packets,
+                "task_type": "oversight_review",
+                "priority": "high" if suspicious else "medium",
+                "escalation": suspicious,
+                "queue_action": "none",
+            }
+
+        if role_type.lower() == "constitutional arbiter":
+            target_scope = prompt.get("target_scope", prompt.get("scope", "global"))
+            company_insights = prompt.get("company_insights") or {}
+            queue_summary = prompt.get("queue_summary", {})
+            global_insights = prompt.get("global_insights") or {}
+            risk_insights = prompt.get("global_risk_insights") or {}
+            finance_insights = prompt.get("global_finance_insights") or {}
+            missing_data = company_insights.get("missing_data") or []
+            escalations = risk_insights.get("escalations") or []
+            risk_flags = risk_insights.get("risk_flags") or []
+            queue_pressure = queue_summary.get("new", 0)
+            evidence_notes = []
+            if missing_data:
+                evidence_notes.append(f"missing data: {', '.join(missing_data)}")
+            if escalations:
+                evidence_notes.append(f"escalations: {len(escalations)} open")
+            if risk_flags:
+                evidence_notes.append(f"risk flags: {len(risk_flags)}")
+            if queue_pressure > 8:
+                evidence_notes.append(f"queue backlog: {queue_pressure}")
+            overreach = bool(evidence_notes)
+            interpretation = (
+                f"Risk authority remains primary, but escalation {'needed' if escalations else 'monitored'}; judiciary watches scope."
+                if overreach else
+                "All branches appear within their delegated lanes for now."
+            )
+            branch_decision = (
+                "Pause disputed acts and ask Mara to reaffirm the audit trail."
+                if overreach else
+                "No balance shift required; maintain the current boundaries."
+            )
+            scope_validity = "scope_invalid" if overreach else "scope_valid"
+            insufficient_basis = bool(missing_data and not overreach)
+            if insufficient_basis:
+                scope_validity = "insufficient_basis"
+            dispute_summary = (
+                f"Dispute details for {target_scope}: {'; '.join(evidence_notes)}."
+                if evidence_notes else
+                f"No dispute evidence detected for {target_scope}."
+            )
+            recommendation = (
+                "Ask Jacob to convene the oversight council and require a corrective memo."
+                if overreach else
+                ("Request Mara to provide the missing artifacts before a formal ruling." if missing_data else "No correction necessary, continue monitoring.")
+            )
+            packets = [
+                {
+                    "recipient": "Jacob",
+                    "summary": dispute_summary,
+                    "next_steps": "Confirm the constitutional posture and authorize remedial action if needed."
+                },
+                {
+                    "recipient": "Mara",
+                    "summary": "Share audit findings for this dispute.",
+                    "next_steps": "Provide evidence or retract the flags."
+                },
+                {
+                    "recipient": "Helena",
+                    "summary": f"Risk exposure: {len(risk_flags)} flags; {len(escalations)} escalations.",
+                    "next_steps": "Justify any vetoes in accordance with policy."
+                },
+                {
+                    "recipient": "Selene",
+                    "summary": f"Treasury reserves {global_insights.get('treasury_snapshot', {}).get('reserve_percent', 'unknown')}",
+                    "next_steps": "Stand down or explain allocations."
+                },
+                {
+                    "recipient": "Vivienne",
+                    "summary": f"Portfolio sustainability: {finance_insights.get('sustainability', 'stable')}",
+                    "next_steps": "Confirm constitutional backing before new spend."
+                },
+                {
+                    "recipient": "Yam Yam",
+                    "summary": "Constitutional ruling compiled.",
+                    "next_steps": "Decide whether to accept or amend the contested action."
+                },
+            ]
+            constitutional_ruling = (
+                f"Ruling: {target_scope} action needs review because {'; '.join(evidence_notes)}."
+                if overreach else
+                f"Ruling: no constitutional breach detected for {target_scope}."
+            )
+            return {
+                "reply_text": f"Justine@{agent_scope} reports {constitutional_ruling}",
+                "constitutional_ruling": constitutional_ruling,
+                "authority_interpretation": interpretation,
+                "branch_balance_decision": branch_decision,
+                "scope_validity": scope_validity,
+                "dispute_summary": dispute_summary,
+                "recommendation": recommendation,
+                "packets": packets,
+                "task_type": "constitutional_review",
+                "priority": "high" if overreach else "medium",
+                "escalation": overreach,
+                "queue_action": "none",
+            }
+
+        if "ombudsman" in role_type:
+            target_scope = prompt.get("target_scope", prompt.get("scope", "global"))
+            company_insights = prompt.get("company_insights") or {}
+            queue_summary = prompt.get("queue_summary", {})
+            risk_insights = prompt.get("global_risk_insights") or {}
+            global_insights = prompt.get("global_insights") or {}
+            finance_insights = prompt.get("global_finance_insights") or {}
+            missing_data = company_insights.get("missing_data") or []
+            escalations = risk_insights.get("escalations") or []
+            risk_flags = risk_insights.get("risk_flags") or []
+            queue_new = queue_summary.get("new", 0)
+            evidence_notes = []
+            if missing_data:
+                evidence_notes.append(f"missing data: {', '.join(missing_data)}")
+            if escalations:
+                evidence_notes.append(f"escalations: {len(escalations)} open")
+            if risk_flags:
+                evidence_notes.append(f"risk flags: {len(risk_flags)}")
+            if queue_new:
+                evidence_notes.append(f"queue backlog: {queue_new}")
+            triage_target = ("Justine" if risk_flags and escalations else
+                            "Mara" if escalations or missing_data else
+                            "Jacob" if queue_new > 10 else
+                            "Originating Branch")
+            appeal_basis = evidence_notes and "; ".join(evidence_notes) or "no solid appeal basis yet"
+            appeal_intake_summary = f"Appeal intake for {target_scope}: {appeal_basis}."
+            fairness_summary = ("Fairness concern present; escalate accordingly." if evidence_notes else "Fairness intake neutral.")
+            complaint_triage_decision = ("Forward to Justice lane (Justine)." if triage_target == "Justine" else
+                                         "Send to Mara for audit validation." if triage_target == "Mara" else
+                                         "Escalate to Jacob for leadership review." if triage_target == "Jacob" else
+                                         "Return to the originating branch with guidance.")
+            recommendation = ("Collect the missing artifacts and resubmit to the indicated reviewer." if triage_target in ("Mara", "Justine", "Jacob") else
+                             "Work with the branch to resolve this administratively.")
+            procedural_guidance = ("Acknowledge the complainant, note the triage destination, and record the evidence." if triage_target != "Originating Branch" else "Document the branch-led resolution and monitor for follow-ups.")
+            packets = [
+                {
+                    "recipient": triage_target,
+                    "summary": complaint_triage_decision,
+                    "next_steps": recommendation
+                },
+                {
+                    "recipient": "Mara",
+                    "summary": appeal_intake_summary,
+                    "next_steps": "Review the audit evidence if requested."
+                },
+                {
+                    "recipient": "Justine",
+                    "summary": f"Authority cues: {len(risk_flags)} risk flags, {len(escalations)} escalations.",
+                    "next_steps": "Interpret whether the contention crosses constitutional boundaries."
+                },
+                {
+                    "recipient": "Jacob",
+                    "summary": "Appeal intake prepared.",
+                    "next_steps": "Authorize any further escalation if needed."
+                },
+            ]
+            return {
+                "reply_text": f"Owen@{agent_scope} triages: {complaint_triage_decision}",
+                "appeal_intake_summary": appeal_intake_summary,
+                "complaint_triage_decision": complaint_triage_decision,
+                "fairness_summary": fairness_summary,
+                "procedural_guidance": procedural_guidance,
+                "recommendation": recommendation,
+                "packets": packets,
+                "task_type": "appeal_triage",
+                "priority": "high" if triage_target in ("Justine", "Jacob") else "medium",
+                "escalation": triage_target in ("Justine", "Jacob"),
+                "queue_action": "none",
+            }
+
+        if role_type.lower() == "master ceo":
+            target_scope = prompt.get("target_scope", prompt.get("scope", "global"))
+            company_insights = prompt.get("company_insights") or {}
+            queue_summary = prompt.get("queue_summary", {})
+            global_insights = prompt.get("global_insights") or {}
+            risk_insights = prompt.get("global_risk_insights") or {}
+            finance_insights = prompt.get("global_finance_insights") or {}
+            missing_data = company_insights.get("missing_data") or []
+            escalations = risk_insights.get("escalations") or []
+            risk_flags = risk_insights.get("risk_flags") or []
+            queue_new = queue_summary.get("new", 0)
+            treasury_snapshot = global_insights.get("treasury_snapshot") or {}
+            portfolio_note = treasury_snapshot.get("reserve_percent") or treasury_snapshot.get("reserve_capital") or "unknown"
+            finance_note = finance_insights.get("sustainability", "steady")
+            lifecycle_state = company_insights.get("metadata_summary", "unknown")
+            direction_signals = []
+            if missing_data:
+                direction_signals.append(f"missing data: {', '.join(missing_data)}")
+            if escalations:
+                direction_signals.append(f"escalations: {len(escalations)} open")
+            if risk_flags:
+                direction_signals.append(f"risk flags: {len(risk_flags)}")
+            if queue_new:
+                direction_signals.append(f"queue backlog: {queue_new}")
+            caution = bool(direction_signals)
+            if caution:
+                ecosystem_direction = "Hold new company actions until the flagged evidence is resolved."
+                lifecycle_decision = "Hold/testing mode; coordinate with treasury/risk before cloning or expanding."
+                branch_coordination_directive = "Selene and Helena align capital/risk posture, Mara verifies integrity, Justine affirms authority limits."
+                strategic_recommendation = "Match growth with discipline; avoid new clones until answers arrive."
+                request_more_evidence = "Supply missing data and risk rationale before advancing."
+            else:
+                ecosystem_direction = "Targeted expansion/testing is acceptable with current evidence."
+                lifecycle_decision = "Advance selective tests or cautious clones for promising companies."
+                branch_coordination_directive = "Engage Nadia/Tessa engineering while Selene/Helena stay aligned and Vivienne monitors sustainability."
+                strategic_recommendation = "Prioritize the companies with the strongest leaderboard guidance."
+                request_more_evidence = "Baseline data already sufficient for measured action."
+            signal_text = "; ".join(direction_signals) if direction_signals else "No critical signals."
+            executive_summary = (
+                f"Yam Yam@{agent_scope} sees {lifecycle_state} state; {signal_text} Portfolio reserve: {portfolio_note}; finance posture: {finance_note}."
+            )
+            packets = [
+                {
+                    "recipient": "Selene",
+                    "summary": f"Capital posture: {portfolio_note}.",
+                    "next_steps": "Hold or release funds in lockstep with the executive direction."
+                },
+                {
+                    "recipient": "Helena",
+                    "summary": f"Risk flags: {len(risk_flags)}; escalations: {len(escalations)}.",
+                    "next_steps": "Confirm veto limits and communicate to the board."
+                },
+                {
+                    "recipient": "Vivienne",
+                    "summary": f"Portfolio sustainability: {finance_note}.",
+                    "next_steps": "Advise on whether restraint or expansion is warranted."
+                },
+                {
+                    "recipient": "Mara",
+                    "summary": f"Integrity signals: {signal_text}.",
+                    "next_steps": "Audit the missing artifacts or suspicious blocks."
+                },
+                {
+                    "recipient": "Justine",
+                    "summary": "Confirm authority boundaries before the next directive.",
+                    "next_steps": "Rule on any disputed lane if flagged."
+                },
+                {
+                    "recipient": "Lucian",
+                    "summary": "Executive direction compiled.",
+                    "next_steps": "Relay it to the company CEOs/CFOs."
+                },
+                {
+                    "recipient": "Bianca",
+                    "summary": "Ensure finance teams mirror the strategic stance.",
+                    "next_steps": "Share liquidity forecasts aligned with the direction."
+                },
+                {
+                    "recipient": "Nadia",
+                    "summary": f"Shared engineering focus: {lifecycle_state} companies.",
+                    "next_steps": "Coordinate product priorities with the executive decision."
+                },
+                {
+                    "recipient": "Tessa",
+                    "summary": "Sprint intake aligned to the direction.",
+                    "next_steps": "Reprioritize blocked tasks per the executive guidance."
+                },
+                {
+                    "recipient": "Jacob",
+                    "summary": "Tracking whether this matter needs executive escalation.",
+                    "next_steps": "Stand by for elevated follow-up if issues persist."
+                },
+            ]
+            escalation_needed = caution and bool(escalations)
+            return {
+                "reply_text": executive_summary,
+                "executive_summary": executive_summary,
+                "ecosystem_direction": ecosystem_direction,
+                "lifecycle_decision": lifecycle_decision,
+                "branch_coordination_directive": branch_coordination_directive,
+                "strategic_recommendation": strategic_recommendation,
+                "request_more_evidence": request_more_evidence,
+                "packets": packets,
+                "task_type": "executive_direction",
+                "priority": "high" if escalation_needed else "medium",
+                "escalation": escalation_needed,
+                "escalate_to": "Jacob" if escalation_needed else "",
                 "queue_action": "none",
             }
 
@@ -897,7 +1274,7 @@ class SimpleLLMAdapter(LLMAdapter):
                     "next_steps": "Prioritize the blockers during planning.",
                 },
                 {
-                    "recipient": "YamYam",
+                    "recipient": "Yam Yam",
                     "summary": "Product view updated; infrastructure gaps first.",
                     "next_steps": "Review before adding new company directives.",
                 },
@@ -940,7 +1317,7 @@ class SimpleLLMAdapter(LLMAdapter):
                     "next_steps": "Hold risky proposals until resolved.",
                 },
                 {
-                    "recipient": "YamYam",
+                    "recipient": "Yam Yam",
                     "summary": "Portfolio finance intelligence ready.",
                     "next_steps": "Use this before approving new directions.",
                 },
@@ -976,7 +1353,7 @@ class SimpleLLMAdapter(LLMAdapter):
                     "next_steps": "Coordinate with treasury before approving new allocations.",
                 },
                 {
-                    "recipient": "YamYam",
+                    "recipient": "Yam Yam",
                     "summary": f"Escalations: {len(escalations)}; risk_flags: {len(risk_flags)}.",
                     "next_steps": "Assess breach responses if any flags are critical.",
                 },
@@ -1026,7 +1403,7 @@ class SimpleLLMAdapter(LLMAdapter):
                     "next_steps": "Hold risky proposals until resolved.",
                 },
                 {
-                    "recipient": "YamYam",
+                    "recipient": "Yam Yam",
                     "summary": "Portfolio finance intelligence ready.",
                     "next_steps": "Use this before approving new directions.",
                 },
@@ -1073,7 +1450,7 @@ class SimpleLLMAdapter(LLMAdapter):
             rationale = f"Reserves {reserve_level}; overexposed companies: {len(overexposed)}; active: {active_count}."
             packets = [
                 {
-                    "recipient": "YamYam",
+                    "recipient": "Yam Yam",
                     "summary": summary,
                     "next_steps": "Discuss capital posture before approving extra spend.",
                 },
@@ -1137,8 +1514,8 @@ class SimpleLLMAdapter(LLMAdapter):
             if escalate_flag:
                 decision = "escalate"
                 approval_decision = "escalate"
-                action_directive = "Escalate to YamYam with the missing data and queue pressure before proceeding."
-                request_more_evidence = f"Provide {missing_text} along with a YamYam-aligned risk brief."
+                action_directive = "Escalate to Yam Yam with the missing data and queue pressure before proceeding."
+                request_more_evidence = f"Provide {missing_text} along with a Yam Yam-aligned risk brief."
             elif missing:
                 decision = "hold"
                 approval_decision = "request more evidence"
@@ -1203,7 +1580,7 @@ class SimpleLLMAdapter(LLMAdapter):
             ]
             if escalate_flag:
                 packets.append({
-                    "recipient": "YamYam",
+                    "recipient": "Yam Yam",
                     "summary": f"Escalating due to {missing_text} while {new_items} queue item(s) wait.",
                     "next_steps": "Advise on risk/treasury limits.",
                 })

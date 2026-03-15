@@ -311,3 +311,28 @@ agents:
   role: Infrastructure
   scope: global
   description: Global Infrastructure steward for OpenClaw
+
+- id: inspector_general
+  name: Mara
+  persona: mara
+  role: Inspector General
+  scope: global
+  description: Global Inspector General overseeing audit and integrity
+- id: constitutional_arbiter
+  name: Justine
+  persona: justine
+  role: Constitutional Arbiter
+  scope: global
+  description: Global Constitutional Arbiter resolving authority disputes
+- id: ombudsman
+  name: Owen
+  persona: owen
+  role: Ombudsman / Appeals Officer
+  scope: global
+  description: Global Ombudsman / Appeals Officer triaging fairness disputes
+- id: yam_yam
+  name: Yam Yam
+  persona: yam_yam
+  role: Master CEO
+  scope: global
+  description: Master CEO overseeing the OpenClaw ecosystem

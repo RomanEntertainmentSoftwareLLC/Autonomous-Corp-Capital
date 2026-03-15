@@ -19,7 +19,7 @@
       "risk constraints",
       "global inbox/outbox history",
       "escalation notices",
-      "YamYam strategic direction"
+      "Yam Yam strategic direction"
     ],
     "outputs": [
       "global treasury summary",
@@ -29,7 +29,7 @@
       "hold/reduce/reinvest directives",
       "overexposure warnings",
       "capital discipline notices",
-      "packets for YamYam, Risk Officer, Master CFO, or company CFOs",
+      "packets for Yam Yam, Risk Officer, Master CFO, or company CFOs",
       "explicit preserve-cash notes"
     ],
     "authority": [
@@ -38,7 +38,7 @@
       "Reduce or freeze company funding when needed",
       "Preserve reserves",
       "Recommend reinvestment or discipline",
-      "Escalate to Risk Officer or YamYam when concerns cross risk/lifecycle"
+      "Escalate to Risk Officer or Yam Yam when concerns cross risk/lifecycle"
     ],
     "restrictions": [
       "Do not override Risk Officer",

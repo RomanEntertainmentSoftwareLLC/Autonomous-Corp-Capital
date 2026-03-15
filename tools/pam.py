@@ -109,7 +109,11 @@ TASK_TYPES = [
     ("risk", "risk_review", "Risk Officer"),
     ("veto", "risk_review", "Risk Officer"),
     ("compliance", "risk_review", "Risk Officer"),
-    ("lifecycle", "lifecycle_action", "YamYam"),
+    ("lifecycle", "lifecycle_action", "Master CEO"),
+    ("ecosystem", "ecosystem_direction", "Master CEO"),
+    ("global direction", "ecosystem_direction", "Master CEO"),
+    ("master direction", "ecosystem_direction", "Master CEO"),
+    ("executive mandate", "ecosystem_direction", "Master CEO"),
     ("software", "software_task", "Product Manager"),
     ("bug", "bug_fix", "SWE"),
     ("meeting", "meeting_prep", "Scrum Master"),
@@ -120,6 +124,23 @@ TASK_TYPES = [
     ("record", "archival_summary", "June"),
     ("lessons", "archival_summary", "June"),
     ("timeline", "archival_summary", "June"),
+    ("audit", "oversight_review", "Inspector General"),
+    ("oversight", "oversight_review", "Inspector General"),
+    ("integrity", "oversight_review", "Inspector General"),
+    ("abuse", "oversight_review", "Inspector General"),
+    ("scope", "oversight_review", "Inspector General"),
+    ("overreach", "oversight_review", "Inspector General"),
+    ("watchdog", "oversight_review", "Inspector General"),
+    ("complaint", "appeal_triage", "Ombudsman / Appeals Officer"),
+    ("appeal", "appeal_triage", "Ombudsman / Appeals Officer"),
+    ("fairness", "appeal_triage", "Ombudsman / Appeals Officer"),
+    ("grievance", "appeal_triage", "Ombudsman / Appeals Officer"),
+    ("procedural", "appeal_triage", "Ombudsman / Appeals Officer"),
+    ("constitutional", "constitutional_review", "Constitutional Arbiter"),
+    ("arbiter", "constitutional_review", "Constitutional Arbiter"),
+    ("authority", "constitutional_review", "Constitutional Arbiter"),
+    ("dispute", "constitutional_review", "Constitutional Arbiter"),
+    ("constitutional law", "constitutional_review", "Constitutional Arbiter"),
 ]
 
 
@@ -164,6 +185,18 @@ ROLE_SPECS = {
     ),
     "Product Manager": (
         "Nadia is the global Product Manager. She turns shared system friction into prioritized, scoped work without coding it herself."
+    ),
+    "Inspector General": (
+        "Mara is the Inspector General. She audits the whole organization, flags abuse, scope drift, and suspicious loops, and escalates integrity findings without acting as an executive."
+    ),
+    "Constitutional Arbiter": (
+        "Justine is the Constitutional Arbiter. She interprets the constitution, resolves authority disputes, and rules on scope compliance without running the system."
+    ),
+    "Ombudsman / Appeals Officer": (
+        "Owen is the Ombudsman / Appeals Officer. He receives appeals, cares for fairness, and routes complaints to Mara, Justine, or Jacob without ruling them himself."
+    ),
+    "Master CEO": (
+        "Yam Yam is the Master CEO. She defines ecosystem-level strategy, lifecycle direction, and branch coordination without overriding constitutional limits."
     ),
     "Low Tier Operations Worker": (
         "Bob is the low-tier operations worker who handles safe, repetitive chores and reports plainly."
@@ -275,6 +308,26 @@ ROLE_STRUCTURED_OUTPUT = {
         "default_queue_action": "none",
         "description": "Rhea stewards branch hygiene, release flow, and rollbacks."
     },
+    "Constitutional Arbiter": {
+        "required_keys": ["reply_text", "constitutional_ruling", "authority_interpretation", "branch_balance_decision", "scope_validity", "dispute_summary", "recommendation", "packets"],
+        "default_queue_action": "none",
+        "description": "Return constitutional rulings, authority interpretations, and dispute packets for the oversight council."
+    },
+    "Inspector General": {
+        "required_keys": ["reply_text", "audit_summary", "integrity_warning", "branch_overreach_warning", "suspicious_pattern_alert", "compliance_concern", "recommendation", "packets"],
+        "default_queue_action": "none",
+        "description": "Return audit packets, integrity warnings, suspicious-pattern alerts, and compliance concerns for oversight recipients."
+    },
+    "Ombudsman / Appeals Officer": {
+        "required_keys": ["reply_text", "appeal_intake_summary", "complaint_triage_decision", "fairness_summary", "procedural_guidance", "recommendation", "packets"],
+        "default_queue_action": "none",
+        "description": "Return appeal intake summaries, fairness notes, and routing packets for the oversight council."
+    },
+    "Master CEO": {
+        "required_keys": ["reply_text", "executive_summary", "ecosystem_direction", "lifecycle_decision", "branch_coordination_directive", "strategic_recommendation", "request_more_evidence", "packets"],
+        "default_queue_action": "none",
+        "description": "Return ecosystem executive direction, lifecycle calls, and branch coordination packets without bypassing constitutional lanes."
+    },
     "Low Tier Operations Worker": {
         "required_keys": ["reply_text", "op_summary", "artifacts", "status", "packets"],
         "default_queue_action": "none",
@@ -309,9 +362,12 @@ def create_prompt(
     role_spec = ROLE_SPECS.get(role_type, ROLE_SPECS.get("administrative_coordinator", ""))
     structured = ROLE_STRUCTURED_OUTPUT.get(role_type, ROLE_STRUCTURED_OUTPUT["administrative_coordinator"])
     insights = gather_company_insights(scope, target_scope, queue)
-    global_insights = gather_global_treasury_insights() if role_key == "master treasurer" else {}
-    global_risk_insights = gather_global_risk_insights() if role_key == "risk officer" else {}
-    global_finance_insights = gather_global_finance_insights() if role_key == "master cfo" else {}
+    treasury_roles = {"master treasurer", "inspector general", "constitutional arbiter", "ombudsman", "master ceo"}
+    risk_roles = {"risk officer", "inspector general", "constitutional arbiter", "ombudsman", "master ceo"}
+    finance_roles = {"master cfo", "inspector general", "constitutional arbiter", "ombudsman", "master ceo"}
+    global_insights = gather_global_treasury_insights() if role_key in treasury_roles else {}
+    global_risk_insights = gather_global_risk_insights() if role_key in risk_roles else {}
+    global_finance_insights = gather_global_finance_insights() if role_key in finance_roles else {}
     prompt = {
         "role_type": role_type,
         "role_spec": role_spec,
@@ -336,7 +392,7 @@ def create_prompt(
         prompt["global_finance_insights"] = global_finance_insights
     return prompt
 def choose_adapter(agent_id: str) -> SimpleLLMAdapter | OpenAIAdapter:
-    if agent_id in ("master_treasurer", "risk_officer", "master_cfo", "product_manager", "scrum_master", "senior_software_architect", "senior_software_engineer", "junior_software_engineer", "tester", "code_reviewer", "qa", "infrastructure") or any(agent_id.startswith(prefix) for prefix in ("pam_company_", "iris_company_", "vera_company_", "rowan_company_", "bianca_company_", "lucian_company_", "bob_company_", "sloane_company_", "atlas_company_", "june_company_")):
+    if agent_id in ("master_treasurer", "risk_officer", "master_cfo", "product_manager", "scrum_master", "senior_software_architect", "senior_software_engineer", "junior_software_engineer", "tester", "code_reviewer", "qa", "infrastructure", "inspector_general", "constitutional_arbiter", "ombudsman", "yam_yam") or any(agent_id.startswith(prefix) for prefix in ("pam_company_", "iris_company_", "vera_company_", "rowan_company_", "bianca_company_", "lucian_company_", "bob_company_", "sloane_company_", "atlas_company_", "june_company_")):
         try:
             return OpenAIAdapter()
         except EnvironmentError:
@@ -487,6 +543,21 @@ def main() -> None:
         packet["evidence"] = response.get("evidence", [])
         packet["missing_data"] = response.get("missing_data", [])
         packet["suggested_followup"] = response.get("suggested_followup", "")
+        packet["packets"] = response.get("packets", [])
+    elif role_type == "master ceo":
+        packet["executive_summary"] = response.get("executive_summary", "")
+        packet["ecosystem_direction"] = response.get("ecosystem_direction", "")
+        packet["lifecycle_decision"] = response.get("lifecycle_decision", "")
+        packet["branch_coordination_directive"] = response.get("branch_coordination_directive", "")
+        packet["strategic_recommendation"] = response.get("strategic_recommendation", "")
+        packet["request_more_evidence"] = response.get("request_more_evidence", "")
+        packet["packets"] = response.get("packets", [])
+    elif "ombudsman" in role_type:
+        packet["appeal_intake_summary"] = response.get("appeal_intake_summary", "")
+        packet["complaint_triage_decision"] = response.get("complaint_triage_decision", "")
+        packet["fairness_summary"] = response.get("fairness_summary", "")
+        packet["procedural_guidance"] = response.get("procedural_guidance", "")
+        packet["recommendation"] = response.get("recommendation", "")
         packet["packets"] = response.get("packets", [])
     if queue_action in ("create", "update"):
         assigned_to = packet.get("handoff_to") or packet.get("to")

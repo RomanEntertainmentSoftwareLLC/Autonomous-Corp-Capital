@@ -740,32 +740,20 @@ class SimpleLLMAdapter(LLMAdapter):
             }
 
         if role_type.lower() == "qa":
-            product_summary = response.get("product_summary") or prompt.get("product_summary") or "Product clarity pending."
-            acceptance_criteria = (
-                response.get("acceptance_criteria") or prompt.get("acceptance_criteria") or []
-            )
-            test_summary = response.get("test_summary") or prompt.get("test_summary") or "Tests pending execution."
-            failing_cases = (
-                response.get("failing_cases")
-                or response.get("blockers")
-                or []
-            )
-            coverage_notes = response.get("coverage_notes") or []
-            review_summary = response.get("review_summary") or prompt.get("review_summary") or "Review pending."
-            review_findings = response.get("review_findings") or []
-            implementation_summary = (
-                response.get("implementation_summary") or prompt.get("implementation_summary") or "Implementation details missing."
-            )
-            blockers = response.get("blockers") or []
-            task_summary = response.get("task_summary") or prompt.get("task_summary") or "No task breakdown yet."
-            engineering_tasks = response.get("engineering_tasks") or prompt.get("engineering_tasks") or []
-            regression_risks = (
-                response.get("regression_risks")
-                or failing_cases
-                or []
-            )
+            product_summary = prompt.get("product_summary") or "Product clarity pending."
+            acceptance_criteria = prompt.get("acceptance_criteria") or []
+            test_summary = prompt.get("test_summary") or "Tests pending execution."
+            failing_cases = prompt.get("failing_cases") or prompt.get("blockers") or []
+            coverage_notes = prompt.get("coverage_notes") or []
+            review_summary = prompt.get("review_summary") or "Review pending."
+            review_findings = prompt.get("review_findings") or []
+            implementation_summary = prompt.get("implementation_summary") or "Implementation details missing."
+            blockers = prompt.get("blockers") or []
+            task_summary = prompt.get("task_summary") or "No task breakdown yet."
+            engineering_tasks = prompt.get("engineering_tasks") or []
+            regression_risks = prompt.get("regression_risks") or failing_cases or blockers or []
             ship_readiness = "Ready" if not failing_cases and not regression_risks else "Not ready"
-            behavior_notes = [product_summary, review_summary, implementation_summary]
+            behavior_notes = [product_summary, review_summary, implementation_summary, test_summary]
             behavior_notes.extend([note for note in acceptance_criteria + coverage_notes + review_findings if note])
             if task_summary:
                 behavior_notes.append(task_summary)
@@ -803,8 +791,9 @@ class SimpleLLMAdapter(LLMAdapter):
                 "queue_action": "none",
             }
         if role_type.lower() == "code reviewer":
-            insights = prompt.get("company_insights", {})
-            snippet = insights.get("manager_action", {}).get("recommendation")
+            insights = prompt.get("company_insights") or {}
+            manager_action = insights.get("manager_action") or {}
+            snippet = manager_action.get("recommendation")
             issues = insights.get("missing_data", [])
             review_summary = "Code is functional but the module needs clearer boundaries."
             recommendation = "Revise before QA; address architecture drift." if issues else "Approve for QA review."

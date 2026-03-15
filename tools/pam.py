@@ -336,7 +336,7 @@ def create_prompt(
         prompt["global_finance_insights"] = global_finance_insights
     return prompt
 def choose_adapter(agent_id: str) -> SimpleLLMAdapter | OpenAIAdapter:
-    if agent_id in ("master_treasurer", "risk_officer", "master_cfo", "product_manager", "scrum_master", "senior_software_architect", "senior_software_engineer", "junior_software_engineer", "tester", "code_reviewer", "qa") or any(agent_id.startswith(prefix) for prefix in ("pam_company_", "iris_company_", "vera_company_", "rowan_company_", "bianca_company_", "lucian_company_", "bob_company_", "sloane_company_", "atlas_company_", "june_company_")):
+    if agent_id in ("master_treasurer", "risk_officer", "master_cfo", "product_manager", "scrum_master", "senior_software_architect", "senior_software_engineer", "junior_software_engineer", "tester", "code_reviewer", "qa", "infrastructure") or any(agent_id.startswith(prefix) for prefix in ("pam_company_", "iris_company_", "vera_company_", "rowan_company_", "bianca_company_", "lucian_company_", "bob_company_", "sloane_company_", "atlas_company_", "june_company_")):
         try:
             return OpenAIAdapter()
         except EnvironmentError:

@@ -7,6 +7,22 @@
       "assigned_to": "Risk Officer",
       "status": "new",
       "timestamp": "2026-03-14T23:46:19.857888+00:00"
+    },
+    {
+      "task_id": "454b22f2-33c9-484f-9ab0-3f765de21f0b",
+      "summary": "Risk breach detected",
+      "priority": "medium",
+      "assigned_to": "Risk Officer",
+      "status": "new",
+      "timestamp": "2026-03-15T00:36:43.627093+00:00"
+    },
+    {
+      "task_id": "6048c082-ed7c-442f-802e-7740c88add3e",
+      "summary": "Risk breach detected",
+      "priority": "medium",
+      "assigned_to": "Risk Officer",
+      "status": "new",
+      "timestamp": "2026-03-15T01:04:27.139581+00:00"
     }
   ],
   "assigned": [],

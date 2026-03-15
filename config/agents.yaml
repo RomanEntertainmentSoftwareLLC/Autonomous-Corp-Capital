@@ -1,6 +1,7 @@
 agents:
   - id: pam
     name: Pam
+    persona: pam
     role: administrative_coordinator
     scope: global
     description: Global switchboard for multi-company coordination
@@ -11,21 +12,25 @@ agents:
       - escalation
   - id: pam_company_001
     name: Pam_company_001
+    persona: pam
     role: administrative_coordinator
     scope: company_001
     description: Front desk admin for company_001
   - id: pam_company_002
     name: Pam_company_002
+    persona: pam
     role: administrative_coordinator
     scope: company_002
     description: Front desk admin for company_002
   - id: pam_company_003
     name: Pam_company_003
+    persona: pam
     role: administrative_coordinator
     scope: company_003
     description: Front desk admin for company_003
   - id: pam_company_004
     name: Pam_company_004
+    persona: pam
     role: administrative_coordinator
     scope: company_004
     description: Front desk admin for company_004

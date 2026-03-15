@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Per-company Pam front desk coordinator."""
+"""Per-company Pam front desk coordinator with persona awareness."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import sys
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List
 
 import yaml
 
@@ -21,6 +21,8 @@ from tools.llm_client import OpenAIAdapter, SimpleLLMAdapter
 
 CONFIG_PATH = ROOT / "config" / "agents.yaml"
 STATE_ROOT = ROOT / "state" / "agents"
+UNIVERSAL_PERSONA_PATH = ROOT / "personas" / "universal.json"
+AGENT_PERSONA_DIR = ROOT / "personas" / "agents"
 
 DEFAULT_QUEUE = {
     "new": [],
@@ -61,11 +63,55 @@ class PamError(Exception):
     pass
 
 
-def load_agents() -> dict[str, dict[str, str]]:
+def load_json_file(path: Path) -> Dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+
+def merge_personas(base: Dict[str, Any], overlay: Dict[str, Any]) -> Dict[str, Any]:
+    merged = dict(base)
+    for key, value in overlay.items():
+        if key in merged and isinstance(merged[key], dict) and isinstance(value, dict):
+            merged[key] = merge_personas(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
+def load_persona(agent_info: Dict[str, str]) -> Dict[str, Any]:
+    persona_id = agent_info.get("persona", agent_info.get("id"))
+    universal = load_json_file(UNIVERSAL_PERSONA_PATH)
+    agent_persona = load_json_file(AGENT_PERSONA_DIR / f"{persona_id}.json")
+    return merge_personas(universal, agent_persona)
+
+
+def persona_description(persona: Dict[str, Any]) -> str:
+    lines: List[str] = []
+    identity = persona.get("identity", {})
+    if identity:
+        impression = identity.get("core_impression")
+        if impression:
+            lines.append(f"Identity: {impression}")
+    tone = persona.get("tone", {})
+    if tone:
+        lines.append(f"Tone: {tone.get('style')} ({tone.get('formality')})")
+    bias = persona.get("operational_bias", {})
+    if bias:
+        keys = ", ".join([k for k, v in bias.items() if v])
+        if keys:
+            lines.append(f"Bias: {keys}")
+    return " | ".join(lines) if lines else ""
+
+
+def load_agents() -> Dict[str, Dict[str, str]]:
     if not CONFIG_PATH.exists():
         raise PamError(f"Agents config not found at {CONFIG_PATH}")
     data = yaml.safe_load(CONFIG_PATH.read_text()) or {}
-    agents = {}
+    agents: Dict[str, Dict[str, str]] = {}
     for entry in data.get("agents", []):
         agent_id = entry.get("id")
         if agent_id:
@@ -93,26 +139,26 @@ def ensure_state(agent_id: str) -> Path:
     return path
 
 
-def read_queue(path: Path) -> dict:
+def read_queue(path: Path) -> Dict[str, Any]:
     try:
         return json.loads(path.read_text())
     except Exception:
         return DEFAULT_QUEUE.copy()
 
 
-def write_queue(path: Path, queue: dict) -> None:
+def write_queue(path: Path, queue: Dict[str, Any]) -> None:
     path.write_text(json.dumps(queue, indent=2))
 
 
-def summarize_queue(queue: dict) -> dict[str, int]:
+def summarize_queue(queue: Dict[str, Any]) -> Dict[str, int]:
     return {k: len(queue.get(k, [])) for k in DEFAULT_QUEUE.keys()}
 
 
-def read_history(path: Path, limit: int = 5) -> List[dict]:
+def read_history(path: Path, limit: int = 5) -> List[Dict[str, Any]]:
     if not path.exists():
         return []
     lines = [line.strip() for line in path.read_text().splitlines() if line.strip()]
-    history: List[dict] = []
+    history: List[Dict[str, Any]] = []
     for raw in lines[-limit:]:
         try:
             history.append(json.loads(raw))
@@ -121,12 +167,12 @@ def read_history(path: Path, limit: int = 5) -> List[dict]:
     return history
 
 
-def append_log(path: Path, entry: dict) -> None:
+def append_log(path: Path, entry: Dict[str, Any]) -> None:
     with path.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(entry) + "\n")
 
 
-def create_prompt(agent_info: dict[str, str], scope: str, message: str, queue: dict, inbox: List[dict], outbox: List[dict]) -> dict[str, object]:
+def create_prompt(agent_info: Dict[str, str], scope: str, message: str, queue: Dict[str, Any], inbox: List[Dict[str, Any]], outbox: List[Dict[str, Any]], persona: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "role_spec": ROLE_SPEC,
         "scope": scope,
@@ -135,11 +181,13 @@ def create_prompt(agent_info: dict[str, str], scope: str, message: str, queue: d
         "recent_inbox": inbox,
         "recent_outbox": outbox,
         "task_rules": TASK_TYPES,
+        "persona": persona,
+        "persona_description": persona_description(persona),
         "message": message,
     }
 
 
-def choose_adapter(agent_id: str, prompt: dict[str, object]):
+def choose_adapter(agent_id: str) -> SimpleLLMAdapter | OpenAIAdapter:
     if agent_id == "pam_company_001":
         try:
             return OpenAIAdapter()
@@ -176,8 +224,9 @@ def main() -> None:
         print(json.dumps(queue, indent=2))
         return
 
-    prompt = create_prompt(agent_info, scope, message, queue, inbox_history, outbox_history)
-    adapter = choose_adapter(args.agent, prompt)
+    persona = load_persona(agent_info)
+    prompt = create_prompt(agent_info, scope, message, queue, inbox_history, outbox_history, persona)
+    adapter = choose_adapter(args.agent)
     response = adapter.reason(message, prompt)
 
     now = datetime.utcnow().isoformat() + "+00:00"

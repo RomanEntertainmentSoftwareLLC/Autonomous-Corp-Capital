@@ -4,24 +4,24 @@ import json
 import os
 import urllib.request
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Dict
 
 
 class LLMAdapter(ABC):
     @abstractmethod
-    def reason(self, message: str, prompt: dict[str, Any]) -> dict[str, Any]:
+    def reason(self, message: str, prompt: Dict[str, Any]) -> Dict[str, Any]:
         pass
 
 
 class OpenAIAdapter(LLMAdapter):
-    def __init__(self, model: str = "gpt-4o-mini") -> None:
-        self._model = model
+    def __init__(self) -> None:
+        self._model = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
         self._api_key = os.environ.get("OPENAI_API_KEY")
         if not self._api_key:
             raise EnvironmentError("OPENAI_API_KEY environment variable is not set")
         self._endpoint = "https://api.openai.com/v1/chat/completions"
 
-    def reason(self, message: str, prompt: dict[str, Any]) -> dict[str, Any]:
+    def reason(self, message: str, prompt: Dict[str, Any]) -> Dict[str, Any]:
         payload = {
             "model": self._model,
             "messages": [
@@ -29,8 +29,8 @@ class OpenAIAdapter(LLMAdapter):
                     "role": "system",
                     "content": (
                         "You are Pam, the organizational coordinator. "
-                        "Return a JSON object with keys reply_text, task_type, priority, receiver, requested_action, queue_action, escalate."
-                        "Always keep policy boundaries: no capital allocation, no risk overrides, no strategy decisions."
+                        "Return a JSON object with keys reply_text, task_type, priority, recipient, requested_action, queue_action, escalate. "
+                        "Follow policy: no capital allocations, no risk overrides, no final strategy decisions."
                     ),
                 },
                 {
@@ -63,11 +63,14 @@ class OpenAIAdapter(LLMAdapter):
 
 
 class SimpleLLMAdapter(LLMAdapter):
-    def reason(self, message: str, prompt: dict[str, Any]) -> dict[str, Any]:
+    def reason(self, message: str, prompt: Dict[str, Any]) -> Dict[str, Any]:
         lowered = message.lower()
+        persona = prompt.get("persona", {})
+        examples = persona.get("example_responses", {})
         if any(greet in lowered for greet in ("hi", "hello", "glorious", "how are")):
+            reply = examples.get("greeting", ["I’m tuned into the queue—what would you like routed?"])[0]
             return {
-                "reply_text": "I’m tuned into the queue—what would you like routed?",
+                "reply_text": reply,
                 "task_type": "greeting",
                 "priority": "low",
                 "recipient": "Analyst",
@@ -83,8 +86,10 @@ class SimpleLLMAdapter(LLMAdapter):
                 task_type, recipient = tt, rcpt
                 break
         action = f"{recipient}: handle {task_type} for {prompt['scope']}"
+        reply_options = examples.get("followup", [f"Routing to {recipient} for {task_type} (priority {priority})."])
+        reply = reply_options[0]
         return {
-            "reply_text": f"Routing to {recipient} for {task_type} (priority {priority}).",
+            "reply_text": reply,
             "task_type": task_type,
             "priority": priority,
             "recipient": recipient,

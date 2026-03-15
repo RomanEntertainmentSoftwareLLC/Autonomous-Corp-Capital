@@ -257,3 +257,57 @@ agents:
   role: Master CFO
   scope: global
   description: Global Master CFO interpreting the full portfolio
+- id: product_manager
+  name: Nadia
+  persona: nadia
+  role: Product Manager
+  scope: global
+  description: Global Product Manager for OpenClaw
+- id: scrum_master
+  name: Tessa
+  persona: tessa
+  role: Scrum Master
+  scope: global
+  description: Global Scrum Master coordinating SWE execution
+- id: senior_software_architect
+  name: Marek
+  persona: marek
+  role: Senior Software Architect
+  scope: global
+  description: Global technical design authority for OpenClaw
+- id: senior_software_engineer
+  name: Eli
+  persona: eli
+  role: Senior Software Engineer
+  scope: global
+  description: Global Senior Software Engineer executing shared work
+- id: junior_software_engineer
+  name: Noah
+  persona: noah
+  role: Junior Software Engineer
+  scope: global
+  description: Junior Software Engineer executing low-risk shared work
+- id: tester
+  name: Mina
+  persona: mina
+  role: Tester
+  scope: global
+  description: Global Tester executing shared verifications
+- id: code_reviewer
+  name: Gideon
+  persona: gideon
+  role: Code Reviewer
+  scope: global
+  description: Global Code Reviewer keeping merges clean
+- id: qa
+  name: Sabine
+  persona: sabine
+  role: QA
+  scope: global
+  description: Global QA ensuring behavior and regression safety
+- id: infrastructure
+  name: Rhea
+  persona: rhea
+  role: Infrastructure
+  scope: global
+  description: Global Infrastructure steward for OpenClaw

@@ -33,7 +33,6 @@ from tools.agent_runtime import (
     gather_global_treasury_insights,
     gather_global_risk_insights,
     gather_global_finance_insights,
-    gather_global_finance_insights,
     load_env_file,
     load_persona,
     persona_description,
@@ -42,6 +41,7 @@ from tools.agent_runtime import (
     summarize_queue,
     write_queue,
 )
+from tools.agent_packets import build_packet
 
 from tools.llm_client import OpenAIAdapter, SimpleLLMAdapter
 
@@ -97,6 +97,12 @@ TASK_TYPES = [
     ("risk", "risk_review", "Risk Officer"),
     ("treasury", "treasury_review", "Master Treasurer"),
     ("portfolio", "finance_review", "Master CFO"),
+    ("product", "product_review", "Product Manager"),
+    ("backlog", "product_review", "Product Manager"),
+    ("feature", "product_review", "Product Manager"),
+    ("sprint", "execution_review", "Scrum Master"),
+    ("task", "execution_review", "Scrum Master"),
+    ("blocker", "execution_review", "Scrum Master"),
     ("efficiency", "finance_review", "Master CFO"),
     ("sustainability", "finance_review", "Master CFO"),
     ("health", "finance_review", "Master CFO"),
@@ -155,6 +161,9 @@ ROLE_SPECS = {
     ),
     "Master CFO": (
         "Vivienne is the global Master CFO. She reads the entire portfolio for efficiency, sustainability, and strategic financial alignment."
+    ),
+    "Product Manager": (
+        "Nadia is the global Product Manager. She turns shared system friction into prioritized, scoped work without coding it herself."
     ),
     "Low Tier Operations Worker": (
         "Bob is the low-tier operations worker who handles safe, repetitive chores and reports plainly."
@@ -282,6 +291,66 @@ ROLE_STRUCTURED_OUTPUT = {
         "default_queue_action": "none",
         "description": "Return portfolio financial intelligence, efficiency notes, and guidance for Selene, Helena, YamYam, and company CFOs/CEOs.",
     },
+    "Scrum Master": {
+        "required_keys": [
+            "reply_text",
+            "task_summary",
+            "task_breakdown",
+            "blockers",
+            "next_steps",
+            "packets",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return sprint/task summaries, blockers, and coordination packets for the SWE crew.",
+    },
+    "Senior Software Architect": {
+        "required_keys": [
+            "reply_text",
+            "architecture_summary",
+            "refactor_recommendation",
+            "module_guidance",
+            "tech_debt_warnings",
+            "packets",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return architecture summaries, refactor notes, and technical debt warnings.",
+    },
+    "Senior Software Engineer": { ... },
+    "Junior Software Engineer": { ... },
+    "Tester": {
+        "required_keys": [
+            "reply_text",
+            "test_summary",
+            "pass_fail",
+            "coverage_notes",
+            "blockers",
+            "packets",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return test results, reproducibility notes, and handoffs for code reviewers and QA.",
+    },
+    "Junior Software Engineer": {
+        "required_keys": [
+            "reply_text",
+            "implementation_summary",
+            "subtask_plan",
+            "blockers",
+            "packets",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return bounded implementation plans, blockers, and handoff notes for the validation chain.",
+    },
+        "default_queue_action": "none",
+        "description": "Return sprint/task summaries, blockers, and coordination packets for the SWE crew.",
+    },
     "Risk Officer": {
         "required_keys": [
             "reply_text",
@@ -297,6 +366,34 @@ ROLE_STRUCTURED_OUTPUT = {
         ],
         "default_queue_action": "none",
         "description": "Return risk posture, veto guidance, and escalation packets for Selene, YamYam, Master CFO, and company leaders.",
+    },
+    "Product Manager": {
+        "required_keys": [
+            "reply_text",
+            "product_summary",
+            "priority_backlog",
+            "recommendation",
+            "acceptance_criteria",
+            "packets",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return prioritized product guidance, scope, and packets for Nadia’s downstream crews.",
+    },
+    "Scrum Master": {
+        "required_keys": [
+            "reply_text",
+            "task_summary",
+            "task_breakdown",
+            "blockers",
+            "next_steps",
+            "packets",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return sprint/task summaries, blockers, and routing instructions for SWE, QA, or infrastructure.",
     },
     "Archivist": {
         "required_keys": [
@@ -421,11 +518,9 @@ def create_prompt(
         prompt["global_risk_insights"] = global_risk_insights
     if global_finance_insights:
         prompt["global_finance_insights"] = global_finance_insights
-    if global_risk_insights:
-        prompt["global_risk_insights"] = global_risk_insights
     return prompt
 def choose_adapter(agent_id: str) -> SimpleLLMAdapter | OpenAIAdapter:
-    if agent_id in ("master_treasurer", "risk_officer", "master_cfo") or any(agent_id.startswith(prefix) for prefix in ("pam_company_", "iris_company_", "vera_company_", "rowan_company_", "bianca_company_", "lucian_company_", "bob_company_", "sloane_company_", "atlas_company_", "june_company_")):
+    if agent_id in ("master_treasurer", "risk_officer", "master_cfo", "product_manager", "scrum_master", "senior_software_architect", "senior_software_engineer", "junior_software_engineer", "tester", "code_reviewer", "qa") or any(agent_id.startswith(prefix) for prefix in ("pam_company_", "iris_company_", "vera_company_", "rowan_company_", "bianca_company_", "lucian_company_", "bob_company_", "sloane_company_", "atlas_company_", "june_company_")):
         try:
             return OpenAIAdapter()
         except EnvironmentError:
@@ -471,31 +566,19 @@ def main() -> None:
 
     now = datetime.now(timezone.utc).isoformat()
     task_id = str(uuid.uuid4())
-    recipient = response.get("recipient", "Analyst")
     priority = response.get("priority", "medium")
     queue_action = response.get("queue_action", prompt["structured_output"]["default_queue_action"])
 
-    packet = {
-        "agent_scope": scope,
-        "target_scope": resolved_target_scope,
-        "task_id": task_id,
-        "from": args.sender,
-        "to": recipient,
-        "company_scope": scope,
-        "task_type": response.get("task_type", "general_triage"),
-        "priority": priority,
-        "summary": message if len(message) < 140 else message[:137] + "...",
-        "context": [
-            f"Captured at {now}",
-            f"Agent: {agent_info.get('name', args.agent)}",
-            response.get("reply_text", ""),
-        ],
-        "requested_action": response.get("requested_action", ""),
-        "status": "new",
-        "escalate_to": "YamYam" if response.get("escalation") else "",
-        "reply_text": response.get("reply_text", ""),
-        "queue_action": queue_action,
-    }
+    packet = build_packet(
+        agent_info,
+        prompt,
+        response,
+        message,
+        queue_action,
+        priority,
+        task_id,
+        now,
+    )
 
     role_type = prompt.get("role_type", "").lower()
     if role_type == "analyst":
@@ -590,11 +673,12 @@ def main() -> None:
         packet["suggested_followup"] = response.get("suggested_followup", "")
         packet["packets"] = response.get("packets", [])
     if queue_action in ("create", "update"):
+        assigned_to = packet.get("handoff_to") or packet.get("to")
         queue_entry = {
             "task_id": task_id,
             "summary": packet["summary"],
             "priority": packet["priority"],
-            "assigned_to": recipient,
+            "assigned_to": assigned_to,
             "status": "new",
             "timestamp": now,
         }
@@ -606,7 +690,7 @@ def main() -> None:
             "timestamp": now,
             "task_id": task_id,
             "reason": response.get("reply_text", ""),
-            "recipient": recipient,
+            "recipient": packet.get("handoff_to") or packet.get("to"),
         })
 
     append_log(state_path / "inbox.jsonl", {

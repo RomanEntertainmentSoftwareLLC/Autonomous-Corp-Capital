@@ -616,6 +616,313 @@ class SimpleLLMAdapter(LLMAdapter):
                 "task_type": "archival_summary",
                 "priority": "medium",
             }
+        if role_type.lower() == "junior software engineer":
+            insights = prompt.get("company_insights", {})
+            blockers = insights.get("missing_data", [])
+            implementation_summary = "I can take on the helper tasks once the blockers clear."
+            subtask_plan = ["Fix the CLI helper and add logging."]
+            packets = [
+                {
+                    "recipient": "Tester",
+                    "summary": "Junior implementation ready for testing.",
+                    "next_steps": "Review the helper changes.",
+                },
+                {
+                    "recipient": "Reviewer",
+                    "summary": "Noah implemented the small bug fix.",
+                    "next_steps": "Ensure integration is safe.",
+                },
+            ]
+            return {
+                "reply_text": f"Noah@{agent_scope} reports {len(blockers)} blockers before I proceed.",
+                "implementation_summary": implementation_summary,
+                "subtask_plan": subtask_plan,
+                "blockers": blockers or ["None"],
+                "packets": packets,
+                "task_type": "implementation_review",
+                "priority": "medium",
+                "escalation": bool(blockers),
+                "queue_action": "none",
+            }
+
+        if role_type.lower() == "junior software engineer":
+            insights = prompt.get("company_insights", {})
+            summary = "Noah can take the helper work once blockers clear."
+            subtask_plan = ["Update the helper module and add tests."]
+            blockers = insights.get("missing_data", [])
+            packets = [
+                {
+                    "recipient": "Tester",
+                    "summary": "Junior changes ready for testing.",
+                    "next_steps": "Run the affected suite.",
+                },
+                {
+                    "recipient": "Reviewer",
+                    "summary": "Noah implementation to review.",
+                    "next_steps": "Confirm integration before QA.",
+                },
+            ]
+            return {
+                "reply_text": f"Noah@{agent_scope} reports {len(blockers)} blockers before I proceed.",
+                "implementation_summary": summary,
+                "subtask_plan": subtask_plan,
+                "blockers": blockers or ["None"],
+                "packets": packets,
+                "task_type": "implementation_review",
+                "priority": "medium",
+                "escalation": bool(blockers),
+                "queue_action": "none",
+            }
+
+        if role_type.lower() == "senior software engineer":
+            insights = prompt.get("company_insights", {})
+            implementation_summary = "Implementation plan ready after Marek's approval."
+            code_plan = ["Wire the rebuilt runtime into the new modules."]
+            integration_notes = ["Watch the treasury/risk interplay."]
+            blockers = insights.get("missing_data", [])
+            packets = [
+                {
+                    "recipient": "Junior SWE",
+                    "summary": "Implementation scope set by Eli.",
+                    "next_steps": "Pick up the confirmed work.",
+                },
+                {
+                    "recipient": "Tester",
+                    "summary": "Integration points flagged.",
+                    "next_steps": "Prep test plan.",
+                },
+            ]
+            return {
+                "reply_text": f"Eli@{agent_scope} notes {len(blockers)} blockers and integration points.",
+                "implementation_summary": implementation_summary,
+                "code_plan": code_plan,
+                "integration_notes": integration_notes,
+                "blockers": blockers or ["None"],
+                "packets": packets,
+                "task_type": "implementation_review",
+                "priority": "medium",
+                "escalation": bool(blockers),
+                "queue_action": "none",
+            }
+
+        if role_type.lower() == "senior software architect":
+            insights = prompt.get("company_insights", {})
+            blockers = insights.get("missing_data", [])
+            module_notes = ["Refactor tools/agent_runtime to respect single duties"]
+            recommendation = (
+                "Extract shared runtime helpers into a dedicated architecture layer before new roles are added."
+                if blockers else "Keep current structure but document the key interfaces before extending."
+            )
+            packets = [
+                {
+                    "recipient": "Senior SWE",
+                    "summary": "Refactor guided by Marek",
+                    "next_steps": "Plan the architecture phase.",
+                },
+                {
+                    "recipient": "Infrastructure",
+                    "summary": "Coordinate shared runtime changes.",
+                    "next_steps": "Ensure deployments honor the new modules.",
+                },
+            ]
+            return {
+                "reply_text": f"Marek@{agent_scope} sees {len(module_notes)} structural concerns.",
+                "architecture_summary": "/tools/agent_runtime and prompt helpers need clearer boundaries.",
+                "refactor_recommendation": recommendation,
+                "module_guidance": module_notes,
+                "tech_debt_warnings": blockers or ["None"],
+                "packets": packets,
+                "escalation": bool(blockers),
+                "queue_action": "none",
+                "task_type": "architecture_review",
+                "priority": "medium",
+            }
+
+        if role_type.lower() == "infrastructure":
+            summary = "Infra status: clean branch but awaiting Sabine's QA sign-off."
+            merge_plan = ["Wait for Gideon approval before merging."]
+            release_notes = ["Tag release after QA sign-off."]
+            rollback_guidance = "Keep the previous tag handy in case regressions appear."
+            packets = [
+                {
+                    "recipient": "Infrastructure",
+                    "summary": "Branch hygiene needs confirmation.",
+                    "next_steps": "Hold until QA and review gates clear.",
+                },
+                {
+                    "recipient": "Jacob",
+                    "summary": "Infra notes ready for review.",
+                    "next_steps": "Approve merge once gates pass.",
+                },
+            ]
+            return {
+                "reply_text": f"Rhea@{agent_scope} says: {summary}",
+                "infra_summary": summary,
+                "merge_plan": merge_plan,
+                "release_notes": release_notes,
+                "rollback_guidance": rollback_guidance,
+                "packets": packets,
+                "task_type": "infrastructure_review",
+                "priority": "medium",
+                "escalation": False,
+                "queue_action": "none",
+            }
+
+        if role_type.lower() == "qa":
+            test_insights = prompt.get("global_finance_insights", {})
+            qa_summary = "Sabine sees behavioral cues needing verification."
+            behavior_notes = ["Ensure workflow confirmation steps fire."]
+            regression_risk = prompt.get("company_insights", {}).get("missing_data", [])
+            acceptance_confidence = 0 if regression_risk else 1
+            packets = [
+                {
+                    "recipient": "Infrastructure",
+                    "summary": "QA signals need for regression follow-up.",
+                    "next_steps": "Pause rollout until fix.",
+                },
+                {
+                    "recipient": "Eli",
+                    "summary": "Behavioral validation flagged issues.",
+                    "next_steps": "Address before code reviewer rechecks.",
+                },
+            ]
+            return {
+                "reply_text": f"Sabine@{agent_scope} reports {"failure" if regression_risk else "all good"}.",
+                "qa_summary": qa_summary,
+                "behavior_notes": behavior_notes,
+                "regression_risk": regression_risk,
+                "acceptance_confidence": acceptance_confidence,
+                "packets": packets,
+                "task_type": "qa_review",
+                "priority": "medium",
+                "escalation": bool(regression_risk),
+                "queue_action": "none",
+            }
+
+        if role_type.lower() == "code reviewer":
+            insights = prompt.get("company_insights", {})
+            snippet = insights.get("manager_action", {}).get("recommendation")
+            issues = insights.get("missing_data", [])
+            review_summary = "Code is functional but the module needs clearer boundaries."
+            recommendation = "Revise before QA; address architecture drift." if issues else "Approve for QA review."
+            quality_notes = ["Watch lifecycle coupling tightness."]
+            blockers = issues
+            packets = [
+                {
+                    "recipient": "Eli",
+                    "summary": "Code needs maintainability polish.",
+                    "next_steps": "Refactor per Marek’s guidance.",
+                },
+                {
+                    "recipient": "QA",
+                    "summary": "Reviewer has flagged issues.",
+                    "next_steps": "Wait for revisions before testing.",
+                },
+            ]
+            return {
+                "reply_text": f"Gideon@{agent_scope} says: {review_summary} Recommendation: {recommendation}",
+                "review_summary": review_summary,
+                "recommendation": recommendation,
+                "code_quality_notes": quality_notes,
+                "blockers": blockers,
+                "packets": packets,
+                "task_type": "code_review",
+                "priority": "medium",
+                "escalation": bool(blockers),
+                "queue_action": "none",
+            }
+
+        if role_type.lower() == "tester":
+            insights = prompt.get("company_insights", {})
+            pass_fail = insights.get("missing_data", [])
+            test_summary = "Test run captured; pass/fail updated"
+            coverage_notes = ["Missing coverage around config parsing"]
+            packets = [
+                {
+                    "recipient": "Eli",
+                    "summary": "Testing uncovered failures.",
+                    "next_steps": "Address failing cases before review.",
+                },
+                {
+                    "recipient": "QA",
+                    "summary": "Verification needs more coverage.",
+                    "next_steps": "Add regression coverage.",
+                },
+            ]
+            return {
+                "reply_text": f"Mina@{agent_scope} details {len(pass_fail)} failing cases.",
+                "test_summary": test_summary,
+                "pass_fail": pass_fail or ["All green"],
+                "coverage_notes": coverage_notes,
+                "blockers": pass_fail,
+                "packets": packets,
+                "task_type": "test_review",
+                "priority": "medium",
+                "escalation": bool(pass_fail),
+                "queue_action": "none",
+            }
+
+        if role_type.lower() == "scrum master":
+            insights = prompt.get("company_insights", {})
+            blockers = insights.get("missing_data", [])
+            task_summary = f"{prompt.get('message', 'Unknown request')} needs {len(blockers)} blockers resolved."
+            task_breakdown = ["Break into SWE + QA tickets"]
+            next_steps = ["Resolve blockers before moving to implementation"]
+            packets = [
+                {
+                    "recipient": "SWE",
+                    "summary": "Tasks ready for sprint planning.",
+                    "next_steps": "Pick up the highest-priority ticket.",
+                },
+                {
+                    "recipient": "QA",
+                    "summary": "Testing scope clarified.",
+                    "next_steps": "Review the acceptance criteria.",
+                },
+            ]
+            return {
+                "reply_text": f"Tessa@{agent_scope} frames {task_summary}.",
+                "task_summary": task_summary,
+                "task_breakdown": task_breakdown,
+                "blockers": blockers,
+                "next_steps": next_steps,
+                "packets": packets,
+                "task_type": "execution_review",
+                "priority": "medium",
+                "escalation": False,
+                "queue_action": "none",
+            }
+
+        if role_type.lower() == "product manager":
+            summary = "Nadia sees the backlog leaning toward infrastructure gaps."
+            priority_backlog = ["Infrastructure: stabilize CLI", "Warehouse: clean reporting pipeline"]
+            recommendation = "Defer new experiments until these critical blockers clear."
+            acceptance_criteria = ["Define success metrics", "Document QA path"]
+            packets = [
+                {
+                    "recipient": "Scrum Master",
+                    "summary": "Shared backlog trimmed to actionable work.",
+                    "next_steps": "Prioritize the blockers during planning.",
+                },
+                {
+                    "recipient": "YamYam",
+                    "summary": "Product view updated; infrastructure gaps first.",
+                    "next_steps": "Review before adding new company directives.",
+                },
+            ]
+            return {
+                "reply_text": f"Nadia@{agent_scope} recommends: {recommendation}",
+                "product_summary": summary,
+                "priority_backlog": priority_backlog,
+                "recommendation": recommendation,
+                "acceptance_criteria": acceptance_criteria,
+                "packets": packets,
+                "task_type": "product_review",
+                "priority": "medium",
+                "escalation": False,
+                "queue_action": "none",
+            }
+
         if role_type.lower() == "master cfo":
             finance_insights = prompt.get("global_finance_insights", {})
             companies = finance_insights.get("companies", [])
@@ -658,6 +965,47 @@ class SimpleLLMAdapter(LLMAdapter):
                 "escalation": bool(inefficiencies),
                 "queue_action": "none",
                 "task_type": "finance_review",
+                "priority": "medium",
+            }
+
+        if role_type.lower() == "product manager":
+            insights = prompt.get("company_insights", {})
+            global_finance = prompt.get("global_finance_insights", {})
+            problems = insights.get("missing_data", [])
+            backlog = global_finance.get("inefficiencies", [])
+            recommendation = (
+                "Deal with the infrastructure gaps and block repeated work."
+                if problems else "Prioritize the backlog of critical bugs before new features."
+            )
+            priority_backlog = [
+                f"{item.get('company_id', 'global')} inefficiency" for item in backlog[:3]
+            ]
+            acceptance_criteria = [
+                "Define success metrics before writing any code.",
+                "Confirm QA paths and rollout plan.",
+            ]
+            packets = [
+                {
+                    "recipient": "Scrum Master",
+                    "summary": "Product priority set for the engineering crew.",
+                    "next_steps": "Queue these items for the next sprint planning.",
+                },
+                {
+                    "recipient": "YamYam",
+                    "summary": "Shared backlog trimmed to the highest-value work.",
+                    "next_steps": "Review before committing new company directives.",
+                },
+            ]
+            return {
+                "reply_text": f"Nadia@{agent_scope} recommends: {recommendation}",
+                "product_summary": recommendation,
+                "priority_backlog": priority_backlog,
+                "recommendation": recommendation,
+                "acceptance_criteria": acceptance_criteria,
+                "packets": packets,
+                "escalation": False,
+                "queue_action": "none",
+                "task_type": "product_review",
                 "priority": "medium",
             }
 

@@ -23,6 +23,38 @@
       "assigned_to": "Risk Officer",
       "status": "new",
       "timestamp": "2026-03-15T01:04:27.139581+00:00"
+    },
+    {
+      "task_id": "ac7f3db0-3c6a-45f7-b741-5ab77ef2f129",
+      "summary": "Risk issue needs Helena",
+      "priority": "medium",
+      "assigned_to": "user",
+      "status": "new",
+      "timestamp": "2026-03-15T19:05:36.062284+00:00"
+    },
+    {
+      "task_id": "c49c5c0b-758f-4a3e-a8b5-a3889decbd2c",
+      "summary": "Risk issue needs Helena",
+      "priority": "medium",
+      "assigned_to": "Risk Officer",
+      "status": "new",
+      "timestamp": "2026-03-15T19:05:56.103624+00:00"
+    },
+    {
+      "task_id": "cf23f4d8-8b4e-4cc1-8f41-353e38d33e95",
+      "summary": "Risk issue needs Helena",
+      "priority": "medium",
+      "assigned_to": "Risk Officer",
+      "status": "new",
+      "timestamp": "2026-03-15T19:10:16.393151+00:00"
+    },
+    {
+      "task_id": "a08512e6-712b-4c59-ae04-7bc7c0977858",
+      "summary": "Risk issue needs Helena",
+      "priority": "medium",
+      "assigned_to": "Risk Officer",
+      "status": "new",
+      "timestamp": "2026-03-15T19:10:37.086429+00:00"
     }
   ],
   "assigned": [],

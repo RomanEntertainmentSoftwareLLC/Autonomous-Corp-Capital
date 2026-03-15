@@ -17,6 +17,7 @@ STATE_ROOT = ROOT / "state" / "agents"
 UNIVERSAL_PERSONA_PATH = ROOT / "personas" / "universal.json"
 AGENT_PERSONA_DIR = ROOT / "personas" / "agents"
 COMPANIES_DIR = ROOT / "companies"
+TREASURY_PATH = ROOT / "state" / "treasury.yaml"
 DEFAULT_QUEUE = {
     "new": [],
     "assigned": [],
@@ -288,3 +289,85 @@ def gather_company_insights(scope: str, target_scope: str, queue: Dict[str, Any]
                 file_checks["result_logs"].append(str(path))
     insights["file_checks"] = file_checks
     return insights
+
+
+def gather_global_treasury_insights() -> Dict[str, Any]:
+    treasury_snapshot = load_yaml_file(TREASURY_PATH)
+    companies: List[Dict[str, Any]] = []
+    for comp_dir in sorted(COMPANIES_DIR.iterdir()):
+        if not comp_dir.is_dir():
+            continue
+        metadata = load_yaml_file(comp_dir / "metadata.yaml")
+        if not metadata:
+            continue
+        cfo_reports = read_agent_outbox_reports("bianca", comp_dir.name)
+        lucian_reports = read_agent_outbox_reports("lucian", comp_dir.name)
+        latest_cfo = cfo_reports[-1] if cfo_reports else {}
+        latest_lucian = lucian_reports[-1] if lucian_reports else {}
+        companies.append({
+            "company_id": comp_dir.name,
+            "lifecycle": metadata.get("lifecycle_state", "unknown"),
+            "allocation_percent": metadata.get("allocation_percent"),
+            "allocation_status": metadata.get("allocation_status"),
+            "cfo_posture": latest_cfo.get("spending_posture"),
+            "cfo_summary": latest_cfo.get("financial_health_summary", latest_cfo.get("cash_runway_caution")),
+            "ceo_decision": latest_lucian.get("decision"),
+            "ceo_summary": latest_lucian.get("executive_summary"),
+        })
+    return {
+        "treasury_snapshot": treasury_snapshot,
+        "companies": companies,
+        "active_company_count": len(companies),
+        "allocation_summary": [c.get("allocation_percent") for c in companies if c.get("allocation_percent") is not None],
+    }
+
+
+def gather_global_risk_insights() -> Dict[str, Any]:
+    treasury = gather_global_treasury_insights()
+    escalations: List[Dict[str, Any]] = []
+    for agent_dir in STATE_ROOT.iterdir():
+        if not agent_dir.is_dir():
+            continue
+        log_path = agent_dir / "escalations.jsonl"
+        if not log_path.exists():
+            continue
+        for line in log_path.read_text().splitlines():
+            try:
+                entry = json.loads(line)
+            except Exception:
+                continue
+            escalations.append({"agent": agent_dir.name, "entry": entry})
+    risk_flags = [c for c in treasury.get("companies", []) if c.get("lifecycle") in ("danger", "retired")]
+    return {
+        "treasury": treasury.get("treasury_snapshot", {}),
+        "companies": treasury.get("companies", []),
+        "escalations": escalations,
+        "risk_flags": risk_flags,
+    }
+
+
+
+def gather_global_finance_insights() -> Dict[str, Any]:
+    treasury = gather_global_treasury_insights()
+    companies = []
+    for comp in treasury.get("companies", []):
+        efficiency = None
+        if comp.get("allocation_percent") not in (None, "unknown"):
+            efficiency = float(comp.get("allocation_percent"))
+        companies.append({
+            "company_id": comp.get("company_id"),
+            "lifecycle": comp.get("lifecycle"),
+            "allocation_percent": efficiency,
+            "cfo_posture": comp.get("cfo_posture"),
+            "cfo_summary": comp.get("cfo_summary"),
+            "ceo_summary": comp.get("ceo_summary"),
+        })
+    inefficiencies = [c for c in companies if c.get("allocation_percent") and c.get("allocation_percent") < 20]
+    sustainability = "fragile" if any(c.get("lifecycle") == "at_risk" for c in companies) else "stable"
+    return {
+        "treasury_snapshot": treasury.get("treasury_snapshot", {}),
+        "companies": companies,
+        "inefficiencies": inefficiencies,
+        "sustainability": sustainability,
+    }
+

@@ -616,6 +616,199 @@ class SimpleLLMAdapter(LLMAdapter):
                 "task_type": "archival_summary",
                 "priority": "medium",
             }
+        if role_type.lower() == "master cfo":
+            finance_insights = prompt.get("global_finance_insights", {})
+            companies = finance_insights.get("companies", [])
+            inefficiencies = finance_insights.get("inefficiencies", [])
+            sustainability = finance_insights.get("sustainability", "unknown")
+            summary = f"Portfolio health {sustainability}; {len(inefficiencies)} inefficiency flag(s)."
+            recommendation = (
+                "Rebalance toward efficient companies and pause noisy spend."
+                if inefficiencies else "Flag for review and keep the current mix."
+            )
+            capital_recommendation = "Preserve cash around the weak performers." if inefficiencies else "Monitor performance before reallocating."
+            exposure = [c for c in companies if c.get("allocation_percent") not in (None, "unknown") and float(c.get("allocation_percent")) > 65]
+            inefficient_ids = [f"{c['company_id']} ({c.get('allocation_percent', '??')}%)" for c in inefficiencies]
+            packets = [
+                {
+                    "recipient": "Selene",
+                    "summary": summary,
+                    "next_steps": "Align treasury posture with this portfolio view.",
+                },
+                {
+                    "recipient": "Helena",
+                    "summary": f"Inefficient companies: {', '.join(inefficient_ids) or 'none'}.",
+                    "next_steps": "Hold risky proposals until resolved.",
+                },
+                {
+                    "recipient": "YamYam",
+                    "summary": "Portfolio finance intelligence ready.",
+                    "next_steps": "Use this before approving new directions.",
+                },
+            ]
+            return {
+                "reply_text": f"Vivienne@{agent_scope} notes {summary} Recommendation: {recommendation}.",
+                "global_financial_summary": summary,
+                "portfolio_efficiency": sustainability,
+                "capital_recommendation": capital_recommendation,
+                "sustainability_note": sustainability,
+                "inefficient_companies": inefficient_ids,
+                "ship_to_risk": "Escalate inefficiencies to Helena." if inefficient_ids else "No extra risk escalation needed.",
+                "packets": packets,
+                "escalation": bool(inefficiencies),
+                "queue_action": "none",
+                "task_type": "finance_review",
+                "priority": "medium",
+            }
+
+        if role_type.lower() == "risk officer":
+            risk_insights = prompt.get("global_risk_insights", {})
+            companies = risk_insights.get("companies", [])
+            escalations = risk_insights.get("escalations", [])
+            risk_flags = risk_insights.get("risk_flags", [])
+            overexposed = [c for c in companies if c.get("allocation_percent") not in (None, "unknown") and str(c.get("allocation_percent")) not in ("None",) and float(c.get("allocation_percent")) > 65] if companies else []
+            exposure_summary = [f"{c['company_id']}: {c['allocation_percent']}%" for c in overexposed]
+            summary = f"Risk summary: {len(overexposed)} overexposed company(s); escalations {len(escalations)}; flags {len(risk_flags)}."
+            veto = "Do not proceed" if risk_flags or overexposed else "Allow caution with close monitoring."
+            caution = risk_flags or ["No immediate red flags"]
+            packets = [
+                {
+                    "recipient": "Selene",
+                    "summary": summary,
+                    "next_steps": "Coordinate with treasury before approving new allocations.",
+                },
+                {
+                    "recipient": "YamYam",
+                    "summary": f"Escalations: {len(escalations)}; risk_flags: {len(risk_flags)}.",
+                    "next_steps": "Assess breach responses if any flags are critical.",
+                },
+                {
+                    "recipient": "Lucian",
+                    "summary": "Risk posture ready for strategy review.",
+                    "next_steps": "Hold or adjust actions per this counsel.",
+                },
+            ]
+            return {
+                "reply_text": f"Helena@{agent_scope} warns: {summary} Veto: {veto}.",
+                "global_risk_summary": summary,
+                "veto_decision": veto,
+                "caution_notes": caution,
+                "drawdown_warnings": overexposed,
+                "overexposure_flags": exposure_summary,
+                "recommended_constraints": "No new risks until the escalations clear." if escalations else "Proceed with approved requests.",
+                "packets": packets,
+                "escalation": bool(escalations),
+                "queue_action": "none",
+                "task_type": "risk_review",
+                "priority": "high" if escalations else "medium",
+            }
+
+        if role_type == "master cfo":
+            finance_insights = prompt.get("global_finance_insights", {})
+            companies = finance_insights.get("companies", [])
+            inefficiencies = finance_insights.get("inefficiencies", [])
+            sustainability = finance_insights.get("sustainability", "unknown")
+            summary = f"Portfolio health {sustainability}; {len(inefficiencies)} inefficiency flag(s)."
+            recommendation = (
+                "Rebalance toward efficient companies and pause noisy spend."
+                if inefficiencies else "Flag for review and keep the current mix."
+            )
+            capital_recommendation = ("Preserve cash around weak performers." if inefficiencies else "Monitor their performance before reallocating.")
+            exposure = [c for c in companies if c.get("allocation_percent") not in (None, "unknown") and float(c.get("allocation_percent")) > 65]
+            inefficient_ids = [f"{c['company_id']} ({c.get('allocation_percent', '??')}%)" for c in inefficiencies]
+            packets = [
+                {
+                    "recipient": "Selene",
+                    "summary": summary,
+                    "next_steps": "Align treasury posture with this portfolio view.",
+                },
+                {
+                    "recipient": "Helena",
+                    "summary": f"Inefficient companies: {', '.join(inefficient_ids) or 'none'}.",
+                    "next_steps": "Hold risky proposals until resolved.",
+                },
+                {
+                    "recipient": "YamYam",
+                    "summary": "Portfolio finance intelligence ready.",
+                    "next_steps": "Use this before approving new directions.",
+                },
+            ]
+            return {
+                "reply_text": f"Vivienne@{agent_scope} notes {summary} Recommendation: {recommendation}.",
+                "global_financial_summary": summary,
+                "portfolio_efficiency": sustainability,
+                "capital_recommendation": capital_recommendation,
+                "sustainability_note": sustainability,
+                "inefficient_companies": inefficient_ids,
+                "ship_to_risk": "Refer inefficiencies to Helena." if inefficient_ids else "No extra risk flags.",
+                "packets": packets,
+                "escalation": bool(inefficiencies),
+                "queue_action": "none",
+                "task_type": "finance_review",
+                "priority": "medium",
+            }
+
+        if role_type == "master treasurer":
+            global_insights = prompt.get("global_insights", {})
+            def _to_pct(value):
+                try:
+                    return float(value)
+                except (TypeError, ValueError):
+                    return None
+            treasury = global_insights.get("treasury_snapshot", {})
+            companies = global_insights.get("companies", [])
+            active_count = global_insights.get("active_company_count", len(companies))
+            reserve_level = treasury.get("reserve_capital") or treasury.get("reserve_percent") or "unknown"
+            overexposed = [
+                c for c in companies
+                if _to_pct(c.get("allocation_percent")) is not None and _to_pct(c.get("allocation_percent")) > 70
+            ]
+            overexposure_warnings = [f"{c['company_id']} at {c['allocation_percent']}%" for c in overexposed]
+            summary = f"Parent treasury reserves {reserve_level}; {active_count} tracked companies."
+            recommendation = (
+                "Preserve capital and hold funding requests while reserves refresh."
+                if overexposure_warnings or reserve_level in ("unknown", 0)
+                else "Allow measured allocations where company CFOs report stable posture."
+            )
+            reserve_posture = "cautious" if overexposure_warnings else "steady"
+            allowance_recommendation = "Tighten allowances for the next cycle." if overexposure_warnings else "Maintain current allowances with close monitoring."
+            rationale = f"Reserves {reserve_level}; overexposed companies: {len(overexposed)}; active: {active_count}."
+            packets = [
+                {
+                    "recipient": "YamYam",
+                    "summary": summary,
+                    "next_steps": "Discuss capital posture before approving extra spend.",
+                },
+                {
+                    "recipient": "Risk Officer",
+                    "summary": f"Overexposure warnings: {', '.join(overexposure_warnings) if overexposure_warnings else 'none'}.",
+                    "next_steps": "Assess risk limits and notify companies.",
+                },
+                {
+                    "recipient": "Bianca",
+                    "summary": "Hold on new requests until global reserves stabilize.",
+                    "next_steps": "Align local spending posture with the treasury note.",
+                },
+                {
+                    "recipient": "Lucian",
+                    "summary": "Treasure summary ready for leadership.",
+                    "next_steps": "Use this before deciding on new company actions.",
+                },
+            ]
+            return {
+                "reply_text": f"Selene@{agent_scope} notes {summary}. {recommendation}",
+                "global_treasury_summary": summary,
+                "allocation_recommendation": recommendation,
+                "reserve_posture": reserve_posture,
+                "allowance_recommendation": allowance_recommendation,
+                "overexposure_warnings": overexposure_warnings,
+                "financial_rationale": rationale,
+                "packets": packets,
+                "escalation": bool(overexposure_warnings),
+                "queue_action": "none",
+                "task_type": "treasury_review",
+                "priority": "medium",
+            }
         if role_type == "ceo":
             insights = prompt.get("company_insights", {})
             queue_summary = prompt.get("queue_summary", {})

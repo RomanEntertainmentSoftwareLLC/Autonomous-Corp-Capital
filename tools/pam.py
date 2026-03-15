@@ -30,6 +30,10 @@ from tools.agent_runtime import (
     detect_target_scope,
     ensure_state,
     gather_company_insights,
+    gather_global_treasury_insights,
+    gather_global_risk_insights,
+    gather_global_finance_insights,
+    gather_global_finance_insights,
     load_env_file,
     load_persona,
     persona_description,
@@ -54,6 +58,11 @@ PRIORITY_KEYWORDS = {
     "low": "low",
     "monitor": "medium",
 }
+
+
+
+class PamError(Exception):
+    pass
 
 TASK_TYPES = [
     ("financial", "financial_review", "Bianca"),
@@ -87,6 +96,13 @@ TASK_TYPES = [
     ("hold", "executive_decision", "Lucian"),
     ("risk", "risk_review", "Risk Officer"),
     ("treasury", "treasury_review", "Master Treasurer"),
+    ("portfolio", "finance_review", "Master CFO"),
+    ("efficiency", "finance_review", "Master CFO"),
+    ("sustainability", "finance_review", "Master CFO"),
+    ("health", "finance_review", "Master CFO"),
+    ("risk", "risk_review", "Risk Officer"),
+    ("veto", "risk_review", "Risk Officer"),
+    ("compliance", "risk_review", "Risk Officer"),
     ("lifecycle", "lifecycle_action", "YamYam"),
     ("software", "software_task", "Product Manager"),
     ("bug", "bug_fix", "SWE"),
@@ -108,35 +124,42 @@ ROLE_SPECS = {
         "Pam is the organizational coordinator. She triages, routes, summarizes, and keeps the queue tidy."
     ),
     "Analyst": (
-        "Iris is the company Analyst. She reads company data, explains what is happening, identifies risks, highlights missing evidence, and suggests next areas for review. She does not make executive decisions."
+        "Iris is the company Analyst. She reads company data, explains what is happening, highlights missing evidence, and suggests next areas for review without making executive calls."
     ),
     "Manager": (
-        "Vera is the company Manager. She reviews Iris’s analyses, proposes practical next steps, highlights uncertainties, and escalates or requests follow-up when needed without making final approvals."
+        "Vera is the company Manager. She reviews Iris’s analyses, recommends next steps, and escalates or requests follow-up when required."
     ),
     "Researcher": (
-        "Rowan is the company Researcher. She explores strategic experiments, hypotheses, and alternative paths based on Iris and Vera’s work, reporting evidence-backed possibilities without pretending they are approved."
+        "Rowan is the company Researcher. She explores strategic experiments and reports evidence-backed ideas without claiming approvals."
     ),
     "Evolution": (
-        "Sloane is the company Evolution Specialist. She turns research and management signals into controlled mutation proposals for Atlas while respecting financial and lifecycle guardrails."
+        "Sloane is the company Evolution Specialist. She turns vetted signals into controlled mutation proposals for Atlas."
     ),
     "Market Simulator": (
-        "Atlas is the company Market Simulator. He compares proposed mutations and strategy branches under simulated scenarios, explains what the simulation can and cannot tell us, and passes structured findings to decision-makers."
+        "Atlas is the company Market Simulator. He compares scenarios and explains what the simulation can and cannot guarantee."
     ),
     "Archivist": (
-        "June is the company Archivist. She records what happened, compiles timelines, and keeps decision memory honest without adding drama or making executive calls."
-    ),
-    "CFO": (
-        "Bianca is the company CFO. She reads allocation, capital usage, reserve posture, lifecycle status, leaderboard data, config, Vera recommendations, Iris analysis, and Rowan proposals. She delivers calm, practical, structured financial guidance, warns about overextension, and prepares packets for Pam, the CEO, and the Master Treasurer without overriding the Treasurer or acting as CEO."
+        "June is the company Archivist. She records what happened, compiles timelines, and keeps the memory clean without drama."
     ),
     "CEO": (
-        "Lucian is the company CEO. He weighs Pam coordination, Iris analysis, Vera recommendations, Rowan research, and Bianca financial guidance against YamYam, Risk Officer, and Master Treasurer constraints before making the final company decision and issuing executive packets."
+        "Lucian is the company CEO. He weighs the inputs from Pam, Iris, Vera, Rowan, Bianca, and global stewards before guiding the company."
+    ),
+    "CFO": (
+        "Bianca is the company CFO. She interprets allocation, runway, and Vera/Iris context to protect local financial sanity."
+    ),
+    "Master Treasurer": (
+        "Selene is the global Master Treasurer. She watches the parent treasury, compares company posture, and keeps capital discipline before allocating."
+    ),
+    "Risk Officer": (
+        "Helena is the global Risk Officer. She enforces boundaries, vetoes reckless ideas, and keeps the ecosystem within policy."
+    ),
+    "Master CFO": (
+        "Vivienne is the global Master CFO. She reads the entire portfolio for efficiency, sustainability, and strategic financial alignment."
     ),
     "Low Tier Operations Worker": (
-        "Bob is the low-tier operations worker who handles safe, repetitive chores—collecting logs, checking files, bundling artifacts, and reporting plainly without overstating his authority."
+        "Bob is the low-tier operations worker who handles safe, repetitive chores and reports plainly."
     ),
-
 }
-
 ROLE_STRUCTURED_OUTPUT = {
     "administrative_coordinator": {
         "required_keys": [
@@ -227,6 +250,54 @@ ROLE_STRUCTURED_OUTPUT = {
         "default_queue_action": "none",
         "description": "Return simulation summaries, confidence notes, and packets for Pam, June, Vera, Sloane, and Lucian.",
     },
+    "Master Treasurer": {
+        "required_keys": [
+            "reply_text",
+            "global_treasury_summary",
+            "allocation_recommendation",
+            "reserve_posture",
+            "allowance_recommendation",
+            "overexposure_warnings",
+            "financial_rationale",
+            "packets",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return cross-company treasury posture, allocation guidance, and caution warnings for YamYam, Risk Officer, Master CFO, and company CFOs.",
+    },
+    "Master CFO": {
+        "required_keys": [
+            "reply_text",
+            "global_financial_summary",
+            "portfolio_efficiency",
+            "capital_recommendation",
+            "sustainability_note",
+            "inefficient_companies",
+            "ship_to_risk",
+            "packets",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return portfolio financial intelligence, efficiency notes, and guidance for Selene, Helena, YamYam, and company CFOs/CEOs.",
+    },
+    "Risk Officer": {
+        "required_keys": [
+            "reply_text",
+            "global_risk_summary",
+            "veto_decision",
+            "caution_notes",
+            "drawdown_warnings",
+            "overexposure_flags",
+            "recommended_constraints",
+            "packets",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return risk posture, veto guidance, and escalation packets for Selene, YamYam, Master CFO, and company leaders.",
+    },
     "Archivist": {
         "required_keys": [
             "reply_text",
@@ -298,29 +369,6 @@ ROLE_STRUCTURED_OUTPUT = {
 }
 
 
-class PamError(Exception):
-    pass
-
-
-def load_json_file(path: Path) -> Dict[str, Any]:
-    if not path.exists():
-        return {}
-    try:
-        return json.loads(path.read_text())
-    except Exception:
-        return {}
-
-
-def load_yaml_file(path: Path) -> Dict[str, Any]:
-    if not path.exists():
-        return {}
-    try:
-        return yaml.safe_load(path.read_text()) or {}
-    except Exception:
-        return {}
-
-
-
 def load_agents() -> Dict[str, Dict[str, str]]:
     if not CONFIG_PATH.exists():
         raise PamError(f"Agents config not found at {CONFIG_PATH}")
@@ -344,10 +392,14 @@ def create_prompt(
     target_scope: str,
 ) -> Dict[str, Any]:
     role_type = agent_info.get("role", "").strip()
+    role_key = role_type.lower()
     role_spec = ROLE_SPECS.get(role_type, ROLE_SPECS.get("administrative_coordinator", ""))
     structured = ROLE_STRUCTURED_OUTPUT.get(role_type, ROLE_STRUCTURED_OUTPUT["administrative_coordinator"])
     insights = gather_company_insights(scope, target_scope, queue)
-    return {
+    global_insights = gather_global_treasury_insights() if role_key == "master treasurer" else {}
+    global_risk_insights = gather_global_risk_insights() if role_key == "risk officer" else {}
+    global_finance_insights = gather_global_finance_insights() if role_key == "master cfo" else {}
+    prompt = {
         "role_type": role_type,
         "role_spec": role_spec,
         "structured_output": structured,
@@ -363,8 +415,17 @@ def create_prompt(
         "company_insights": insights,
         "message": message,
     }
+    if global_insights:
+        prompt["global_insights"] = global_insights
+    if global_risk_insights:
+        prompt["global_risk_insights"] = global_risk_insights
+    if global_finance_insights:
+        prompt["global_finance_insights"] = global_finance_insights
+    if global_risk_insights:
+        prompt["global_risk_insights"] = global_risk_insights
+    return prompt
 def choose_adapter(agent_id: str) -> SimpleLLMAdapter | OpenAIAdapter:
-    if any(agent_id.startswith(prefix) for prefix in ("pam_company_", "iris_company_", "vera_company_", "rowan_company_", "bianca_company_", "lucian_company_", "bob_company_", "sloane_company_", "atlas_company_", "june_company_")):
+    if agent_id in ("master_treasurer", "risk_officer", "master_cfo") or any(agent_id.startswith(prefix) for prefix in ("pam_company_", "iris_company_", "vera_company_", "rowan_company_", "bianca_company_", "lucian_company_", "bob_company_", "sloane_company_", "atlas_company_", "june_company_")):
         try:
             return OpenAIAdapter()
         except EnvironmentError:
@@ -455,7 +516,6 @@ def main() -> None:
         packet["evidence"] = response.get("evidence", [])
         packet["missing_data"] = response.get("missing_data", [])
         packet["suggested_followup"] = response.get("suggested_followup", "")
-
     elif role_type == "cfo":
         packet["financial_health_summary"] = response.get("financial_health_summary", "")
         packet["cash_runway_caution"] = response.get("cash_runway_caution", "")
@@ -466,7 +526,30 @@ def main() -> None:
         packet["missing_data"] = response.get("missing_data", [])
         packet["suggested_followup"] = response.get("suggested_followup", "")
         packet["packets"] = response.get("packets", [])
-
+    elif role_type == "master treasurer":
+        packet["global_treasury_summary"] = response.get("global_treasury_summary", "")
+        packet["allocation_recommendation"] = response.get("allocation_recommendation", "")
+        packet["reserve_posture"] = response.get("reserve_posture", "")
+        packet["allowance_recommendation"] = response.get("allowance_recommendation", "")
+        packet["overexposure_warnings"] = response.get("overexposure_warnings", [])
+        packet["financial_rationale"] = response.get("financial_rationale", "")
+        packet["packets"] = response.get("packets", [])
+    elif role_type == "master cfo":
+        packet["global_financial_summary"] = response.get("global_financial_summary", "")
+        packet["portfolio_efficiency"] = response.get("portfolio_efficiency", "")
+        packet["capital_recommendation"] = response.get("capital_recommendation", "")
+        packet["sustainability_note"] = response.get("sustainability_note", "")
+        packet["inefficient_companies"] = response.get("inefficient_companies", [])
+        packet["ship_to_risk"] = response.get("ship_to_risk", "")
+        packet["packets"] = response.get("packets", [])
+    elif role_type == "risk officer":
+        packet["global_risk_summary"] = response.get("global_risk_summary", "")
+        packet["veto_decision"] = response.get("veto_decision", "")
+        packet["caution_notes"] = response.get("caution_notes", [])
+        packet["drawdown_warnings"] = response.get("drawdown_warnings", [])
+        packet["overexposure_flags"] = response.get("overexposure_flags", [])
+        packet["recommended_constraints"] = response.get("recommended_constraints", "")
+        packet["packets"] = response.get("packets", [])
     elif role_type == "evolution":
         packet["mutation_proposal"] = response.get("mutation_proposal", "")
         packet["evolution_summary"] = response.get("evolution_summary", "")
@@ -476,7 +559,6 @@ def main() -> None:
         packet["risk_notes"] = response.get("risk_notes", [])
         packet["suggested_followup"] = response.get("suggested_followup", "")
         packet["packets"] = response.get("packets", [])
-
     elif role_type == "market simulator":
         packet["simulation_summary"] = response.get("simulation_summary", "")
         packet["scenario_results"] = response.get("scenario_results", "")
@@ -486,45 +568,16 @@ def main() -> None:
         packet["recommendation"] = response.get("recommendation", "")
         packet["suggested_followup"] = response.get("suggested_followup", "")
         packet["packets"] = response.get("packets", [])
-
-    elif role_type == "low tier operations worker":
-        packet["cash_runway_caution"] = response.get("cash_runway_caution", "")
-        packet["spending_posture"] = response.get("spending_posture", "")
-        packet["recommendation"] = response.get("recommendation", "")
-        packet["financial_rationale"] = response.get("financial_rationale", "")
-        packet["evidence"] = response.get("evidence", [])
-        packet["missing_data"] = response.get("missing_data", [])
-        packet["suggested_followup"] = response.get("suggested_followup", "")
+    elif role_type == "archivist":
+        packet["archival_summary"] = response.get("archival_summary", "")
+        packet["decision_record"] = response.get("decision_record", [])
+        packet["event_summary"] = response.get("event_summary", [])
+        packet["memory_digest"] = response.get("memory_digest", "")
+        packet["timeline"] = response.get("timeline", [])
+        packet["lessons_learned"] = response.get("lessons_learned", [])
+        packet["unresolved_issues"] = response.get("unresolved_issues", [])
         packet["packets"] = response.get("packets", [])
-
-    elif role_type == "evolution":
-        packet["mutation_proposal"] = response.get("mutation_proposal", "")
-        packet["evolution_summary"] = response.get("evolution_summary", "")
-        packet["candidate_parameters"] = response.get("candidate_parameters", [])
-        packet["candidate_strategies"] = response.get("candidate_strategies", [])
-        packet["rationale"] = response.get("rationale", "")
-        packet["risk_notes"] = response.get("risk_notes", [])
-        packet["suggested_followup"] = response.get("suggested_followup", "")
-        packet["packets"] = response.get("packets", [])
-
-    elif role_type == "low tier operations worker":
-        packet["financial_health_summary"] = response.get("financial_health_summary", "")
-        packet["cash_runway_caution"] = response.get("cash_runway_caution", "")
-        packet["spending_posture"] = response.get("spending_posture", "")
-        packet["recommendation"] = response.get("recommendation", "")
-        packet["financial_rationale"] = response.get("financial_rationale", "")
-        packet["evidence"] = response.get("evidence", [])
-        packet["missing_data"] = response.get("missing_data", [])
-        packet["suggested_followup"] = response.get("suggested_followup", "")
-        packet["packets"] = response.get("packets", [])
-
-    elif role_type == "low tier operations worker":
-        packet["op_summary"] = response.get("op_summary", "")
-        packet["artifacts"] = response.get("artifacts", [])
-        packet["missing_data"] = response.get("missing_data", [])
-        packet["status"] = response.get("status", "")
-        packet["packets"] = response.get("packets", [])
-
+        packet["escalation"] = response.get("escalation", False)
     elif role_type == "ceo":
         packet["decision"] = response.get("decision", "")
         packet["executive_summary"] = response.get("executive_summary", "")
@@ -536,7 +589,6 @@ def main() -> None:
         packet["missing_data"] = response.get("missing_data", [])
         packet["suggested_followup"] = response.get("suggested_followup", "")
         packet["packets"] = response.get("packets", [])
-
     if queue_action in ("create", "update"):
         queue_entry = {
             "task_id": task_id,

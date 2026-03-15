@@ -239,3 +239,21 @@ agents:
   role: Archivist
   scope: company_004
   description: Archivist for company_004
+- id: master_treasurer
+  name: Selene
+  persona: selene
+  role: Master Treasurer
+  scope: global
+  description: Global Master Treasurer overseeing the parent treasury
+- id: risk_officer
+  name: Helena
+  persona: helena
+  role: Risk Officer
+  scope: global
+  description: Global Risk Officer protecting the ecosystem
+- id: master_cfo
+  name: Vivienne
+  persona: vivienne
+  role: Master CFO
+  scope: global
+  description: Global Master CFO interpreting the full portfolio

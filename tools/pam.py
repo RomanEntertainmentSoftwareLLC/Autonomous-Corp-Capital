@@ -47,6 +47,25 @@ PRIORITY_KEYWORDS = {
 }
 
 TASK_TYPES = [
+    ("financial", "financial_review", "Bianca"),
+    ("budget", "financial_review", "Bianca"),
+    ("runway", "financial_review", "Bianca"),
+    ("cash", "financial_review", "Bianca"),
+    ("spend", "financial_review", "Bianca"),
+    ("capital", "financial_review", "Bianca"),
+    ("artifacts", "operational_task", "Bob"),
+    ("artifact", "operational_task", "Bob"),
+    ("gather", "operational_task", "Bob"),
+    ("collect", "operational_task", "Bob"),
+    ("log", "operational_task", "Bob"),
+    ("file", "operational_task", "Bob"),
+    ("archive", "operational_task", "Bob"),
+    ("cleanup", "operational_task", "Bob"),
+    ("decision", "executive_decision", "Lucian"),
+    ("direction", "executive_decision", "Lucian"),
+    ("approve", "executive_decision", "Lucian"),
+    ("strategy", "executive_decision", "Lucian"),
+    ("hold", "executive_decision", "Lucian"),
     ("risk", "risk_review", "Risk Officer"),
     ("treasury", "treasury_review", "Master Treasurer"),
     ("lifecycle", "lifecycle_action", "YamYam"),
@@ -56,6 +75,7 @@ TASK_TYPES = [
     ("report", "status_report", "Analyst"),
     ("analysis", "analysis", "Analyst"),
 ]
+
 
 ALLOWED_RECIPIENTS = sorted({entry[2] for entry in TASK_TYPES})
 
@@ -72,6 +92,16 @@ ROLE_SPECS = {
     "Researcher": (
         "Rowan is the company Researcher. She explores strategic experiments, hypotheses, and alternative paths based on Iris and Vera’s work, reporting evidence-backed possibilities without pretending they are approved."
     ),
+    "CFO": (
+        "Bianca is the company CFO. She reads allocation, capital usage, reserve posture, lifecycle status, leaderboard data, config, Vera recommendations, Iris analysis, and Rowan proposals. She delivers calm, practical, structured financial guidance, warns about overextension, and prepares packets for Pam, the CEO, and the Master Treasurer without overriding the Treasurer or acting as CEO."
+    ),
+    "CEO": (
+        "Lucian is the company CEO. He weighs Pam coordination, Iris analysis, Vera recommendations, Rowan research, and Bianca financial guidance against YamYam, Risk Officer, and Master Treasurer constraints before making the final company decision and issuing executive packets."
+    ),
+    "Low Tier Operations Worker": (
+        "Bob is the low-tier operations worker who handles safe, repetitive chores—collecting logs, checking files, bundling artifacts, and reporting plainly without overstating his authority."
+    ),
+
 }
 
 ROLE_STRUCTURED_OUTPUT = {
@@ -129,6 +159,57 @@ ROLE_STRUCTURED_OUTPUT = {
         ],
         "default_queue_action": "none",
         "description": "Return exploratory research insights and experiment ideas.",
+    },
+    "CFO": {
+        "required_keys": [
+            "reply_text",
+            "financial_health_summary",
+            "cash_runway_caution",
+            "spending_posture",
+            "recommendation",
+            "financial_rationale",
+            "evidence",
+            "missing_data",
+            "suggested_followup",
+            "packets",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return financially grounded guidance plus a packets array with {recipient, summary, next_steps} for Pam, the CEO, and the Master Treasurer.",
+    },
+    "Low Tier Operations Worker": {
+        "required_keys": [
+            "reply_text",
+            "op_summary",
+            "artifacts",
+            "missing_data",
+            "status",
+            "packets",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return operational completion notes with artifacts, missing data, and packets for the requesting agents.",
+    },
+    "CEO": {
+        "required_keys": [
+            "reply_text",
+            "decision",
+            "executive_summary",
+            "approval_decision",
+            "rationale",
+            "action_directive",
+            "request_more_evidence",
+            "packets",
+            "evidence",
+            "missing_data",
+            "suggested_followup",
+            "escalation",
+            "queue_action",
+        ],
+        "default_queue_action": "none",
+        "description": "Return a final company decision with rationale, action directive, and packets for Pam, Vera, Bianca, Rowan, and YamYam.",
     },
 }
 
@@ -271,12 +352,57 @@ def append_log(path: Path, entry: Dict[str, Any]) -> None:
 
 
 
+def read_agent_outbox_reports(agent_prefix: str, target_scope: str, limit: int = 3) -> List[Dict[str, Any]]:
+    path = STATE_ROOT / f"{agent_prefix}_{target_scope}" / "outbox.jsonl"
+    if not path.exists():
+        return []
+    lines = [line.strip() for line in path.read_text().splitlines() if line.strip()]
+    reports: List[Dict[str, Any]] = []
+    for raw in lines[-limit:]:
+        try:
+            entry = json.loads(raw)
+        except Exception:
+            continue
+        response = entry.get("response", {})
+        report: Dict[str, Any] = {
+            "timestamp": entry.get("timestamp"),
+            "task_type": response.get("task_type"),
+            "priority": response.get("priority"),
+            "summary": response.get("summary"),
+            "reply_text": response.get("reply_text"),
+            "analysis_summary": response.get("analysis_summary"),
+            "recommendation": response.get("recommendation"),
+            "research_summary": response.get("research_summary"),
+            "ideas": response.get("ideas"),
+            "hypotheses": response.get("hypotheses"),
+            "evidence": response.get("evidence"),
+            "missing_data": response.get("missing_data"),
+            "suggested_followup": response.get("suggested_followup"),
+        }
+        report = {k: v for k, v in report.items() if v}
+        if report:
+            reports.append(report)
+    return reports
+
+
+def collect_agent_reports(target_scope: str) -> Dict[str, List[Dict[str, Any]]]:
+    return {
+        "Pam": read_agent_outbox_reports("pam", target_scope),
+        "Iris": read_agent_outbox_reports("iris", target_scope),
+        "Vera": read_agent_outbox_reports("vera", target_scope),
+        "Rowan": read_agent_outbox_reports("rowan", target_scope),
+        "Bianca": read_agent_outbox_reports("bianca", target_scope),
+        "Bob": read_agent_outbox_reports("bob", target_scope),
+    }
+
+
+
 def detect_target_scope(message: str, default: str) -> str:
     lowered = message.lower()
     match = re.search(r"(company_\d+)", lowered)
     return match.group(1) if match else default
 
-def gather_company_insights(scope: str, target_scope: str) -> Dict[str, Any]:
+def gather_company_insights(scope: str, target_scope: str, queue: Dict[str, Any] | None = None) -> Dict[str, Any]:
     insights: Dict[str, Any] = {"scope": scope, "target_scope": target_scope}
     comp_dir = ROOT / "companies" / target_scope
     metadata = load_yaml_file(comp_dir / "metadata.yaml")
@@ -307,11 +433,12 @@ def gather_company_insights(scope: str, target_scope: str) -> Dict[str, Any]:
         insights["leaderboard_entries"][0] if insights["leaderboard_entries"] else None
     )
     manager_actions = load_yaml_file(Path("manager_actions.yaml"))
-    insights["manager_action"] = None
+    manager_action = None
     for action in manager_actions.get("actions", []):
         if action.get("company") == target_scope:
-            insights["manager_action"] = action
+            manager_action = action
             break
+    insights["manager_action"] = manager_action
     results_dir = ROOT / "results" / target_scope
     if results_dir.exists():
         insights["logs_present"] = True
@@ -330,6 +457,37 @@ def gather_company_insights(scope: str, target_scope: str) -> Dict[str, Any]:
     if not insights.get("manager_action"):
         missing.append("manager_action")
     insights["missing_data"] = missing
+    queue_snapshot = queue or {}
+    insights["queue_entries"] = queue_snapshot
+    insights["allocation"] = {
+        "amount": metadata.get("allocation_amount"),
+        "percent": metadata.get("allocation_percent"),
+        "status": metadata.get("allocation_status"),
+    }
+    capital_usage = {
+        "allocated": metadata.get("allocation_amount"),
+    }
+    if manager_action and manager_action.get("account_value") is not None:
+        capital_usage["manager_account_value"] = manager_action.get("account_value")
+    insights["capital_usage"] = capital_usage
+    insights["budget_posture"] = metadata.get("allocation_status") or "unknown"
+    treasury_path = ROOT / "state" / "treasury.yaml"
+    insights["treasury_snapshot"] = load_yaml_file(treasury_path)
+    insights["agent_reports"] = collect_agent_reports(target_scope)
+    file_checks = {
+        "trade_logs": [],
+        "result_logs": [],
+    }
+    for pattern in ("trade*.jsonl", "trade_log*.jsonl"):
+        for path in comp_dir.rglob(pattern):
+            if path.is_file():
+                file_checks["trade_logs"].append(str(path))
+    results_dir = ROOT / "results" / target_scope
+    if results_dir.exists():
+        for path in results_dir.rglob("*.jsonl"):
+            if path.is_file():
+                file_checks["result_logs"].append(str(path))
+    insights["file_checks"] = file_checks
     return insights
 
 def create_prompt(
@@ -345,7 +503,7 @@ def create_prompt(
     role_type = agent_info.get("role", "").strip()
     role_spec = ROLE_SPECS.get(role_type, ROLE_SPECS.get("administrative_coordinator", ""))
     structured = ROLE_STRUCTURED_OUTPUT.get(role_type, ROLE_STRUCTURED_OUTPUT["administrative_coordinator"])
-    insights = gather_company_insights(scope, target_scope)
+    insights = gather_company_insights(scope, target_scope, queue)
     return {
         "role_type": role_type,
         "role_spec": role_spec,
@@ -362,7 +520,7 @@ def create_prompt(
         "message": message,
     }
 def choose_adapter(agent_id: str) -> SimpleLLMAdapter | OpenAIAdapter:
-    if agent_id.startswith("pam_company_") or agent_id.startswith("iris_company_"):
+    if any(agent_id.startswith(prefix) for prefix in ("pam_company_", "iris_company_", "bianca_company_", "lucian_company_", "bob_company_")):
         try:
             return OpenAIAdapter()
         except EnvironmentError:
@@ -450,6 +608,36 @@ def main() -> None:
         packet["evidence"] = response.get("evidence", [])
         packet["missing_data"] = response.get("missing_data", [])
         packet["suggested_followup"] = response.get("suggested_followup", "")
+
+    elif role_type == "cfo":
+        packet["financial_health_summary"] = response.get("financial_health_summary", "")
+        packet["cash_runway_caution"] = response.get("cash_runway_caution", "")
+        packet["spending_posture"] = response.get("spending_posture", "")
+        packet["recommendation"] = response.get("recommendation", "")
+        packet["financial_rationale"] = response.get("financial_rationale", "")
+        packet["evidence"] = response.get("evidence", [])
+        packet["missing_data"] = response.get("missing_data", [])
+        packet["suggested_followup"] = response.get("suggested_followup", "")
+        packet["packets"] = response.get("packets", [])
+
+    elif role_type == "low tier operations worker":
+        packet["op_summary"] = response.get("op_summary", "")
+        packet["artifacts"] = response.get("artifacts", [])
+        packet["missing_data"] = response.get("missing_data", [])
+        packet["status"] = response.get("status", "")
+        packet["packets"] = response.get("packets", [])
+
+    elif role_type == "ceo":
+        packet["decision"] = response.get("decision", "")
+        packet["executive_summary"] = response.get("executive_summary", "")
+        packet["approval_decision"] = response.get("approval_decision", "")
+        packet["rationale"] = response.get("rationale", "")
+        packet["action_directive"] = response.get("action_directive", "")
+        packet["request_more_evidence"] = response.get("request_more_evidence", "")
+        packet["evidence"] = response.get("evidence", [])
+        packet["missing_data"] = response.get("missing_data", [])
+        packet["suggested_followup"] = response.get("suggested_followup", "")
+        packet["packets"] = response.get("packets", [])
 
     if queue_action in ("create", "update"):
         queue_entry = {

@@ -6,9 +6,13 @@ from __future__ import annotations
 import argparse
 import shutil
 import sys
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
+
+from tools.company_roster import ensure_company_roster, roster_sync
 
 
 BASE_CONFIG = Path(__file__).resolve().parent.parent / "tradebot" / "config.yaml"
@@ -60,6 +64,18 @@ def main() -> None:
     config_path = destination / "config.yaml"
     with open(config_path, "w", encoding="utf-8") as fh:
         yaml.safe_dump(template, fh, sort_keys=False)
+
+    metadata = {
+        "company_id": company_id,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "company_status": "active",
+        "generation": 1,
+    }
+    with (destination / "metadata.yaml").open("w", encoding="utf-8") as fh:
+        yaml.safe_dump(metadata, fh, sort_keys=False)
+
+    ensure_company_roster(company_id, parent_company=None, generation=1, event_id=str(uuid.uuid4()))
+    roster_sync()
 
     print(f"Created company config at {config_path}")
 

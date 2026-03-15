@@ -248,3 +248,9 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+    try:
+        from tools.company_roster import roster_sync
+    except ImportError:
+        pass
+    else:
+        roster_sync()

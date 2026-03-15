@@ -6,10 +6,13 @@ from __future__ import annotations
 import argparse
 import shutil
 import sys
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
+
+from tools.company_roster import ensure_company_roster, roster_sync
 
 COMPANIES_DIR = Path(__file__).resolve().parent.parent / "companies"
 
@@ -25,7 +28,7 @@ def read_metadata(company: str) -> dict:
 def write_metadata(company: str, data: dict) -> None:
     meta_path = COMPANIES_DIR / company / "metadata.yaml"
     with open(meta_path, "w", encoding="utf-8") as fh:
-        yaml.safe_dump(data, fh)
+        yaml.safe_dump(data, fh, sort_keys=False)
 
 
 def copy_config(parent: str, child: str) -> None:
@@ -63,16 +66,22 @@ def main() -> None:
 
     parent_meta = read_metadata(args.parent)
     generation = int(parent_meta.get("generation", 0)) + 1
+    event_id = str(uuid.uuid4())
     created_at = datetime.now(timezone.utc).isoformat()
     metadata = {
         "company_id": args.child,
         "parent_company": args.parent,
         "generation": generation,
+        "mutation_event_id": event_id,
         "mutation_source": f"clone_of_{args.parent}",
         "created_at": created_at,
+        "company_status": "active",
         "notes": f"Cloned from {args.parent} on {created_at}",
     }
     write_metadata(args.child, metadata)
+
+    ensure_company_roster(args.child, parent_company=args.parent, generation=generation, event_id=event_id)
+    roster_sync()
 
     print(f"Cloned '{args.parent}' → '{args.child}'")
     print(f"Child config ready at companies/{args.child}/config.yaml")

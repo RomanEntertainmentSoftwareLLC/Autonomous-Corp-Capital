@@ -1,108 +1,169 @@
 agents:
-  - id: pam
-    name: Pam
-    persona: pam
-    role: administrative_coordinator
-    scope: global
-    description: Global switchboard for multi-company coordination
-    capabilities:
-      - intake
-      - triage
-      - routing
-      - escalation
-  - id: pam_company_001
-    name: Pam_company_001
-    persona: pam
-    role: administrative_coordinator
-    scope: company_001
-    description: Front desk admin for company_001
-  - id: pam_company_002
-    name: Pam_company_002
-    persona: pam
-    role: administrative_coordinator
-    scope: company_002
-    description: Front desk admin for company_002
-  - id: pam_company_003
-    name: Pam_company_003
-    persona: pam
-    role: administrative_coordinator
-    scope: company_003
-    description: Front desk admin for company_003
-  - id: pam_company_004
-    name: Pam_company_004
-    persona: pam
-    role: administrative_coordinator
-    scope: company_004
-    description: Front desk admin for company_004
-  - id: iris_company_001
-    name: Iris
-    persona: iris
-    role: Analyst
-    scope: company_001
-    description: Analyst for company_001
-  - id: iris_company_002
-    name: Iris
-    persona: iris
-    role: Analyst
-    scope: company_002
-    description: Analyst for company_002
-  - id: iris_company_003
-    name: Iris
-    persona: iris
-    role: Analyst
-    scope: company_003
-    description: Analyst for company_003
-  - id: iris_company_004
-    name: Iris
-    persona: iris
-    role: Analyst
-    scope: company_004
-    description: Analyst for company_004
-  - id: vera_company_001
-    name: Vera
-    persona: vera
-    role: Manager
-    scope: company_001
-    description: Manager for company_001
-  - id: vera_company_002
-    name: Vera
-    persona: vera
-    role: Manager
-    scope: company_002
-    description: Manager for company_002
-  - id: vera_company_003
-    name: Vera
-    persona: vera
-    role: Manager
-    scope: company_003
-    description: Manager for company_003
-  - id: vera_company_004
-    name: Vera
-    persona: vera
-    role: Manager
-    scope: company_004
-    description: Manager for company_004
-  - id: rowan_company_001
-    name: Rowan
-    persona: rowan
-    role: Researcher
-    scope: company_001
-    description: Researcher for company_001
-  - id: rowan_company_002
-    name: Rowan
-    persona: rowan
-    role: Researcher
-    scope: company_002
-    description: Researcher for company_002
-  - id: rowan_company_003
-    name: Rowan
-    persona: rowan
-    role: Researcher
-    scope: company_003
-    description: Researcher for company_003
-  - id: rowan_company_004
-    name: Rowan
-    persona: rowan
-    role: Researcher
-    scope: company_004
-    description: Researcher for company_004
+- id: pam_company_001
+  name: Pam_company_001
+  persona: pam
+  role: administrative_coordinator
+  scope: company_001
+  description: Front desk admin for company_001
+- id: pam_company_002
+  name: Pam_company_002
+  persona: pam
+  role: administrative_coordinator
+  scope: company_002
+  description: Front desk admin for company_002
+- id: pam_company_003
+  name: Pam_company_003
+  persona: pam
+  role: administrative_coordinator
+  scope: company_003
+  description: Front desk admin for company_003
+- id: pam_company_004
+  name: Pam_company_004
+  persona: pam
+  role: administrative_coordinator
+  scope: company_004
+  description: Front desk admin for company_004
+- id: iris_company_001
+  name: Iris
+  persona: iris
+  role: Analyst
+  scope: company_001
+  description: Analyst for company_001
+- id: iris_company_002
+  name: Iris
+  persona: iris
+  role: Analyst
+  scope: company_002
+  description: Analyst for company_002
+- id: iris_company_003
+  name: Iris
+  persona: iris
+  role: Analyst
+  scope: company_003
+  description: Analyst for company_003
+- id: iris_company_004
+  name: Iris
+  persona: iris
+  role: Analyst
+  scope: company_004
+  description: Analyst for company_004
+- id: vera_company_001
+  name: Vera
+  persona: vera
+  role: Manager
+  scope: company_001
+  description: Manager for company_001
+- id: vera_company_002
+  name: Vera
+  persona: vera
+  role: Manager
+  scope: company_002
+  description: Manager for company_002
+- id: vera_company_003
+  name: Vera
+  persona: vera
+  role: Manager
+  scope: company_003
+  description: Manager for company_003
+- id: vera_company_004
+  name: Vera
+  persona: vera
+  role: Manager
+  scope: company_004
+  description: Manager for company_004
+- id: rowan_company_001
+  name: Rowan
+  persona: rowan
+  role: Researcher
+  scope: company_001
+  description: Researcher for company_001
+- id: rowan_company_002
+  name: Rowan
+  persona: rowan
+  role: Researcher
+  scope: company_002
+  description: Researcher for company_002
+- id: rowan_company_003
+  name: Rowan
+  persona: rowan
+  role: Researcher
+  scope: company_003
+  description: Researcher for company_003
+- id: rowan_company_004
+  name: Rowan
+  persona: rowan
+  role: Researcher
+  scope: company_004
+  description: Researcher for company_004
+- id: bianca_company_001
+  name: Bianca
+  persona: bianca
+  role: CFO
+  scope: company_001
+  description: CFO for company_001
+- id: bianca_company_002
+  name: Bianca
+  persona: bianca
+  role: CFO
+  scope: company_002
+  description: CFO for company_002
+- id: bianca_company_003
+  name: Bianca
+  persona: bianca
+  role: CFO
+  scope: company_003
+  description: CFO for company_003
+- id: bianca_company_004
+  name: Bianca
+  persona: bianca
+  role: CFO
+  scope: company_004
+  description: CFO for company_004
+- id: lucian_company_001
+  name: Lucian
+  persona: lucian
+  role: CEO
+  scope: company_001
+  description: CEO for company_001
+- id: lucian_company_002
+  name: Lucian
+  persona: lucian
+  role: CEO
+  scope: company_002
+  description: CEO for company_002
+- id: lucian_company_003
+  name: Lucian
+  persona: lucian
+  role: CEO
+  scope: company_003
+  description: CEO for company_003
+- id: lucian_company_004
+  name: Lucian
+  persona: lucian
+  role: CEO
+  scope: company_004
+  description: CEO for company_004
+- id: bob_company_001
+  name: Bob
+  persona: bob
+  role: Low Tier Operations Worker
+  scope: company_001
+  description: Low Tier Operations Worker for company_001
+- id: bob_company_002
+  name: Bob
+  persona: bob
+  role: Low Tier Operations Worker
+  scope: company_002
+  description: Low Tier Operations Worker for company_002
+- id: bob_company_003
+  name: Bob
+  persona: bob
+  role: Low Tier Operations Worker
+  scope: company_003
+  description: Low Tier Operations Worker for company_003
+- id: bob_company_004
+  name: Bob
+  persona: bob
+  role: Low Tier Operations Worker
+  scope: company_004
+  description: Low Tier Operations Worker for company_004

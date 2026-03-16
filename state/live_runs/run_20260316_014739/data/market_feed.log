@@ -1,0 +1,12 @@
+{"timestamp": "2026-03-16T01:47:40.066379+00:00", "symbol": "BTC-USD", "price": 72608, "source": "coingecko", "tier": "core", "watch_ok": true, "paper_ok": true, "real_money_ok": true}
+{"timestamp": "2026-03-16T01:47:40.066379+00:00", "symbol": "ETH-USD", "price": 2179.45, "source": "coingecko", "tier": "core", "watch_ok": true, "paper_ok": true, "real_money_ok": false}
+{"timestamp": "2026-03-16T01:47:40.066379+00:00", "symbol": "XRP-USD", "price": 1.44, "source": "coingecko", "tier": "liquid", "watch_ok": true, "paper_ok": true, "real_money_ok": false}
+{"timestamp": "2026-03-16T01:47:40.066379+00:00", "symbol": "SOL-USD", "price": 91.74, "source": "coingecko", "tier": "liquid", "watch_ok": true, "paper_ok": true, "real_money_ok": false}
+{"timestamp": "2026-03-16T01:47:40.066379+00:00", "symbol": "ADA-USD", "price": 0.271164, "source": "coingecko", "tier": "liquid", "watch_ok": true, "paper_ok": true, "real_money_ok": false}
+{"timestamp": "2026-03-16T01:47:40.066379+00:00", "symbol": "DOGE-USD", "price": 0.097565, "source": "coingecko", "tier": "liquid", "watch_ok": true, "paper_ok": true, "real_money_ok": false}
+{"timestamp": "2026-03-16T01:47:40.066379+00:00", "symbol": "LTC-USD", "price": 56.11, "source": "coingecko", "tier": "liquid", "watch_ok": true, "paper_ok": true, "real_money_ok": false}
+{"timestamp": "2026-03-16T01:47:40.066379+00:00", "symbol": "AVAX-USD", "price": 9.96, "source": "coingecko", "tier": "liquid", "watch_ok": true, "paper_ok": true, "real_money_ok": false}
+{"timestamp": "2026-03-16T01:47:40.066379+00:00", "symbol": "LINK-USD", "price": 9.48, "source": "coingecko", "tier": "liquid", "watch_ok": true, "paper_ok": true, "real_money_ok": false}
+{"timestamp": "2026-03-16T01:47:40.066379+00:00", "symbol": "SHIB-USD", "price": 5.98e-06, "source": "coingecko", "tier": "speculative", "watch_ok": true, "paper_ok": true, "real_money_ok": false}
+{"timestamp": "2026-03-16T01:47:40.066379+00:00", "symbol": "PEPE-USD", "price": 3.51e-06, "source": "coingecko", "tier": "speculative", "watch_ok": true, "paper_ok": true, "real_money_ok": false}
+{"timestamp": "2026-03-16T01:47:40.066379+00:00", "symbol": "BONK-USD", "price": 6.18e-06, "source": "coingecko", "tier": "speculative", "watch_ok": true, "paper_ok": true, "real_money_ok": false}

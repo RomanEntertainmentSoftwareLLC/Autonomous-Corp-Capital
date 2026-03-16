@@ -49,6 +49,6 @@ def build_decision(snapshot: Dict[str, object], company_id: str, last_price: Opt
             "notes": "signal-based scoring",
         }
     )
-    result["ml_scoring_active"] = True
-    result["signal_scoring_active"] = False
+    result["ml_scoring_active"] = False
+    result["signal_scoring_active"] = True
     return result

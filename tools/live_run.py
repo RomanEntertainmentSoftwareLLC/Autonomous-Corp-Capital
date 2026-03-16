@@ -117,6 +117,7 @@ def stop_run(run_id: str | None = None) -> None:
 def record_snapshot(run_dir: Path, snapshot: Dict[str, Any]) -> None:
     with (run_dir / "data" / "market_feed.log").open("a", encoding="utf-8") as feed:
         feed.write(json.dumps(snapshot) + "\n")
+        \
 
 
 def run_worker(run_id: str, duration_hours: float = 0.0) -> None:
@@ -150,39 +151,55 @@ def run_worker(run_id: str, duration_hours: float = 0.0) -> None:
                 backoff = max(LIVE_RUN_BACKOFF_BASE, backoff * 2 or LIVE_RUN_BACKOFF_BASE)
                 with log_path.open("a", encoding="utf-8") as log:
                     log.write(json.dumps({"timestamp": timestamp, "event": "rate_limit", "retry": backoff}) + "\n")
+
                 time.sleep(backoff)
                 continue
             raise
         except Exception as exc:
             with log_path.open("a", encoding="utf-8") as log:
                 log.write(json.dumps({"timestamp": timestamp, "event": "feed_error", "error": str(exc)}) + "\n")
+
             time.sleep(LIVE_RUN_POLL_SECONDS)
             continue
         anomalies: List[str] = []
+        cycle_decisions: List[Dict[str, Any]] = []
         for company in COMPANIES:
             for snapshot in snapshots:
                 symbol = snapshot["symbol"]
                 decision = build_decision(snapshot, company, last_prices.get((company, symbol)))
+                decision["vetoed_by_risk"] = abs(decision.get("signal_score", 0)) > 0.08
+                decision["position_state"] = portfolio.positions[company].get(symbol, 0.0)
+                decision["cash_snapshot"] = portfolio.cash.get(company, 0.0)
+                decision["allocation_context"] = portfolio.allocations.get(company)
                 last_prices[(company, symbol)] = snapshot.get("price") or last_prices.get((company, symbol), 0.0)
                 record_snapshot(run_dir, snapshot)
                 with (run_dir / "artifacts" / "paper_decisions.jsonl").open("a", encoding="utf-8") as fh:
                     fh.write(json.dumps(decision) + "\n")
+                
+                if decision["vetoed_by_risk"]:
+                    anomalies.append(f"veto:{company}:{symbol}")
+                    with (run_dir / "artifacts" / "risk.log").open("a", encoding="utf-8") as risk_file:
+                        risk_file.write(json.dumps({"timestamp": timestamp, "company": company, "symbol": symbol, "veto": True}) + "\n")
+                    
+                    continue
                 portfolio.apply_decision(decision)
-                if abs(decision.get("signal_score", 0)) > 0.05:
-                    anomalies.append(f"{company}:{symbol}")
-        orchestrate(run_dir, cycle, anomalies)
+                cycle_decisions.append(decision)
+        orchestrate(run_dir, cycle, cycle_decisions, anomalies)
         strategy_entry = {"timestamp": timestamp, "decision": "ml-driven", "confidence": 0.7}
         risk_entry = {"timestamp": timestamp, "veto": bool(anomalies), "notes": "risk event" if anomalies else "all good"}
         with (run_dir / "artifacts" / "strategy.log").open("a", encoding="utf-8") as strategy:
             strategy.write(json.dumps(strategy_entry) + "\n")
-        with (run_dir / "artifacts" / "risk.log").open("a", encoding="utf-8") as risk_file:
-            risk_file.write(json.dumps(risk_entry) + "\n")
+        
         with log_path.open("a", encoding="utf-8") as log:
             log.write(json.dumps({"timestamp": timestamp, "event": "heartbeat", "symbols": symbols}) + "\n")
+        
+        if cycle % 10 == 0:
+            reallocation_note = {"timestamp": timestamp, "event": "allocation_review", "note": "Reallocation pending (planned)."}
+            with (run_dir / "artifacts" / "risk.log").open("a", encoding="utf-8") as risk_file:
+                risk_file.write(json.dumps(reallocation_note) + "\n")
+        
         time.sleep(LIVE_RUN_POLL_SECONDS)
     pid_file.unlink(missing_ok=True)
-
-
 def summary(run_id: str) -> None:
     run_dir = run_directory(run_id)
     logs = list((run_dir / "logs").glob("*.log"))

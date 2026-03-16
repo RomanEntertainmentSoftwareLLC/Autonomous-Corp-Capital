@@ -26,9 +26,9 @@ def branch_packet(run_dir: Path, branch: str, summary: str) -> None:
     path.write_text(json.dumps(packet, indent=2))
 
 
-def orchestrate(run_dir: Path, cycle: int, anomalies: List[str]) -> None:
+def orchestrate(run_dir: Path, cycle: int, cycle_decisions: List[Dict[str, Any]], anomalies: List[str]) -> None:
     if cycle % 5 == 0:
-        branch_packet(run_dir, "company_local", "Company reports processed this cycle.")
-        branch_packet(run_dir, "master", "Master branches reviewed allocations.")
+        branch_packet(run_dir, "company_local", f"Company cycle {cycle}: {len(cycle_decisions)} decisions logged.")
+        branch_packet(run_dir, "master", "Master branches reviewed treasury posture and reinforced reserve discipline.")
     if anomalies:
         branch_packet(run_dir, "watchdog", f"Anomalies detected: {', '.join(anomalies)}")

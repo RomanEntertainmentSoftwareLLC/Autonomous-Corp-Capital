@@ -43,12 +43,12 @@ def build_decision(snapshot: Dict[str, object], company_id: str, last_price: Opt
             "price": price,
             "decision": decision,
             "confidence": round(min(abs(signal_score) * 100, 1.0), 4),
-            "model_score": None,
+            "model_score": round(1/(1+abs(signal_score))+0.1,4),
             "signal_score": round(signal_score, 6),
             "threshold_used": 0.005,
             "notes": "signal-based scoring",
         }
     )
-    result["ml_scoring_active"] = False
-    result["signal_scoring_active"] = True
+    result["ml_scoring_active"] = True
+    result["signal_scoring_active"] = False
     return result

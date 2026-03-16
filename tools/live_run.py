@@ -12,8 +12,9 @@ import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Dict, Any, List
+import urllib.error
 
-from tools.live_decision_engine import build_decision
+from tools.live_decision_engine import build_decision, DecisionResult
 from tools.live_market_feed import fetch_market_data
 from tools.live_orchestra import orchestrate
 from tools.live_paper_portfolio import PortfolioState
@@ -158,20 +159,20 @@ def run_worker(run_id: str, duration_hours: float = 0.0) -> None:
             time.sleep(LIVE_RUN_POLL_SECONDS)
             continue
         anomalies: List[str] = []
-        for snapshot in snapshots:
-            symbol = snapshot["symbol"]
-            decision = build_decision(snapshot, "company_001", last_prices.get(symbol))
-            last_prices[symbol] = snapshot.get("price") or last_prices.get(symbol, 0.0)
-            record_snapshot(run_dir, snapshot)
-            with (run_dir / "artifacts" / "paper_decisions.jsonl").open("a", encoding="utf-8") as fh:
-                fh.write(json.dumps(decision) + "\n")
-            portfolio.apply_decision(decision)
-            if abs(decision.get("signal_score", 0)) > 0.05:
-                anomalies.append(symbol)
+        for company in COMPANIES:
+            for snapshot in snapshots:
+                symbol = snapshot["symbol"]
+                decision = build_decision(snapshot, company, last_prices.get((company, symbol)))
+                last_prices[(company, symbol)] = snapshot.get("price") or last_prices.get((company, symbol), 0.0)
+                record_snapshot(run_dir, snapshot)
+                with (run_dir / "artifacts" / "paper_decisions.jsonl").open("a", encoding="utf-8") as fh:
+                    fh.write(json.dumps(decision) + "\n")
+                portfolio.apply_decision(decision)
+                if abs(decision.get("signal_score", 0)) > 0.05:
+                    anomalies.append(f"{company}:{symbol}")
         orchestrate(run_dir, cycle, anomalies)
         strategy_entry = {"timestamp": timestamp, "decision": "ml-driven", "confidence": 0.7}
         risk_entry = {"timestamp": timestamp, "veto": bool(anomalies), "notes": "risk event" if anomalies else "all good"}
-        record_snapshot(run_dir, {"timestamp": timestamp, "symbol": "orchestrated", "price": 0, "source": "run", "tier": "meta", "watch_ok": True, "paper_ok": True, "real_money_ok": False})
         with (run_dir / "artifacts" / "strategy.log").open("a", encoding="utf-8") as strategy:
             strategy.write(json.dumps(strategy_entry) + "\n")
         with (run_dir / "artifacts" / "risk.log").open("a", encoding="utf-8") as risk_file:

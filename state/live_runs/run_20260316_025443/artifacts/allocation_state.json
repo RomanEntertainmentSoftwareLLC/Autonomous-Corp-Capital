@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-03-16T02:54:43.432193+00:00",
+  "parent_total": 100.0,
+  "reserve_amount": 60.0,
+  "deployable_amount": 40.0,
+  "per_company_allocation": {
+    "company_001": 10.0,
+    "company_002": 10.0,
+    "company_003": 10.0,
+    "company_004": 10.0
+  }
+}

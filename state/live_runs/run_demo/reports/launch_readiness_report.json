@@ -1,0 +1,49 @@
+{
+  "run_id": "run_demo",
+  "report_generated_at": "2026-03-16T00:40:18.003613",
+  "metrics": {
+    "feed_entries": 5,
+    "strategy_decisions": 1,
+    "risk_records": 1,
+    "packet_events": 1,
+    "log_files": [],
+    "timestamps": [
+      "2026-03-16T00:40:18.004064",
+      "2026-03-16T00:40:18.004105",
+      "2026-03-16T00:40:18.004123",
+      "2026-03-16T00:40:18.004134",
+      "2026-03-16T00:40:18.004144"
+    ],
+    "data_completeness": 1.0
+  },
+  "thresholds": {
+    "data_completeness": 0.99,
+    "execution_reliability": 0.99,
+    "paper_only": true,
+    "critical_failures": 0,
+    "signoffs": 1.0,
+    "rollback_ready": true,
+    "drawdown_policy": 0.05
+  },
+  "summary": {
+    "performance": {
+      "decision_volume": 1,
+      "data_points": 5,
+      "stability": "steady"
+    },
+    "risk": {
+      "drawdown": "within policy",
+      "veto_frequency": "none recorded"
+    },
+    "capital": {
+      "efficiency": "analysis pending",
+      "treasury_effect": "neutral"
+    }
+  },
+  "run_meta": {
+    "run_id": "run_demo",
+    "mode": "paper",
+    "status": "completed",
+    "started_at": "2026-03-16T00:40:18.003613"
+  }
+}

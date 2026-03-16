@@ -6,6 +6,38 @@ import urllib.request
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 
+from tools.global_watchdog_fallbacks import GLOBAL_WATCHDOG_ROLES, build_global_watchdog_fallback
+
+def _global_context_blob(prompt: Dict[str, Any]) -> Dict[str, str]:
+    insights = prompt.get("company_insights", {})
+    companies = insights.get("company_summary") or []
+    status_line = ", ".join(f"{c.get('company_id','unknown')}({c.get('status','unknown')})" for c in companies if c.get('company_id'))
+    active_count = insights.get("active_company_count") or len(insights.get("active_companies") or []) or len(companies)
+    active_line = f"{active_count} active companies" if active_count else "no active companies"
+    queue_summary = prompt.get("queue_summary") or {}
+    queue_line = ", ".join(f"{k}:{v}" for k, v in queue_summary.items() if v) or "queue idle"
+    treasury = prompt.get("global_insights") or {}
+    treasury_snapshot = treasury.get("treasury_snapshot") or treasury.get("reserve_snapshot") or treasury
+    reserve_note = treasury_snapshot.get("reserve_percent") or treasury_snapshot.get("reserve_capital") or treasury_snapshot.get("reserves") or "unknown reserves"
+    risk = prompt.get("global_risk_insights") or {}
+    risk_flags = risk.get("risk_flags") or []
+    escalations = risk.get("escalations") or []
+    risk_line = f"{len(risk_flags)} risk flags; {len(escalations)} escalations" if risk_flags or escalations else "no risk flags"
+    lifecycle_notes = insights.get("lifecycle_history") or insights.get("global_notes") or "lifecycle signals pending"
+    policy_note = prompt.get("policy_description", "")
+    return {
+        "status_line": status_line or "company statuses unavailable",
+        "active_line": active_line,
+        "queue_line": queue_line,
+        "treasury_note": f"Reserves {reserve_note}",
+        "risk_line": risk_line,
+        "lifecycle_notes": lifecycle_notes,
+        "policy_note": policy_note,
+        "active_companies": insights.get("active_companies", []),
+    }
+
+
+
 
 class LLMAdapter(ABC):
     @abstractmethod
@@ -74,9 +106,12 @@ class SimpleLLMAdapter(LLMAdapter):
         lowered = message.lower()
         persona = prompt.get("persona", {})
         examples = persona.get("example_responses", {})
-        role_type = prompt.get("role_type", "").lower()
+        role_display = prompt.get("role_type", "").strip()
+        role_type = role_display.lower()
         target_scope = prompt.get("target_scope", prompt.get("scope", ""))
         agent_scope = prompt.get("agent_scope", prompt.get("scope", ""))
+        if role_display in GLOBAL_WATCHDOG_ROLES:
+            return build_global_watchdog_fallback(role_display, prompt)
 
         if role_type == "analyst":
             insights = prompt.get("company_insights", {})
@@ -1462,15 +1497,21 @@ class SimpleLLMAdapter(LLMAdapter):
                 if _to_pct(c.get("allocation_percent")) is not None and _to_pct(c.get("allocation_percent")) > 70
             ]
             overexposure_warnings = [f"{c['company_id']} at {c['allocation_percent']}%" for c in overexposed]
-            summary = f"Parent treasury reserves {reserve_level}; {active_count} tracked companies."
+            global_ctx = _global_context_blob(prompt)
+            if global_ctx['status_line']:
+                summary = f"{global_ctx['active_line']}; {global_ctx['status_line']}; {global_ctx['treasury_note'].replace('Reserves ', 'reserves ')}"
+            else:
+                summary = f"{global_ctx['active_line']}; {global_ctx['treasury_note']}"
             recommendation = (
-                "Preserve capital and hold funding requests while reserves refresh."
+                "Preserve capital and tighten disbursements while reserves refresh."
                 if overexposure_warnings or reserve_level in ("unknown", 0)
                 else "Allow measured allocations where company CFOs report stable posture."
             )
             reserve_posture = "cautious" if overexposure_warnings else "steady"
             allowance_recommendation = "Tighten allowances for the next cycle." if overexposure_warnings else "Maintain current allowances with close monitoring."
-            rationale = f"Reserves {reserve_level}; overexposed companies: {len(overexposed)}; active: {active_count}."
+            rationale = (
+                f"{global_ctx['treasury_note']}; {global_ctx['risk_line']}; overexposed companies: {len(overexposed)}; active: {active_count}."
+            )
             packets = [
                 {
                     "recipient": "Yam Yam",

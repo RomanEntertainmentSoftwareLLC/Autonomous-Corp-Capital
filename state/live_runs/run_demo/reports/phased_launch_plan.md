@@ -1,0 +1,3 @@
+# Phased Launch Plan
+
+1. Tiny capital 0.5% of reserves...

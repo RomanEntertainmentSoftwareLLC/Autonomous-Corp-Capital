@@ -1,0 +1,21 @@
+{
+  "run_id": "run_20260316_012904",
+  "mode": "paper",
+  "symbols": [
+    "BTC-USD",
+    "ETH-USD",
+    "XRP-USD",
+    "SOL-USD",
+    "ADA-USD",
+    "DOGE-USD",
+    "LTC-USD",
+    "AVAX-USD",
+    "LINK-USD",
+    "SHIB-USD",
+    "PEPE-USD",
+    "BONK-USD"
+  ],
+  "started_at": "2026-03-16T01:29:04.988218",
+  "status": "stopped",
+  "ended_at": "2026-03-16T01:29:30.078135"
+}

@@ -108,23 +108,6 @@ def stop_run(run_id: str | None = None) -> None:
     if active_current.get("run_id") == target_run:
         clear_current_run()
     print(f"Live-data paper run {target_run} stopped safely.")
-    pid = current.get("pid")
-    run_dir = run_directory(run_id)
-    pid_file = run_dir / "run.pid"
-    if pid and pid_file.exists():
-        try:
-            os.kill(int(pid), signal.SIGTERM)
-        except ProcessLookupError:
-            pass
-        pid_file.unlink()
-    meta_path = run_dir / "run_metadata.json"
-    if meta_path.exists():
-        meta = json.loads(meta_path.read_text())
-        meta["ended_at"] = datetime.utcnow().isoformat()
-        meta["status"] = "stopped"
-        meta_path.write_text(json.dumps(meta, indent=2))
-    clear_current_run()
-    print(f"Live-data paper run {run_id} stopped safely.")
 
 
 def record_snapshot(run_dir: Path, snapshot: Dict[str, Any]) -> None:

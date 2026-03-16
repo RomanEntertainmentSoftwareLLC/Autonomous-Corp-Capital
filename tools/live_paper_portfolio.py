@@ -43,14 +43,14 @@ class PortfolioState:
         price = decision["price"]
         decision_type = decision["decision"]
         cash = self.cash.get(company, 0.0)
+        size = self._determine_size(company, price, decision.get("confidence", 0.0))
         entry = self.positions[company].get(symbol, 0.0)
-        size = 1.0
-        if decision_type == "BUY" and cash >= price * size and price > 0:
+        if decision_type == "BUY" and cash >= price * size and price > 0 and size > 0:
             self.positions[company][symbol] = entry + size
             self.cash[company] = cash - price * size
             trade = self._build_trade(decision, "BUY", size)
             self._log_trade(trade)
-        elif decision_type == "SELL" and entry >= size and price > 0:
+        elif decision_type == "SELL" and entry >= size and price > 0 and size > 0:
             self.positions[company][symbol] = entry - size
             self.cash[company] = cash + price * size
             pnl = (price - (price * 0.99)) * size
@@ -88,3 +88,24 @@ class PortfolioState:
         }
         with (self.run_dir / "artifacts" / "portfolio_state.jsonl").open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(snapshot) + "\n")
+
+    def _determine_size(self, company: str, price: float, confidence: float) -> float:
+        cash = self.cash.get(company, 0.0)
+        if price <= 0 or cash <= 0:
+            return 0.0
+        base = cash * min(confidence, 0.9)
+        size = max(min(base / price, 2.0), 0.1)
+        return min(size, cash / price)
+
+    def reallocation_step(self) -> None:
+        avg_equity = sum(self.cash.values()) / len(self.cash) if self.cash else 0
+        for company, eq in self.cash.items():
+            change = 0.0
+            if eq > avg_equity * 1.05:
+                change = min(eq * 0.05, self.deployable * 0.02)
+            elif eq < avg_equity * 0.95:
+                change = -min(eq * 0.03, self.allocations[company] * 0.02)
+            if change != 0:
+                self.allocations[company] = max(self.allocations[company] + change, 0.0)
+                self.cash[company] += change
+        self.allocation_snapshot()

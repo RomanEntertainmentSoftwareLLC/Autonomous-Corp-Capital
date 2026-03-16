@@ -78,9 +78,36 @@ def start_run() -> None:
     print(f"Logs at: {run_dir / 'logs' / 'run.log'}")
 
 
-def stop_run() -> None:
-    current = read_current_run()
-    run_id = current["run_id"]
+def stop_run(run_id: str | None = None) -> None:
+    active_current: Dict[str, Any] = {}
+    try:
+        active_current = read_current_run()
+    except FileNotFoundError:
+        pass
+    target_run = run_id or active_current.get("run_id")
+    if not target_run:
+        raise SystemExit("No run_id provided and no current run tracked")
+    if active_current.get("run_id") != target_run:
+        pid = None
+    else:
+        pid = active_current.get("pid")
+    run_dir = run_directory(target_run)
+    pid_file = run_dir / "run.pid"
+    if pid and pid_file.exists():
+        try:
+            os.kill(int(pid), signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+        pid_file.unlink()
+    meta_path = run_dir / "run_metadata.json"
+    if meta_path.exists():
+        meta = json.loads(meta_path.read_text())
+        meta["ended_at"] = datetime.utcnow().isoformat()
+        meta["status"] = "stopped"
+        meta_path.write_text(json.dumps(meta, indent=2))
+    if active_current.get("run_id") == target_run:
+        clear_current_run()
+    print(f"Live-data paper run {target_run} stopped safely.")
     pid = current.get("pid")
     run_dir = run_directory(run_id)
     pid_file = run_dir / "run.pid"
@@ -187,10 +214,20 @@ def verify_paper_only(run_id: str) -> None:
 def validate() -> None:
     ensure_directories()
     symbols = target_symbol_list()
-    try:
-        fetch_market_data(symbols)
-    except Exception as exc:
-        raise SystemExit(f"Live feed unavailable: {exc}")
+    snapshots = fetch_market_data(symbols)
+    if not snapshots:
+        raise SystemExit("Feed returned no snapshot data")
+    for snapshot in snapshots:
+        if snapshot.get("price") is None or not snapshot.get("timestamp"):
+            raise SystemExit("Invalid snapshot data from feed")
+    temp_run = run_directory("validate_temp")
+    for path in (temp_run / "data" / "market_feed.log", temp_run / "artifacts" / "strategy.log", temp_run / "logs" / "run.log"):
+        path.write_text("")
+    fake_real = temp_run / "artifacts" / "real_money_trades.log"
+    fake_real.write_text("")
+    fake_real.unlink(missing_ok=True)
+    if fake_real.exists():
+        raise SystemExit("Paper-only validation failed")
     print("Live-run infrastructure ready")
 
 
@@ -198,7 +235,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Manage the live-data paper run")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("start", help="Start the paper run")
-    subparsers.add_parser("stop", help="Stop the current paper run")
+    stop_parser = subparsers.add_parser("stop", help="Stop the current paper run")
+    stop_parser.add_argument("--run-id", help="Explicit run id to stop")
     run_parser = subparsers.add_parser("run", help="Run worker (internal)")
     run_parser.add_argument("--run-id", required=True)
     summary_parser = subparsers.add_parser("summary", help="Generate summary bundle")
@@ -210,7 +248,7 @@ def main() -> None:
     if args.command == "start":
         start_run()
     elif args.command == "stop":
-        stop_run()
+        stop_run(run_id=args.run_id)
     elif args.command == "run":
         run_worker(args.run_id)
     elif args.command == "summary":

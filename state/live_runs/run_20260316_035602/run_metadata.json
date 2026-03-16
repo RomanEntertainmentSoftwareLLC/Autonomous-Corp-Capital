@@ -1,0 +1,21 @@
+{
+  "run_id": "run_20260316_035602",
+  "mode": "paper",
+  "symbols": [
+    "BTC-USD",
+    "ETH-USD",
+    "XRP-USD",
+    "SOL-USD",
+    "ADA-USD",
+    "DOGE-USD",
+    "LTC-USD",
+    "AVAX-USD",
+    "LINK-USD",
+    "SHIB-USD",
+    "PEPE-USD",
+    "BONK-USD"
+  ],
+  "duration_hours": 0.0005,
+  "started_at": "2026-03-16T03:56:02.515081",
+  "status": "scheduled"
+}

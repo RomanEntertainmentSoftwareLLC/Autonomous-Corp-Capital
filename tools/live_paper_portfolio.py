@@ -99,6 +99,7 @@ class PortfolioState:
 
     def reallocation_step(self) -> None:
         avg_equity = sum(self.cash.values()) / len(self.cash) if self.cash else 0
+        changes = []
         for company, eq in self.cash.items():
             change = 0.0
             if eq > avg_equity * 1.05:
@@ -106,6 +107,19 @@ class PortfolioState:
             elif eq < avg_equity * 0.95:
                 change = -min(eq * 0.03, self.allocations[company] * 0.02)
             if change != 0:
+                old_alloc = self.allocations[company]
                 self.allocations[company] = max(self.allocations[company] + change, 0.0)
                 self.cash[company] += change
+                changes.append({
+                    "company": company,
+                    "old_alloc": old_alloc,
+                    "new_alloc": self.allocations[company],
+                    "change": change,
+                })
         self.allocation_snapshot()
+        if changes:
+            with (self.run_dir / "artifacts" / "allocation_state.json").open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps({
+                    "timestamp": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+                    "changes": changes,
+                }) + "\n")

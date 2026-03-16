@@ -1,0 +1,33 @@
+"""Orchestrate branch participation for live paper runs."""
+
+from __future__ import annotations
+
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Dict, List
+
+BRANCHES = {
+    "company_local": ["Iris", "Vera", "Bianca", "Lucian", "June", "Pam"],
+    "master": ["Selene", "Helena", "Vivienne", "Yam Yam"],
+    "watchdog": ["Mara", "Justine", "Owen"],
+}
+
+
+def branch_packet(run_dir: Path, branch: str, summary: str) -> None:
+    packet = {
+        "timestamp": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+        "branch": branch,
+        "summary": summary,
+        "participants": BRANCHES.get(branch, []),
+    }
+    path = run_dir / "packets" / f"packet_{branch}_{int(time.time())}.json"
+    path.write_text(json.dumps(packet, indent=2))
+
+
+def orchestrate(run_dir: Path, cycle: int, anomalies: List[str]) -> None:
+    if cycle % 5 == 0:
+        branch_packet(run_dir, "company_local", "Company reports processed this cycle.")
+        branch_packet(run_dir, "master", "Master branches reviewed allocations.")
+    if anomalies:
+        branch_packet(run_dir, "watchdog", f"Anomalies detected: {', '.join(anomalies)}")

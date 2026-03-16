@@ -11,19 +11,22 @@ import sys
 import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from typing import Dict, Any
-import urllib.error
+from typing import Dict, Any, List
+
+from tools.live_decision_engine import build_decision
+from tools.live_market_feed import fetch_market_data
+from tools.live_orchestra import orchestrate
+from tools.live_paper_portfolio import PortfolioState
+from tools.live_universe import target_symbol_list
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-
-from tools.live_market_feed import fetch_market_data
-from tools.live_universe import target_symbol_list
 
 LIVE_RUNS_ROOT = ROOT / "state" / "live_runs"
 CURRENT_RUN_PATH = LIVE_RUNS_ROOT / "current_run.json"
 LIVE_RUN_POLL_SECONDS = int(os.getenv("LIVE_RUN_POLL_SECONDS", "60"))
 LIVE_RUN_BACKOFF_BASE = int(os.getenv("LIVE_RUN_BACKOFF_SECONDS", "60"))
+COMPANIES = ["company_001", "company_002", "company_003", "company_004"]
 
 
 def ensure_directories() -> None:
@@ -82,15 +85,15 @@ def start_run(duration_hours: float = 0.0) -> None:
 
 
 def stop_run(run_id: str | None = None) -> None:
-    active_current: Dict[str, Any] = {}
+    current = {}
     try:
-        active_current = read_current_run()
+        current = read_current_run()
     except FileNotFoundError:
         pass
-    target_run = run_id or active_current.get("run_id")
+    target_run = run_id or current.get("run_id")
     if not target_run:
         raise SystemExit("No run_id provided and no current run tracked")
-    pid = active_current.get("pid") if active_current.get("run_id") == target_run else None
+    pid = current.get("pid") if current.get("run_id") == target_run else None
     run_dir = run_directory(target_run)
     pid_file = run_dir / "run.pid"
     if pid and pid_file.exists():
@@ -105,7 +108,7 @@ def stop_run(run_id: str | None = None) -> None:
         meta["ended_at"] = datetime.utcnow().isoformat()
         meta["status"] = "stopped"
         meta_path.write_text(json.dumps(meta, indent=2))
-    if active_current.get("run_id") == target_run:
+    if current.get("run_id") == target_run:
         clear_current_run()
     print(f"Live-data paper run {target_run} stopped safely.")
 
@@ -115,28 +118,19 @@ def record_snapshot(run_dir: Path, snapshot: Dict[str, Any]) -> None:
         feed.write(json.dumps(snapshot) + "\n")
 
 
-def record_artifact(run_dir: Path, category: str, entry: Dict[str, Any]) -> None:
-    file = run_dir / "artifacts" / f"{category}.log"
-    with file.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(entry) + "\n")
-
-
-def record_packet(run_dir: Path, packet: Dict[str, Any]) -> None:
-    timestamp = packet.get("timestamp", datetime.utcnow().isoformat()).replace(":", "-")
-    path = run_dir / "packets" / f"packet_{timestamp}.json"
-    path.write_text(json.dumps(packet, indent=2))
-
-
 def run_worker(run_id: str, duration_hours: float = 0.0) -> None:
     run_dir = run_directory(run_id)
     pid_file = run_dir / "run.pid"
     symbols = os.environ.get("LIVE_RUN_SYMBOLS")
     symbols = symbols.split(",") if symbols else target_symbol_list()
+    portfolio = PortfolioState(run_dir)
     with pid_file.open("w", encoding="utf-8") as fh:
         fh.write(str(os.getpid()))
     stop_flag = False
-    backoff_seconds = 0
+    backoff = 0
     end_time = datetime.utcnow() + timedelta(hours=duration_hours) if duration_hours > 0 else None
+    last_prices: Dict[str, float] = {}
+    cycle = 0
 
     def _signal_handler(*_: Any) -> None:
         nonlocal stop_flag
@@ -145,36 +139,43 @@ def run_worker(run_id: str, duration_hours: float = 0.0) -> None:
     signal.signal(signal.SIGTERM, _signal_handler)
     log_path = run_dir / "logs" / "run.log"
     while not stop_flag and (not end_time or datetime.utcnow() < end_time):
+        cycle += 1
         timestamp = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
         try:
             snapshots = fetch_market_data(symbols)
-            backoff_seconds = 0
+            backoff = 0
         except urllib.error.HTTPError as exc:
             if exc.code == 429:
-                backoff_seconds = max(LIVE_RUN_BACKOFF_BASE, backoff_seconds * 2 or LIVE_RUN_BACKOFF_BASE)
+                backoff = max(LIVE_RUN_BACKOFF_BASE, backoff * 2 or LIVE_RUN_BACKOFF_BASE)
                 with log_path.open("a", encoding="utf-8") as log:
-                    log.write(json.dumps({"timestamp": timestamp, "event": "rate_limit", "retry": backoff_seconds}) + "\n")
-                time.sleep(backoff_seconds)
+                    log.write(json.dumps({"timestamp": timestamp, "event": "rate_limit", "retry": backoff}) + "\n")
+                time.sleep(backoff)
                 continue
             raise
         except Exception as exc:
             with log_path.open("a", encoding="utf-8") as log:
                 log.write(json.dumps({"timestamp": timestamp, "event": "feed_error", "error": str(exc)}) + "\n")
-            time.sleep(min(LIVE_RUN_BACKOFF_BASE, LIVE_RUN_POLL_SECONDS))
+            time.sleep(LIVE_RUN_POLL_SECONDS)
             continue
+        anomalies: List[str] = []
         for snapshot in snapshots:
+            symbol = snapshot["symbol"]
+            decision = build_decision(snapshot, "company_001", last_prices.get(symbol))
+            last_prices[symbol] = snapshot.get("price") or last_prices.get(symbol, 0.0)
             record_snapshot(run_dir, snapshot)
-        strategy_entry = {"timestamp": timestamp, "decision": "paper-batch", "confidence": 0.6}
-        record_artifact(run_dir, "strategy", strategy_entry)
-        risk_entry = {"timestamp": timestamp, "veto": False, "notes": "risk within bounds"}
-        record_artifact(run_dir, "risk", risk_entry)
-        packet = {
-            "timestamp": timestamp,
-            "recipient": "Pam",
-            "summary": "paper run live snapshots recorded",
-            "next_steps": "Archive logs for audit",
-        }
-        record_packet(run_dir, packet)
+            with (run_dir / "artifacts" / "paper_decisions.jsonl").open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(decision) + "\n")
+            portfolio.apply_decision(decision)
+            if abs(decision.get("signal_score", 0)) > 0.05:
+                anomalies.append(symbol)
+        orchestrate(run_dir, cycle, anomalies)
+        strategy_entry = {"timestamp": timestamp, "decision": "ml-driven", "confidence": 0.7}
+        risk_entry = {"timestamp": timestamp, "veto": bool(anomalies), "notes": "risk event" if anomalies else "all good"}
+        record_snapshot(run_dir, {"timestamp": timestamp, "symbol": "orchestrated", "price": 0, "source": "run", "tier": "meta", "watch_ok": True, "paper_ok": True, "real_money_ok": False})
+        with (run_dir / "artifacts" / "strategy.log").open("a", encoding="utf-8") as strategy:
+            strategy.write(json.dumps(strategy_entry) + "\n")
+        with (run_dir / "artifacts" / "risk.log").open("a", encoding="utf-8") as risk_file:
+            risk_file.write(json.dumps(risk_entry) + "\n")
         with log_path.open("a", encoding="utf-8") as log:
             log.write(json.dumps({"timestamp": timestamp, "event": "heartbeat", "symbols": symbols}) + "\n")
         time.sleep(LIVE_RUN_POLL_SECONDS)
@@ -217,9 +218,7 @@ def validate() -> None:
     run_dir = run_directory("validate_temp")
     for path in (run_dir / "data" / "market_feed.log", run_dir / "artifacts" / "strategy.log", run_dir / "logs" / "run.log"):
         path.write_text("")
-    fake_real = run_dir / "artifacts" / "real_money_trades.log"
-    fake_real.write_text("")
-    fake_real.unlink(missing_ok=True)
+    (run_dir / "artifacts" / "real_money_trades.log").write_text("")
     print("Live-run infrastructure ready")
 
 

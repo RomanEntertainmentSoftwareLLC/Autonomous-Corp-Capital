@@ -112,26 +112,26 @@ def load_policy(agent_info: Dict[str, str]) -> Dict[str, Any]:
 
 
 def load_company_values(target_scope: str) -> Dict[str, Any]:
-    if not target_scope or not str(target_scope).startswith("company_"):
-        return {}
+ if not target_scope or not str(target_scope).startswith("company_"):
+ return {}
 
-    candidates = [
-        ROOT.parent / "workspaces" / "companies" / target_scope / "COMPANY_VALUES.md",
-        ROOT / "workspaces" / "companies" / target_scope / "COMPANY_VALUES.md",
-        ROOT.parent / "workspace" / "companies" / target_scope / "COMPANY_VALUES.md",
-        ROOT / "workspace" / "companies" / target_scope / "COMPANY_VALUES.md",
-        Path("/opt/openclaw/.openclaw/workspaces/companies") / target_scope / "COMPANY_VALUES.md",
-        Path("/opt/openclaw/.openclaw/workspace/companies") / target_scope / "COMPANY_VALUES.md",
-    ]
+ candidates = [
+ ROOT.parent / "workspaces" / "companies" / target_scope / "COMPANY_VALUES.md",
+ ROOT / "workspaces" / "companies" / target_scope / "COMPANY_VALUES.md",
+ ROOT.parent / "workspace" / "companies" / target_scope / "COMPANY_VALUES.md",
+ ROOT / "workspace" / "companies" / target_scope / "COMPANY_VALUES.md",
+ Path("/opt/openclaw/.openclaw/workspaces/companies") / target_scope / "COMPANY_VALUES.md",
+ Path("/opt/openclaw/.openclaw/workspace/companies") / target_scope / "COMPANY_VALUES.md",
+ ]
 
-    for path in candidates:
-        if path.exists():
-            return {
-                "path": str(path),
-                "text": path.read_text(encoding="utf-8").strip(),
-            }
+ for path in candidates:
+ if path.exists():
+ return {
+ "path": str(path),
+ "text": path.read_text(encoding="utf-8").strip(),
+ }
 
-    return {}
+ return {}
 
 
 def persona_description(persona: Dict[str, Any]) -> str:

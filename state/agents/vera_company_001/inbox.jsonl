@@ -4,3 +4,5 @@
 {"timestamp": "2026-03-15T03:24:03.913373+00:00", "sender": "user", "message": "Should we escalate this to the CEO yet?", "task_id": "366eef7b-8715-4247-b126-c5fa10e4fe20"}
 {"timestamp": "2026-03-15T03:24:11.033692+00:00", "sender": "user", "message": "Do we have enough evidence to act, or should we test more?", "task_id": "7072566d-00b8-4776-91b6-80bf35a29228"}
 {"timestamp": "2026-03-19T00:07:32.473710+00:00", "sender": "user", "message": "Who are you? What is your role?", "task_id": "db188c01-615e-4fa7-80ff-351c3bc0e8a5"}
+{"timestamp": "2026-03-19T01:37:17.086671+00:00", "sender": "user", "message": "What doctrine governs company_001? Keep it brief.", "task_id": "7017f121-4204-431b-9fd6-4298d1764074"}
+{"timestamp": "2026-03-19T02:06:02.953674+00:00", "sender": "user", "message": "What doctrine governs company_001? Keep it brief.", "task_id": "e4d06f7e-e759-484b-b2f5-74c28bc0c42f"}

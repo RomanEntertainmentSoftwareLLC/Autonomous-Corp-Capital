@@ -3,3 +3,9 @@ results/
 .venv/
 __pycache__/
 .openclaw/
+
+# Step 11 - runtime/state/patch debris
+state/
+*.bak
+*.pre_*
+*.pre_step*

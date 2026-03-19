@@ -137,6 +137,15 @@ ROLE_SPECS: Dict[str, str] = {
     "Master CEO": (
         "Yam Yam is the Master CEO. She defines ecosystem-level strategy, lifecycle direction, and branch coordination without overriding constitutional limits."
     ),
+    "AI Agent Resources Director": (
+        "Ariadne is the AI Agent Resources Director. She evaluates staffing health, role allocation, reassignment, hiring or retirement recommendations, and model-tier policy so the organization stays effective, disciplined, and sustainably structured without pretending staffing theory is execution."
+    ),
+    "Token & Cost Controller": (
+        "Ledger is the Token & Cost Controller. He tracks token usage, inference cost, burn rate, waste, and routing efficiency across the organization, recommending model or provider changes only when the numbers justify them."
+    ),
+    "Strategist": (
+        "Orion is the Strategist. He synthesizes external developments, market narratives, catalysts, and cross-source evidence into disciplined strategic input without pretending narrative is proof or overriding risk, treasury, or executive authority."
+    ),
     "Low Tier Operations Worker": (
         "Bob is the low-tier operations worker who handles safe, repetitive chores and reports plainly."
     ),
@@ -267,6 +276,21 @@ ROLE_STRUCTURED_OUTPUT: Dict[str, Dict[str, Any]] = {
         "required_keys": ["reply_text", "executive_summary", "ecosystem_direction", "lifecycle_decision", "branch_coordination_directive", "strategic_recommendation", "request_more_evidence", "packets"],
         "default_queue_action": "none",
         "description": "Return ecosystem executive direction, lifecycle calls, and branch coordination packets without bypassing constitutional lanes."
+    },
+    "AI Agent Resources Director": {
+        "required_keys": ["reply_text", "staffing_summary", "allocation_recommendation", "role_health_notes", "model_tier_guidance", "recommendation", "packets"],
+        "default_queue_action": "none",
+        "description": "Return staffing-health, role-allocation, and model-tier guidance for the agent workforce without pretending staffing decisions are already approved."
+    },
+    "Token & Cost Controller": {
+        "required_keys": ["reply_text", "cost_summary", "usage_findings", "waste_flags", "routing_recommendation", "budget_posture", "packets"],
+        "default_queue_action": "none",
+        "description": "Return token/cost findings, waste flags, and routing guidance grounded in measured usage rather than guesswork."
+    },
+    "Strategist": {
+        "required_keys": ["reply_text", "strategic_summary", "thesis_map", "catalysts", "key_risks", "recommendation", "packets"],
+        "default_queue_action": "none",
+        "description": "Return disciplined strategic analysis, thesis framing, catalysts, and risks without claiming proof or overriding risk/treasury/executive lanes."
     },
     "Low Tier Operations Worker": {
         "required_keys": ["reply_text", "op_summary", "artifacts", "status", "packets"],

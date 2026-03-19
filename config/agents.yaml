@@ -391,3 +391,46 @@ agents:
   scope: global
   description: Master CEO overseeing the OpenClaw ecosystem
   agent_kind: global
+- id: aiar
+  name: Ariadne
+  persona: ariadne
+  role: AI Agent Resources Director
+  scope: global
+  description: Global AI Agent Resources Director for agent ecosystem alignment and
+    resources
+  agent_kind: global
+- id: ledger
+  name: Ledger
+  persona: ledger
+  role: Token & Cost Controller
+  scope: global
+  description: Global Token & Cost Controller tracking model usage and spend
+  agent_kind: global
+- id: orion_company_001
+  name: Orion
+  persona: orion
+  role: Strategist
+  scope: company_001
+  description: Strategist for company_001
+  agent_kind: company_local
+- id: orion_company_002
+  name: Orion
+  persona: orion
+  role: Strategist
+  scope: company_002
+  description: Strategist for company_002
+  agent_kind: company_local
+- id: orion_company_003
+  name: Orion
+  persona: orion
+  role: Strategist
+  scope: company_003
+  description: Strategist for company_003
+  agent_kind: company_local
+- id: orion_company_004
+  name: Orion
+  persona: orion
+  role: Strategist
+  scope: company_004
+  description: Strategist for company_004
+  agent_kind: company_local

@@ -77,9 +77,21 @@ def choose_adapter(agent_id: str, agent_info: Dict[str, Any]) -> OpenClawAdapter
  return OpenClawAdapter(agent_id)
 
 
+
+def merge_structured_fields(packet: Dict[str, Any], prompt: Dict[str, Any], response: Dict[str, Any]) -> Dict[str, Any]:
+ structured = prompt.get("structured_output", {}) or {}
+ required_keys = structured.get("required_keys", []) or []
+ for key in required_keys:
+  if key in response:
+   packet[key] = response.get(key)
+ if "packets" in response:
+  packet["packets"] = response.get("packets", [])
+ return packet
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Pam front desk coordinator")
-    parser.add_argument("--agent", default="pam", help="Agent ID from config/agents.yaml")
+    parser.add_argument("--agent", required=True, help="Agent ID from config/agents.yaml")
     parser.add_argument("--sender", default="user", help="Identity of the requester")
     parser.add_argument("--show-queue", action="store_true")
     parser.add_argument("message", nargs="*", help="Message or request for Pam")
@@ -135,6 +147,7 @@ def main() -> None:
         task_id,
         now,
     )
+    packet = merge_structured_fields(packet, prompt, response)
     if response.get("bridge_fallback_used"):
      packet["bridge_fallback_used"] = True
      packet["bridge_error"] = response.get("bridge_error", "")

@@ -37,8 +37,7 @@ from tools.agent_packets import build_packet
 from tools.agent_context import build_prompt
 from tools.agent_reports import load_agent_histories
 
-from tools.llm_client import SimpleLLMAdapter
-from tools.openclaw_agent_bridge import OpenClawAdapter
+from tools.llm_client import OpenAIAdapter, SimpleLLMAdapter
 
 load_env_file(AGENT_ROOT / ".env")
 
@@ -73,8 +72,14 @@ def load_agents() -> Dict[str, Dict[str, str]]:
     return agents
 
 
-def choose_adapter(agent_id: str, agent_info: Dict[str, Any]) -> OpenClawAdapter:
- return OpenClawAdapter(agent_id)
+def choose_adapter(agent_info: Dict[str, Any]) -> SimpleLLMAdapter | OpenAIAdapter:
+    kind = agent_info.get("agent_kind", "company_local")
+    if kind in ("global", "swe", "watchdog", "company_local"):
+        try:
+            return OpenAIAdapter()
+        except EnvironmentError:
+            return SimpleLLMAdapter()
+    return SimpleLLMAdapter()
 
 
 def main() -> None:
@@ -109,16 +114,8 @@ def main() -> None:
     target_scope = detect_target_scope(message, scope)
     prompt = build_prompt(agent_info, scope, message, queue, inbox_history, outbox_history, persona, target_scope)
     resolved_target_scope = prompt.get("target_scope", scope)
-    adapter = choose_adapter(args.agent, agent_info)
-    try:
-     response = adapter.reason(message, prompt)
-    except Exception as exc:
-     response = SimpleLLMAdapter().reason(message, prompt)
-     response["bridge_fallback_used"] = True
-     response["bridge_error"] = str(exc)
-     if response.get("bridge_fallback_used"):
-      response["priority"] = "high"
-      response["queue_action"] = "escalate"
+    adapter = choose_adapter(agent_info)
+    response = adapter.reason(message, prompt)
 
     now = datetime.now(timezone.utc).isoformat()
     task_id = str(uuid.uuid4())
@@ -135,10 +132,6 @@ def main() -> None:
         task_id,
         now,
     )
-    if response.get("bridge_fallback_used"):
-     packet["bridge_fallback_used"] = True
-     packet["bridge_error"] = response.get("bridge_error", "")
-     packet["status"] = "blocked"
 
     role_type = prompt.get("role_type", "").lower()
     if role_type == "analyst":

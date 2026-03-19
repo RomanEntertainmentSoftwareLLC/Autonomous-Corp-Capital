@@ -11,7 +11,6 @@ from tools.agent_runtime import (
     gather_global_risk_insights,
     gather_global_treasury_insights,
     load_policy,
- load_company_values,
     persona_description,
     policy_description,
     summarize_queue,
@@ -37,7 +36,6 @@ def build_prompt(
     role_spec = ROLE_SPECS.get(role_type, ROLE_SPECS.get("administrative_coordinator", ""))
     structured = ROLE_STRUCTURED_OUTPUT.get(role_type, ROLE_STRUCTURED_OUTPUT["administrative_coordinator"])
     policy = load_policy(agent_info)
- company_values = load_company_values(target_scope)
     insights = gather_company_insights(scope, target_scope, queue)
     queue_summary = summarize_queue(queue)
     global_insights = gather_global_treasury_insights() if role_key in TREASURY_ROLES else {}
@@ -51,8 +49,6 @@ def build_prompt(
         "persona_description": persona_description(persona),
         "policy": policy,
         "policy_description": policy_description(policy),
- "company_values": company_values.get("text", ""),
- "company_values_path": company_values.get("path", ""),
         "scope": scope,
         "agent_scope": scope,
         "target_scope": target_scope,

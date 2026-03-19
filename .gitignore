@@ -9,3 +9,4 @@ state/
 *.bak
 *.pre_*
 *.pre_step*
+logs/meetings/

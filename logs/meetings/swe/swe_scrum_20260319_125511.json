@@ -1,0 +1,83 @@
+{
+  "meeting_id": "swe_scrum_20260319_125511",
+  "type": "swe_scrum",
+  "timestamp": "2026-03-19T12:55:11.002877+00:00",
+  "participants": [
+    "tessa",
+    "nadia",
+    "marek",
+    "eli",
+    "noah",
+    "mina",
+    "gideon",
+    "sabine",
+    "rhea"
+  ],
+  "summary": "Initial SWE scrum MVP transcript",
+  "action_items": [],
+  "transcript": [
+    {
+      "agent_id": "tessa",
+      "role": "Scrum Master",
+      "ok": false,
+      "reply_text": "",
+      "stderr": "Unknown agent 'tessa' (check config/agents.yaml)"
+    },
+    {
+      "agent_id": "nadia",
+      "role": "Product Manager",
+      "ok": false,
+      "reply_text": "",
+      "stderr": "Unknown agent 'nadia' (check config/agents.yaml)"
+    },
+    {
+      "agent_id": "marek",
+      "role": "Senior Software Architect",
+      "ok": false,
+      "reply_text": "",
+      "stderr": "Unknown agent 'marek' (check config/agents.yaml)"
+    },
+    {
+      "agent_id": "eli",
+      "role": "Senior Software Engineer",
+      "ok": false,
+      "reply_text": "",
+      "stderr": "Unknown agent 'eli' (check config/agents.yaml)"
+    },
+    {
+      "agent_id": "noah",
+      "role": "Junior Software Engineer",
+      "ok": false,
+      "reply_text": "",
+      "stderr": "Unknown agent 'noah' (check config/agents.yaml)"
+    },
+    {
+      "agent_id": "mina",
+      "role": "Tester",
+      "ok": false,
+      "reply_text": "",
+      "stderr": "Unknown agent 'mina' (check config/agents.yaml)"
+    },
+    {
+      "agent_id": "gideon",
+      "role": "Code Reviewer",
+      "ok": false,
+      "reply_text": "",
+      "stderr": "Unknown agent 'gideon' (check config/agents.yaml)"
+    },
+    {
+      "agent_id": "sabine",
+      "role": "QA",
+      "ok": false,
+      "reply_text": "",
+      "stderr": "Unknown agent 'sabine' (check config/agents.yaml)"
+    },
+    {
+      "agent_id": "rhea",
+      "role": "Infrastructure",
+      "ok": false,
+      "reply_text": "",
+      "stderr": "Unknown agent 'rhea' (check config/agents.yaml)"
+    }
+  ]
+}

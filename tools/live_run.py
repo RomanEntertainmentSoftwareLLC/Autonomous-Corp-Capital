@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Dict, Any, List
 import urllib.error
 
+from tools.agent_runtime import collect_agent_reports
 from tools.live_decision_engine import build_decision, DecisionResult
 from tools.live_market_feed import fetch_market_data
 from tools.live_orchestra import orchestrate
@@ -28,6 +29,8 @@ CURRENT_RUN_PATH = LIVE_RUNS_ROOT / "current_run.json"
 LIVE_RUN_POLL_SECONDS = int(os.getenv("LIVE_RUN_POLL_SECONDS", "60"))
 LIVE_RUN_BACKOFF_BASE = int(os.getenv("LIVE_RUN_BACKOFF_SECONDS", "60"))
 COMPANIES = ["company_001", "company_002", "company_003", "company_004"]
+MAX_EXECUTIONS_PER_CYCLE = 6
+MAX_EXECUTIONS_PER_COMPANY_PER_CYCLE = 2
 
 
 def ensure_directories() -> None:
@@ -49,6 +52,180 @@ def write_current_run(run_id: str, pid: int) -> None:
     ensure_directories()
     data = {"run_id": run_id, "pid": pid, "mode": "paper", "status": "running", "started_at": datetime.utcnow().isoformat()}
     CURRENT_RUN_PATH.write_text(json.dumps(data, indent=2))
+
+
+
+def candidate_ranking_score(decision: Dict[str, Any]) -> float:
+    policy_signal_score = abs(float(decision.get("policy_signal_score") or 0.0))
+    ml_signal_score = abs(float(decision.get("ml_signal_score") or 0.0))
+    model_confidence = abs(float(decision.get("model_score") or 0.5) - 0.5) * 2.0
+    return round(policy_signal_score + ml_signal_score + model_confidence, 6)
+
+
+
+def rank_and_select_candidates(candidates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    ranked = sorted(candidates, key=lambda c: c["ranking_score"], reverse=True)
+    selected: List[Dict[str, Any]] = []
+    per_company_counts: Dict[str, int] = {}
+    for candidate in ranked:
+        if candidate.get("vetoed_by_risk"):
+            candidate["execution_state"] = "skipped"
+            candidate["skip_reason"] = "risk_veto"
+            continue
+        if candidate.get("decision") == "HOLD":
+            candidate["execution_state"] = "skipped"
+            candidate["skip_reason"] = "hold_candidate"
+            continue
+        company = str(candidate.get("company_id"))
+        if len(selected) >= MAX_EXECUTIONS_PER_CYCLE:
+            candidate["execution_state"] = "skipped"
+            candidate["skip_reason"] = "global_execution_cap"
+            continue
+        if per_company_counts.get(company, 0) >= MAX_EXECUTIONS_PER_COMPANY_PER_CYCLE:
+            candidate["execution_state"] = "skipped"
+            candidate["skip_reason"] = "company_execution_cap"
+            continue
+        candidate["execution_state"] = "executed"
+        candidate["skip_reason"] = None
+        selected.append(candidate)
+        per_company_counts[company] = per_company_counts.get(company, 0) + 1
+    return ranked
+
+
+
+def latest_report(reports: Dict[str, List[Dict[str, Any]]], agent_name: str) -> Dict[str, Any]:
+    agent_reports = reports.get(agent_name) or []
+    return agent_reports[-1] if agent_reports else {}
+
+
+
+def derive_lucian_posture(report: Dict[str, Any]) -> str:
+    text = " ".join(
+        str(report.get(key, ""))
+        for key in ("decision", "approval_decision", "action_directive", "executive_summary", "reply_text", "rationale")
+    ).lower()
+    if not text:
+        return "approve_top_candidate"
+    if "do not approve" in text or "request more evidence" in text or "not approved" in text:
+        return "company_veto"
+    if "defer" in text:
+        return "defer"
+    if "hold" in text:
+        return "hold"
+    return "approve_top_candidate"
+
+
+
+def derive_bianca_cap_multiplier(report: Dict[str, Any]) -> float:
+    text = " ".join(
+        str(report.get(key, ""))
+        for key in ("spending_posture", "budget_posture", "reply_text", "recommendation", "rationale")
+    ).lower()
+    if not text:
+        return 1.0
+    if "hold new spending" in text or "preserve cash" in text or "keep spending constrained" in text or "caution level: high" in text:
+        return 0.5
+    if "caution" in text or "constrained" in text:
+        return 0.75
+    return 1.0
+
+
+
+def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]]) -> Dict[str, Any]:
+    reports = collect_agent_reports(company)
+    source_agents = [
+        "Pam",
+        "Iris",
+        "Vera",
+        "Rowan",
+        "Orion",
+        "Bianca",
+        "Lucian",
+        "Atlas",
+        "Bob",
+        "June",
+        "Sloane",
+    ]
+    consulted = [agent for agent in source_agents if reports.get(agent)]
+    missing = [agent for agent in source_agents if not reports.get(agent)]
+    lucian_report = latest_report(reports, "Lucian")
+    bianca_report = latest_report(reports, "Bianca")
+    iris_report = latest_report(reports, "Iris")
+    vera_report = latest_report(reports, "Vera")
+    orion_report = latest_report(reports, "Orion")
+    approval_posture = derive_lucian_posture(lucian_report)
+    cap_multiplier = derive_bianca_cap_multiplier(bianca_report)
+    top_candidates = [
+        {
+            "symbol": c.get("symbol"),
+            "decision": c.get("decision"),
+            "ranking_score": c.get("ranking_score"),
+            "decision_path": c.get("decision_path"),
+            "execution_state": c.get("execution_state"),
+            "skip_reason": c.get("skip_reason"),
+        }
+        for c in ranked_candidates[:3]
+    ]
+    rationale_bits = []
+    for agent_name, report in (("Iris", iris_report), ("Vera", vera_report), ("Orion", orion_report)):
+        text = report.get("analysis_summary") or report.get("recommendation") or report.get("reply_text") or report.get("research_summary")
+        if text:
+            rationale_bits.append(f"{agent_name}: {text}")
+    if not rationale_bits:
+        rationale_bits.append("No real Iris/Vera/Orion runtime rationale available yet.")
+    return {
+        "company_id": company,
+        "top_ranked_candidates": top_candidates,
+        "approval_posture": approval_posture,
+        "cap_multiplier": cap_multiplier,
+        "sizing_posture": "reduced" if cap_multiplier < 1.0 else "baseline",
+        "rationale": " | ".join(rationale_bits[:3]),
+        "missing_input_flags": missing,
+        "source_agents_consulted": consulted,
+        "execution_changed_by_packet": False,
+        "packet_effects": [],
+    }
+
+
+
+def apply_company_packets(ranked_candidates: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+    packets: Dict[str, Dict[str, Any]] = {}
+    by_company: Dict[str, List[Dict[str, Any]]] = {company: [] for company in COMPANIES}
+    for candidate in ranked_candidates:
+        by_company.setdefault(str(candidate.get("company_id")), []).append(candidate)
+
+    for company, company_candidates in by_company.items():
+        packet = build_company_packet(company, company_candidates)
+        packets[company] = packet
+        allowed_execs = max(0, min(MAX_EXECUTIONS_PER_COMPANY_PER_CYCLE, int(MAX_EXECUTIONS_PER_COMPANY_PER_CYCLE * packet["cap_multiplier"] + 0.9999)))
+        executed_for_company = 0
+        for candidate in company_candidates:
+            if candidate.get("execution_state") != "executed":
+                continue
+            if packet["approval_posture"] == "company_veto":
+                candidate["execution_state"] = "skipped"
+                candidate["skip_reason"] = "company_packet_veto"
+                packet["execution_changed_by_packet"] = True
+                packet["packet_effects"].append(f"vetoed:{candidate.get('symbol')}")
+                continue
+            if packet["approval_posture"] in {"hold", "defer"}:
+                candidate["execution_state"] = "skipped"
+                candidate["skip_reason"] = f"company_packet_{packet['approval_posture']}"
+                packet["execution_changed_by_packet"] = True
+                packet["packet_effects"].append(f"{packet['approval_posture']}:{candidate.get('symbol')}")
+                continue
+            if executed_for_company >= allowed_execs:
+                candidate["execution_state"] = "skipped"
+                candidate["skip_reason"] = "company_packet_cap"
+                packet["execution_changed_by_packet"] = True
+                packet["packet_effects"].append(f"cap:{candidate.get('symbol')}")
+                continue
+            candidate["size_multiplier"] = round(float(candidate.get("size_multiplier", 1.0)) * float(packet["cap_multiplier"]), 4)
+            candidate["company_packet_posture"] = packet["approval_posture"]
+            candidate["company_packet_cap_multiplier"] = packet["cap_multiplier"]
+            executed_for_company += 1
+        packet["resulting_execution_posture"] = packet["approval_posture"]
+    return packets
 
 
 def read_current_run() -> Dict[str, Any]:
@@ -77,7 +254,7 @@ def start_run(duration_hours: float = 0.0) -> None:
         "status": "scheduled",
     }
     (run_dir / "run_metadata.json").write_text(json.dumps(meta, indent=2))
-    command = [sys.executable, str(Path(__file__)), "run", "--run-id", run_id, "--duration-hours", str(duration_hours)]
+    command = [sys.executable, "-m", "tools.live_run", "run", "--run-id", run_id, "--duration-hours", str(duration_hours)]
     proc = subprocess.Popen(command, env=dict(os.environ, LIVE_RUN_MODE="paper"))
     (run_dir / "run.pid").write_text(str(proc.pid))
     write_current_run(run_id, proc.pid)
@@ -163,6 +340,9 @@ def run_worker(run_id: str, duration_hours: float = 0.0) -> None:
             continue
         anomalies: List[str] = []
         cycle_decisions: List[Dict[str, Any]] = []
+        candidate_decisions: List[Dict[str, Any]] = []
+        for snapshot in snapshots:
+            record_snapshot(run_dir, snapshot)
         for company in COMPANIES:
             for snapshot in snapshots:
                 symbol = snapshot["symbol"]
@@ -171,21 +351,66 @@ def run_worker(run_id: str, duration_hours: float = 0.0) -> None:
                 decision["position_state"] = portfolio.positions[company].get(symbol, 0.0)
                 decision["cash_snapshot"] = portfolio.cash.get(company, 0.0)
                 decision["allocation_context"] = portfolio.allocations.get(company)
+                decision["ranking_score"] = candidate_ranking_score(decision)
+                decision["pretrade_selection_path"] = "ranked_then_company_packet"
+                decision["pretrade_agent_participation"] = "company packet consulted after ranking"
                 last_prices[(company, symbol)] = snapshot.get("price") or last_prices.get((company, symbol), 0.0)
-                record_snapshot(run_dir, snapshot)
-                with (run_dir / "artifacts" / "paper_decisions.jsonl").open("a", encoding="utf-8") as fh:
-                    fh.write(json.dumps(decision) + "\n")
-                
-                if decision["vetoed_by_risk"]:
-                    anomalies.append(f"veto:{company}:{symbol}")
-                    with (run_dir / "artifacts" / "risk.log").open("a", encoding="utf-8") as risk_file:
-                        risk_file.write(json.dumps({"timestamp": timestamp, "company": company, "symbol": symbol, "veto": True}) + "\n")
-                    
-                    continue
-                portfolio.apply_decision(decision)
-                cycle_decisions.append(decision)
+                candidate_decisions.append(decision)
+
+        ranked_candidates = rank_and_select_candidates(candidate_decisions)
+        company_packets = apply_company_packets(ranked_candidates)
+        for packet in company_packets.values():
+            with (run_dir / "artifacts" / "company_packets.jsonl").open("a", encoding="utf-8") as packet_file:
+                packet_file.write(json.dumps({"timestamp": timestamp, **packet}) + "\n")
+        for decision in ranked_candidates:
+            if decision["vetoed_by_risk"]:
+                anomalies.append(f"veto:{decision['company_id']}:{decision['symbol']}")
+                with (run_dir / "artifacts" / "risk.log").open("a", encoding="utf-8") as risk_file:
+                    risk_file.write(json.dumps({"timestamp": timestamp, "company": decision["company_id"], "symbol": decision["symbol"], "veto": True}) + "\n")
+            with (run_dir / "artifacts" / "paper_decisions.jsonl").open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(decision) + "\n")
+            if decision.get("execution_state") != "executed":
+                continue
+            portfolio.apply_decision(decision)
+            cycle_decisions.append(decision)
         orchestrate(run_dir, cycle, cycle_decisions, anomalies)
-        strategy_entry = {"timestamp": timestamp, "decision": "ml-driven", "confidence": 0.7}
+        strategy_entry = {
+            "timestamp": timestamp,
+            "decision": "ml+signal" if any(d.get("ml_scoring_active") for d in cycle_decisions) else "signal-only",
+            "confidence": 0.0,
+            "ml_scoring_active": any(d.get("ml_scoring_active") for d in cycle_decisions),
+            "decision_path_counts": {
+                "ml+signal": sum(1 for d in ranked_candidates if d.get("decision_path") == "ml+signal"),
+                "signal-only fallback": sum(1 for d in ranked_candidates if d.get("decision_path") == "signal-only fallback"),
+            },
+            "ranking_summary": {
+                "candidate_count": len(ranked_candidates),
+                "executed_count": sum(1 for d in ranked_candidates if d.get("execution_state") == "executed"),
+                "skipped_count": sum(1 for d in ranked_candidates if d.get("execution_state") == "skipped"),
+                "company_packet_count": len(company_packets),
+                "top_ranked": [
+                    {
+                        "company_id": d.get("company_id"),
+                        "symbol": d.get("symbol"),
+                        "decision": d.get("decision"),
+                        "ranking_score": d.get("ranking_score"),
+                        "execution_state": d.get("execution_state"),
+                        "skip_reason": d.get("skip_reason"),
+                    }
+                    for d in ranked_candidates[: min(10, len(ranked_candidates))]
+                ],
+            },
+            "company_packet_summary": {
+                company: {
+                    "approval_posture": packet.get("approval_posture"),
+                    "cap_multiplier": packet.get("cap_multiplier"),
+                    "source_agents_consulted": packet.get("source_agents_consulted"),
+                    "execution_changed_by_packet": packet.get("execution_changed_by_packet"),
+                }
+                for company, packet in company_packets.items()
+            },
+            "notes": "Cycle ranked all candidates first, then applied real company packets before execution. Not all 62 agents are execution-impacting yet.",
+        }
         risk_entry = {"timestamp": timestamp, "veto": bool(anomalies), "notes": "risk event" if anomalies else "all good"}
         with (run_dir / "artifacts" / "strategy.log").open("a", encoding="utf-8") as strategy:
             strategy.write(json.dumps(strategy_entry) + "\n")

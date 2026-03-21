@@ -43,7 +43,7 @@ class PortfolioState:
         price = decision["price"]
         decision_type = decision["decision"]
         cash = self.cash.get(company, 0.0)
-        size = self._determine_size(company, price, decision.get("confidence", 0.0))
+        size = self._determine_size(decision)
         entry = self.positions[company].get(symbol, 0.0)
         if decision_type == "BUY" and cash >= price * size and price > 0 and size > 0:
             self.positions[company][symbol] = entry + size
@@ -71,6 +71,10 @@ class PortfolioState:
             "size": size,
             "price": decision["price"],
             "decision_confidence": decision["confidence"],
+            "policy_name": decision.get("policy_name"),
+            "company_posture": decision.get("company_posture"),
+            "size_multiplier": decision.get("size_multiplier"),
+            "sizing_rationale": decision.get("sizing_rationale"),
         }
 
     def _log_trade(self, trade: Dict[str, object]) -> None:
@@ -89,13 +93,17 @@ class PortfolioState:
         with (self.run_dir / "artifacts" / "portfolio_state.jsonl").open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(snapshot) + "\n")
 
-    def _determine_size(self, company: str, price: float, confidence: float) -> float:
+    def _determine_size(self, decision: Dict[str, object]) -> float:
+        company = decision["company_id"]
+        price = float(decision["price"])
+        confidence = float(decision.get("confidence", 0.0))
+        size_multiplier = float(decision.get("size_multiplier", 1.0))
         cash = self.cash.get(company, 0.0)
         if price <= 0 or cash <= 0:
             return 0.0
-        base = cash * min(confidence, 0.9)
-        size = max(min(base / price, 2.0), 0.1)
-        return min(size, cash / price)
+        base = cash * min(confidence, 0.9) * max(size_multiplier, 0.0)
+        size = min(base / price, 2.0)
+        return max(min(size, cash / price), 0.0)
 
     def reallocation_step(self) -> None:
         avg_equity = sum(self.cash.values()) / len(self.cash) if self.cash else 0

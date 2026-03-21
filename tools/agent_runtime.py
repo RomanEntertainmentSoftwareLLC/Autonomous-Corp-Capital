@@ -243,6 +243,13 @@ def read_agent_outbox_reports(agent_prefix: str, target_scope: str, limit: int =
             "evidence": response.get("evidence"),
             "missing_data": response.get("missing_data"),
             "suggested_followup": response.get("suggested_followup"),
+            "decision": response.get("decision"),
+            "approval_decision": response.get("approval_decision"),
+            "action_directive": response.get("action_directive"),
+            "executive_summary": response.get("executive_summary"),
+            "rationale": response.get("rationale"),
+            "spending_posture": response.get("spending_posture"),
+            "budget_posture": response.get("budget_posture"),
         }
         report = {k: v for k, v in report.items() if v}
         if report:
@@ -256,6 +263,7 @@ def collect_agent_reports(target_scope: str) -> Dict[str, List[Dict[str, Any]]]:
         "Iris": read_agent_outbox_reports("iris", target_scope),
         "Vera": read_agent_outbox_reports("vera", target_scope),
         "Rowan": read_agent_outbox_reports("rowan", target_scope),
+        "Orion": read_agent_outbox_reports("orion", target_scope),
         "Bianca": read_agent_outbox_reports("bianca", target_scope),
         "Bob": read_agent_outbox_reports("bob", target_scope),
         "Sloane": read_agent_outbox_reports("sloane", target_scope),

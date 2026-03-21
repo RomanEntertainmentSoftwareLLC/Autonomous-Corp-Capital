@@ -12,9 +12,9 @@ BOARD_LOG_DIR = ROOT / "logs" / "meetings" / "board"
 WATCHDOG_LOG_DIR = ROOT / "logs" / "meetings" / "watchdog"
 
 WATCHDOGS = [
- ("inspector_general", "Inspector General"),
- ("constitutional_arbiter", "Constitutional Arbiter"),
- ("ombudsman", "Ombudsman / Appeals Officer"),
+ ("mara", "Inspector General"),
+ ("justine", "Constitutional Arbiter"),
+ ("owen", "Ombudsman / Appeals Officer"),
 ]
 
 DEFAULT_PROMPT = (

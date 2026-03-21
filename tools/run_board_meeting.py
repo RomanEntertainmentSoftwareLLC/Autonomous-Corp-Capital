@@ -12,10 +12,10 @@ LOG_DIR = ROOT / "logs" / "meetings" / "board"
 
 # Phase 1: board speaks first
 BOARD = [
- ("master_treasurer", "Master Treasurer"),
- ("risk_officer", "Risk Officer"),
- ("master_cfo", "Master CFO"),
- ("aiar", "AI Agent Resources Director"),
+ ("selene", "Master Treasurer"),
+ ("helena", "Risk Officer"),
+ ("vivienne", "Master CFO"),
+ ("ariadne", "AI Agent Resources Director"),
  ("ledger", "Token & Cost Controller"),
  ("lucian_company_001", "CEO"),
  ("lucian_company_002", "CEO"),
@@ -34,12 +34,21 @@ DEFAULT_PROMPT = (
 
 YAM_YAM_SYNTHESIS_PROMPT = (
  "You are the Master CEO of Autonomous Corp Capital. "
- "You are reviewing the completed board meeting transcript below. "
+ "You are reviewing a compact summary of the completed board meeting. "
  "Return a concise executive synthesis in 3 parts only: "
  "1) ecosystem posture, "
  "2) most important next executive decision or caution, "
  "3) blockers, risks, or evidence gaps. "
- "Stay role-bound. Do not ramble."
+ "Stay role-bound. Do not ramble. "
+ "Truth and consistency rules: "
+ "Do not contradict explicit facts that are repeatedly stated in the board summary. "
+ "If lanes conflict, say the record is inconsistent instead of inventing a false clean answer. "
+ "Do not claim there are no active companies unless the summary clearly supports that. "
+ "If the summary states there are 4 active companies, preserve that fact unless a stronger contradiction is explicitly documented. "
+ "Prefer evidence gaps, unresolved contradictions, or incomplete reporting over fake certainty. "
+ "Preserve the board's cautious posture when most lanes point to hold, verify, clarify, or constrained operation rather than expansion. "
+ "Do not collapse multiple hold signals into growth language. "
+ "If company_001 carries contradictory clone-vs-retire signals, say so plainly."
 )
 
 
@@ -105,16 +114,24 @@ def run_agent(agent_id: str, message: str, timeout_sec: int = 240) -> Dict[str, 
   }
 
 
-def run_yam_yam_synthesis(transcript: List[Dict[str, object]], timeout_sec: int = 900) -> Dict[str, object]:
+def _compact_for_yam(text: str, max_len: int = 260) -> str:
+ text = " ".join((text or "").split())
+ if len(text) <= max_len:
+  return text
+ return text[: max_len - 3] + "..."
+
+
+def run_yam_yam_synthesis(transcript: List[Dict[str, object]], timeout_sec: int = 480) -> Dict[str, object]:
  transcript_blob = []
  for entry in transcript:
-  transcript_blob.append(
-   f"{entry.get('agent_id')}: ok={entry.get('ok')} | reply={entry.get('reply_text', '')}"
-  )
+  agent_id = entry.get("agent_id", "")
+  ok = entry.get("ok", False)
+  reply_text = _compact_for_yam(str(entry.get("reply_text", "")), 260)
+  transcript_blob.append(f"{agent_id}: ok={ok} | summary={reply_text}")
 
  message = (
   YAM_YAM_SYNTHESIS_PROMPT
-  + "\n\nBOARD TRANSCRIPT:\n"
+  + "\n\nCOMPACT BOARD SUMMARY:\n"
   + "\n".join(transcript_blob)
  )
 

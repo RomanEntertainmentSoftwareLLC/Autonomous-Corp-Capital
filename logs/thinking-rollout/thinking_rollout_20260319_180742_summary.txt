@@ -1,0 +1,13 @@
+stamp=20260319_180742
+dry_run=0
+verify=0
+timeout=180
+ok_count=61
+fail_count=1
+verify_fail_count=0
+
+failures:
+main:/think:high
+
+verify_failures:
+(none)

@@ -90,9 +90,9 @@ def smoke_lifecycle() -> None:
 def main() -> None:
     branches = [
         ("bianca_company_001", "Can you sum up company_001 runway?"),
-        ("master_treasurer", "How healthy is the treasury?"),
+        ("selene", "How healthy is the treasury?"),
         ("senior_software_engineer", "Integration risk on shared runtime?"),
-        ("inspector_general", "Any branch overreach right now?"),
+        ("mara", "Any branch overreach right now?"),
     ]
     for agent, message in branches:
         run_agent(agent, message)

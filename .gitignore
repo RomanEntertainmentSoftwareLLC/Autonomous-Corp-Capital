@@ -10,3 +10,6 @@ state/
 *.pre_*
 *.pre_step*
 logs/meetings/
+
+agent_state_backup/
+openclaw_backup/credentials/

@@ -13,12 +13,12 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_TIMEOUT = 180
 SLOW_AGENT_TIMEOUTS = {
  "main": 420,
- "master_treasurer": 300,
- "risk_officer": 300,
- "master_cfo": 300,
- "inspector_general": 300,
- "constitutional_arbiter": 300,
- "ombudsman": 300,
+ "selene": 300,
+ "helena": 300,
+ "vivienne": 300,
+ "mara": 300,
+ "justine": 300,
+ "owen": 300,
 }
 
 LOCK_RETRY_ATTEMPTS = {

@@ -279,21 +279,21 @@ agents:
   scope: company_004
   description: Archivist for company_004
   agent_kind: company_local
-- id: master_treasurer
+- id: selene
   name: Selene
   persona: selene
   role: Master Treasurer
   scope: global
   description: Global Master Treasurer overseeing the parent treasury
   agent_kind: global
-- id: risk_officer
+- id: helena
   name: Helena
   persona: helena
   role: Risk Officer
   scope: global
   description: Global Risk Officer protecting the ecosystem
   agent_kind: global
-- id: master_cfo
+- id: vivienne
   name: Vivienne
   persona: vivienne
   role: Master CFO
@@ -363,21 +363,21 @@ agents:
   scope: global
   description: Global Infrastructure steward for OpenClaw
   agent_kind: swe
-- id: inspector_general
+- id: mara
   name: Mara
   persona: mara
   role: Inspector General
   scope: global
   description: Global Inspector General overseeing audit and integrity
   agent_kind: watchdog
-- id: constitutional_arbiter
+- id: justine
   name: Justine
   persona: justine
   role: Constitutional Arbiter
   scope: global
   description: Global Constitutional Arbiter resolving authority disputes
   agent_kind: watchdog
-- id: ombudsman
+- id: owen
   name: Owen
   persona: owen
   role: Ombudsman / Appeals Officer
@@ -391,7 +391,7 @@ agents:
   scope: global
   description: Master CEO overseeing the OpenClaw ecosystem
   agent_kind: global
-- id: aiar
+- id: ariadne
   name: Ariadne
   persona: ariadne
   role: AI Agent Resources Director

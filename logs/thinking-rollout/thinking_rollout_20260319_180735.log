@@ -1,0 +1,192 @@
+thinking rollout stamp=20260319_180735 dry_run=1 verify=0 timeout=180
+log_file=/opt/openclaw/.openclaw/workspace/logs/thinking-rollout/thinking_rollout_20260319_180735.log
+jsonl_file=/opt/openclaw/.openclaw/workspace/logs/thinking-rollout/thinking_rollout_20260319_180735.jsonl
+summary_file=/opt/openclaw/.openclaw/workspace/logs/thinking-rollout/thinking_rollout_20260319_180735_summary.txt
+
+=== constitutional_arbiter :: /think:high ===
+[dry-run] openclaw agent --agent constitutional_arbiter --message '/think:high' --json --timeout 180
+
+=== inspector_general :: /think:high ===
+[dry-run] openclaw agent --agent inspector_general --message '/think:high' --json --timeout 180
+
+=== ombudsman :: /think:medium ===
+[dry-run] openclaw agent --agent ombudsman --message '/think:medium' --json --timeout 180
+
+=== main :: /think:high ===
+[dry-run] openclaw agent --agent main --message '/think:high' --json --timeout 180
+
+=== master_treasurer :: /think:high ===
+[dry-run] openclaw agent --agent master_treasurer --message '/think:high' --json --timeout 180
+
+=== risk_officer :: /think:high ===
+[dry-run] openclaw agent --agent risk_officer --message '/think:high' --json --timeout 180
+
+=== master_cfo :: /think:high ===
+[dry-run] openclaw agent --agent master_cfo --message '/think:high' --json --timeout 180
+
+=== aiar :: /think:high ===
+[dry-run] openclaw agent --agent aiar --message '/think:high' --json --timeout 180
+
+=== ledger :: /think:high ===
+[dry-run] openclaw agent --agent ledger --message '/think:high' --json --timeout 180
+
+=== nadia :: /think:medium ===
+[dry-run] openclaw agent --agent nadia --message '/think:medium' --json --timeout 180
+
+=== tessa :: /think:low ===
+[dry-run] openclaw agent --agent tessa --message '/think:low' --json --timeout 180
+
+=== marek :: /think:high ===
+[dry-run] openclaw agent --agent marek --message '/think:high' --json --timeout 180
+
+=== eli :: /think:high ===
+[dry-run] openclaw agent --agent eli --message '/think:high' --json --timeout 180
+
+=== noah :: /think:low ===
+[dry-run] openclaw agent --agent noah --message '/think:low' --json --timeout 180
+
+=== mina :: /think:low ===
+[dry-run] openclaw agent --agent mina --message '/think:low' --json --timeout 180
+
+=== gideon :: /think:low ===
+[dry-run] openclaw agent --agent gideon --message '/think:low' --json --timeout 180
+
+=== sabine :: /think:low ===
+[dry-run] openclaw agent --agent sabine --message '/think:low' --json --timeout 180
+
+=== rhea :: /think:high ===
+[dry-run] openclaw agent --agent rhea --message '/think:high' --json --timeout 180
+
+=== pam_company_001 :: /think:low ===
+[dry-run] openclaw agent --agent pam_company_001 --message '/think:low' --json --timeout 180
+
+=== iris_company_001 :: /think:medium ===
+[dry-run] openclaw agent --agent iris_company_001 --message '/think:medium' --json --timeout 180
+
+=== vera_company_001 :: /think:medium ===
+[dry-run] openclaw agent --agent vera_company_001 --message '/think:medium' --json --timeout 180
+
+=== rowan_company_001 :: /think:low ===
+[dry-run] openclaw agent --agent rowan_company_001 --message '/think:low' --json --timeout 180
+
+=== bianca_company_001 :: /think:medium ===
+[dry-run] openclaw agent --agent bianca_company_001 --message '/think:medium' --json --timeout 180
+
+=== lucian_company_001 :: /think:high ===
+[dry-run] openclaw agent --agent lucian_company_001 --message '/think:high' --json --timeout 180
+
+=== bob_company_001 :: /think:low ===
+[dry-run] openclaw agent --agent bob_company_001 --message '/think:low' --json --timeout 180
+
+=== sloane_company_001 :: /think:medium ===
+[dry-run] openclaw agent --agent sloane_company_001 --message '/think:medium' --json --timeout 180
+
+=== atlas_company_001 :: /think:medium ===
+[dry-run] openclaw agent --agent atlas_company_001 --message '/think:medium' --json --timeout 180
+
+=== june_company_001 :: /think:low ===
+[dry-run] openclaw agent --agent june_company_001 --message '/think:low' --json --timeout 180
+
+=== orion_company_001 :: /think:high ===
+[dry-run] openclaw agent --agent orion_company_001 --message '/think:high' --json --timeout 180
+
+=== pam_company_002 :: /think:low ===
+[dry-run] openclaw agent --agent pam_company_002 --message '/think:low' --json --timeout 180
+
+=== iris_company_002 :: /think:medium ===
+[dry-run] openclaw agent --agent iris_company_002 --message '/think:medium' --json --timeout 180
+
+=== vera_company_002 :: /think:medium ===
+[dry-run] openclaw agent --agent vera_company_002 --message '/think:medium' --json --timeout 180
+
+=== rowan_company_002 :: /think:low ===
+[dry-run] openclaw agent --agent rowan_company_002 --message '/think:low' --json --timeout 180
+
+=== bianca_company_002 :: /think:medium ===
+[dry-run] openclaw agent --agent bianca_company_002 --message '/think:medium' --json --timeout 180
+
+=== lucian_company_002 :: /think:high ===
+[dry-run] openclaw agent --agent lucian_company_002 --message '/think:high' --json --timeout 180
+
+=== bob_company_002 :: /think:low ===
+[dry-run] openclaw agent --agent bob_company_002 --message '/think:low' --json --timeout 180
+
+=== sloane_company_002 :: /think:medium ===
+[dry-run] openclaw agent --agent sloane_company_002 --message '/think:medium' --json --timeout 180
+
+=== atlas_company_002 :: /think:medium ===
+[dry-run] openclaw agent --agent atlas_company_002 --message '/think:medium' --json --timeout 180
+
+=== june_company_002 :: /think:low ===
+[dry-run] openclaw agent --agent june_company_002 --message '/think:low' --json --timeout 180
+
+=== orion_company_002 :: /think:high ===
+[dry-run] openclaw agent --agent orion_company_002 --message '/think:high' --json --timeout 180
+
+=== pam_company_003 :: /think:low ===
+[dry-run] openclaw agent --agent pam_company_003 --message '/think:low' --json --timeout 180
+
+=== iris_company_003 :: /think:medium ===
+[dry-run] openclaw agent --agent iris_company_003 --message '/think:medium' --json --timeout 180
+
+=== vera_company_003 :: /think:medium ===
+[dry-run] openclaw agent --agent vera_company_003 --message '/think:medium' --json --timeout 180
+
+=== rowan_company_003 :: /think:low ===
+[dry-run] openclaw agent --agent rowan_company_003 --message '/think:low' --json --timeout 180
+
+=== bianca_company_003 :: /think:medium ===
+[dry-run] openclaw agent --agent bianca_company_003 --message '/think:medium' --json --timeout 180
+
+=== lucian_company_003 :: /think:high ===
+[dry-run] openclaw agent --agent lucian_company_003 --message '/think:high' --json --timeout 180
+
+=== bob_company_003 :: /think:low ===
+[dry-run] openclaw agent --agent bob_company_003 --message '/think:low' --json --timeout 180
+
+=== sloane_company_003 :: /think:medium ===
+[dry-run] openclaw agent --agent sloane_company_003 --message '/think:medium' --json --timeout 180
+
+=== atlas_company_003 :: /think:medium ===
+[dry-run] openclaw agent --agent atlas_company_003 --message '/think:medium' --json --timeout 180
+
+=== june_company_003 :: /think:low ===
+[dry-run] openclaw agent --agent june_company_003 --message '/think:low' --json --timeout 180
+
+=== orion_company_003 :: /think:high ===
+[dry-run] openclaw agent --agent orion_company_003 --message '/think:high' --json --timeout 180
+
+=== pam_company_004 :: /think:low ===
+[dry-run] openclaw agent --agent pam_company_004 --message '/think:low' --json --timeout 180
+
+=== iris_company_004 :: /think:medium ===
+[dry-run] openclaw agent --agent iris_company_004 --message '/think:medium' --json --timeout 180
+
+=== vera_company_004 :: /think:medium ===
+[dry-run] openclaw agent --agent vera_company_004 --message '/think:medium' --json --timeout 180
+
+=== rowan_company_004 :: /think:low ===
+[dry-run] openclaw agent --agent rowan_company_004 --message '/think:low' --json --timeout 180
+
+=== bianca_company_004 :: /think:medium ===
+[dry-run] openclaw agent --agent bianca_company_004 --message '/think:medium' --json --timeout 180
+
+=== lucian_company_004 :: /think:high ===
+[dry-run] openclaw agent --agent lucian_company_004 --message '/think:high' --json --timeout 180
+
+=== bob_company_004 :: /think:low ===
+[dry-run] openclaw agent --agent bob_company_004 --message '/think:low' --json --timeout 180
+
+=== sloane_company_004 :: /think:medium ===
+[dry-run] openclaw agent --agent sloane_company_004 --message '/think:medium' --json --timeout 180
+
+=== atlas_company_004 :: /think:medium ===
+[dry-run] openclaw agent --agent atlas_company_004 --message '/think:medium' --json --timeout 180
+
+=== june_company_004 :: /think:low ===
+[dry-run] openclaw agent --agent june_company_004 --message '/think:low' --json --timeout 180
+
+=== orion_company_004 :: /think:high ===
+[dry-run] openclaw agent --agent orion_company_004 --message '/think:high' --json --timeout 180
+
+Done.

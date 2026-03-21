@@ -1,0 +1,913 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.3.13",
+    "lastTouchedAt": "2026-03-20T23:45:13.812Z"
+  },
+  "wizard": {
+    "lastRunAt": "2026-03-19T22:42:37.182Z",
+    "lastRunVersion": "2026.3.13",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "auth": {
+    "profiles": {
+      "openai:default": {
+        "provider": "openai",
+        "mode": "api_key"
+      },
+      "nvkimi:default": {
+        "provider": "nvkimi",
+        "mode": "api_key"
+      }
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "nvkimi": {
+        "baseUrl": "https://integrate.api.nvidia.com/v1",
+        "apiKey": "${NVIDIA_API_KEY}",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "moonshotai/kimi-k2-thinking",
+            "name": "Kimi K2 Thinking",
+            "reasoning": true,
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 262144,
+            "maxTokens": 32768
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "openai/gpt-5.4"
+      },
+      "models": {
+        "openai/gpt-5.1-codex": {
+          "alias": "GPT"
+        },
+        "openai/gpt-5.4": {},
+        "nvkimi/moonshotai/kimi-k2-thinking": {
+          "alias": "Kimi K2 Thinking"
+        }
+      },
+      "workspace": "/opt/openclaw/.openclaw/workspace",
+      "thinkingDefault": "low"
+    },
+    "list": [
+      {
+        "id": "main",
+        "identity": {
+          "name": "Yam Yam",
+          "theme": "Master CEO",
+          "emoji": "🥢",
+		  "avatar": "_"
+        },
+        "model": "openai/gpt-5.4",
+        "name": "main"
+      },
+      {
+        "id": "selene",
+        "name": "selene",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/master_treasurer/selene_master_treasurer",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/master_branch/master_treasurer/selene",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Selene",
+          "theme": "Master Treasurer",
+          "emoji": "💠",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "helena",
+        "name": "helena",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/risk_officer/helena_risk_officer",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/master_branch/risk_officer/helena",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Helena",
+          "theme": "Risk Officer",
+          "emoji": "🛡️",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "vivienne",
+        "name": "vivienne",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/master_cfo/vivienne_master_cfo",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/master_branch/master_cfo/vivienne",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Vivienne",
+          "theme": "Master CFO",
+          "emoji": "📊",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "mara",
+        "name": "mara",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/watchdog_branch/inspector_general/mara_inspector_general",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/watchdog_branch/inspector_general/mara",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Mara",
+          "theme": "Inspector General",
+          "emoji": "🔎",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "justine",
+        "name": "justine",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/watchdog_branch/constitutional_arbiter/justine_constitutional_arbiter",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/watchdog_branch/constitutional_arbiter/justine",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Justine",
+          "theme": "Constitutional Arbiter",
+          "emoji": "⚖️",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "owen",
+        "name": "owen",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/watchdog_branch/ombudsman/owen_ombudsman",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/watchdog_branch/ombudsman/owen",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Owen",
+          "theme": "Ombudsman",
+          "emoji": "🕊️",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "ariadne",
+        "name": "ariadne",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/ai_agent_resources/ariadne_ai_agent_resources",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/master_branch/ai_agent_resources/ariadne",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Ariadne",
+          "theme": "AI Agent Resources Director",
+          "emoji": "🧭",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "ledger",
+        "name": "ledger",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/token_cost_controller/ledger_token_cost_controller",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/master_branch/token_cost_controller/ledger",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Ledger",
+          "theme": "Token & Cost Controller",
+          "emoji": "📊",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "nadia",
+        "name": "nadia",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/swe_branch/product_manager/nadia_product_manager",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/swe_branch/product_manager/nadia",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Nadia",
+          "theme": "Product Manager",
+          "emoji": "📋",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "tessa",
+        "name": "tessa",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/swe_branch/scrum_master/tessa_scrum_master",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/swe_branch/scrum_master/tessa",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Tessa",
+          "theme": "Scrum Master",
+          "emoji": "⏱️",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "marek",
+        "name": "marek",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/swe_branch/senior_software_architect/marek_senior_software_architect",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/swe_branch/senior_software_architect/marek",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Marek",
+          "theme": "Senior Software Architect",
+          "emoji": "🏗️",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "eli",
+        "name": "eli",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/swe_branch/senior_software_engineer/eli_senior_software_engineer",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/swe_branch/senior_software_engineer/eli",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Eli",
+          "theme": "Senior Software Engineer",
+          "emoji": "💻",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "noah",
+        "name": "noah",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/swe_branch/junior_software_engineer/noah_junior_software_engineer",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/swe_branch/junior_software_engineer/noah",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Noah",
+          "theme": "Junior Software Engineer",
+          "emoji": "🧩",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "mina",
+        "name": "mina",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/swe_branch/tester/mina_tester",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/swe_branch/tester/mina",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Mina",
+          "theme": "Tester",
+          "emoji": "🧪",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "gideon",
+        "name": "gideon",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/swe_branch/code_reviewer/gideon_code_reviewer",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/swe_branch/code_reviewer/gideon",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Gideon",
+          "theme": "Code Reviewer",
+          "emoji": "🔍",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "sabine",
+        "name": "sabine",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/swe_branch/qa/sabine_qa",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/swe_branch/qa/sabine",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Sabine",
+          "theme": "QA",
+          "emoji": "✅",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "rhea",
+        "name": "rhea",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/swe_branch/infrastructure/rhea_infrastructure",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/swe_branch/infrastructure/rhea",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Rhea",
+          "theme": "Infrastructure",
+          "emoji": "🖧",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "pam_company_001",
+        "name": "pam_company_001",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/front_desk_administrator/pam_front_desk_administrator_company_001",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company001_branch/front_desk_administrator/pam_company_001",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Pam",
+          "theme": "Front Desk Administrator, Company 001",
+          "emoji": "📎",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "pam_company_002",
+        "name": "pam_company_002",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/front_desk_administrator/pam_front_desk_administrator_company_002",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company002_branch/front_desk_administrator/pam_company_002",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Pam",
+          "theme": "Front Desk Administrator, Company 002",
+          "emoji": "📎",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "pam_company_003",
+        "name": "pam_company_003",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/front_desk_administrator/pam_front_desk_administrator_company_003",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company003_branch/front_desk_administrator/pam_company_003",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Pam",
+          "theme": "Front Desk Administrator, Company 003",
+          "emoji": "📎",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "pam_company_004",
+        "name": "pam_company_004",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/front_desk_administrator/pam_front_desk_administrator_company_004",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company004_branch/front_desk_administrator/pam_company_004",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Pam",
+          "theme": "Front Desk Administrator, Company 004",
+          "emoji": "📎",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "iris_company_001",
+        "name": "iris_company_001",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/analyst/iris_analyst_company_001",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company001_branch/analyst/iris_company_001",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Iris",
+          "theme": "Analyst, Company 001",
+          "emoji": "📈",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "iris_company_002",
+        "name": "iris_company_002",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/analyst/iris_analyst_company_002",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company002_branch/analyst/iris_company_002",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Iris",
+          "theme": "Analyst, Company 002",
+          "emoji": "📈",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "iris_company_003",
+        "name": "iris_company_003",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/analyst/iris_analyst_company_003",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company003_branch/analyst/iris_company_003",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Iris",
+          "theme": "Analyst, Company 003",
+          "emoji": "📈",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "iris_company_004",
+        "name": "iris_company_004",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/analyst/iris_analyst_company_004",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company004_branch/analyst/iris_company_004",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Iris",
+          "theme": "Analyst, Company 004",
+          "emoji": "📈",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "vera_company_001",
+        "name": "vera_company_001",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/manager/vera_manager_company_001",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company001_branch/manager/vera_company_001",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Vera",
+          "theme": "Manager, Company 001",
+          "emoji": "🧭",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "vera_company_002",
+        "name": "vera_company_002",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/manager/vera_manager_company_002",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company002_branch/manager/vera_company_002",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Vera",
+          "theme": "Manager, Company 002",
+          "emoji": "🧭",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "vera_company_003",
+        "name": "vera_company_003",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/manager/vera_manager_company_003",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company003_branch/manager/vera_company_003",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Vera",
+          "theme": "Manager, Company 003",
+          "emoji": "🧭",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "vera_company_004",
+        "name": "vera_company_004",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/manager/vera_manager_company_004",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company004_branch/manager/vera_company_004",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Vera",
+          "theme": "Manager, Company 004",
+          "emoji": "🧭",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "rowan_company_001",
+        "name": "rowan_company_001",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/researcher/rowan_researcher_company_001",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company001_branch/researcher/rowan_company_001",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Rowan",
+          "theme": "Researcher, Company 001",
+          "emoji": "🔬",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "rowan_company_002",
+        "name": "rowan_company_002",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/researcher/rowan_researcher_company_002",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company002_branch/researcher/rowan_company_002",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Rowan",
+          "theme": "Researcher, Company 002",
+          "emoji": "🔬",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "rowan_company_003",
+        "name": "rowan_company_003",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/researcher/rowan_researcher_company_003",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company003_branch/researcher/rowan_company_003",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Rowan",
+          "theme": "Researcher, Company 003",
+          "emoji": "🔬",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "rowan_company_004",
+        "name": "rowan_company_004",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/researcher/rowan_researcher_company_004",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company004_branch/researcher/rowan_company_004",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Rowan",
+          "theme": "Researcher, Company 004",
+          "emoji": "🔬",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "bianca_company_001",
+        "name": "bianca_company_001",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/cfo/bianca_cfo_company_001",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company001_branch/cfo/bianca_company_001",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Bianca",
+          "theme": "CFO, Company 001",
+          "emoji": "💼",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "bianca_company_002",
+        "name": "bianca_company_002",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/cfo/bianca_cfo_company_002",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company002_branch/cfo/bianca_company_002",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Bianca",
+          "theme": "CFO, Company 002",
+          "emoji": "💼",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "bianca_company_003",
+        "name": "bianca_company_003",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/cfo/bianca_cfo_company_003",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company003_branch/cfo/bianca_company_003",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Bianca",
+          "theme": "CFO, Company 003",
+          "emoji": "💼",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "bianca_company_004",
+        "name": "bianca_company_004",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/cfo/bianca_cfo_company_004",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company004_branch/cfo/bianca_company_004",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Bianca",
+          "theme": "CFO, Company 004",
+          "emoji": "💼",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "lucian_company_001",
+        "name": "lucian_company_001",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/ceo/lucian_ceo_company_001",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company001_branch/ceo/lucian_company_001",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Lucian",
+          "theme": "CEO, Company 001",
+          "emoji": "👑",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "lucian_company_002",
+        "name": "lucian_company_002",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/ceo/lucian_ceo_company_002",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company002_branch/ceo/lucian_company_002",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Lucian",
+          "theme": "CEO, Company 002",
+          "emoji": "👑",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "lucian_company_003",
+        "name": "lucian_company_003",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/ceo/lucian_ceo_company_003",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company003_branch/ceo/lucian_company_003",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Lucian",
+          "theme": "CEO, Company 003",
+          "emoji": "👑",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "lucian_company_004",
+        "name": "lucian_company_004",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/ceo/lucian_ceo_company_004",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company004_branch/ceo/lucian_company_004",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Lucian",
+          "theme": "CEO, Company 004",
+          "emoji": "👑",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "bob_company_001",
+        "name": "bob_company_001",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/operations_worker/bob_operations_worker_company_001",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company001_branch/operations_worker/bob_company_001",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Bob",
+          "theme": "Low Tier Operations Worker, Company 001",
+          "emoji": "🔧",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "bob_company_002",
+        "name": "bob_company_002",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/operations_worker/bob_operations_worker_company_002",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company002_branch/operations_worker/bob_company_002",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Bob",
+          "theme": "Low Tier Operations Worker, Company 002",
+          "emoji": "🔧",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "bob_company_003",
+        "name": "bob_company_003",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/operations_worker/bob_operations_worker_company_003",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company003_branch/operations_worker/bob_company_003",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Bob",
+          "theme": "Low Tier Operations Worker, Company 003",
+          "emoji": "🔧",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "bob_company_004",
+        "name": "bob_company_004",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/operations_worker/bob_operations_worker_company_004",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company004_branch/operations_worker/bob_company_004",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "Bob",
+          "theme": "Low Tier Operations Worker, Company 004",
+          "emoji": "🔧",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "sloane_company_001",
+        "name": "sloane_company_001",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/evolution_specialist/sloane_evolution_specialist_company_001",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company001_branch/evolution_specialist/sloane_company_001",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Sloane",
+          "theme": "Evolution Specialist, Company 001",
+          "emoji": "🧬",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "sloane_company_002",
+        "name": "sloane_company_002",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/evolution_specialist/sloane_evolution_specialist_company_002",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company002_branch/evolution_specialist/sloane_company_002",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Sloane",
+          "theme": "Evolution Specialist, Company 002",
+          "emoji": "🧬",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "sloane_company_003",
+        "name": "sloane_company_003",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/evolution_specialist/sloane_evolution_specialist_company_003",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company003_branch/evolution_specialist/sloane_company_003",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Sloane",
+          "theme": "Evolution Specialist, Company 003",
+          "emoji": "🧬",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "sloane_company_004",
+        "name": "sloane_company_004",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/evolution_specialist/sloane_evolution_specialist_company_004",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company004_branch/evolution_specialist/sloane_company_004",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Sloane",
+          "theme": "Evolution Specialist, Company 004",
+          "emoji": "🧬",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "atlas_company_001",
+        "name": "atlas_company_001",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/market_simulator/atlas_market_simulator_company_001",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company001_branch/market_simulator/atlas_company_001",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Atlas",
+          "theme": "Market Simulator, Company 001",
+          "emoji": "🌐",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "atlas_company_002",
+        "name": "atlas_company_002",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/market_simulator/atlas_market_simulator_company_002",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company002_branch/market_simulator/atlas_company_002",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Atlas",
+          "theme": "Market Simulator, Company 002",
+          "emoji": "🌐",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "atlas_company_003",
+        "name": "atlas_company_003",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/market_simulator/atlas_market_simulator_company_003",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company003_branch/market_simulator/atlas_company_003",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Atlas",
+          "theme": "Market Simulator, Company 003",
+          "emoji": "🌐",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "atlas_company_004",
+        "name": "atlas_company_004",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/market_simulator/atlas_market_simulator_company_004",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company004_branch/market_simulator/atlas_company_004",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Atlas",
+          "theme": "Market Simulator, Company 004",
+          "emoji": "🌐",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "june_company_001",
+        "name": "june_company_001",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/archivist/june_archivist_company_001",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company001_branch/archivist/june_company_001",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "June",
+          "theme": "Archivist, Company 001",
+          "emoji": "🗂️",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "june_company_002",
+        "name": "june_company_002",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/archivist/june_archivist_company_002",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company002_branch/archivist/june_company_002",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "June",
+          "theme": "Archivist, Company 002",
+          "emoji": "🗂️",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "june_company_003",
+        "name": "june_company_003",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/archivist/june_archivist_company_003",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company003_branch/archivist/june_company_003",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "June",
+          "theme": "Archivist, Company 003",
+          "emoji": "🗂️",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "june_company_004",
+        "name": "june_company_004",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/archivist/june_archivist_company_004",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company004_branch/archivist/june_company_004",
+        "model": "nvkimi/moonshotai/kimi-k2-thinking",
+        "identity": {
+          "name": "June",
+          "theme": "Archivist, Company 004",
+          "emoji": "🗂️",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "orion_company_001",
+        "name": "orion_company_001",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/strategist/orion_strategist_company_001",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company001_branch/strategist/orion_company_001",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Orion",
+          "theme": "Strategist, Company 001",
+          "emoji": "🛰️",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "orion_company_002",
+        "name": "orion_company_002",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/strategist/orion_strategist_company_002",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company002_branch/strategist/orion_company_002",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Orion",
+          "theme": "Strategist, Company 002",
+          "emoji": "🛰️",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "orion_company_003",
+        "name": "orion_company_003",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/strategist/orion_strategist_company_003",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company003_branch/strategist/orion_company_003",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Orion",
+          "theme": "Strategist, Company 003",
+          "emoji": "🛰️",
+		  "avatar": "_"
+        }
+      },
+      {
+        "id": "orion_company_004",
+        "name": "orion_company_004",
+        "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/strategist/orion_strategist_company_004",
+        "agentDir": "/opt/openclaw/.openclaw/agent_state/company004_branch/strategist/orion_company_004",
+        "model": "openai/gpt-5.4",
+        "identity": {
+          "name": "Orion",
+          "theme": "Strategist, Company 004",
+          "emoji": "🛰️",
+		  "avatar": "_"
+        }
+      }
+    ]
+  },
+  "tools": {
+    "profile": "coding"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "832b027350b211f32ccf76f79c3cf57cf0ce6f38a7ada8e0"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    },
+    "nodes": {
+      "denyCommands": [
+        "camera.snap",
+        "camera.clip",
+        "screen.record",
+        "contacts.add",
+        "calendar.add",
+        "reminders.add",
+        "sms.send"
+      ]
+    }
+  }
+}

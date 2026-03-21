@@ -1,0 +1,13 @@
+stamp=20260319_180735
+dry_run=1
+verify=0
+timeout=180
+ok_count=62
+fail_count=0
+verify_fail_count=0
+
+failures:
+(none)
+
+verify_failures:
+(none)

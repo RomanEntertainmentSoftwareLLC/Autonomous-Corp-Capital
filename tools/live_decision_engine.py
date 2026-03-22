@@ -7,7 +7,9 @@ import sys
 from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, List, Any
+
+from tools.pattern_engine import evaluate_patterns
 
 ROOT = Path(__file__).resolve().parent.parent
 ML_MODEL_PATH = ROOT / "models" / "ml_model.pkl"
@@ -208,8 +210,18 @@ def infer_ml_signal(snapshot: Dict[str, object], last_price: Optional[float]) ->
 
 
 
-def build_decision(snapshot: Dict[str, object], company_id: str, last_price: Optional[float]) -> DecisionResult:
+def build_decision(
+    snapshot: Dict[str, object],
+    company_id: str,
+    last_price: Optional[float],
+    candle_history: Optional[List[Dict[str, Any]]] = None,
+) -> DecisionResult:
     price = snapshot.get("price") or 0.0
+    latest_candle = (candle_history or [None])[-1] or {}
+    candle_source = snapshot.get("candle_source") or latest_candle.get("candle_source") or "unknown"
+    candle_confidence = snapshot.get("candle_confidence")
+    if candle_confidence in (None, ""):
+        candle_confidence = latest_candle.get("candle_confidence", 0.0)
     policy = company_policy(company_id)
     raw_signal_score = compute_signal(snapshot, last_price)
     adjusted_signal_score = raw_signal_score * float(policy["signal_multiplier"])
@@ -236,6 +248,20 @@ def build_decision(snapshot: Dict[str, object], company_id: str, last_price: Opt
     else:
         confidence = min(confidence_base, 1.0)
 
+    pattern_result = evaluate_patterns(
+        candle_history or [],
+        {
+            "symbol": snapshot.get("symbol"),
+            "timeframe": "live_tick",
+            "ml_signal_score": ml_result.get("ml_signal_score") or 0.0,
+            "policy_signal_score": adjusted_signal_score,
+            "orion_bias": snapshot.get("orion_bias") or 0.0,
+            "volume_confirmation": snapshot.get("volume_confirmation") or 0.0,
+            "candle_source": candle_source,
+            "candle_confidence": candle_confidence,
+        },
+    )
+
     result = DecisionResult(
         {
             "timestamp": snapshot.get("timestamp") or datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
@@ -253,6 +279,15 @@ def build_decision(snapshot: Dict[str, object], company_id: str, last_price: Opt
             "sizing_rationale": policy["sizing_rationale"],
             "notes": notes,
             "scoring_method": scoring_method,
+            "pattern_flags": pattern_result["pattern_flags"],
+            "pattern_dir": pattern_result["pattern_dir"],
+            "pattern_strength": pattern_result["pattern_strength"],
+            "pattern_contribution": pattern_result["pattern_contribution"],
+            "pattern_confirmation": pattern_result["pattern_confirmation"],
+            "pattern_debug": pattern_result["pattern_debug"],
+            "matched_context": pattern_result["matched_context"],
+            "candle_source": pattern_result["matched_context"]["candle_source"],
+            "candle_confidence": pattern_result["matched_context"]["candle_confidence"],
         }
     )
     result.update(ml_result)

@@ -11,6 +11,8 @@ from typing import Dict, Optional, List, Any
 
 from tools.pattern_engine import evaluate_patterns
 
+LIVE_PATTERN_SCORE_MAX_ABS = 0.015
+
 ROOT = Path(__file__).resolve().parent.parent
 ML_MODEL_PATH = ROOT / "models" / "ml_model.pkl"
 ML_COLUMNS = [
@@ -210,6 +212,117 @@ def infer_ml_signal(snapshot: Dict[str, object], last_price: Optional[float]) ->
 
 
 
+def _close_only_pattern_payload(
+    candle_history: List[Dict[str, Any]],
+    symbol: Any,
+    candle_source: str,
+    candle_confidence: Any,
+) -> Dict[str, Any]:
+    closes = [float(c.get("close") or 0.0) for c in candle_history[-4:] if c]
+    detected_patterns: List[str] = []
+    pattern_score = 0.0
+    if len(closes) >= 3:
+        last_three = closes[-3:]
+        if last_three[0] < last_three[1] < last_three[2]:
+            detected_patterns.append("close_three_rising")
+            pattern_score = LIVE_PATTERN_SCORE_MAX_ABS
+        elif last_three[0] > last_three[1] > last_three[2]:
+            detected_patterns.append("close_three_falling")
+            pattern_score = -LIVE_PATTERN_SCORE_MAX_ABS
+    if len(closes) >= 4:
+        prev_three = closes[-4:-1]
+        last_close = closes[-1]
+        if prev_three[0] > prev_three[1] > prev_three[2] and last_close > prev_three[-1]:
+            detected_patterns.append("close_reversal_after_two_decline")
+            pattern_score = max(pattern_score, 0.01)
+        elif prev_three[0] < prev_three[1] < prev_three[2] and last_close < prev_three[-1]:
+            detected_patterns.append("close_reversal_after_two_rise")
+            pattern_score = min(pattern_score, -0.01)
+    pattern_dir = 1 if pattern_score > 0 else -1 if pattern_score < 0 else 0
+    return {
+        "pattern_flags": {},
+        "pattern_dir": pattern_dir,
+        "pattern_strength": round(abs(pattern_score) / LIVE_PATTERN_SCORE_MAX_ABS, 4) if pattern_score else 0.0,
+        "pattern_contribution": round(pattern_score, 6),
+        "pattern_confirmation": {"satisfied": bool(detected_patterns), "signals": ["close_only_three_step"] if detected_patterns else []},
+        "pattern_debug": {"engine_mode": "close_only_3step", "reason": "price_only_live_feed_no_real_ohlc", "detected_patterns": detected_patterns},
+        "matched_context": {
+            "symbol": symbol,
+            "timeframe": "live_tick",
+            "candle_source": candle_source,
+            "candle_confidence": candle_confidence,
+        },
+        "detected_patterns": detected_patterns,
+        "pattern_score": round(pattern_score, 6),
+        "pattern_engine_mode": "close_only_3step",
+        "strat_pattern": None,
+        "strat_available": False,
+    }
+
+
+
+def _real_ohlc_pattern_payload(
+    candle_history: List[Dict[str, Any]],
+    symbol: Any,
+    adjusted_signal_score: float,
+    ml_result: Dict[str, object],
+    snapshot: Dict[str, object],
+    candle_source: str,
+    candle_confidence: Any,
+) -> Dict[str, Any]:
+    pattern_result = evaluate_patterns(
+        candle_history,
+        {
+            "symbol": symbol,
+            "timeframe": "live_tick",
+            "ml_signal_score": ml_result.get("ml_signal_score") or 0.0,
+            "policy_signal_score": adjusted_signal_score,
+            "orion_bias": snapshot.get("orion_bias") or 0.0,
+            "volume_confirmation": snapshot.get("volume_confirmation") or 0.0,
+            "candle_source": candle_source,
+            "candle_confidence": candle_confidence,
+        },
+    )
+    matched_patterns = list(pattern_result.get("pattern_debug", {}).get("matched_patterns") or [])
+    strat_pattern = next((name for name in matched_patterns if name.startswith("strat_")), None)
+    pattern_score = max(-LIVE_PATTERN_SCORE_MAX_ABS, min(LIVE_PATTERN_SCORE_MAX_ABS, float(pattern_result.get("pattern_contribution") or 0.0)))
+    pattern_result.update(
+        {
+            "detected_patterns": matched_patterns,
+            "pattern_score": round(pattern_score, 6),
+            "pattern_engine_mode": "ohlc_pattern_engine",
+            "strat_pattern": strat_pattern,
+            "strat_available": True,
+        }
+    )
+    pattern_result["pattern_contribution"] = round(pattern_score, 6)
+    return pattern_result
+
+
+
+def build_live_pattern_payload(
+    snapshot: Dict[str, object],
+    candle_history: Optional[List[Dict[str, Any]]],
+    adjusted_signal_score: float,
+    ml_result: Dict[str, object],
+    candle_source: str,
+    candle_confidence: Any,
+) -> Dict[str, Any]:
+    history = candle_history or []
+    if candle_source == "real_ohlc":
+        return _real_ohlc_pattern_payload(
+            history,
+            snapshot.get("symbol"),
+            adjusted_signal_score,
+            ml_result,
+            snapshot,
+            candle_source,
+            candle_confidence,
+        )
+    return _close_only_pattern_payload(history, snapshot.get("symbol"), candle_source, candle_confidence)
+
+
+
 def build_decision(
     snapshot: Dict[str, object],
     company_id: str,
@@ -248,18 +361,13 @@ def build_decision(
     else:
         confidence = min(confidence_base, 1.0)
 
-    pattern_result = evaluate_patterns(
-        candle_history or [],
-        {
-            "symbol": snapshot.get("symbol"),
-            "timeframe": "live_tick",
-            "ml_signal_score": ml_result.get("ml_signal_score") or 0.0,
-            "policy_signal_score": adjusted_signal_score,
-            "orion_bias": snapshot.get("orion_bias") or 0.0,
-            "volume_confirmation": snapshot.get("volume_confirmation") or 0.0,
-            "candle_source": candle_source,
-            "candle_confidence": candle_confidence,
-        },
+    pattern_result = build_live_pattern_payload(
+        snapshot,
+        candle_history,
+        adjusted_signal_score,
+        ml_result,
+        str(candle_source),
+        candle_confidence,
     )
 
     result = DecisionResult(
@@ -288,6 +396,11 @@ def build_decision(
             "matched_context": pattern_result["matched_context"],
             "candle_source": pattern_result["matched_context"]["candle_source"],
             "candle_confidence": pattern_result["matched_context"]["candle_confidence"],
+            "detected_patterns": pattern_result["detected_patterns"],
+            "pattern_score": pattern_result["pattern_score"],
+            "pattern_engine_mode": pattern_result["pattern_engine_mode"],
+            "strat_pattern": pattern_result["strat_pattern"],
+            "strat_available": pattern_result["strat_available"],
         }
     )
     result.update(ml_result)

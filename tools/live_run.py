@@ -37,6 +37,22 @@ LIVE_COMMITTEE_TIMEOUT_SECONDS = int(os.getenv("LIVE_COMMITTEE_TIMEOUT_SECONDS",
 LIVE_COMMITTEE_ROLES = ["Lucian", "Bianca", "Vera", "Iris", "Orion"]
 
 
+def virtual_currency_context(virtual_currency: float | None) -> Dict[str, Any]:
+    if virtual_currency is None:
+        return {
+            "virtual_currency": None,
+            "virtual_company_pool_total": None,
+            "virtual_company_budget": None,
+        }
+    pool_total = float(virtual_currency) * 0.40
+    company_budget = pool_total / max(len(COMPANIES), 1)
+    return {
+        "virtual_currency": round(float(virtual_currency), 6),
+        "virtual_company_pool_total": round(pool_total, 6),
+        "virtual_company_budget": round(company_budget, 6),
+    }
+
+
 def ensure_directories() -> None:
     LIVE_RUNS_ROOT.mkdir(parents=True, exist_ok=True)
 
@@ -63,8 +79,8 @@ def candidate_ranking_score(decision: Dict[str, Any]) -> float:
     policy_signal_score = abs(float(decision.get("policy_signal_score") or 0.0))
     ml_signal_score = abs(float(decision.get("ml_signal_score") or 0.0))
     model_confidence = abs(float(decision.get("model_score") or 0.5) - 0.5) * 2.0
-    pattern_contribution = float(decision.get("pattern_contribution") or 0.0)
-    return round(policy_signal_score + ml_signal_score + model_confidence + pattern_contribution, 6)
+    pattern_score = float(decision.get("pattern_score") or decision.get("pattern_contribution") or 0.0)
+    return round(policy_signal_score + ml_signal_score + model_confidence + pattern_score, 6)
 
 
 
@@ -103,9 +119,10 @@ def latest_report(reports: Dict[str, List[Dict[str, Any]]], agent_name: str) -> 
     return agent_reports[-1] if agent_reports else {}
 
 
-ORION_BIAS_MAX_ABS = 0.10
+ORION_BIAS_BULL = 0.02
+ORION_BIAS_BEAR = -0.02
 ORION_STALE_AFTER_HOURS = 24.0
-ORION_SECONDARY_WEIGHT = 0.08
+ORION_MATCH_FIELDS = ["analysis_summary", "research_summary", "ideas", "hypotheses", "evidence"]
 
 
 def _parse_report_timestamp(report: Dict[str, Any]) -> datetime | None:
@@ -130,157 +147,83 @@ def _orion_report_is_stale(report: Dict[str, Any], now: datetime) -> bool:
 
 
 
-def _extract_symbol_tokens(value: Any) -> set[str]:
+def _stringify_field(value: Any) -> str:
     if value is None:
-        return set()
-    if isinstance(value, dict):
-        tokens: set[str] = set()
-        for key, nested in value.items():
-            tokens.update(_extract_symbol_tokens(key))
-            tokens.update(_extract_symbol_tokens(nested))
-        return tokens
+        return ""
     if isinstance(value, (list, tuple, set)):
-        tokens: set[str] = set()
-        for item in value:
-            tokens.update(_extract_symbol_tokens(item))
-        return tokens
-    text = str(value).upper()
-    return set(re.findall(r"\b[A-Z]{2,10}\b", text))
+        return " ".join(_stringify_field(item) for item in value)
+    if isinstance(value, dict):
+        return " ".join(f"{_stringify_field(k)} {_stringify_field(v)}" for k, v in value.items())
+    return str(value)
 
 
 
-def _orion_report_mentions_symbol(report: Dict[str, Any], symbol: str) -> bool:
-    symbol_upper = str(symbol or "").upper()
-    if not symbol_upper:
-        return False
-    symbol_fields = [
-        report.get("symbol"),
-        report.get("symbols"),
-        report.get("ticker"),
-        report.get("tickers"),
-        report.get("asset"),
-        report.get("assets"),
-        report.get("pair"),
-        report.get("pairs"),
-        report.get("evidence"),
-        report.get("ideas"),
-        report.get("hypotheses"),
-        report.get("analysis_summary"),
-        report.get("recommendation"),
-        report.get("research_summary"),
-        report.get("reply_text"),
-        report.get("summary"),
-        report.get("rationale"),
-    ]
-    for field in symbol_fields:
-        if symbol_upper in _extract_symbol_tokens(field):
-            return True
-    return False
+def _orion_symbol_match_fields(report: Dict[str, Any], symbol: str) -> List[str]:
+    symbol_text = str(symbol or "").upper()
+    if not symbol_text:
+        return []
+    matches: List[str] = []
+    for field in ORION_MATCH_FIELDS:
+        value_text = _stringify_field(report.get(field)).upper()
+        if symbol_text and symbol_text in value_text:
+            matches.append(field)
+    return matches
 
 
 
-def _orion_directional_multiplier(report: Dict[str, Any], decision: Dict[str, Any]) -> float:
-    text = " ".join(
-        str(report.get(key, ""))
-        for key in ("analysis_summary", "recommendation", "research_summary", "reply_text", "summary", "rationale", "decision")
-    ).lower()
-    if not text:
-        return 0.0
-
-    bullish_hits = sum(
-        phrase in text
-        for phrase in (
-            "bullish",
-            "buy",
-            "long",
-            "overweight",
-            "accumulate",
-            "positive catalyst",
-            "favorable",
-            "constructive",
-        )
-    )
-    bearish_hits = sum(
-        phrase in text
-        for phrase in (
-            "bearish",
-            "sell",
-            "short",
-            "underweight",
-            "distribute",
-            "negative catalyst",
-            "unfavorable",
-            "cautious",
-        )
-    )
-    net = float(bullish_hits - bearish_hits)
-    if net == 0.0:
-        return 0.0
-
-    target_sign = 0.0
-    decision_text = str(decision.get("decision") or "").upper()
-    if decision_text == "BUY":
-        target_sign = 1.0
-    elif decision_text == "SELL":
-        target_sign = -1.0
-    else:
-        signal_score = float(decision.get("signal_score") or 0.0)
-        ml_signal_score = float(decision.get("ml_signal_score") or 0.0)
-        combined = signal_score + ml_signal_score
-        if combined > 0:
-            target_sign = 1.0
-        elif combined < 0:
-            target_sign = -1.0
-    if target_sign == 0.0:
-        return 0.0
-    return 1.0 if (net > 0 and target_sign > 0) or (net < 0 and target_sign < 0) else -1.0
+def _orion_direction_from_text(report: Dict[str, Any]) -> tuple[float, str]:
+    text = " ".join(_stringify_field(report.get(field)) for field in ORION_MATCH_FIELDS).lower()
+    bullish = any(phrase in text for phrase in ("bullish catalyst", "bullish", "positive catalyst", "upside catalyst", "buy", "long", "accumulate"))
+    bearish = any(phrase in text for phrase in ("bearish catalyst", "bearish", "negative catalyst", "downside catalyst", "sell", "short", "distribute"))
+    if bullish and not bearish:
+        return ORION_BIAS_BULL, "bullish_catalyst"
+    if bearish and not bullish:
+        return ORION_BIAS_BEAR, "bearish_catalyst"
+    return 0.0, "no_directional_catalyst"
 
 
 
-def _orion_damping_factor(report: Dict[str, Any]) -> float:
-    damping = 1.0
-    missing_data = report.get("missing_data")
-    if missing_data:
-        damping *= 0.5
-
-    evidence = report.get("evidence")
-    if evidence is None:
-        damping *= 0.7
-    elif isinstance(evidence, (list, tuple, set)):
-        if len(evidence) == 0:
-            damping *= 0.7
-        elif len(evidence) == 1:
-            damping *= 0.85
-
-    text = " ".join(
-        str(report.get(key, ""))
-        for key in ("analysis_summary", "recommendation", "research_summary", "reply_text", "summary", "rationale")
-    ).lower()
-    if any(phrase in text for phrase in ("unclear", "mixed", "weak evidence", "limited evidence", "insufficient evidence", "uncertain", "tentative")):
-        damping *= 0.6
-    elif any(phrase in text for phrase in ("watch", "monitor", "possible", "maybe", "developing")):
-        damping *= 0.8
-
-    return max(0.0, min(1.0, damping))
+def _orion_uncertainty_factor(report: Dict[str, Any]) -> float:
+    text = " ".join(_stringify_field(report.get(field)) for field in ORION_MATCH_FIELDS).lower()
+    uncertain = any(token in text for token in ("unclear", "uncertain", "insufficient", "mixed"))
+    if report.get("missing_data") or uncertain:
+        return 0.5
+    return 1.0
 
 
 
-def compute_orion_bias(decision: Dict[str, Any], report: Dict[str, Any], now: datetime | None = None) -> float:
-    if not report:
-        return 0.0
+def compute_orion_bias(decision: Dict[str, Any], report: Dict[str, Any], now: datetime | None = None) -> Dict[str, Any]:
     now = now or datetime.utcnow().replace(tzinfo=timezone.utc)
+    report_ts = _parse_report_timestamp(report)
+    default = {
+        "orion_bias": 0.0,
+        "orion_bias_reason": "no_report",
+        "orion_report_timestamp": report_ts.isoformat() if report_ts else None,
+        "orion_match_fields": [],
+        "orion_bias_applied": False,
+    }
+    if not report:
+        return default
     if _orion_report_is_stale(report, now):
-        return 0.0
-    if not _orion_report_mentions_symbol(report, str(decision.get("symbol") or "")):
-        return 0.0
-
-    direction = _orion_directional_multiplier(report, decision)
-    if direction == 0.0:
-        return 0.0
-
-    base_score = float(decision.get("ranking_score") or candidate_ranking_score(decision))
-    raw_bias = base_score * ORION_SECONDARY_WEIGHT * _orion_damping_factor(report) * direction
-    return round(max(-ORION_BIAS_MAX_ABS, min(ORION_BIAS_MAX_ABS, raw_bias)), 6)
+        default["orion_bias_reason"] = "stale_report"
+        return default
+    match_fields = _orion_symbol_match_fields(report, str(decision.get("symbol") or ""))
+    if not match_fields:
+        default["orion_bias_reason"] = "no_symbol_match"
+        return default
+    base_bias, reason = _orion_direction_from_text(report)
+    if base_bias == 0.0:
+        default["orion_bias_reason"] = reason
+        default["orion_match_fields"] = match_fields
+        return default
+    bias = round(base_bias * _orion_uncertainty_factor(report), 6)
+    return {
+        "orion_bias": bias,
+        "orion_bias_reason": reason if abs(bias) == abs(base_bias) else f"{reason}_halved_for_uncertainty",
+        "orion_report_timestamp": report_ts.isoformat() if report_ts else None,
+        "orion_match_fields": match_fields,
+        "orion_bias_applied": bias != 0.0,
+    }
 
 
 
@@ -291,10 +234,10 @@ def apply_orion_bias_before_ranking(candidates: List[Dict[str, Any]], now: datet
         company = str(candidate.get("company_id"))
         if company not in report_cache:
             report_cache[company] = latest_report(collect_agent_reports(company), "Orion")
-        orion_report = report_cache[company]
         base_score = float(candidate.get("ranking_score") or candidate_ranking_score(candidate))
         candidate["ranking_score_before_orion"] = round(base_score, 6)
-        candidate["orion_bias"] = compute_orion_bias(candidate, orion_report, now=now)
+        meta = compute_orion_bias(candidate, report_cache[company], now=now)
+        candidate.update(meta)
         candidate["ranking_score"] = round(base_score + float(candidate["orion_bias"]), 6)
     return candidates
 
@@ -702,12 +645,13 @@ def clear_current_run() -> None:
         CURRENT_RUN_PATH.unlink()
 
 
-def start_run(duration_hours: float = 0.0) -> None:
+def start_run(duration_hours: float = 0.0, virtual_currency: float | None = None) -> None:
     ensure_directories()
     run_id = create_run_id()
     run_dir = run_directory(run_id)
     symbol_list = os.environ.get("LIVE_RUN_SYMBOLS")
     symbols = symbol_list.split(",") if symbol_list else target_symbol_list()
+    virtual_budget = virtual_currency_context(virtual_currency)
     meta = {
         "run_id": run_id,
         "mode": "paper",
@@ -715,9 +659,13 @@ def start_run(duration_hours: float = 0.0) -> None:
         "duration_hours": duration_hours,
         "started_at": datetime.utcnow().isoformat(),
         "status": "scheduled",
+        **virtual_budget,
+        "virtual_currency_note": "testing-only virtual capital pool; not real brokerage cash",
     }
     (run_dir / "run_metadata.json").write_text(json.dumps(meta, indent=2))
     command = [sys.executable, "-m", "tools.live_run", "run", "--run-id", run_id, "--duration-hours", str(duration_hours)]
+    if virtual_currency is not None:
+        command.extend(["--virtual-currency", str(virtual_currency)])
     proc = subprocess.Popen(command, env=dict(os.environ, LIVE_RUN_MODE="paper"))
     (run_dir / "run.pid").write_text(str(proc.pid))
     write_current_run(run_id, proc.pid)
@@ -778,7 +726,7 @@ def build_pseudo_candle(snapshot: Dict[str, Any], last_price: float | None) -> D
 
 
 
-def run_worker(run_id: str, duration_hours: float = 0.0) -> None:
+def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float | None = None) -> None:
     run_dir = run_directory(run_id)
     pid_file = run_dir / "run.pid"
     symbols = os.environ.get("LIVE_RUN_SYMBOLS")
@@ -792,6 +740,7 @@ def run_worker(run_id: str, duration_hours: float = 0.0) -> None:
     last_prices: Dict[str, float] = {}
     candle_history: Dict[str, List[Dict[str, Any]]] = {}
     cycle = 0
+    virtual_budget = virtual_currency_context(virtual_currency)
 
     def _signal_handler(*_: Any) -> None:
         nonlocal stop_flag
@@ -843,6 +792,8 @@ def run_worker(run_id: str, duration_hours: float = 0.0) -> None:
                 decision["ranking_score"] = candidate_ranking_score(decision)
                 decision["pretrade_selection_path"] = "ranked_then_company_packet"
                 decision["pretrade_agent_participation"] = "company packet consulted after ranking"
+                decision.update(virtual_budget)
+                decision["virtual_currency_note"] = "testing-only virtual capital pool; not real brokerage cash"
                 last_prices[price_key] = snapshot.get("price") or last_prices.get(price_key, 0.0)
                 candidate_decisions.append(decision)
 
@@ -869,6 +820,8 @@ def run_worker(run_id: str, duration_hours: float = 0.0) -> None:
             "decision": "ml+signal" if any(d.get("ml_scoring_active") for d in cycle_decisions) else "signal-only",
             "confidence": 0.0,
             "ml_scoring_active": any(d.get("ml_scoring_active") for d in cycle_decisions),
+            **virtual_budget,
+            "virtual_currency_note": "testing-only virtual capital pool; not real brokerage cash",
             "decision_path_counts": {
                 "ml+signal": sum(1 for d in ranked_candidates if d.get("decision_path") == "ml+signal"),
                 "signal-only fallback": sum(1 for d in ranked_candidates if d.get("decision_path") == "signal-only fallback"),
@@ -884,6 +837,16 @@ def run_worker(run_id: str, duration_hours: float = 0.0) -> None:
                         "symbol": d.get("symbol"),
                         "decision": d.get("decision"),
                         "ranking_score": d.get("ranking_score"),
+                        "orion_bias": d.get("orion_bias"),
+                        "orion_bias_reason": d.get("orion_bias_reason"),
+                        "orion_report_timestamp": d.get("orion_report_timestamp"),
+                        "orion_match_fields": d.get("orion_match_fields"),
+                        "orion_bias_applied": d.get("orion_bias_applied"),
+                        "detected_patterns": d.get("detected_patterns"),
+                        "pattern_score": d.get("pattern_score"),
+                        "pattern_engine_mode": d.get("pattern_engine_mode"),
+                        "strat_pattern": d.get("strat_pattern"),
+                        "strat_available": d.get("strat_available"),
                         "pattern_flags": d.get("pattern_flags"),
                         "pattern_dir": d.get("pattern_dir"),
                         "pattern_strength": d.get("pattern_strength"),
@@ -967,11 +930,13 @@ def main() -> None:
     subparsers = parser.add_subparsers(dest="command", required=True)
     start_parser = subparsers.add_parser("start", help="Start the paper run")
     start_parser.add_argument("--duration-hours", type=float, default=0.0)
+    start_parser.add_argument("--virtual-currency", type=float, default=None, help="Testing-only virtual capital pool; not real brokerage cash")
     stop_parser = subparsers.add_parser("stop", help="Stop the current paper run")
     stop_parser.add_argument("--run-id", help="Explicit run id to stop")
     run_parser = subparsers.add_parser("run", help="Run worker (internal)")
     run_parser.add_argument("--run-id", required=True)
     run_parser.add_argument("--duration-hours", type=float, default=0.0)
+    run_parser.add_argument("--virtual-currency", type=float, default=None, help="Testing-only virtual capital pool; not real brokerage cash")
     summary_parser = subparsers.add_parser("summary", help="Generate summary bundle")
     summary_parser.add_argument("--run-id", required=True)
     verify_parser = subparsers.add_parser("verify", help="Verify paper-only mode")
@@ -979,11 +944,11 @@ def main() -> None:
     subparsers.add_parser("validate", help="Validate feed/dirs")
     args = parser.parse_args()
     if args.command == "start":
-        start_run(duration_hours=args.duration_hours)
+        start_run(duration_hours=args.duration_hours, virtual_currency=args.virtual_currency)
     elif args.command == "stop":
         stop_run(run_id=args.run_id)
     elif args.command == "run":
-        run_worker(args.run_id, duration_hours=args.duration_hours)
+        run_worker(args.run_id, duration_hours=args.duration_hours, virtual_currency=args.virtual_currency)
     elif args.command == "summary":
         summary(args.run_id)
     elif args.command == "verify":

@@ -14,16 +14,17 @@ DEFAULT_COMPANIES = ["company_001", "company_002", "company_003", "company_004"]
 
 
 class PortfolioState:
-    def __init__(self, run_dir: Path):
+    def __init__(self, run_dir: Path, parent_total: float | None = None, companies: List[str] | None = None):
         self.run_dir = run_dir
-        self.parent_total = DEFAULT_TREASURY
+        self.companies = list(companies or DEFAULT_COMPANIES)
+        self.parent_total = float(parent_total if parent_total is not None else DEFAULT_TREASURY)
         self.reserve = self.parent_total * RESERVE_PERCENTAGE
         self.deployable = self.parent_total * DEPLOYABLE_PERCENTAGE
-        self.allocations: Dict[str, float] = {comp: self.deployable / len(DEFAULT_COMPANIES) for comp in DEFAULT_COMPANIES}
-        self.positions: Dict[str, Dict[str, float]] = {comp: {} for comp in DEFAULT_COMPANIES}
+        self.allocations: Dict[str, float] = {comp: self.deployable / len(self.companies) for comp in self.companies}
+        self.positions: Dict[str, Dict[str, float]] = {comp: {} for comp in self.companies}
         self.cash: Dict[str, float] = self.allocations.copy()
-        self.realized: Dict[str, float] = {comp: 0.0 for comp in DEFAULT_COMPANIES}
-        self.unrealized: Dict[str, float] = {comp: 0.0 for comp in DEFAULT_COMPANIES}
+        self.realized: Dict[str, float] = {comp: 0.0 for comp in self.companies}
+        self.unrealized: Dict[str, float] = {comp: 0.0 for comp in self.companies}
         self.parent_equity = self.reserve + sum(self.cash.values())
         self.allocation_snapshot()
 

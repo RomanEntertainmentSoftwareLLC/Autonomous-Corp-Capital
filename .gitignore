@@ -13,3 +13,7 @@ logs/meetings/
 
 agent_state_backup/
 openclaw_backup/credentials/
+
+yam_step*.txt
+
+yam_step*.txt

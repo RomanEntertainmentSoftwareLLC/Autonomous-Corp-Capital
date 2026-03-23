@@ -731,16 +731,23 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
     pid_file = run_dir / "run.pid"
     symbols = os.environ.get("LIVE_RUN_SYMBOLS")
     symbols = symbols.split(",") if symbols else target_symbol_list()
-    portfolio = PortfolioState(run_dir)
+    virtual_budget = virtual_currency_context(virtual_currency)
+    portfolio_parent_total = virtual_currency if virtual_currency is not None else None
+    portfolio = PortfolioState(run_dir, parent_total=portfolio_parent_total, companies=COMPANIES)
     with pid_file.open("w", encoding="utf-8") as fh:
         fh.write(str(os.getpid()))
+    meta_path = run_dir / "run_metadata.json"
+    if meta_path.exists():
+        meta = json.loads(meta_path.read_text())
+        meta["status"] = "running"
+        meta["worker_started_at"] = datetime.utcnow().isoformat()
+        meta_path.write_text(json.dumps(meta, indent=2))
     stop_flag = False
     backoff = 0
     end_time = datetime.utcnow() + timedelta(hours=duration_hours) if duration_hours > 0 else None
     last_prices: Dict[str, float] = {}
     candle_history: Dict[str, List[Dict[str, Any]]] = {}
     cycle = 0
-    virtual_budget = virtual_currency_context(virtual_currency)
 
     def _signal_handler(*_: Any) -> None:
         nonlocal stop_flag
@@ -885,6 +892,22 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
         
         time.sleep(LIVE_RUN_POLL_SECONDS)
     pid_file.unlink(missing_ok=True)
+    if meta_path.exists():
+        meta = json.loads(meta_path.read_text())
+        meta["ended_at"] = datetime.utcnow().isoformat()
+        if stop_flag:
+            meta["status"] = "stopped"
+        else:
+            meta["status"] = "completed"
+        meta_path.write_text(json.dumps(meta, indent=2))
+    current = None
+    try:
+        current = read_current_run()
+    except FileNotFoundError:
+        current = None
+    if current and current.get("run_id") == run_id:
+        clear_current_run()
+
 def summary(run_id: str) -> None:
     run_dir = run_directory(run_id)
     logs = list((run_dir / "logs").glob("*.log"))

@@ -7,6 +7,7 @@ import json
 import os
 import re
 import signal
+import sqlite3
 import subprocess
 import sys
 import time
@@ -28,7 +29,7 @@ sys.path.insert(0, str(ROOT))
 
 LIVE_RUNS_ROOT = ROOT / "state" / "live_runs"
 CURRENT_RUN_PATH = LIVE_RUNS_ROOT / "current_run.json"
-LIVE_RUN_POLL_SECONDS = int(os.getenv("LIVE_RUN_POLL_SECONDS", "60"))
+LIVE_RUN_POLL_SECONDS = int(os.getenv("LIVE_RUN_POLL_SECONDS", "10"))
 LIVE_RUN_BACKOFF_BASE = int(os.getenv("LIVE_RUN_BACKOFF_SECONDS", "60"))
 COMPANIES = ["company_001", "company_002", "company_003", "company_004"]
 MAX_EXECUTIONS_PER_CYCLE = 6
@@ -645,6 +646,144 @@ def clear_current_run() -> None:
         CURRENT_RUN_PATH.unlink()
 
 
+def prune_old_run_artifacts(current_run_id: str) -> None:
+    bulky_paths = [
+        ("artifacts", "paper_decisions.jsonl"),
+        ("artifacts", "company_packets.jsonl"),
+        ("artifacts", "strategy.log"),
+        ("data", "market_feed.log"),
+    ]
+    eligible_runs: List[Path] = []
+    for run_dir in LIVE_RUNS_ROOT.glob("run_*"):
+        name = run_dir.name
+        if (
+            not run_dir.is_dir()
+            or name >= current_run_id
+            or not (name.startswith("run_") and len(name) == 19 and name[4:12].isdigit() and name[12] == "_" and name[13:19].isdigit())
+        ):
+            continue
+        meta_path = run_dir / "run_metadata.json"
+        if not meta_path.exists():
+            continue
+        try:
+            status = json.loads(meta_path.read_text()).get("status")
+        except Exception:
+            continue
+        if status in {"completed", "stopped"}:
+            eligible_runs.append(run_dir)
+    for run_dir in sorted(eligible_runs, key=lambda path: path.name, reverse=True)[2:]:
+        for parts in bulky_paths:
+            path = run_dir.joinpath(*parts)
+            if path.exists():
+                path.unlink()
+
+
+def load_company_rankings(limit: int = 5) -> Dict[str, Any]:
+    warehouse_path = ROOT / "data" / "warehouse.sqlite"
+    rankings = {"source": None, "sort_by": "fitness", "top": []}
+    if not warehouse_path.exists():
+        return rankings
+    try:
+        with sqlite3.connect(warehouse_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT c.name,
+                       cp.latest_fitness,
+                       cp.latest_account_value,
+                       cp.latest_realized_pnl,
+                       cp.latest_unrealized_pnl,
+                       cp.latest_trade_count,
+                       cp.latest_win_rate,
+                       cp.latest_drawdown,
+                       cp.allocation_percent,
+                       lrs.mode,
+                       cp.lifecycle_state
+                FROM companies c
+                JOIN company_performance cp ON cp.company_id = c.id
+                LEFT JOIN latest_run_summary lrs ON lrs.company = c.name
+                ORDER BY cp.latest_fitness DESC, cp.latest_account_value DESC, c.name ASC
+                LIMIT ?
+                """,
+                (limit,),
+            )
+            rows = cursor.fetchall()
+    except sqlite3.Error:
+        return rankings
+    rankings["source"] = "company_performance"
+    rankings["top"] = [
+        {
+            "rank": index,
+            "company": row[0],
+            "fitness": row[1],
+            "account_value": row[2],
+            "realized_pnl": row[3],
+            "unrealized_pnl": row[4],
+            "trade_count": row[5],
+            "win_rate": row[6],
+            "drawdown": row[7],
+            "allocation_percent": row[8],
+            "latest_mode": row[9],
+            "lifecycle_state": row[10],
+        }
+        for index, row in enumerate(rows, start=1)
+    ]
+    return rankings
+
+
+
+def write_daily_digest(run_id: str) -> None:
+    run_dir = run_directory(run_id)
+    meta_path = run_dir / "run_metadata.json"
+    strategy_path = run_dir / "artifacts" / "strategy.log"
+    packets_path = run_dir / "artifacts" / "company_packets.jsonl"
+    ledger_path = ROOT / "state" / "agents" / "ledger" / "usage.jsonl"
+    meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
+    last_strategy = {}
+    if strategy_path.exists():
+        lines = [line.strip() for line in strategy_path.read_text().splitlines() if line.strip()]
+        if lines:
+            last_strategy = json.loads(lines[-1])
+    last_packets: Dict[str, Dict[str, Any]] = {}
+    symbol_counts: Dict[str, int] = {}
+    company_packet_count = 0
+    if packets_path.exists():
+        for raw in packets_path.read_text().splitlines():
+            if not raw.strip():
+                continue
+            row = json.loads(raw)
+            company_packet_count += 1
+            company = str(row.get("company_id") or "")
+            if company:
+                last_packets[company] = row
+            for candidate in row.get("top_ranked_candidates") or []:
+                symbol = candidate.get("symbol")
+                if symbol:
+                    symbol_counts[str(symbol)] = symbol_counts.get(str(symbol), 0) + 1
+    digest = {
+        "run_id": run_id,
+        "status": meta.get("status"),
+        "started_at": meta.get("started_at"),
+        "finished_at": meta.get("ended_at"),
+        "company_packet_count": company_packet_count,
+        "executed_count": (last_strategy.get("ranking_summary") or {}).get("executed_count", 0),
+        "skipped_count": (last_strategy.get("ranking_summary") or {}).get("skipped_count", 0),
+        "top_company_activity": [
+            {
+                "company_id": company,
+                "approval_posture": packet.get("approval_posture"),
+                "resulting_execution_posture": packet.get("resulting_execution_posture"),
+                "source_agents_consulted": packet.get("source_agents_consulted"),
+            }
+            for company, packet in sorted(last_packets.items())[:4]
+        ],
+        "top_symbols": [symbol for symbol, _count in sorted(symbol_counts.items(), key=lambda item: (-item[1], item[0]))[:5]],
+        "ledger_usage_present": ledger_path.exists(),
+        "company_rankings": load_company_rankings(),
+    }
+    (run_dir / "reports" / "daily_digest.json").write_text(json.dumps(digest, indent=2))
+
+
 def start_run(duration_hours: float = 0.0, virtual_currency: float | None = None) -> None:
     ensure_directories()
     run_id = create_run_id()
@@ -726,6 +865,58 @@ def build_pseudo_candle(snapshot: Dict[str, Any], last_price: float | None) -> D
 
 
 
+def build_live_candle(snapshot: Dict[str, Any], last_price: float | None) -> Dict[str, Any]:
+    symbol = str(snapshot.get("symbol") or "")
+    timestamp = snapshot.get("timestamp")
+    price = float(snapshot.get("price") or 0.0)
+    if not symbol or not timestamp or price <= 0.0:
+        return build_pseudo_candle(snapshot, last_price)
+    try:
+        bucket = datetime.fromisoformat(str(timestamp).replace("Z", "+00:00")).replace(second=0, microsecond=0).isoformat()
+    except ValueError:
+        return build_pseudo_candle(snapshot, last_price)
+
+    def _new_active_candle() -> Dict[str, Any]:
+        return {
+            "timestamp": timestamp,
+            "open": price,
+            "high": price,
+            "low": price,
+            "close": price,
+            "candle_source": "real_ohlc",
+            "candle_confidence": 0.7,
+        }
+
+    state = getattr(build_live_candle, "_state", {})
+    entry = state.get(symbol)
+    if not entry:
+        state[symbol] = {"active_bucket": bucket, "active_candle": _new_active_candle(), "emit_bucket": None, "emitted_candle": None}
+        build_live_candle._state = state
+        return build_pseudo_candle(snapshot, last_price)
+
+    active_candle = dict(entry.get("active_candle") or _new_active_candle())
+    if entry.get("active_bucket") == bucket:
+        active_candle["high"] = max(float(active_candle.get("high") or price), price)
+        active_candle["low"] = min(float(active_candle.get("low") or price), price)
+        active_candle["close"] = price
+        entry["active_candle"] = active_candle
+        state[symbol] = entry
+        build_live_candle._state = state
+        emitted_candle = entry.get("emitted_candle") if entry.get("emit_bucket") == bucket else None
+        return dict(emitted_candle) if emitted_candle else build_pseudo_candle(snapshot, last_price)
+
+    finalized_candle = active_candle
+    state[symbol] = {
+        "active_bucket": bucket,
+        "active_candle": _new_active_candle(),
+        "emit_bucket": bucket,
+        "emitted_candle": finalized_candle,
+    }
+    build_live_candle._state = state
+    return dict(finalized_candle)
+
+
+
 def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float | None = None) -> None:
     run_dir = run_directory(run_id)
     pid_file = run_dir / "run.pid"
@@ -786,7 +977,7 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
                 symbol = snapshot["symbol"]
                 price_key = (company, symbol)
                 symbol_history = candle_history.setdefault(symbol, [])
-                latest_candle = build_pseudo_candle(snapshot, last_prices.get(price_key))
+                latest_candle = build_live_candle(snapshot, last_prices.get(price_key))
                 symbol_history.append(latest_candle)
                 candle_history[symbol] = symbol_history[-20:]
                 snapshot["candle_source"] = latest_candle["candle_source"]
@@ -815,10 +1006,10 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
                 anomalies.append(f"veto:{decision['company_id']}:{decision['symbol']}")
                 with (run_dir / "artifacts" / "risk.log").open("a", encoding="utf-8") as risk_file:
                     risk_file.write(json.dumps({"timestamp": timestamp, "company": decision["company_id"], "symbol": decision["symbol"], "veto": True}) + "\n")
-            with (run_dir / "artifacts" / "paper_decisions.jsonl").open("a", encoding="utf-8") as fh:
-                fh.write(json.dumps(decision) + "\n")
             if decision.get("execution_state") != "executed":
                 continue
+            with (run_dir / "artifacts" / "paper_decisions.jsonl").open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(decision) + "\n")
             portfolio.apply_decision(decision)
             cycle_decisions.append(decision)
         orchestrate(run_dir, cycle, cycle_decisions, anomalies)
@@ -865,6 +1056,7 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
                         "skip_reason": d.get("skip_reason"),
                     }
                     for d in ranked_candidates[: min(10, len(ranked_candidates))]
+                    if not (d.get("decision") == "HOLD" and d.get("execution_state") == "skipped")
                 ],
             },
             "company_packet_summary": {
@@ -900,6 +1092,8 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
         else:
             meta["status"] = "completed"
         meta_path.write_text(json.dumps(meta, indent=2))
+    write_daily_digest(run_id)
+    prune_old_run_artifacts(run_id)
     current = None
     try:
         current = read_current_run()

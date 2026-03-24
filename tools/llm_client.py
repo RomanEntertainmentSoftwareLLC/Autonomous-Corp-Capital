@@ -4,6 +4,7 @@ import json
 import os
 import urllib.request
 from abc import ABC, abstractmethod
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 from tools.global_watchdog_fallbacks import GLOBAL_WATCHDOG_ROLES, build_global_watchdog_fallback
@@ -92,6 +93,24 @@ class OpenAIAdapter(LLMAdapter):
             result = json.loads(choice)
         except json.JSONDecodeError:
             return SimpleLLMAdapter().reason(message, prompt)
+        usage = data.get("usage") or {}
+        target_scope = prompt.get("target_scope")
+        company = target_scope if isinstance(target_scope, str) and target_scope.startswith("company_") else None
+        telemetry = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "agent": prompt.get("agent_id"),
+            "company": company,
+            "model": self._model,
+            "provider": "openai",
+            "prompt_tokens": usage.get("prompt_tokens"),
+            "completion_tokens": usage.get("completion_tokens"),
+            "total_tokens": usage.get("total_tokens"),
+            "estimated_cost": None,
+        }
+        usage_path = os.path.join(os.path.dirname(__file__), "..", "state", "agents", "ledger", "usage.jsonl")
+        os.makedirs(os.path.dirname(usage_path), exist_ok=True)
+        with open(os.path.abspath(usage_path), "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(telemetry) + "\n")
         return result
 
 

@@ -149,6 +149,8 @@ def persona_description(persona: Dict[str, Any]) -> str:
         keys = ", ".join([k for k, v in bias.items() if v])
         if keys:
             lines.append(f"Bias: {keys}")
+    if persona.get("shared_doctrine"):
+        lines.append("Doctrine: survival, durable profitability, role-bounded initiative, legal/compliance/risk guardrails")
     return " | ".join(lines) if lines else ""
 
 

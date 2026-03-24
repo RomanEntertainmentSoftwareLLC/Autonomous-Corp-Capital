@@ -54,6 +54,7 @@ def build_prompt(
         "company_values": company_values.get("text", ""),
         "company_values_path": company_values.get("path", ""),
         "scope": scope,
+        "agent_id": agent_info.get("id"),
         "agent_scope": scope,
         "target_scope": target_scope,
         "allowed_recipients": ALLOWED_RECIPIENTS,

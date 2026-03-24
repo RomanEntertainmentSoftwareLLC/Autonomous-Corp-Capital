@@ -369,6 +369,25 @@ def build_decision(
         str(candle_source),
         candle_confidence,
     )
+    if decision in {"BUY", "SELL"} and (
+        pattern_result["matched_context"]["candle_source"] != "real_ohlc"
+        or not pattern_result["detected_patterns"]
+        or not pattern_result["pattern_confirmation"].get("satisfied")
+    ):
+        decision = "HOLD"
+    if (
+        decision in {"BUY", "SELL"}
+        and pattern_result["matched_context"]["candle_source"] == "real_ohlc"
+        and pattern_result["detected_patterns"]
+        and pattern_result["pattern_confirmation"].get("satisfied")
+        and ml_result["ml_scoring_active"]
+        and ml_result["model_score"] is not None
+    ):
+        model_score = float(ml_result["model_score"])
+        if decision == "BUY" and model_score <= 0.55:
+            decision = "HOLD"
+        elif decision == "SELL" and model_score >= 0.45:
+            decision = "HOLD"
 
     result = DecisionResult(
         {

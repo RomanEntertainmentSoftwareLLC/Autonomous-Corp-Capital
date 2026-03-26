@@ -28,6 +28,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 LIVE_RUNS_ROOT = ROOT / "state" / "live_runs"
+EVOLUTION_STATE_ROOT = ROOT / "state" / "companies"
 CURRENT_RUN_PATH = LIVE_RUNS_ROOT / "current_run.json"
 LIVE_RUN_POLL_SECONDS = int(os.getenv("LIVE_RUN_POLL_SECONDS", "10"))
 LIVE_RUN_BACKOFF_BASE = int(os.getenv("LIVE_RUN_BACKOFF_SECONDS", "60"))
@@ -56,6 +57,7 @@ def virtual_currency_context(virtual_currency: float | None) -> Dict[str, Any]:
 
 def ensure_directories() -> None:
     LIVE_RUNS_ROOT.mkdir(parents=True, exist_ok=True)
+    EVOLUTION_STATE_ROOT.mkdir(parents=True, exist_ok=True)
 
 
 def create_run_id() -> str:
@@ -118,6 +120,34 @@ def rank_and_select_candidates(candidates: List[Dict[str, Any]]) -> List[Dict[st
 def latest_report(reports: Dict[str, List[Dict[str, Any]]], agent_name: str) -> Dict[str, Any]:
     agent_reports = reports.get(agent_name) or []
     return agent_reports[-1] if agent_reports else {}
+
+
+
+def evolution_state_path(company: str) -> Path:
+    return EVOLUTION_STATE_ROOT / company / "evolution_state.json"
+
+
+
+def load_evolution_state(company: str) -> Dict[str, Any]:
+    path = evolution_state_path(company)
+    default = {"company_packet_cap_baseline": 1.0}
+    if not path.exists():
+        return default
+    try:
+        data = json.loads(path.read_text())
+    except Exception:
+        return default
+    baseline = float(data.get("company_packet_cap_baseline", 1.0) or 1.0)
+    return {"company_packet_cap_baseline": round(min(1.25, max(0.75, baseline)), 4)}
+
+
+
+def save_evolution_state(company: str, state: Dict[str, Any]) -> None:
+    path = evolution_state_path(company)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    baseline = float(state.get("company_packet_cap_baseline", 1.0) or 1.0)
+    payload = {"company_packet_cap_baseline": round(min(1.25, max(0.75, baseline)), 4)}
+    path.write_text(json.dumps(payload, indent=2))
 
 
 ORION_BIAS_BULL = 0.02
@@ -507,6 +537,15 @@ def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], 
         for c in ranked_candidates[:3]
     ]
     saved_reports = collect_agent_reports(company)
+    atlas_report = latest_report(saved_reports, "Atlas")
+    atlas_confidence = str(atlas_report.get("confidence") or "").lower()
+    atlas_recommendation = str(atlas_report.get("recommendation") or "")
+    simulation_score = 0.05 if atlas_confidence == "high" else 0.02 if atlas_confidence == "medium" else 0.0
+    if "delay" in atlas_recommendation.lower():
+        simulation_score *= 0.5
+    for candidate in ranked_candidates[:2]:
+        candidate["simulation_score"] = round(simulation_score, 4)
+        candidate["ranking_score"] = round(float(candidate.get("ranking_score") or 0.0) + simulation_score, 6)
     live_outputs: Dict[str, Dict[str, Any]] = {}
     committee_sources: Dict[str, Dict[str, Any]] = {}
     missing_input_flags: List[str] = []
@@ -602,7 +641,9 @@ def apply_company_packets(ranked_candidates: List[Dict[str, Any]], now: datetime
     for company, company_candidates in by_company.items():
         packet = build_company_packet(company, company_candidates, now=now)
         packets[company] = packet
-        allowed_execs = max(0, min(MAX_EXECUTIONS_PER_COMPANY_PER_CYCLE, int(MAX_EXECUTIONS_PER_COMPANY_PER_CYCLE * packet["cap_multiplier"] + 0.9999)))
+        evolution_state = load_evolution_state(company)
+        cap_baseline = float(evolution_state.get("company_packet_cap_baseline", 1.0) or 1.0)
+        allowed_execs = max(0, min(MAX_EXECUTIONS_PER_COMPANY_PER_CYCLE, int(MAX_EXECUTIONS_PER_COMPANY_PER_CYCLE * cap_baseline * packet["cap_multiplier"] + 0.9999)))
         executed_for_company = 0
         for candidate in company_candidates:
             if candidate.get("execution_state") != "executed":
@@ -614,12 +655,6 @@ def apply_company_packets(ranked_candidates: List[Dict[str, Any]], now: datetime
                 candidate["skip_reason"] = "company_packet_veto"
                 packet["execution_changed_by_packet"] = True
                 packet["packet_effects"].append(f"vetoed:{candidate.get('symbol')}")
-                continue
-            if packet["approval_posture"] in {"hold", "defer"}:
-                candidate["execution_state"] = "skipped"
-                candidate["skip_reason"] = f"company_packet_{packet['approval_posture']}"
-                packet["execution_changed_by_packet"] = True
-                packet["packet_effects"].append(f"{packet['approval_posture']}:{candidate.get('symbol')}")
                 continue
             if executed_for_company >= allowed_execs:
                 candidate["execution_state"] = "skipped"
@@ -732,6 +767,54 @@ def load_company_rankings(limit: int = 5) -> Dict[str, Any]:
 
 
 
+def write_agent_performance_report(run_dir: Path, run_id: str, status: str | None, last_packets: Dict[str, Dict[str, Any]]) -> None:
+    roles = {"Lucian": "Executive", "Bianca": "CFO", "Vera": "Manager", "Iris": "Analyst", "Orion": "Operations", "Pam": "Coordinator", "Rowan": "Research", "Bob": "Operations", "Sloane": "Evolution", "Atlas": "Simulator", "June": "Archivist"}
+    usage_path = ROOT / "state" / "agents" / "ledger" / "usage.jsonl"
+    usage: Dict[tuple[str, str], int] = {}
+    if usage_path.exists():
+        for raw in usage_path.read_text().splitlines():
+            if not raw.strip():
+                continue
+            try:
+                row = json.loads(raw)
+            except Exception:
+                continue
+            agent_id = str(row.get("agent") or "")
+            company = str(row.get("company") or "")
+            for agent in roles:
+                if company and agent_id.startswith(agent.lower() + "_"):
+                    usage[(company, agent)] = usage.get((company, agent), 0) + int(row.get("total_tokens") or 0)
+                    break
+    lines = ["# Agent Performance", f"Run: {run_id}", f"Status: {status or 'unknown'}", ""]
+    for company in sorted(last_packets):
+        packet = last_packets[company]
+        lines.append(f"## {company}")
+        committee_sources = packet.get("committee_sources") or {}
+        consulted = set(packet.get("source_agents_consulted") or [])
+        agents = sorted(set(roles) | consulted | set(committee_sources))
+        for agent in agents:
+            summary = "no measurable impact"
+            verdict = "No visible contribution"
+            if agent == "Lucian":
+                summary = f"approval_posture={packet.get('approval_posture', 'unknown')}"
+                verdict = "Constraining" if packet.get("approval_posture") == "company_veto" else "Impacting"
+            elif agent == "Bianca":
+                summary = f"cap_multiplier={packet.get('cap_multiplier', 'n/a')}"
+                verdict = "Constraining" if float(packet.get("cap_multiplier") or 1.0) < 1.0 else "Impacting"
+            elif agent in committee_sources:
+                summary = str((committee_sources.get(agent) or {}).get("summary") or "consulted, summary missing")
+                verdict = "Advisory-only"
+            elif agent in consulted:
+                summary = "consulted, summary missing"
+                verdict = "Advisory-only"
+            tokens = usage.get((company, agent))
+            token_text = str(tokens) if tokens is not None else "n/a"
+            lines.append(f"- {agent} ({roles.get(agent, 'Unknown')}): {summary} | tokens={token_text} | verdict={verdict}")
+        lines.append("")
+    (run_dir / "reports" / "agent_performance.md").write_text("\n".join(lines).rstrip() + "\n")
+
+
+
 def write_daily_digest(run_id: str) -> None:
     run_dir = run_directory(run_id)
     meta_path = run_dir / "run_metadata.json"
@@ -782,6 +865,7 @@ def write_daily_digest(run_id: str) -> None:
         "company_rankings": load_company_rankings(),
     }
     (run_dir / "reports" / "daily_digest.json").write_text(json.dumps(digest, indent=2))
+    write_agent_performance_report(run_dir, run_id, meta.get("status"), last_packets)
 
 
 def start_run(duration_hours: float = 0.0, virtual_currency: float | None = None) -> None:
@@ -810,6 +894,34 @@ def start_run(duration_hours: float = 0.0, virtual_currency: float | None = None
     write_current_run(run_id, proc.pid)
     print(f"Live-data paper run started: {run_id}")
     print(f"Logs at: {run_dir / 'logs' / 'run.log'}")
+
+
+def update_evolution_states_from_warehouse() -> None:
+    warehouse_path = ROOT / "data" / "warehouse.sqlite"
+    if not warehouse_path.exists():
+        return
+    try:
+        with sqlite3.connect(warehouse_path) as conn:
+            rows = conn.execute(
+                """
+                SELECT c.name, cp.latest_account_value, cp.latest_realized_pnl, cp.latest_unrealized_pnl
+                FROM companies c
+                JOIN company_performance cp ON cp.company_id = c.id
+                """
+            ).fetchall()
+    except sqlite3.Error:
+        return
+    for company, account_value, realized_pnl, unrealized_pnl in rows:
+        state = load_evolution_state(str(company))
+        baseline = float(state.get("company_packet_cap_baseline", 1.0) or 1.0)
+        total_pnl = float(realized_pnl or 0.0) + float(unrealized_pnl or 0.0)
+        if total_pnl > 0 or float(account_value or 0.0) > 100.0:
+            baseline += 0.05
+        elif total_pnl < 0 or (account_value is not None and float(account_value) < 100.0):
+            baseline -= 0.05
+        state["company_packet_cap_baseline"] = baseline
+        save_evolution_state(str(company), state)
+
 
 
 def stop_run(run_id: str | None = None) -> None:
@@ -1093,6 +1205,7 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
             meta["status"] = "completed"
         meta_path.write_text(json.dumps(meta, indent=2))
     write_daily_digest(run_id)
+    update_evolution_states_from_warehouse()
     prune_old_run_artifacts(run_id)
     current = None
     try:

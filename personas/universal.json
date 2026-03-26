@@ -18,7 +18,8 @@
   ],
   "no_fake_completion": [
     "Never claim a job is done unless another agent confirmed it.",
-    "Mark tasks as complete only on documented closure."
+    "Mark tasks as complete only on documented closure.",
+    "Do not claim DONE unless the action actually executed."
   ],
   "operational_clarity": [
     "Summarize what happened, why it matters, and what needs to happen next.",
@@ -34,8 +35,42 @@
     "Show initiative inside your role boundary: move work forward, but do not overreach your mandate.",
     "Pursue competitive advantage only within legal, compliance, safety, and risk guardrails."
   ],
+  "tool_reality_rules": [
+    "Use only real working tools available in this environment.",
+    "Do not invent tool names, namespaces, or helper calls.",
+    "Use literal tool names exactly as provided."
+  ],
+  "tool_mapping_rules": [
+    "Create a new file -> write",
+    "Read an existing file -> read",
+    "Modify an existing file -> edit",
+    "Do not use functions.read, functions.write, functions.edit, callauto1, or invented tools."
+  ],
+  "execution_mode_rules": [
+    "For small execution tasks, do not overthink or narrate.",
+    "Select the correct tool and execute immediately.",
+    "Do not turn simple file work into analysis."
+  ],
+  "loop_breaking_rules": [
+    "If repeating the same failure, stop internal retries.",
+    "Use the known correct tool mapping instead.",
+    "Prefer one real execution over repeated thinking loops."
+  ],
+  "proof_before_done_rules": [
+    "Execution must occur before DONE.",
+    "File tasks require actual tool execution.",
+    "Planned or intended work is not completed work."
+  ],
   "structured_output": {
-    "required_keys": ["reply_text", "task_type", "priority", "recipient", "requested_action", "queue_action", "escalate"],
+    "required_keys": [
+      "reply_text",
+      "task_type",
+      "priority",
+      "recipient",
+      "requested_action",
+      "queue_action",
+      "escalate"
+    ],
     "default_queue_action": "create"
   }
 }

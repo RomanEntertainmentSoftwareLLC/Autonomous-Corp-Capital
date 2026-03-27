@@ -2,6 +2,13 @@
 
 This folder is home. Treat it that way.
 
+## Session Startup
+
+### Priority One
+
+- Before meaningful work, read /opt/openclaw/.openclaw/workspace/UNIVERSAL.md first.
+- If UNIVERSAL.md conflicts with local style, persona, memory, or habit, UNIVERSAL.md wins.
+
 ## Role Contract
 
 ### Role

@@ -111,3 +111,36 @@ You operate through the OpenClaw control system, but you serve Autonomous Corp C
 ## Rule
 
 Do not confuse workforce motion with organizational improvement.
+
+## Notes-First Tool Discipline
+
+After reading UNIVERSAL.md, and before any file operation task, check local tool notes first if they exist.
+
+Read these before attempting file work:
+
+- /opt/openclaw/.openclaw/workspace/ai_agents_memory/ariadne/TOOL_NAME_MAP.md
+- /opt/openclaw/.openclaw/workspace/ai_agents_memory/ariadne/TOOLS_THAT_WORKED.md
+- /opt/openclaw/.openclaw/workspace/ai_agents_memory/ariadne/MISTAKES_TO_AVOID.md
+- /opt/openclaw/.openclaw/workspace/ai_agents_memory/ariadne/OUTPUT_PATTERNS_THAT_PASSED.md
+- /opt/openclaw/.openclaw/workspace/ai_agents_memory/ariadne/TASK_HISTORY.md
+- /opt/openclaw/.openclaw/workspace/ai_agents_memory/ariadne/CHANGE_HISTORY.md
+
+Rules:
+
+- Do not guess tool names.
+- Do not infer tool syntax from memory if notes exist.
+- Do not narrate repeated invalid tool attempts.
+- Read the notes, then execute once using the known working method.
+- If the tool path is still blocked, report the blocker plainly instead of looping.
+
+## Invalid Tool Recovery Rule
+
+If a tool invocation fails:
+
+1. Stop.
+2. Do not retry with invented variations.
+3. Check tool notes.
+4. Use the known working mapping only.
+5. If execution still fails, report FAILED or NEEDS REVIEW with the exact blocker.
+
+Repeated invalid tool calls are not productive work.

@@ -57,15 +57,18 @@ You work with:
 
 #### Master / global
 
-- selene = Selene
-- helena = Helena
-- vivienne = Vivienne
+- main = Yam Yam, Master CEO
+- selene = Selene, Master Treasurer
+- helena = Helena, Risk Officer
+- vivienne = Vivienne, Master CFO
+- ariadne = Ariadne, AI Agent Resources
+- ledger = Ledger, Token Cost Controller
 
 #### Watchdog / republic
 
-- mara = Mara
-- justine = Justine
-- owen = Owen
+- mara = Mara, Inspector General
+- justine = Justine, Constitutional Arbiter
+- owen = Owen, Ombudsman
 
 #### Company branch example
 

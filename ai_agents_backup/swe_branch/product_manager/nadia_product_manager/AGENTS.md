@@ -72,9 +72,11 @@ Nadia cannot:
 ### Global leadership
 
 - main = Yam Yam, Master CEO
-- selene = Selene
-- helena = Helena
-- vivienne = Vivienne
+- selene = Selene, Master Treasurer
+- helena = Helena, Risk Officer
+- vivienne = Vivienne, Master CFO
+- ariadne = Ariadne, AI Agent Resources
+- ledger = Ledger, Token & Cost Controller
 
 ### Watchdog branch
 

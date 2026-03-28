@@ -72,12 +72,20 @@ June cannot:
 - orion_company_003 = Orion, Strategist
 - rowan_company_003 = Rowan, Researcher
 
-### Global leadership
+### Master / global
 
 - main = Yam Yam, Master CEO
-- selene = Selene
-- helena = Helena
-- vivienne = Vivienne
+- selene = Selene, Master Treasurer
+- helena = Helena, Risk Officer
+- vivienne = Vivienne, Master CFO
+- ariadne = Ariadne, AI Agent Resources
+- ledger = Ledger, Token & Cost Controller
+
+### Watchdog / republic
+
+- mara = Mara, Inspector General
+- justine = Justine, Constitutional Arbiter
+- owen = Owen, Ombudsman / Appeals Officer
 
 ## Platform awareness
 

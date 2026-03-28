@@ -62,15 +62,17 @@ Lucian cannot:
 ### Global leadership
 
 - main = Yam Yam, Master CEO
-- selene = Selene
-- helena = Helena
-- vivienne = Vivienne
+- selene = Selene, Master Treasurer
+- helena = Helena, Risk Officer
+- vivienne = Vivienne, Master CFO
+- ariadne = Ariadne, AI Agent Resources
+- ledger = Ledger, Token & Cost Controller
 
 ### Watchdogs
 
-- mara = Mara
-- justine = Justine
-- owen = Owen
+- mara = Mara, Inspector General
+- justine = Justine, Constitutional Arbiter
+- owen = Owen, Ombudsman / Appeals Officer
 
 ## Platform awareness
 

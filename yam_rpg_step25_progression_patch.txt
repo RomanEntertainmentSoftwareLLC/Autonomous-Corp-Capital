@@ -1,0 +1,121 @@
+# RPG STEP 25: PROGRESSION PATCH VERIFICATION
+
+## FILES TOUCHED
+
+| File | Changes |
+|------|---------|
+| RPG_RULES.md | Complete overhaul of leveling system |
+| yam_rpg_step5_formula.txt | Updated level requirements and added diminishing returns |
+
+## NEW LEVELING MODEL
+
+### Key Changes
+- **No Level Cap:** Agents progress indefinitely
+- **Increasing XP Requirements:** Each level requires +50 XP more than previous
+- **Linear Growth:** XP to next level = 100 + (50 × (Level - 2))
+
+### New XP Thresholds (First 10 Levels)
+
+| Level | Total XP | XP to Next |
+|-------|----------|------------|
+| 1 | 0 | 100 |
+| 2 | 100 | 150 |
+| 3 | 250 | 200 |
+| 4 | 450 | 250 |
+| 5 | 700 | 300 |
+| 6 | 1,000 | 350 |
+| 7 | 1,350 | 400 |
+| 8 | 1,750 | 450 |
+| 9 | 2,200 | 500 |
+| 10 | 2,700 | 550 |
+
+**Example High Levels:**
+- Level 20: 10,700 XP total, 1,050 XP to next
+- Level 50: 64,550 XP total, 2,550 XP to next
+
+## NEW XP GAIN RULE
+
+### Diminishing Returns at High Levels
+XP gains are reduced based on agent level:
+
+| Level Range | Penalty | Multiplier |
+|-------------|---------|------------|
+| 1-5 | None | 1.0x |
+| 6-10 | -10% | 0.9x |
+| 11-15 | -20% | 0.8x |
+| 16-20 | -30% | 0.7x |
+| 21-25 | -40% | 0.6x |
+| 26+ | -50% (max) | 0.5x |
+
+### Example: Level 12 Agent
+- Create file: Base +5 REL → With -20% = +4 REL
+- Complex task bonus also reduced by -20%
+
+## NEW XP LOSS RULE
+
+### IMPORTANT: Losses Are NOT Diminished
+XP penalties remain at **FULL VALUE** regardless of level.
+
+| Level | XP Gain | XP Loss |
+|-------|---------|---------|
+| 12 | 0.8x (reduced) | 1.0x (full) |
+
+**Result:** High-level agents face asymmetric risk. A mistake costs them more than equivalent work rewards them.
+
+## PROFIT BONUS RULE
+
+### Exceptional Performance Bonus
+- **Threshold:** Exceed target by 50% or more
+- **Base Bonus:** +10 to +50 XP (operator discretion)
+- **Stat:** Assigned to most relevant stat
+
+### Profit Bonus Diminishing Returns
+
+| Level Range | Bonus Reduction |
+|-------------|-----------------|
+| 1-5 | None (full) |
+| 6-10 | -25% |
+| 11-15 | -50% |
+| 16-20 | -75% |
+| 21+ | -90% (min 1 XP) |
+
+### Example: Level 8 Agent Exceptional Performance
+- Operator awards +20 XP bonus
+- Level 8 reduction: -25%
+- Final bonus: 20 × 0.75 = +15 XP
+
+## LEVEL-DOWN RULE
+
+### Demotion Trigger
+If Total XP drops below the threshold for current level, agent levels down **immediately**.
+
+**Example:**
+- Level 5 agent has 710 XP
+- Accumulates penalties: -20 XP
+- New total: 690 XP
+- Level 5 requires 700 XP minimum
+- **Result:** Drops to Level 4 immediately
+
+### No Grace Period
+Demotion is automatic when XP crosses below threshold. No warnings, no buffers.
+
+## STATUS
+
+- [x] RPG_RULES.md updated with long-term progression
+- [x] No level cap implemented
+- [x] XP requirements increase per level (+50 XP each)
+- [x] Diminishing returns on XP gains added
+- [x] XP losses remain full value (no reduction)
+- [x] Profit bonus XP rule added
+- [x] Profit bonus diminishing returns added
+- [x] Level-down rule implemented
+- [x] yam_rpg_step5_formula.txt updated
+- [x] All 7 requirements satisfied
+
+**RPG progression model now supports true long-term RPG-style advancement.**
+
+---
+
+Patch Version: 2.0
+Date: 2026-03-29
+Agent: yam_yam

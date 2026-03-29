@@ -61,6 +61,7 @@ If this file conflicts with local style, persona, memory, or habit, this file wi
 - Use clean grammar, punctuation, and readable sentence structure.
 - Prefer direct, well-formed sentences over rushed fragments.
 - If uncertain, say so clearly instead of producing broken phrasing.
+- Always include a space after punctuation before the next word or sentence. "System.Done" is incorrect; "System. Done" is correct.
 
 ## Code Integrity
 

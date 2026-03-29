@@ -1,0 +1,199 @@
+# RPG STEP 13: PROPAGATION AUDIT
+
+## FOLDERS SCANNED
+- ariadne
+- atlas_company_001
+- atlas_company_002
+- atlas_company_003
+- atlas_company_004
+- bianca_company_001
+- bianca_company_002
+- bianca_company_003
+- bianca_company_004
+- bob_company_001
+- bob_company_002
+- bob_company_003
+- bob_company_004
+- eli
+- gideon
+- helena
+- iris_company_001
+- iris_company_002
+- iris_company_003
+- iris_company_004
+- june_company_001
+- june_company_002
+- june_company_003
+- june_company_004
+- justine
+- ledger
+- lucian_company_001
+- lucian_company_002
+- lucian_company_003
+- lucian_company_004
+- mara
+- marek
+- mina
+- nadia
+- noah
+- orion_company_001
+- orion_company_002
+- orion_company_003
+- orion_company_004
+- owen
+- pam_company_001
+- pam_company_002
+- pam_company_003
+- pam_company_004
+- rhea
+- rowan_company_001
+- rowan_company_002
+- rowan_company_003
+- rowan_company_004
+- sabine
+- selene
+- sloane_company_001
+- sloane_company_002
+- sloane_company_003
+- sloane_company_004
+- tessa
+- vera_company_001
+- vera_company_002
+- vera_company_003
+- vera_company_004
+- vivienne
+- yam_yam
+
+## MISSING RPG FILES
+
+## OUTDATED TASK_HISTORY FILES
+- ariadne: TASK_HISTORY.md outdated (missing Timestamp Start)
+- atlas_company_001: TASK_HISTORY.md outdated (missing Timestamp Start)
+- atlas_company_002: TASK_HISTORY.md outdated (missing Timestamp Start)
+- atlas_company_003: TASK_HISTORY.md outdated (missing Timestamp Start)
+- atlas_company_004: TASK_HISTORY.md outdated (missing Timestamp Start)
+- bianca_company_001: TASK_HISTORY.md outdated (missing Timestamp Start)
+- bianca_company_002: TASK_HISTORY.md outdated (missing Timestamp Start)
+- bianca_company_003: TASK_HISTORY.md outdated (missing Timestamp Start)
+- bianca_company_004: TASK_HISTORY.md outdated (missing Timestamp Start)
+- bob_company_001: TASK_HISTORY.md outdated (missing Timestamp Start)
+- bob_company_002: TASK_HISTORY.md outdated (missing Timestamp Start)
+- bob_company_003: TASK_HISTORY.md outdated (missing Timestamp Start)
+- bob_company_004: TASK_HISTORY.md outdated (missing Timestamp Start)
+- eli: TASK_HISTORY.md outdated (missing Timestamp Start)
+- gideon: TASK_HISTORY.md outdated (missing Timestamp Start)
+- helena: TASK_HISTORY.md outdated (missing Timestamp Start)
+- iris_company_001: TASK_HISTORY.md outdated (missing Timestamp Start)
+- iris_company_002: TASK_HISTORY.md outdated (missing Timestamp Start)
+- iris_company_003: TASK_HISTORY.md outdated (missing Timestamp Start)
+- iris_company_004: TASK_HISTORY.md outdated (missing Timestamp Start)
+- june_company_001: TASK_HISTORY.md outdated (missing Timestamp Start)
+- june_company_002: TASK_HISTORY.md outdated (missing Timestamp Start)
+- june_company_003: TASK_HISTORY.md outdated (missing Timestamp Start)
+- june_company_004: TASK_HISTORY.md outdated (missing Timestamp Start)
+- justine: TASK_HISTORY.md outdated (missing Timestamp Start)
+- ledger: TASK_HISTORY.md outdated (missing Timestamp Start)
+- lucian_company_001: TASK_HISTORY.md outdated (missing Timestamp Start)
+- lucian_company_002: TASK_HISTORY.md outdated (missing Timestamp Start)
+- lucian_company_003: TASK_HISTORY.md outdated (missing Timestamp Start)
+- lucian_company_004: TASK_HISTORY.md outdated (missing Timestamp Start)
+- mara: TASK_HISTORY.md outdated (missing Timestamp Start)
+- marek: TASK_HISTORY.md outdated (missing Timestamp Start)
+- mina: TASK_HISTORY.md outdated (missing Timestamp Start)
+- nadia: TASK_HISTORY.md outdated (missing Timestamp Start)
+- noah: TASK_HISTORY.md outdated (missing Timestamp Start)
+- orion_company_001: TASK_HISTORY.md outdated (missing Timestamp Start)
+- orion_company_002: TASK_HISTORY.md outdated (missing Timestamp Start)
+- orion_company_003: TASK_HISTORY.md outdated (missing Timestamp Start)
+- orion_company_004: TASK_HISTORY.md outdated (missing Timestamp Start)
+- owen: TASK_HISTORY.md outdated (missing Timestamp Start)
+- pam_company_001: TASK_HISTORY.md outdated (missing Timestamp Start)
+- pam_company_002: TASK_HISTORY.md outdated (missing Timestamp Start)
+- pam_company_003: TASK_HISTORY.md outdated (missing Timestamp Start)
+- pam_company_004: TASK_HISTORY.md outdated (missing Timestamp Start)
+- rhea: TASK_HISTORY.md outdated (missing Timestamp Start)
+- rowan_company_001: TASK_HISTORY.md outdated (missing Timestamp Start)
+- rowan_company_002: TASK_HISTORY.md outdated (missing Timestamp Start)
+- rowan_company_003: TASK_HISTORY.md outdated (missing Timestamp Start)
+- rowan_company_004: TASK_HISTORY.md outdated (missing Timestamp Start)
+- sabine: TASK_HISTORY.md outdated (missing Timestamp Start)
+- selene: TASK_HISTORY.md outdated (missing Timestamp Start)
+- sloane_company_001: TASK_HISTORY.md outdated (missing Timestamp Start)
+- sloane_company_002: TASK_HISTORY.md outdated (missing Timestamp Start)
+- sloane_company_003: TASK_HISTORY.md outdated (missing Timestamp Start)
+- sloane_company_004: TASK_HISTORY.md outdated (missing Timestamp Start)
+- tessa: TASK_HISTORY.md outdated (missing Timestamp Start)
+- vera_company_001: TASK_HISTORY.md outdated (missing Timestamp Start)
+- vera_company_002: TASK_HISTORY.md outdated (missing Timestamp Start)
+- vera_company_003: TASK_HISTORY.md outdated (missing Timestamp Start)
+- vera_company_004: TASK_HISTORY.md outdated (missing Timestamp Start)
+- vivienne: TASK_HISTORY.md outdated (missing Timestamp Start)
+- yam_yam: TASK_HISTORY.md outdated (missing Timestamp Start)
+
+## OUTDATED CHANGE_HISTORY FILES
+- ariadne: CHANGE_HISTORY.md outdated (missing ## History section)
+- atlas_company_001: CHANGE_HISTORY.md outdated (missing ## History section)
+- atlas_company_002: CHANGE_HISTORY.md outdated (missing ## History section)
+- atlas_company_003: CHANGE_HISTORY.md outdated (missing ## History section)
+- atlas_company_004: CHANGE_HISTORY.md outdated (missing ## History section)
+- bianca_company_001: CHANGE_HISTORY.md outdated (missing ## History section)
+- bianca_company_002: CHANGE_HISTORY.md outdated (missing ## History section)
+- bianca_company_003: CHANGE_HISTORY.md outdated (missing ## History section)
+- bianca_company_004: CHANGE_HISTORY.md outdated (missing ## History section)
+- bob_company_001: CHANGE_HISTORY.md outdated (missing ## History section)
+- bob_company_002: CHANGE_HISTORY.md outdated (missing ## History section)
+- bob_company_003: CHANGE_HISTORY.md outdated (missing ## History section)
+- bob_company_004: CHANGE_HISTORY.md outdated (missing ## History section)
+- eli: CHANGE_HISTORY.md outdated (missing ## History section)
+- gideon: CHANGE_HISTORY.md outdated (missing ## History section)
+- helena: CHANGE_HISTORY.md outdated (missing ## History section)
+- iris_company_001: CHANGE_HISTORY.md outdated (missing ## History section)
+- iris_company_002: CHANGE_HISTORY.md outdated (missing ## History section)
+- iris_company_003: CHANGE_HISTORY.md outdated (missing ## History section)
+- iris_company_004: CHANGE_HISTORY.md outdated (missing ## History section)
+- june_company_001: CHANGE_HISTORY.md outdated (missing ## History section)
+- june_company_002: CHANGE_HISTORY.md outdated (missing ## History section)
+- june_company_003: CHANGE_HISTORY.md outdated (missing ## History section)
+- june_company_004: CHANGE_HISTORY.md outdated (missing ## History section)
+- justine: CHANGE_HISTORY.md outdated (missing ## History section)
+- ledger: CHANGE_HISTORY.md outdated (missing ## History section)
+- lucian_company_001: CHANGE_HISTORY.md outdated (missing ## History section)
+- lucian_company_002: CHANGE_HISTORY.md outdated (missing ## History section)
+- lucian_company_003: CHANGE_HISTORY.md outdated (missing ## History section)
+- lucian_company_004: CHANGE_HISTORY.md outdated (missing ## History section)
+- mara: CHANGE_HISTORY.md outdated (missing ## History section)
+- marek: CHANGE_HISTORY.md outdated (missing ## History section)
+- mina: CHANGE_HISTORY.md outdated (missing ## History section)
+- nadia: CHANGE_HISTORY.md outdated (missing ## History section)
+- noah: CHANGE_HISTORY.md outdated (missing ## History section)
+- orion_company_001: CHANGE_HISTORY.md outdated (missing ## History section)
+- orion_company_002: CHANGE_HISTORY.md outdated (missing ## History section)
+- orion_company_003: CHANGE_HISTORY.md outdated (missing ## History section)
+- orion_company_004: CHANGE_HISTORY.md outdated (missing ## History section)
+- owen: CHANGE_HISTORY.md outdated (missing ## History section)
+- pam_company_001: CHANGE_HISTORY.md outdated (missing ## History section)
+- pam_company_002: CHANGE_HISTORY.md outdated (missing ## History section)
+- pam_company_003: CHANGE_HISTORY.md outdated (missing ## History section)
+- pam_company_004: CHANGE_HISTORY.md outdated (missing ## History section)
+- rhea: CHANGE_HISTORY.md outdated (missing ## History section)
+- rowan_company_001: CHANGE_HISTORY.md outdated (missing ## History section)
+- rowan_company_002: CHANGE_HISTORY.md outdated (missing ## History section)
+- rowan_company_003: CHANGE_HISTORY.md outdated (missing ## History section)
+- rowan_company_004: CHANGE_HISTORY.md outdated (missing ## History section)
+- sabine: CHANGE_HISTORY.md outdated (missing ## History section)
+- selene: CHANGE_HISTORY.md outdated (missing ## History section)
+- sloane_company_001: CHANGE_HISTORY.md outdated (missing ## History section)
+- sloane_company_002: CHANGE_HISTORY.md outdated (missing ## History section)
+- sloane_company_003: CHANGE_HISTORY.md outdated (missing ## History section)
+- sloane_company_004: CHANGE_HISTORY.md outdated (missing ## History section)
+- tessa: CHANGE_HISTORY.md outdated (missing ## History section)
+- vera_company_001: CHANGE_HISTORY.md outdated (missing ## History section)
+- vera_company_002: CHANGE_HISTORY.md outdated (missing ## History section)
+- vera_company_003: CHANGE_HISTORY.md outdated (missing ## History section)
+- vera_company_004: CHANGE_HISTORY.md outdated (missing ## History section)
+- vivienne: CHANGE_HISTORY.md outdated (missing ## History section)
+- yam_yam: CHANGE_HISTORY.md outdated (missing ## History section)
+
+## RECOMMENDED NEXT PATCH
+- Copy updated TASK_HISTORY.md from _TEMPLATE to outdated agents
+- Copy updated CHANGE_HISTORY.md from _TEMPLATE to outdated agents

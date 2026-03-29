@@ -1,0 +1,21 @@
+# RPG STEP 17: RUNS FOLDER VERIFICATION
+
+## FOLDER CREATED
+
+| Folder | Path |
+|--------|------|
+| rpg_runs | /opt/openclaw/.openclaw/workspace/rpg_runs |
+
+## STATUS
+
+- [x] rpg_runs folder created
+- [x] README.md placeholder created (not a fake run file)
+- [x] Folder ready for future runtime score sheets
+- [x] No fake run files created
+
+**Folder ready for Phase 1 manual tracking.**
+
+---
+
+Verification Generated: 2026-03-29
+Agent: yam_yam

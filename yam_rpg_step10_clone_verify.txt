@@ -1,0 +1,38 @@
+# RPG STEP 10: CLONE VERIFICATION
+
+## OPERATOR ACTION
+
+Operator manually executed shell commands to copy RPG template files from `ai_agents_memory/_TEMPLATE/` to all live agent memory folders.
+
+Command pattern used:
+```bash
+for agent in $(ls ai_agents_memory/ | grep -v '^_'); do
+  cp -n ai_agents_memory/_TEMPLATE/RPG_*.md ai_agents_memory/$agent/
+done
+```
+
+## RESULT
+
+| File | Copies Created |
+|------|----------------|
+| RPG_STATE.md | 62 |
+| RPG_HISTORY.md | 62 |
+| RPG_ACHIEVEMENTS.md | 62 |
+
+All 62 agents now have the three core RPG files in their memory folders.
+
+## STATUS
+
+- [x] RPG_STATE.md propagated to all agents
+- [x] RPG_HISTORY.md propagated to all agents
+- [x] RPG_ACHIEVEMENTS.md propagated to all agents
+- [x] No existing files overwritten
+- [x] _TEMPLATE folder skipped as source-only
+- [x] All agents have v1 RPG foundation
+
+Ready for Phase 1: Manual tracking.
+
+---
+
+Report Generated: 2026-03-29
+Agent: yam_yam

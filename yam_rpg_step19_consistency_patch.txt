@@ -1,0 +1,89 @@
+# RPG STEP 19: CONSISTENCY PATCH VERIFICATION
+
+## FILES TOUCHED
+
+| File | Changes |
+|------|---------|
+| RPG_RULES.md | Added Rounding Rule section |
+| yam_rpg_step18_manual_apply_plan.txt | Fixed XP math in example (10→11) |
+
+## ROUNDING RULE CHOSEN
+
+**Rule:** Round to nearest integer (0.5 rounds up)
+
+**Added to RPG_RULES.md:**
+```markdown
+### Rounding Rule
+
+After all calculations, **round to nearest integer** (0.5 rounds up).
+
+Examples:
+- 10.5 → 11
+- 7.2 → 7
+- 8.8 → 9
+```
+
+**Rationale:**
+- Matches existing examples in yam_rpg_step5_formula.txt ("7.5 → 8", "62.92 → 63")
+- Simple to understand and apply
+- Consistent with standard rounding conventions
+
+## SPEED DORMANCY FIX
+
+**Status:** Already consistent across all files
+
+**Verified:**
+- [x] RPG_RULES.md - Level table shows only ACC, REL, JUD (no SPD)
+- [x] yam_rpg_step5_formula.txt - Has note "SPD values reserved for future activation"
+- [x] yam_rpg_step18_manual_apply_plan.txt - No SPD in level requirements
+- [x] yam_rpg_step7_operator_summary.txt - No SPD in level requirements
+
+**No changes needed** - Speed dormancy was already correctly implemented.
+
+## PROOF SNIPPETS
+
+### RPG_RULES.md - Rounding Rule Added
+```markdown
+### Rounding Rule
+
+After all calculations, **round to nearest integer** (0.5 rounds up).
+
+Examples:
+- 10.5 → 11
+- 7.2 → 7
+- 8.8 → 9
+```
+
+### yam_rpg_step18_manual_apply_plan.txt - Fixed Example
+Before:
+```
+- Total: +10 XP (+10 REL)
+```
+
+After:
+```
+- Total: 7 × 1.5 = 10.5 → 11 XP (+11 REL)
+```
+
+All references to +10 in the example workflow updated to +11:
+- XP Delta: +10 → +11
+- Reliability Delta: +10 → +11  
+- Session Net: +10 → +11
+- Total XP: 10 → 11
+
+## STATUS
+
+- [x] Rounding rule explicitly defined in RPG_RULES.md
+- [x] Example math in step18_manual_apply_plan.txt corrected
+- [x] Speed dormancy consistent across all RPG documents
+- [x] All level tables show only 3 active stats (ACC, REL, JUD)
+- [x] No SPD minimums required for v1 level advancement
+- [x] All documents internally consistent
+
+**RPG v1 documentation is now consistent and ready for pilot run.**
+
+---
+
+Patch Version: 1.0
+Date: 2026-03-29
+Agent: yam_yam

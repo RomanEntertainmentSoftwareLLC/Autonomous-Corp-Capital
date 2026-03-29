@@ -1,0 +1,55 @@
+# RPG STEP 16: RUN TEMPLATE VERIFICATION
+
+## FILE CREATED
+
+| File | Path | Size |
+|------|------|------|
+| RPG_RUN_SCORE_TEMPLATE.md | /opt/openclaw/.openclaw/workspace/RPG_RUN_SCORE_TEMPLATE.md | 337 bytes |
+
+## PROOF SNIPPET
+
+```markdown
+# RPG Run Score Template
+
+- Run ID:
+- Date:
+- Reviewed By:
+- Runtime Only: YES
+
+## Agent Score Entry Template
+
+- Agent:
+- Role:
+- Run Participation: YES/NO
+- Verified Outcome:
+- Accuracy Delta:
+- Reliability Delta:
+- Judgment Delta:
+- Speed Delta:
+- XP Delta:
+- Level Change:
+- Notes:
+- Approved: YES/NO
+
+## Summary
+- No run scored yet.
+```
+
+## STATUS
+
+- [x] RPG_RUN_SCORE_TEMPLATE.md created
+- [x] Run metadata fields present (Run ID, Date, Reviewed By, Runtime Only)
+- [x] Agent score entry template complete
+- [x] All 4 stat deltas included (ACC, REL, JUD, SPD)
+- [x] XP Delta field present
+- [x] Level Change tracking included
+- [x] Approval field (YES/NO) for operator verification
+- [x] Runtime Only flag set to YES by default
+- [x] File ready for manual per-run scoring
+
+**Template ready for Phase 1 manual tracking.**
+
+---
+
+Verification Generated: 2026-03-29
+Agent: yam_yam

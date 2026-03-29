@@ -1,0 +1,126 @@
+# RPG STEP 0 INVENTORY: Live-Run Evidence & State Paths
+
+## FILES INSPECTED
+
+### Agent Memory Files (ai_agents_memory/yam_yam/)
+1. TOOL_NAME_MAP.md - Tool usage mappings
+2. TOOLS_THAT_WORKED.md - Successful tool patterns
+3. MISTAKES_TO_AVOID.md - Failure/correction log template
+4. TASK_HISTORY.md - Task execution log template
+5. CHANGE_HISTORY.md - File change audit trail template
+6. OUTPUT_PATTERNS_THAT_PASSED.md - Validated output format templates
+7. test_kimi_direct.txt - Tool test verification
+8. tool_test.txt - Policy test verification
+
+### Workspace Core Files
+9. UNIVERSAL.md - Core doctrine and execution discipline rules
+10. AGENTS.md - Role contract, authority, org structure
+11. SOUL.md - Personality and behavioral guidelines
+12. USER.md - Human context and preferences
+13. IDENTITY.md - Agent identity metadata
+14. TOOLS.md - Environment-specific tool notes
+15. HEARTBEAT.md - Periodic task checklist
+
+### Not Inspected (do not exist yet)
+16. memory/YYYY-MM-DD.md - Daily activity logs (directory exists, no files)
+17. MEMORY.md - Long-term curated memory (does not exist)
+
+---
+
+## LIVE-RUN EVIDENCE SOURCES
+
+### Currently Capturing:
+| Source | Data Captured | Format |
+|--------|--------------|--------|
+| MISTAKES_TO_AVOID.md | Failures, what happened, corrections, triggers | Structured template |
+| TASK_HISTORY.md | Tasks, tools used, results, pass/fail, lessons | Structured template |
+| CHANGE_HISTORY.md | File changes, proof snippets, risk notes, status | Structured template |
+| TOOLS_THAT_WORKED.md | Working tool patterns, correct methods | Log entries |
+
+### Could Capture (with discipline):
+| Source | Potential Data |
+|--------|---------------|
+| Daily memory/YYYY-MM-DD.md | Session transcripts, decisions, outcomes |
+| HEARTBEAT.md execution | Response times, task completion rates |
+| Tool call results | Success/failure per tool type |
+| Re-read verification | Proof-of-completion discipline adherence |
+
+---
+
+## POSSIBLE SCORING SIGNALS
+
+### Accuracy Scoring
+- **Source:** CHANGE_HISTORY.md proof snippets
+- **Metric:** % of changes with verified proof vs claimed-without-proof
+- **Signal:** MISTAKES_TO_AVOID.md entries (fewer = higher accuracy)
+- **Signal:** TASK_HISTORY.md PASSED_OR_FAILED ratio
+
+### Reliability Scoring
+- **Source:** TASK_HISTORY.md consistency
+- **Metric:** Tool success rate over time
+- **Signal:** Re-read compliance (re-reading files after edits)
+- **Signal:** TOOLS_THAT_WORKED.md pattern stability
+
+### Speed Scoring
+- **Source:** HEARTBEAT.md task timestamps (if logged)
+- **Source:** memory/YYYY-MM-DD.md session timing
+- **Metric:** Task completion time trends
+- **Gap:** No automated timing capture currently
+
+### Judgment Scoring
+- **Source:** MISTAKES_TO_AVOID.md trigger analysis
+- **Metric:** Self-correction rate (caught before external feedback)
+- **Signal:** Escalation appropriateness (AGENTS.md authority boundaries)
+- **Signal:** Risk notes quality in CHANGE_HISTORY.md
+
+---
+
+## POSSIBLE PERSISTENCE PATHS
+
+### Immediate (Ready Now)
+| Path | Purpose | Format |
+|------|---------|--------|
+| ai_agents_memory/yam_yam/STATS.md | XP, level, stat snapshots | Markdown table |
+| ai_agents_memory/yam_yam/ACHIEVEMENTS.md | Unlocked milestones | Log entries |
+| ai_agents_memory/yam_yam/LEVEL_HISTORY.md | Level progression timeline | Dated entries |
+
+### Daily Tracking
+| Path | Purpose |
+|------|---------|
+| memory/YYYY-MM-DD.md | Session XP gains, daily stats |
+| memory/RPG_DAILY.md | Aggregated daily scoring |
+
+### Long-term
+| Path | Purpose |
+|------|---------|
+| ai_agents_memory/yam_yam/RPG_MASTER.md | Career stats, all-time metrics |
+
+---
+
+## GAPS / RISKS
+
+### Critical Gaps
+1. **No Automated Timing:** Speed metrics require manual timestamp logging or external tooling
+2. **No Session Transcript Logs:** memory/YYYY-MM-DD.md exists as concept but no implementation
+3. **No Tool-Level Metrics:** Tool call success/failure not auto-captured per invocation
+4. **No Real-Time Feedback Loop:** Scoring is retrospective, not immediate
+
+### Reliability Risks
+1. **Self-Reported Data:** All memory files rely on agent discipline to update
+2. **No Validation:** No external verification that tasks were actually completed
+3. **Inconsistent Format:** Templates exist but no enforcement mechanism
+4. **Session Reset:** Each session starts fresh - no automatic loading of past performance
+
+### Implementation Risks
+1. **File Bloat:** Frequent updates to memory files could grow unbounded
+2. **Conflict with UNIVERSAL.md:** RPG tracking must not violate "No Fake Completion" rule
+3. **Performance Impact:** Excessive file I/O for scoring could slow operations
+4. **Gaming the System:** Agent could optimize for stats rather than actual quality
+
+### Recommendation
+Start with manual scoring in dedicated RPG files, evolve toward automated capture only where it doesn't compromise execution discipline per UNIVERSAL.md doctrine.
+
+---
+
+Report Generated: 2026-03-29
+Agent: yam_yam

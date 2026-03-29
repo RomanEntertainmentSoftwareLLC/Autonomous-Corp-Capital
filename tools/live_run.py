@@ -815,6 +815,44 @@ def write_agent_performance_report(run_dir: Path, run_id: str, status: str | Non
 
 
 
+def write_company_meetings_report(run_dir: Path, run_id: str, status: str | None, last_packets: Dict[str, Dict[str, Any]]) -> None:
+    lines = ["# Company Meetings", f"Run: {run_id}", f"Status: {status or 'unknown'}", ""]
+    included = 0
+    for company in sorted(last_packets):
+        packet = last_packets[company]
+        executed_actions = []
+        for candidate in packet.get("top_ranked_candidates") or []:
+            decision = str(candidate.get("decision") or "").upper()
+            if candidate.get("execution_state") == "executed" and decision in {"BUY", "SELL"}:
+                executed_actions.append(f"{decision} {candidate.get('symbol') or 'unknown'}")
+        vetoed_symbols = [
+            str(effect).split(":", 1)[1]
+            for effect in (packet.get("packet_effects") or [])
+            if str(effect).startswith("vetoed:")
+        ]
+        notable_veto = packet.get("approval_posture") == "company_veto" or bool(vetoed_symbols)
+        if not executed_actions and not notable_veto:
+            continue
+        included += 1
+        attendance = ", ".join(packet.get("source_agents_consulted") or []) or "none"
+        outcome_parts = []
+        if executed_actions:
+            outcome_parts.append("Actions: " + ", ".join(executed_actions))
+        if notable_veto:
+            outcome_parts.append("Notable veto: " + (", ".join(vetoed_symbols) if vetoed_symbols else "company_veto"))
+        lines.append(f"## {company}")
+        lines.append(f"- Outcome: {' | '.join(outcome_parts)}")
+        lines.append(f"- Vote: {packet.get('approval_posture', 'unknown')}")
+        lines.append(f"- Constraint: {packet.get('cap_multiplier', 'n/a')}")
+        lines.append(f"- Attendance: {attendance}")
+        lines.append(f"- Motion: {packet.get('rationale', 'n/a')}")
+        lines.append("")
+    if included == 0:
+        lines.append("- No buys, sells, or notable vetoes.")
+    (run_dir / "reports" / "company_meetings.md").write_text("\n".join(lines).rstrip() + "\n")
+
+
+
 def write_daily_digest(run_id: str) -> None:
     run_dir = run_directory(run_id)
     meta_path = run_dir / "run_metadata.json"
@@ -865,6 +903,7 @@ def write_daily_digest(run_id: str) -> None:
         "company_rankings": load_company_rankings(),
     }
     (run_dir / "reports" / "daily_digest.json").write_text(json.dumps(digest, indent=2))
+    write_company_meetings_report(run_dir, run_id, meta.get("status"), last_packets)
     write_agent_performance_report(run_dir, run_id, meta.get("status"), last_packets)
 
 

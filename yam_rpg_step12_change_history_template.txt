@@ -1,0 +1,43 @@
+# RPG STEP 12: CHANGE_HISTORY TEMPLATE UPDATE
+
+## FILE TOUCHED
+
+| File | Path |
+|------|------|
+| CHANGE_HISTORY.md | ai_agents_memory/_TEMPLATE/CHANGE_HISTORY.md |
+
+## PROOF SNIPPET
+
+```
+# CHANGE_HISTORY
+
+## Entry Template
+- Timestamp:
+- Agent:
+- Role:
+- Target File:
+- Intended Change:
+- Proof Snippet:
+- Risk Notes:
+- Status:
+
+## History
+- No change history yet.
+```
+
+## STATUS
+
+- [x] CHANGE_HISTORY.md updated with RPG-aware template
+- [x] Template fields: Timestamp, Agent, Role, Target File, Intended Change, Proof Snippet, Risk Notes, Status
+- [x] Risk Notes field supports Judgment stat scoring
+- [x] Proof Snippet field supports Accuracy stat verification
+- [x] Structure supports future runtime scoring
+- [x] File readable and operator-friendly
+- [x] Ready for propagation to agent folders
+
+Template update complete.
+
+---
+
+Report Generated: 2026-03-29
+Agent: yam_yam

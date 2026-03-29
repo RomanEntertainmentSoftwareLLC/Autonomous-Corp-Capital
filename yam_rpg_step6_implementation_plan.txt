@@ -1,0 +1,425 @@
+# RPG v1 IMPLEMENTATION PLAN
+
+## SMALLEST SAFE PATCH ORDER
+
+### Philosophy
+- One change at a time
+- Verify before proceeding
+- No dependencies on unbuilt systems
+- Leverage existing memory infrastructure
+- Manual before automated
+
+### Patch Sequence Summary
+1. Data files (no code changes)
+2. Logging templates (no runtime changes)
+3. Manual XP tracking (human-verified)
+4. Semi-automated tracking (agent self-reports)
+5. Automated scoring (future - post-Axiom)
+
+---
+
+## STEP-BY-STEP IMPLEMENTATION SEQUENCE
+
+### PHASE 0: Foundation (No Runtime Changes)
+
+#### Step 0.1: Create RPG State Files
+**Action:** Create empty RPG state files for all agents
+
+**Files to create:**
+- `ai_agents_memory/{agent}/RPG_STATE.md` - Current stats
+- `ai_agents_memory/{agent}/RPG_HISTORY.md` - Session logs
+- `ai_agents_memory/{agent}/RPG_ACHIEVEMENTS.md` - Milestones
+
+**Template for RPG_STATE.md:**
+```markdown
+# RPG State: {agent_name}
+
+| Field | Value |
+|-------|-------|
+| Level | 1 |
+| Title | Initiate |
+| Total XP | 0 |
+| Accuracy | 0 |
+| Reliability | 0 |
+| Speed | 0 |
+| Judgment | 0 |
+| Sessions | 0 |
+
+## XP Breakdown
+
+| Source | XP |
+|--------|-----|
+| (none yet) | 0 |
+```
+
+**Verification:**
+- [ ] All 62 agents have RPG_STATE.md
+- [ ] File readable by operator
+- [ ] Format consistent across all agents
+
+**Risk:** None - no runtime code affected
+
+---
+
+#### Step 0.2: Update Memory File Templates
+**Action:** Add RPG-aware fields to existing memory templates
+
+**Files to modify:**
+- `ai_agents_memory/{agent}/TASK_HISTORY.md` - Add timestamp fields
+- `ai_agents_memory/{agent}/CHANGE_HISTORY.md` - Add risk notes field
+
+**Additions to TASK_HISTORY.md:**
+```markdown
+## Extended Format (RPG-aware)
+
+| Field | Value |
+|-------|-------|
+| Timestamp Start | ISO8601 |
+| Timestamp End | ISO8601 |
+| Task Complexity | simple|medium|complex |
+| Attempts | int |
+| First Try Success | bool |
+```
+
+**Verification:**
+- [ ] New fields present in template
+- [ ] Backward compatible (old entries still valid)
+- [ ] All agents updated
+
+**Risk:** Low - template changes only
+
+---
+
+### PHASE 1: Manual Tracking (Human-Driven)
+
+#### Step 1.1: Session-End Reporting
+**Action:** Agent reports XP at end of each session
+
+**Process:**
+1. Agent reviews session activity
+2. Agent calculates XP per formula
+3. Agent appends to RPG_HISTORY.md
+4. Operator reviews and approves
+
+**Example RPG_HISTORY.md entry:**
+```markdown
+## Session 2026-03-29-001
+
+| Time | Event | XP | Stat | Proof |
+|------|-------|-----|------|-------|
+| 14:05 | Created inventory file | +10 | ACC | yam_rpg_step0_inventory.txt |
+
+**Session Total: +10 XP**
+**Operator Verified: [pending]**
+```
+
+**Verification:**
+- [ ] Agent can correctly calculate XP
+- [ ] Proof references are valid
+- [ ] Operator can verify claims
+
+**Risk:** Low - human in the loop
+
+---
+
+#### Step 1.2: Weekly Level Updates
+**Action:** Weekly manual level calculation
+
+**Process:**
+1. Sum all session XP from RPG_HISTORY.md
+2. Calculate stat levels
+3. Update RPG_STATE.md
+4. Log level-ups
+
+**Verification:**
+- [ ] Math is correct
+- [ ] Level thresholds respected
+- [ ] Changes logged
+
+**Risk:** Low - weekly batch process
+
+---
+
+### PHASE 2: Semi-Automated (Agent Self-Reporting)
+
+#### Step 2.1: Automatic Event Logging
+**Action:** Agent logs events in real-time to RPG_HISTORY.md
+
+**Changes:**
+- After each tool call, agent appends event
+- After each file operation, agent appends event
+- Self-calculates running total
+
+**No changes to:**
+- Tool behavior
+- File operations
+- Runtime architecture
+
+**Verification:**
+- [ ] Events logged immediately
+- [ ] Format consistent
+- [ ] No performance impact
+
+**Risk:** Medium - more file I/O
+
+---
+
+#### Step 2.2: Session Summary Generation
+**Action:** Agent auto-generates session summary
+
+**Process:**
+1. At session end, read RPG_HISTORY.md
+2. Calculate totals
+3. Present summary to operator
+4. Operator approves with one command
+
+**Example summary:**
+```
+SESSION SUMMARY
+---------------
+XP Earned: +42
+XP Lost: -3
+Net: +39
+
+Breakdown:
+  ACC: +15
+  REL: +20
+  SPD: +2
+  JUD: +5
+
+Level: 1 → 1 (59/100 to next)
+
+Approve? [y/n]
+```
+
+**Verification:**
+- [ ] Summary is accurate
+- [ ] Operator can approve/deny
+- [ ] Approved updates propagate to RPG_STATE.md
+
+**Risk:** Medium - requires operator attention
+
+---
+
+### PHASE 3: Pre-Axiom Preparation
+
+#### Step 3.1: XP Validation Layer
+**Action:** Add proof verification to session summary
+
+**Process:**
+1. Agent claims XP with proof reference
+2. System verifies proof exists
+3. Unverified claims flagged for review
+
+**Example:**
+```
+VERIFICATION REPORT
+-------------------
+✓ Created file yam_rpg_step0_inventory.txt - VERIFIED
+✓ Tool call succeeded - VERIFIED
+✗ Re-read verification - NO PROOF FOUND [FLAGGED]
+```
+
+**Verification:**
+- [ ] Proof checking works
+- [ ] False claims caught
+- [ ] Operator review queue manageable
+
+**Risk:** Medium - requires proof storage discipline
+
+---
+
+#### Step 3.2: Audit Trail Completeness
+**Action:** Ensure all XP events have audit trail
+
+**Checklist per event:**
+- [ ] Timestamp
+- [ ] Event type
+- [ ] XP delta
+- [ ] Stat affected
+- [ ] Proof reference
+- [ ] Session ID
+
+**Verification:**
+- [ ] 100% of events have all fields
+- [ ] Missing fields flagged
+- [ ] Backfill process for old events
+
+**Risk:** Low - data quality check
+
+---
+
+## WHICH FILES WOULD CHANGE FIRST
+
+### Immediate Changes (Phase 0)
+| Priority | File | Change | Risk |
+|----------|------|--------|------|
+| 1 | `RPG_STATE.md` (new) | Create per-agent | None |
+| 2 | `RPG_HISTORY.md` (new) | Create per-agent | None |
+| 3 | `TASK_HISTORY.md` | Add timestamp template | Low |
+| 4 | `CHANGE_HISTORY.md` | Add risk notes template | Low |
+
+### Near-Term Changes (Phase 1-2)
+| Priority | File | Change | Risk |
+|----------|------|--------|------|
+| 5 | `RPG_HISTORY.md` | Append session events | Low |
+| 6 | `RPG_STATE.md` | Update totals | Low |
+| 7 | `AGENTS.md` | Add RPG reference | Low |
+
+### Post-Axiom Changes (Phase 3+)
+| Priority | File | Change | Risk |
+|----------|------|--------|------|
+| 8 | System integration | Automated proof verification | Medium |
+| 9 | Real-time tracking | Live stat display | Medium |
+
+---
+
+## WHAT SHOULD BE VERIFIED AFTER EACH STEP
+
+### After Step 0.1 (Create State Files)
+```bash
+# Verification command
+ls ai_agents_memory/*/RPG_STATE.md | wc -l
+# Should equal number of agents (62)
+
+# Spot check
+cat ai_agents_memory/yam_yam/RPG_STATE.md
+# Should show Level 1, all zeros
+```
+
+### After Step 0.2 (Update Templates)
+```bash
+# Check template updated
+grep "Timestamp Start" ai_agents_memory/yam_yam/TASK_HISTORY.md
+
+# Verify old entries still parse
+head -20 ai_agents_memory/yam_yam/TASK_HISTORY.md
+```
+
+### After Step 1.1 (Manual Reporting)
+```bash
+# Check first entry
+tail -30 ai_agents_memory/yam_yam/RPG_HISTORY.md
+# Should show verified session
+
+# Cross-check math
+# Sum of session XP should match RPG_STATE.md total
+```
+
+### After Step 2.1 (Auto Logging)
+```bash
+# Check events being logged
+tail -10 ai_agents_memory/yam_yam/RPG_HISTORY.md
+# Should see real-time events
+
+# Check no duplicate entries
+# Each event should appear once
+```
+
+### After Step 2.2 (Session Summary)
+```bash
+# Check summary accuracy
+# Manual audit: pick random session, verify math
+
+# Check operator approval flow
+# Approved sessions should update RPG_STATE.md
+```
+
+### After Step 3.1 (Validation Layer)
+```bash
+# Run verification on recent sessions
+# All claims should have proof or be flagged
+
+# Check flag rate
+# Should be <10% of events
+```
+
+---
+
+## WHAT MUST EXIST BEFORE AXIOM IS ADDED
+
+### Prerequisites Checklist
+
+#### Data Layer
+- [ ] All agents have RPG_STATE.md
+- [ ] All agents have RPG_HISTORY.md
+- [ ] All agents have RPG_ACHIEVEMENTS.md
+- [ ] Templates updated with RPG fields
+- [ ] At least 10 sessions logged per agent
+
+#### Process Layer
+- [ ] Agents can self-report XP
+- [ ] Operator approval workflow established
+- [ ] Proof verification working
+- [ ] Audit trail complete
+
+#### Validation Layer
+- [ ] XP formulas tested and correct
+- [ ] Level thresholds validated
+- [ ] Anti-cheese rules enforced
+- [ ] Edge cases documented
+
+#### Documentation Layer
+- [ ] RPG spec finalized (yam_rpg_step2_spec.txt)
+- [ ] Data model documented (yam_rpg_step3_data_model.txt)
+- [ ] Formulas documented (yam_rpg_step5_formula.txt)
+- [ ] This implementation plan approved
+
+#### Stability Layer
+- [ ] No critical bugs in 2+ weeks
+- [ ] Operator comfortable with workflow
+- [ ] Agent performance stable
+- [ ] File I/O performance acceptable
+
+### What Axiom Should NOT Have To Handle
+- RPG file creation
+- Backfilling old data
+- Template migrations
+- Formula debugging
+- Process establishment
+
+Axiom should inherit a working system, not build it.
+
+---
+
+## TIMELINE ESTIMATE
+
+| Phase | Steps | Est. Duration | Cumulative |
+|-------|-------|---------------|------------|
+| 0 | 0.1 - 0.2 | 1 day | 1 day |
+| 1 | 1.1 - 1.2 | 1 week | 1 week 1 day |
+| 2 | 2.1 - 2.2 | 2 weeks | 3 weeks 1 day |
+| 3 | 3.1 - 3.2 | 1 week | 4 weeks 1 day |
+| Buffer | - | 1 week | 5 weeks 1 day |
+
+**Total: ~5 weeks to Axiom-ready**
+
+---
+
+## RISK MITIGATION
+
+| Risk | Mitigation |
+|------|------------|
+| File bloat | Rotate RPG_HISTORY.md monthly |
+| Operator fatigue | Batch approvals, weekly not per-session |
+| Agent confusion | Clear templates, examples |
+| Data corruption | Daily backups, checksums |
+| Gaming | Verification layer, operator oversight |
+
+---
+
+## SUCCESS CRITERIA
+
+Implementation is successful when:
+1. All agents have consistent RPG state
+2. XP accurately reflects performance
+3. Operator can verify any claim
+4. Level-ups feel earned
+5. No gaming detected
+6. Ready for Axiom integration
+
+---
+
+Plan Version: 1.0
+Date: 2026-03-29
+Agent: yam_yam

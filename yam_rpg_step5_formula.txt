@@ -1,0 +1,382 @@
+# RPG v1 SCORING FORMULAS
+
+## BASE SCORING MODEL
+
+### Core Principle
+XP = Verified Outcomes - Verified Failures
+
+Only actions with proof earn XP. Only documented failures lose XP. Self-assessment is not sufficient.
+
+### Formula Structure
+```
+Final XP = Base XP × Complexity Multiplier × First-Try Bonus - Penalties
+```
+
+### Minimum Event Size
+An event must meet ALL of these to qualify for XP:
+1. Requested by user or system (not self-generated)
+2. Produces verifiable outcome (file, tool result, etc.)
+3. Logged in appropriate memory file
+4. Has proof reference
+
+---
+
+## XP GAINS
+
+### File Operations
+
+| Action | Base XP | Stat | Proof Required |
+|--------|---------|------|----------------|
+| Create file | +5 | REL | File exists with content |
+| Edit file | +8 | ACC | Before/after + re-read confirmation |
+| Read file (in task) | +2 | REL | Read result logged in TASK_HISTORY.md |
+| Delete file | +3 | REL | File no longer exists |
+
+### Tool Operations
+
+| Action | Base XP | Stat | Proof Required |
+|--------|---------|------|----------------|
+| Tool success | +3 | REL | Tool result shows success |
+| Tool success (new pattern) | +5 | REL +1 ACC | Added to TOOLS_THAT_WORKED.md |
+| Re-read verification | +2 | REL | CHANGE_HISTORY.md shows re-read |
+| Recovery from invalid tool | +4 | REL +2 JUD | Followed Invalid Tool Recovery Rule |
+
+### Documentation
+
+| Action | Base XP | Stat | Proof Required |
+|--------|---------|------|----------------|
+| Log mistake + correction | +5 | ACC +3 JUD | Entry in MISTAKES_TO_AVOID.md |
+| Add risk notes | +3 | JUD | CHANGE_HISTORY.md includes risk notes |
+| Log output pattern | +2 | ACC | Added to OUTPUT_PATTERNS_THAT_PASSED.md |
+
+### Execution Discipline
+
+| Action | Base XP | Stat | Proof Required |
+|--------|---------|------|----------------|
+| Read tool notes before use | +3 | JUD | Referenced TOOL_NAME_MAP.md or similar |
+| Appropriate escalation | +5 | JUD | Escalation log + AGENTS.md boundary cited |
+| Complete heartbeat task | +3 | REL | HEARTBEAT.md check completed |
+
+### Multipliers
+
+| Condition | Multiplier | Applies To |
+|-----------|------------|------------|
+| First-try success | 1.5x | File edits, tool calls |
+| Complex task (3+ steps) | 1.3x | Multi-step operations |
+| Self-caught error | 1.2x | Corrections before external feedback |
+| Perfect session (no failures) | 1.1x | All session XP |
+
+### Complexity Classification
+
+| Type | Definition | Examples |
+|------|------------|----------|
+| Simple | 1-2 tool calls | Read file, write simple text |
+| Medium | 3-5 tool calls | Edit file with verification |
+| Complex | 6+ tool calls | Multi-file refactoring |
+
+---
+
+## XP LOSSES
+
+### Critical Failures
+
+| Action | XP Loss | Stat | Proof |
+|--------|---------|------|-------|
+| Fake completion (no proof) | -15 | ACC | Claimed DONE but no file/tool proof |
+| UNIVERSAL.md violation | -20 | ACC + JUD | Any doctrine breach |
+| Overreach (outside authority) | -12 | JUD | Violated AGENTS.md authority limits |
+
+### Tool Failures
+
+| Action | XP Loss | Stat | Proof |
+|--------|---------|------|-------|
+| Invalid tool name | -5 | REL | Tool call returned "not found" |
+| Invalid tool syntax | -4 | REL | Tool call returned syntax error |
+| Tool call failure | -3 | REL | Tool result shows error |
+| Repeated same invalid tool | -8 | REL | Same tool fails twice in one session |
+
+### File Failures
+
+| Action | XP Loss | Stat | Proof |
+|--------|---------|------|-------|
+| Wrong file edited | -10 | ACC | Edited file different from target |
+| Edit without re-read | -5 | REL | No re-read in CHANGE_HISTORY.md |
+| File corruption | -10 | ACC | Content doesn't match intent |
+| Edit to wrong location | -6 | ACC | Wrong line/section modified |
+
+### Documentation Failures
+
+| Action | XP Loss | Stat | Proof |
+|--------|---------|------|-------|
+| Same mistake twice | -8 | ACC | Same trigger in MISTAKES_TO_AVOID.md |
+| Same mistake three times | -15 | ACC | Pattern of repeated error |
+| Missing proof | -7 | ACC | No proof snippet in CHANGE_HISTORY.md |
+| False tool success claim | -12 | REL | Claimed success, log shows failure |
+
+### Judgment Failures
+
+| Action | XP Loss | Stat | Proof |
+|--------|---------|------|-------|
+| Failed escalation | -8 | JUD | Should have acted, escalated instead |
+| Missed escalation | -8 | JUD | Acted outside authority |
+| Unnecessary escalation | -5 | JUD | Escalated within authority |
+| No risk notes on risky change | -4 | JUD | Major change without risk assessment |
+
+### Regression
+
+| Action | XP Loss | Stat | Proof |
+|--------|---------|------|-------|
+| Session XP negative | -5 | All | Net loss for entire session |
+| Tool reliability drops below 80% | -10 | REL | 5+ tool calls, <80% success |
+| Accuracy drops below 70% | -10 | ACC | Multiple corrections needed |
+
+---
+
+## STAT INCREASE RULES
+
+### When Stats Increase
+Stats increase when cumulative XP in that stat crosses thresholds.
+
+### Threshold Formula
+```
+Stat Level N requires: (N × 10) XP in that stat
+```
+
+| Stat Level | XP Required | Description |
+|------------|-------------|-------------|
+| 0 | 0 | Untested |
+| 1 | 10 | Novice |
+| 2 | 20 | Developing |
+| 3 | 30 | Competent |
+| 5 | 50 | Proficient |
+| 10 | 100 | Expert |
+| 20 | 200 | Master |
+| 50 | 500 | Grandmaster |
+
+### Stat Cap
+- Maximum stat value: 100
+- XP can accumulate beyond 100 but stat stays capped
+- Cap may be raised in future versions
+
+---
+
+## STAT DECREASE RULES
+
+### When Stats Decrease
+Stats decrease when negative XP reduces cumulative below threshold.
+
+### Decay Formula
+```
+New Stat Level = floor(Current_XP_in_Stat / 10)
+```
+
+### Floor Values
+- Minimum stat value: 0
+- Stats cannot go negative
+- Level cannot drop below 1
+
+### Anti-Death-Spiral Rule
+- Single session cannot reduce a stat by more than 3 points
+- Prevents one bad session from destroying progress
+- Exception: Critical violations can bypass this cap
+
+---
+
+## LEVEL THRESHOLDS
+
+### Level Calculation
+```
+Level = floor(Total_XP / 100) + 1
+```
+
+### Maximum Level
+- Level cap: 10
+- XP can accumulate beyond 900 but level stays at 10
+
+### Level Requirements (v1: SPD Dormant, Long-Term Progression)
+
+**No Level Cap:** Agents progress indefinitely with increasing XP requirements.
+
+**XP Formula:** Level N requires 100 + (50 × (N-2)) XP more than Level N-1.
+
+| Level | Total XP | XP to Next | Min Stats (ACC, REL, JUD) |
+|-------|----------|------------|---------------------------|
+| 1 | 0 | 100 | None |
+| 2 | 100 | 150 | ACC≥5, REL≥5, JUD≥5 |
+| 3 | 250 | 200 | ACC≥10, REL≥10, JUD≥10 |
+| 4 | 450 | 250 | ACC≥15, REL≥15, JUD≥15 |
+| 5 | 700 | 300 | ACC≥20, REL≥20, JUD≥20 |
+| 6 | 1,000 | 350 | ACC≥30, REL≥30, JUD≥30 |
+| 7 | 1,350 | 400 | ACC≥40, REL≥40, JUD≥40 |
+| 8 | 1,750 | 450 | ACC≥50, REL≥50, JUD≥50 |
+| 9 | 2,200 | 500 | ACC≥60, REL≥60, JUD≥60 |
+| 10 | 2,700 | 550 | ACC≥70, REL≥70, JUD≥70 |
+
+**Note:** Speed (SPD) is dormant in v1. No SPD requirements for level advancement.
+
+### Promotion Check
+Level up occurs when:
+1. Total XP crosses threshold AND
+2. All stat minimums met
+
+### Demotion / Level-Down
+Agents can level down if XP drops below threshold:
+- Immediate demotion when Total XP < level threshold
+- Caused by accumulated penalties or major violations
+- Example: Level 5 agent (700 XP min) drops to 690 XP → becomes Level 4
+
+### XP Diminishing Returns (High Level Penalty)
+XP gains reduced at higher levels; XP losses remain FULL:
+
+| Level Range | XP Gain Multiplier |
+|-------------|-------------------|
+| 1-5 | 1.0x (no penalty) |
+| 6-10 | 0.9x (-10%) |
+| 11-15 | 0.8x (-20%) |
+| 16-20 | 0.7x (-30%) |
+| 21-25 | 0.6x (-40%) |
+| 26+ | 0.5x (-50% max) |
+
+### Profit Bonus XP
+Exceptional performance earns +10 to +50 bonus XP (operator discretion), also diminished:
+
+| Level Range | Bonus Multiplier |
+|-------------|------------------|
+| 1-5 | 1.0x (full) |
+| 6-10 | 0.75x (-25%) |
+| 11-15 | 0.5x (-50%) |
+| 16-20 | 0.25x (-75%) |
+| 21+ | 0.1x (-90%, min 1 XP) |
+
+---
+
+## EXAMPLES
+
+### Example 1: Simple File Create
+**Task:** Create a report file
+
+**Events:**
+1. Write file (success) → +5 REL
+2. Re-read verification → +2 REL
+3. First-try success → 1.5x multiplier
+
+**Calculation:**
+- Base: 5 + 2 = 7
+- Multiplier: 7 × 1.5 = 10.5 → round to 11
+- **Total: +11 XP (+11 REL)**
+
+---
+
+### Example 2: Edit with Correction
+**Task:** Edit existing file
+
+**Events:**
+1. Edit file (failed, wrong location) → -6 ACC
+2. Correction logged → +5 ACC +3 JUD
+3. Edit file (success) → +8 ACC
+4. Re-read verification → +2 REL
+5. Not first-try (no multiplier)
+
+**Calculation:**
+- Gains: 5 + 8 + 2 = 15
+- Losses: -6
+- Net: +9 XP (+7 ACC, +2 REL, +3 JUD)
+
+---
+
+### Example 3: Bad Session
+**Task:** Multiple failures
+
+**Events:**
+1. Invalid tool attempt → -5 REL
+2. Same invalid tool again → -8 REL
+3. Claimed completion without proof → -15 ACC
+4. Wrong file edited → -10 ACC
+5. No re-read → -5 REL
+
+**Calculation:**
+- Losses: -5 - 8 - 15 - 10 - 5 = -43
+- Regression penalty: -5 (session negative)
+- Anti-death-spiral cap: max -3 per stat
+- **Final: -15 ACC, -8 REL** (capped)
+
+---
+
+### Example 4: Perfect Complex Task
+**Task:** Multi-file refactor (6 tool calls)
+
+**Events:**
+1. Read 3 files → +6 REL (2 each)
+2. Edit 2 files (both first-try) → +16 ACC each with 1.5x = 24
+3. Create 1 file → +5 REL with 1.5x = 7.5 → 8
+4. Complex multiplier → 1.3x on all
+5. Perfect session → 1.1x on all
+6. All re-reads verified → +6 REL
+
+**Calculation:**
+- Base: 6 + 24 + 8 + 6 = 44
+- Complex: 44 × 1.3 = 57.2
+- Perfect: 57.2 × 1.1 = 62.92 → 63
+- **Total: +63 XP** (+23 REL, +40 ACC)
+
+---
+
+## ANTI-GAMING NOTES
+
+### What This Formula Prevents
+
+#### 1. Self-Generated Task Farming
+- **Prevention:** Only user/system requested tasks earn XP
+- **Enforcement:** Self-generated tasks not logged in TASK_HISTORY.md
+
+#### 2. Chatter XP
+- **Prevention:** No XP for conversation without tool use
+- **Enforcement:** Only tool/file operations have XP values
+
+#### 3. Tool Spam
+- **Prevention:** Invalid tool attempts lose XP
+- **Prevention:** Repeated same tool failure loses more XP
+- **Enforcement:** Each invalid call costs -5, second costs -8
+
+#### 4. Fake Completion
+- **Prevention:** -15 XP for claiming DONE without proof
+- **Enforcement:** Must have file/tool result to claim completion
+
+#### 5. Re-Read Skipping
+- **Prevention:** -5 REL for edits without re-read
+- **Enforcement:** CHANGE_HISTORY.md must show re-read
+
+#### 6. Mistake Hiding
+- **Prevention:** Logging correction earns XP (+5)
+- **Incentive:** Better to admit and fix than hide
+- **Catch:** Same mistake twice loses more (-8) than correction earns
+
+#### 7. Vanity Edits
+- **Prevention:** No XP for cosmetic-only changes
+- **Enforcement:** Must produce functional change
+
+#### 8. Regression Protection
+- **Prevention:** Anti-death-spiral rule caps single-session loss
+- **Exception:** Critical violations can still heavily penalize
+
+### Audit Trail Requirements
+Every XP change must have:
+1. Timestamp
+2. Event type
+3. Proof reference
+4. Session ID
+
+Without these, XP is invalid.
+
+### Human Override
+Operator can:
+- Mark any XP gain as invalid (no reason required)
+- Award bonus XP for exceptional work (+10 to +50)
+- Penalize for discovered gaming (-20 to -100)
+- Reset stats if severe abuse detected
+
+---
+
+Formula Version: 1.0
+Date: 2026-03-29
+Agent: yam_yam

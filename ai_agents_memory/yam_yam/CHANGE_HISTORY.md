@@ -1,7 +1,6 @@
 # CHANGE_HISTORY
 
-## Template
-
+## Entry Template
 - Timestamp:
 - Agent:
 - Role:
@@ -11,4 +10,5 @@
 - Risk Notes:
 - Status:
 
----
+## History
+- No change history yet.

@@ -1,0 +1,61 @@
+# RPG STEP 28: PROFIT BONUS RULES VERIFICATION
+
+## FILE CREATED
+
+| File | Path | Size |
+|------|------|------|
+| RPG_PROFIT_BONUS_RULES.md | /opt/openclaw/.openclaw/workspace/RPG_PROFIT_BONUS_RULES.md | 8380 bytes |
+
+## PROOF SNIPPET
+
+```markdown
+# RPG Profit Bonus Rules
+
+## PURPOSE
+
+Reward agents for exceptional performance that exceeds expected targets. Profit bonus recognizes going above and beyond routine execution—not just doing the job, but doing it exceptionally well.
+
+**Important:** Profit bonus is discretionary, rare, and secondary to safety, compliance, and system survival.
+
+---
+
+## WHEN PROFIT BONUS APPLIES
+
+### All Conditions Must Be Met
+
+1. **Real Live Run**
+   - Must be actual runtime work
+   - Not planning, discussion, or preparation
+   - Must produce verifiable outcomes
+
+2. **Verified Profit Exceeds Target**
+   - Target must be defined before the run
+   - Actual results must exceed target by 50% or more
+```
+
+## STATUS
+
+- [x] RPG_PROFIT_BONUS_RULES.md created
+- [x] All required sections present:
+  - [x] PURPOSE
+  - [x] WHEN PROFIT BONUS APPLIES
+  - [x] WHEN PROFIT BONUS DOES NOT APPLY
+  - [x] DIMINISHING RETURNS ON PROFIT BONUS
+  - [x] RISK AND SAFETY OVERRIDE RULE
+  - [x] SIMPLE EXAMPLES
+- [x] Profit bonus applies only to real live runs documented
+- [x] 50% over target threshold established
+- [x] Diminishing returns by level documented
+- [x] Risk/safety/compliance override rule clear
+- [x] Reckless profit explicitly excluded
+- [x] Hierarchy: Survival > Compliance > Safety > Risk > Profit
+- [x] Operator discretion guidelines included
+- [x] Concrete examples provided
+- [x] Documentation requirements specified
+
+**Profit bonus rules complete. Safety and compliance always win over profit.**
+
+---
+
+Verification Generated: 2026-03-29
+Agent: yam_yam

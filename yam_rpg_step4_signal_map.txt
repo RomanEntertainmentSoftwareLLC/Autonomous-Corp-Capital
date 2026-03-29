@@ -1,0 +1,278 @@
+# RPG v1 STAT-TO-SIGNAL MAPPING
+
+## ACCURACY
+
+**Definition:** Correctness of work on first attempt.
+
+### Current Runtime Evidence (Available Now)
+| Source | Signal | Strength |
+|--------|--------|----------|
+| CHANGE_HISTORY.md | Proof snippet present | Strong |
+| CHANGE_HISTORY.md | "Status: CHANGED" with proof | Strong |
+| MISTAKES_TO_AVOID.md | Entry logged (failure occurred) | Strong (negative) |
+| TASK_HISTORY.md | PASSED_OR_FAILED: PASSED | Medium |
+| File system | File exists after create/edit | Strong |
+| File re-read | Content matches intended change | Strong |
+
+### How to Score from Current Evidence
+- **+ACC:** File created/edited, re-read confirms content, proof snippet logged
+- **+ACC:** Task logged as PASSED with verified outcome
+- **-ACC:** MISTAKES_TO_AVOID.md entry (error occurred)
+- **-ACC:** Claimed change but no proof in CHANGE_HISTORY.md
+
+### Weaknesses in Current Evidence
+- No automatic diff generation
+- No automated content verification (relies on re-read discipline)
+- No "first try" flag (can't distinguish retry from first attempt)
+
+---
+
+## RELIABILITY
+
+**Definition:** Consistency of execution over time.
+
+### Current Runtime Evidence (Available Now)
+| Source | Signal | Strength |
+|--------|--------|----------|
+| TASK_HISTORY.md | PASSED_OR_FAILED status | Strong |
+| TASK_HISTORY.md | Consecutive task entries | Medium |
+| TOOLS_THAT_WORKED.md | Successful pattern logged | Medium |
+| MISTAKES_TO_AVOID.md | Repeated same error | Strong (negative) |
+| Tool call results | Success vs error response | Strong |
+| CHANGE_HISTORY.md | Re-read verification logged | Strong |
+| CHANGE_HISTORY.md | "Re-read skipped" (if noted) | Strong (negative) |
+
+### How to Score from Current Evidence
+- **+REL:** Tool call succeeds, logged in TASK_HISTORY.md as PASSED
+- **+REL:** Re-read performed after edit (discipline adherence)
+- **+REL:** Pattern added to TOOLS_THAT_WORKED.md
+- **-REL:** Tool call fails (error response)
+- **-REL:** Same trigger appears multiple times in MISTAKES_TO_AVOID.md
+- **-REL:** No re-read after file modification
+
+### Weaknesses in Current Evidence
+- No automatic tool success/failure tracking
+- No timestamp data for streak calculation
+- Re-read compliance is self-reported (could be falsified)
+- No session-to-session continuity (fresh start each session)
+
+---
+
+## SPEED (DORMANT in v1)
+
+**Definition:** Efficient completion without rushing.
+
+### Status: DORMANT
+Speed is defined but not active in v1. No XP awarded or tracked.
+
+### Current Runtime Evidence (Available Now)
+| Source | Signal | Strength |
+|--------|--------|----------|
+| None | No timing data captured | N/A |
+
+### Why Dormant
+The system does not capture:
+- Task start times
+- Task end times
+- Tool call durations
+- Session durations
+
+Without timing data, Speed cannot be scored accurately.
+
+### Potential Proxies (Weak - Not Used in v1)
+| Proxy | Why It's Weak |
+|-------|---------------|
+| Number of tool calls | More calls != slower (could be thorough) |
+| Message count | Chatty != slow |
+| File size edited | Not consistently related to task complexity |
+
+### Activation Path
+Speed becomes active when:
+1. TASK_HISTORY.md includes `timestamp_start` and `timestamp_end`
+2. Agents log task durations consistently
+3. Minimum 100 timed tasks in dataset
+4. Operator enables Speed scoring
+
+---
+
+## JUDGMENT
+
+**Definition:** Decision quality, escalation appropriateness, risk awareness.
+
+### Current Runtime Evidence (Available Now)
+| Source | Signal | Strength |
+|--------|--------|----------|
+| CHANGE_HISTORY.md | Risk notes present | Medium |
+| AGENTS.md | Authority boundaries defined | Strong (reference) |
+| MISTAKES_TO_AVOID.md | Self-correction before external feedback | Strong |
+| TASK_HISTORY.md | Escalation logged appropriately | Medium |
+| User feedback | "Should have asked first" vs "Good call" | Strong (but not logged) |
+
+### How to Score from Current Evidence
+- **+JUD:** Risk notes added to CHANGE_HISTORY.md entry
+- **+JUD:** Self-correction logged in MISTAKES_TO_AVOID.md (caught own error)
+- **+JUD:** Escalated when outside authority per AGENTS.md
+- **-JUD:** "Overreach" pattern in MISTAKES_TO_AVOID.md
+- **-JUD:** Failed escalation (should have acted, didn't)
+
+### Weaknesses in Current Evidence
+- Risk notes are optional (not enforced)
+- Escalation appropriateness requires human judgment
+- No structured escalation log
+- AGENTS.md is static reference, not runtime data
+
+---
+
+## CURRENTLY USABLE SIGNALS
+
+### Strong Signals (Ready to Use)
+| Stat | Signal | Source |
+|------|--------|--------|
+| ACC | Proof snippet present | CHANGE_HISTORY.md |
+| ACC | Task PASSED | TASK_HISTORY.md |
+| ACC | Error occurred | MISTAKES_TO_AVOID.md |
+| REL | Tool success/failure | Tool call results |
+| REL | Re-read logged | CHANGE_HISTORY.md |
+| REL | Pattern success | TOOLS_THAT_WORKED.md |
+| JUD | Risk notes present | CHANGE_HISTORY.md |
+| JUD | Self-correction | MISTAKES_TO_AVOID.md |
+
+### Medium Signals (Usable with Caveats)
+| Stat | Signal | Caveat |
+|------|--------|--------|
+| ACC | File exists | Doesn't prove correctness |
+| REL | Consecutive tasks | No automatic streak counting |
+| REL | Same error repeat | Requires pattern matching |
+| JUD | Escalation logged | No structured format yet |
+
+### Missing Signals (Cannot Use)
+| Stat | Missing Signal |
+|------|----------------|
+| SPD | All timing data |
+| SPD | Task complexity baseline |
+| ACC | First-try vs retry distinction |
+| REL | Automatic tool success rate |
+
+---
+
+## WEAK SIGNALS / MISSING SIGNALS
+
+### Critical Gaps
+
+#### 1. SPEED: Complete Absence
+- **Missing:** Timestamp on all actions
+- **Missing:** Task duration tracking
+- **Missing:** Complexity classification
+- **Impact:** Cannot implement SPD stat
+
+#### 2. ACCURACY: First-Try Distinction
+- **Missing:** Retry counter per task
+- **Missing:** "First attempt failed" flag
+- **Impact:** Hard to distinguish "got it right" from "fixed it"
+
+#### 3. RELIABILITY: Automatic Tool Metrics
+- **Missing:** Tool success/failure auto-logging
+- **Missing:** Per-tool-type reliability scores
+- **Impact:** REL relies on self-reporting
+
+#### 4. JUDGMENT: Escalation Tracking
+- **Missing:** Structured escalation log
+- **Missing:** Authority boundary violations log
+- **Impact:** JUD scoring is subjective
+
+### Self-Reporting Risks
+| Signal | Risk |
+|--------|------|
+| Re-read verification | Agent could claim re-read without doing it |
+| Risk notes | Optional, may be skipped |
+| Task passed/failed | Self-assigned, no external validation |
+| Tool pattern success | No automatic verification |
+
+---
+
+## SMALLEST FUTURE ADDITIONS
+
+### Tier 1: Minimum Viable Additions (Enable All Stats)
+
+#### For SPEED
+```
+Add to TASK_HISTORY.md:
+- timestamp_start: ISO8601
+- timestamp_end: ISO8601
+- task_complexity: simple|medium|complex (self-assessed)
+```
+
+**Effort:** Low
+**Impact:** Enables basic SPD scoring
+
+#### For ACCURACY (First-Try)
+```
+Add to TASK_HISTORY.md:
+- attempts: int
+- first_try_success: bool
+```
+
+**Effort:** Low
+**Impact:** Distinguishes first-try accuracy from eventual success
+
+#### For RELIABILITY (Auto-Track)
+```
+Add automatic logging:
+- Tool call success/failure (captured by system)
+- Tool type used
+- Error category
+```
+
+**Effort:** Medium (requires system integration)
+**Impact:** Objective REL scoring, no self-reporting
+
+#### For JUDGMENT (Structured)
+```
+Add to new file ESCALATION_LOG.md:
+- timestamp
+- trigger: what caused escalation
+- decision: escalate|act|delegate
+- authority_boundary: which AGENTS.md rule applied
+- outcome: correct|incorrect (filled later)
+```
+
+**Effort:** Low
+**Impact:** Structured JUD data, enables review
+
+### Tier 2: Nice to Have (Better Accuracy)
+
+| Addition | Benefit | Effort |
+|----------|---------|--------|
+| Automatic file hash on write | Tamper-proof proof | Medium |
+| Diff generation on edit | Precise change tracking | Low |
+| Session continuity | Cross-session streaks | High |
+| User feedback capture | External validation | Medium |
+
+### Tier 3: Future Considerations
+
+| Addition | Benefit | Effort |
+|----------|---------|--------|
+| Real-time stat display | Immediate feedback | High |
+| Cross-agent comparison | Benchmarking | High |
+| Automated audits | Anti-cheese enforcement | High |
+
+---
+
+## RECOMMENDATION
+
+**For v1.0 MVP:**
+1. Implement with ACC, REL, JUD only
+2. Add minimal timing to TASK_HISTORY.md for basic SPD
+3. Accept that early SPD scores will be approximate
+4. Prioritize Tier 1 additions for v1.1
+
+**Deferred:**
+- Tier 2 and 3 features until v1.x stable
+- Complex anti-cheese automation
+- Cross-agent features
+
+---
+
+Mapping Version: 1.0
+Date: 2026-03-29
+Agent: yam_yam

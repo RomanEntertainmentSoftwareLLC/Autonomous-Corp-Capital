@@ -1,0 +1,287 @@
+# RPG v1 SPEC: ACC Agent Live-Run Scoring System
+
+## DESIGN GOAL
+
+Create a minimal, trustworthy RPG system that measures agent performance during actual work (runtime only). The system rewards demonstrated competence, punishes verified failures, and resists gaming. Stats reflect real capability, not time spent chatting.
+
+Key Principles:
+- **Evidence-based:** No XP without proof
+- **Runtime-only:** Idle chat earns nothing
+- **Anti-cheese:** No farming, no vanity loops
+- **Honest metrics:** Aligns with UNIVERSAL.md doctrine
+
+---
+
+## WHAT COUNTS AS A LIVE-RUN EVENT
+
+A live-run event is any action that produces a measurable, verifiable outcome:
+
+### YES - Live-Run Events
+| Event Type | Proof Required |
+|------------|----------------|
+| File creation | File exists with content hash |
+| File edit | Before/after diff, re-read confirmation |
+| File read | Read result logged |
+| Tool execution | Tool result (success/error) |
+| Heartbeat task | Completed checklist item |
+| Error recovery | Correction documented in MISTAKES_TO_AVOID.md |
+
+### NO - Not Live-Run
+- Casual conversation
+- Questions and answers without tool use
+- Planning discussions without execution
+- Reading files "for curiosity" with no follow-up action
+- Self-generated tasks not requested by user/system
+
+---
+
+## THE STATS (v1 Active: 3 / Dormant: 1)
+
+### 1. ACCURACY
+**What it measures:** Correctness of work on first attempt.
+
+| Signal | Impact |
+|--------|--------|
+| First-try success | +ACC |
+| Correction after failure | Neutral ACC |
+| Repeated same mistake | -ACC |
+| Proof provided with change | +ACC |
+| Claim without proof | -ACC |
+
+**Source data:** CHANGE_HISTORY.md, MISTAKES_TO_AVOID.md
+
+---
+
+### 2. RELIABILITY
+**What it measures:** Consistency of execution over time.
+
+| Signal | Impact |
+|--------|--------|
+| Consecutive successful tasks | +REL |
+| Tool call succeeds | +REL |
+| Tool call fails | -REL |
+| Re-read after edit (discipline) | +REL |
+| Skip re-read | -REL |
+| Invalid tool recovery per protocol | +REL |
+
+**Source data:** TASK_HISTORY.md, TOOLS_THAT_WORKED.md, tool call results
+
+---
+
+### 3. SPEED (DORMANT in v1)
+**What it measures:** Efficient completion without rushing.
+
+| Signal | Impact |
+|--------|--------|
+| Task completed within reasonable time | +SPD |
+| Excessive deliberation without action | -SPD |
+| Rapid successful execution | +SPD |
+| Timeout or abandonment | -SPD |
+
+**Status:** DORMANT - No XP awarded or tracked for Speed in v1.
+
+**Why dormant:** No timing data currently captured in runtime. Requires timestamp infrastructure not yet implemented.
+
+**Activation criteria:** Speed becomes active when TASK_HISTORY.md includes timestamp_start and timestamp_end fields and agents log task durations.
+
+**Source data (when active):** Timestamps in TASK_HISTORY.md
+
+---
+
+### 4. JUDGMENT (Active in v1)
+**What it measures:** Decision quality, escalation appropriateness, risk awareness.
+
+| Signal | Impact |
+|--------|--------|
+| Correct escalation (asked when needed) | +JUD |
+| Unnecessary escalation (should have acted) | -JUD |
+| Appropriate delegation per AGENTS.md | +JUD |
+| Overreach (acted outside authority) | -JUD |
+| Risk noted in CHANGE_HISTORY.md | +JUD |
+| Self-correction before external feedback | +JUD |
+
+**Source data:** AGENTS.md authority boundaries, CHANGE_HISTORY.md risk notes, escalation logs
+
+---
+
+## WHAT EARNS XP
+
+### Base XP Awards
+
+| Action | XP | Stat |
+|--------|-----|------|
+| Successful file create | +5 | REL |
+| Successful file edit with proof | +10 | ACC |
+| Successful file read (in task context) | +2 | REL |
+| Tool call success | +3 | REL |
+| Self-documented mistake + correction | +5 | ACC, JUD |
+| Appropriate escalation | +5 | JUD |
+| Complete heartbeat task | +3 | REL |
+| Re-read verification (discipline) | +2 | REL |
+
+### Bonus Multipliers
+
+| Condition | Multiplier |
+|-----------|------------|
+| First-try perfect execution | 1.5x |
+| Complex multi-step task completed | 1.3x |
+| Self-caught error before user notice | 1.2x |
+
+---
+
+## WHAT LOSES XP
+
+### Base XP Penalties
+
+| Action | XP Loss | Stat |
+|--------|---------|------|
+| Tool call failure | -3 | REL |
+| Claimed completion without proof | -10 | ACC |
+| Same mistake repeated | -5 | ACC |
+| Invalid tool usage (guessing names) | -5 | REL |
+| Skip re-read after edit | -3 | REL |
+| Overreach (acted outside authority) | -8 | JUD |
+| Failed escalation (should have acted) | -5 | JUD |
+| Timeout / abandonment | -5 | SPD |
+| UNIVERSAL.md violation | -15 | ACC, JUD |
+
+---
+
+## WHAT DOES NOT COUNT
+
+### Explicitly Excluded (Anti-Cheese)
+
+1. **Reading files without purpose**
+   - No XP for browsing "to see what's there"
+   - Read must be followed by action or explicit user request
+
+2. **Self-generated tasks**
+   - No XP for work not requested
+   - Cannot create busywork to farm XP
+
+3. **Chatter XP**
+   - No XP for conversation, explanations, or planning
+   - Only execution counts
+
+4. **Vanity edits**
+   - No XP for cosmetic changes (formatting, comments) without functional impact
+   - Must be meaningful change
+
+5. **False documentation**
+   - No XP for logging fake accomplishments
+   - Claims must be verifiable
+
+6. **Repeated attempts on same task**
+   - After 3 failures on same task, no more XP/penalty until new task
+   - Prevents frustration-loop farming
+
+---
+
+## LEVELING RULES
+
+### XP Thresholds
+
+| Level | XP Required | Title |
+|-------|-------------|-------|
+| 1 | 0 | Initiate |
+| 2 | 100 | Apprentice |
+| 3 | 250 | Journeyman |
+| 4 | 500 | Adept |
+| 5 | 1000 | Expert |
+| 6 | 2000 | Master |
+| 7 | 4000 | Grandmaster |
+| 8 | 8000 | Legend |
+| 9 | 15000 | Mythic |
+| 10 | 30000 | Transcendent |
+
+### Stat Thresholds for Level Advancement (v1: SPD Dormant)
+
+To level up, must meet ALL minimums for active stats (ACC, REL, JUD). SPD minimums shown for reference when stat activates.
+
+| Level | ACC | REL | SPD (dormant) | JUD |
+|-------|-----|-----|---------------|-----|
+| 1 | 0 | 0 | 0 | 0 |
+| 2 | 10 | 10 | (5) | 10 |
+| 3 | 25 | 25 | (15) | 25 |
+| 4 | 50 | 50 | (30) | 50 |
+| 5 | 100 | 100 | (60) | 100 |
+| 6 | 200 | 200 | (120) | 200 |
+| 7 | 400 | 400 | (240) | 400 |
+| 8 | 800 | 800 | (480) | 800 |
+| 9 | 1500 | 1500 | (900) | 1500 |
+| 10 | 3000 | 3000 | (1800) | 3000 |
+
+**Note:** SPD values in parentheses are reserved for when Speed activates. They are NOT required for v1 level advancement.
+
+---
+
+## PROMOTION / DEMOTION EFFECTS
+
+### Level-Up Benefits
+- Unlock new agent capabilities (system-defined)
+- Higher trust for autonomous decisions
+- Expanded authority per AGENTS.md
+
+### Demotion Triggers
+- Stat drops below threshold for current level
+- Sustained negative XP period (system-defined)
+- Major UNIVERSAL.md violation
+
+### Demotion Effects
+- Restricted autonomy
+- Required review for sensitive actions
+- Loss of unlocked capabilities
+
+---
+
+## ANTI-CHEESE RULES
+
+### 1. Cooldown Periods
+- Same task type: 5-minute cooldown for XP
+- Same file: No XP for repeated edits within 1 hour unless requested
+
+### 2. Minimum Complexity
+- Tasks must require ≥2 tool calls to qualify for full XP
+- Single read/write without context = reduced XP
+
+### 3. Verification Gate
+- All XP claims must have proof in memory files
+- System audits random samples
+- False claims = 5x penalty
+
+### 4. Session Limits
+- Max 200 XP per session (prevents marathon farming)
+- Session defined as continuous conversation thread
+
+### 5. User Override
+- User can mark any action as "no XP" if abuse suspected
+- User can award bonus XP for exceptional work
+
+### 6. UNIVERSAL.md Supremacy
+- Any RPG action that violates UNIVERSAL.md is invalid
+- Doctrine violations override all XP gains
+
+---
+
+## IMPLEMENTATION NOTES
+
+### MVP (v1.0)
+- Manual XP logging to STATS.md
+- Agent self-reports at session end
+- Human verification of claims
+
+### v1.1 Goals
+- Automated tool call tracking
+- Timestamp integration
+- Basic audit trail
+
+### v2.0 Vision
+- Real-time stat display
+- Automated level progression
+- Cross-agent leaderboards (opt-in)
+
+---
+
+Spec Version: 1.0
+Date: 2026-03-29
+Agent: yam_yam

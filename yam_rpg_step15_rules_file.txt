@@ -1,0 +1,79 @@
+# RPG STEP 15: RULES FILE VERIFICATION
+
+## FILE CREATED
+
+| File | Path | Size |
+|------|------|------|
+| RPG_RULES.md | /opt/openclaw/.openclaw/workspace/RPG_RULES.md | 5437 bytes |
+
+## PROOF SNIPPET
+
+```markdown
+# RPG Rules v1
+
+## PURPOSE
+
+Measure agent performance during live runtime work. Earn XP for verified successful actions. Lose XP for documented failures. No XP for chatter or busywork.
+
+---
+
+## WHAT COUNTS AS A LIVE-RUN EVENT
+
+**YES - Live-Run Events:**
+- File creation (with proof)
+- File edit (with before/after + re-read)
+- File read (in task context)
+- Tool execution (success or failure)
+- Heartbeat task completion
+- Error recovery (logged correction)
+
+**NO - Not Live-Run:**
+- Casual conversation
+- Questions without tool use
+- Planning without execution
+- Reading "for curiosity"
+- Self-generated tasks
+
+---
+
+## ACTIVE STATS
+
+### Accuracy (ACC)
+Correctness of work on first attempt.
+
+| Action | XP | Proof |
+|--------|-----|-------|
+| Edit file with proof | +8 | Before/after + re-read confirmation |
+| Log mistake + correction | +5 | Entry in MISTAKES_TO_AVOID.md |
+| Same mistake again | -8 | Repeated trigger in MISTAKES_TO_AVOID.md |
+| Fake completion | -15 | Claimed DONE without proof |
+
+[... continues with REL, JUD, DORMANT STATS, etc.]
+```
+
+## STATUS
+
+- [x] RPG_RULES.md created
+- [x] All required sections present:
+  - [x] PURPOSE
+  - [x] WHAT COUNTS AS A LIVE-RUN EVENT
+  - [x] ACTIVE STATS (ACC, REL, JUD)
+  - [x] DORMANT STATS (SPD)
+  - [x] WHAT EARNS XP
+  - [x] WHAT LOSES XP
+  - [x] WHAT DOES NOT COUNT
+  - [x] OPERATOR APPROVAL RULE
+  - [x] WHY AXIOM COMES LATER
+- [x] Level progression table included
+- [x] Quick reference section included
+- [x] File is short, readable, and operator-friendly
+- [x] Runtime-only scoring emphasized
+- [x] No XP for chatter/self-generated chores
+- [x] Speed correctly marked as dormant
+
+**Phase 0 complete. RPG v1 ready for manual tracking.**
+
+---
+
+Verification Generated: 2026-03-29
+Agent: yam_yam

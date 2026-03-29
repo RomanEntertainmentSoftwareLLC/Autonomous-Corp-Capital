@@ -1,0 +1,104 @@
+# RPG Pilot Checklist - Yam Yam
+
+## PILOT GOAL
+
+Validate the manual RPG scoring process with a simple, low-stakes task.
+
+**Success:** Operator can apply a score to yam_yam's RPG_STATE.md following the documented process.
+
+---
+
+## REQUIRED INPUTS
+
+Copy and fill before scoring:
+
+```
+Run ID: pilot_2026-03-29_001
+Date: 2026-03-29T__:**__Z
+Agent: yam_yam
+Task: ________________________________
+
+Actions Taken:
+1. ___________________________________
+2. ___________________________________
+3. ___________________________________
+
+XP Calculation:
+- Base: _____
+- Multipliers: _____
+- Penalties: _____
+- Net: _____ (show work)
+
+Proof References:
+- ___________________________________
+- ___________________________________
+
+Reviewer: ___________________________
+```
+
+---
+
+## FILES THAT WILL CHANGE
+
+| File | Action | Path |
+|------|--------|------|
+| Run Score | Create | `rpg_runs/{run_id}.md` |
+| Agent History | Append | `ai_agents_memory/yam_yam/RPG_HISTORY.md` |
+| Agent State | Modify | `ai_agents_memory/yam_yam/RPG_STATE.md` |
+
+**Backup:** Copy RPG_STATE.md before modifying.
+
+---
+
+## APPROVAL CHECKS
+
+- [ ] Run ID assigned and unique
+- [ ] Date timestamp valid (ISO8601)
+- [ ] Task was runtime work (not chatter)
+- [ ] All actions have proof references
+- [ ] Proof references are verifiable (files exist, logs show results)
+- [ ] XP math is correct per RPG_RULES.md
+- [ ] Rounding rule applied (nearest integer, 0.5 rounds up)
+- [ ] Only 3 active stats used (ACC, REL, JUD)
+- [ ] Speed (SPD) not scored (dormant in v1)
+- [ ] Penalties documented if applicable
+- [ ] Reviewer name recorded
+
+---
+
+## PASS / FAIL DECISION
+
+**APPROVE if ALL checks pass:**
+```
+Decision: APPROVED
+Reviewer: _______________
+Time: _______________
+Action: Apply score to RPG_HISTORY.md and RPG_STATE.md
+```
+
+**REJECT if ANY check fails:**
+```
+Decision: REJECTED
+Reviewer: _______________
+Time: _______________
+Reason: _______________
+Action: Agent revises and resubmits
+```
+
+---
+
+## POST-PILOT NOTES
+
+What worked:
+___________________________________
+
+What was confusing:
+___________________________________
+
+What to change for next run:
+___________________________________
+
+---
+
+Checklist Version: 1.0
+Date: 2026-03-29

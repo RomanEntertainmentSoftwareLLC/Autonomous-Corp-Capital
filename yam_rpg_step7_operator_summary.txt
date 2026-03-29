@@ -1,0 +1,249 @@
+# RPG v1 OPERATOR SUMMARY
+
+## WHAT THE RPG SYSTEM WILL DO
+
+### Core Purpose
+Measure agent performance during live runtime work using XP, levels, and three active stats: Accuracy, Reliability, and Judgment. Speed is defined but dormant in v1.
+
+### What Gets Measured (v1 Active)
+- **Accuracy:** Correctness of work on first attempt
+- **Reliability:** Consistency of execution over time  
+- **Judgment:** Decision quality, escalation appropriateness, risk awareness
+
+### What Is Defined But Dormant
+- **Speed:** Task completion efficiency (requires timing data not yet captured)
+
+### XP System
+- Earn XP for verified successful actions
+- Lose XP for documented failures
+- Multipliers for first-try success and complex tasks
+- Daily and per-session caps prevent farming
+
+### Level Progression
+- 10 levels (Initiate to Transcendent)
+- XP thresholds: 0, 100, 200, 300... 900
+- Stat minimums required for level advancement
+- Anti-death-spiral protection (max -3 stat drop per session)
+
+### Storage
+- Per-agent files in `ai_agents_memory/{agent}/`
+- `RPG_STATE.md` - Current stats and totals
+- `RPG_HISTORY.md` - Session-by-session event log
+- `RPG_ACHIEVEMENTS.md` - Unlocked milestones
+- Simple markdown tables for human readability
+
+---
+
+## WHAT IT WILL NOT DO
+
+### Not Implemented in v1
+- **Speed stat** (defined but dormant until timing data exists)
+- Real-time stat display during chat
+- Automated proof verification (v1.1 goal)
+- Cross-agent leaderboards
+- Automatic level-up notifications
+- Skill trees or unlockable abilities
+- Integration with Axiom (comes later)
+
+### Explicitly Excluded
+- **No XP for chatter:** Idle conversation earns nothing
+- **No self-generated tasks:** Cannot farm XP by creating busywork
+- **No vanity edits:** Cosmetic-only changes don't count
+- **No speed-running:** Rushed work loses XP, not gains it
+- **No gaming the system:** Fake completions heavily penalized
+
+### Out of Scope
+- Historical backfill (starts from implementation date)
+- Complex anti-cheat automation
+- External integrations (Discord, web dashboards)
+- Machine learning for pattern detection
+
+---
+
+## WHAT IS READY NOW
+
+### Documentation Complete
+| Document | Purpose | Location |
+|----------|---------|----------|
+| Step 0 | Inventory of evidence sources | `yam_rpg_step0_inventory.txt` |
+| Step 1 | Inventory (copy) | `yam_rpg_step1_inventory.txt` |
+| Step 2 | System specification | `yam_rpg_step2_spec.txt` |
+| Step 3 | Data model design | `yam_rpg_step3_data_model.txt` |
+| Step 4 | Signal mapping | `yam_rpg_step4_signal_map.txt` |
+| Step 5 | Scoring formulas | `yam_rpg_step5_formula.txt` |
+| Step 6 | Implementation plan | `yam_rpg_step6_implementation_plan.txt` |
+
+### Existing Infrastructure
+- Memory file system (`ai_agents_memory/{agent}/`)
+- `TASK_HISTORY.md` template
+- `CHANGE_HISTORY.md` template
+- `MISTAKES_TO_AVOID.md` template
+- `TOOLS_THAT_WORKED.md` template
+- `UNIVERSAL.md` doctrine (updated with grammar rule)
+
+### Agent Readiness
+- 62 agents identified
+- All have memory directories
+- Templates understood
+- XP calculation rules documented
+
+---
+
+## WHAT STILL NEEDS IMPLEMENTATION
+
+### Phase 0: Foundation (1 day)
+- [ ] Create `RPG_STATE.md` for all 62 agents
+- [ ] Create `RPG_HISTORY.md` for all 62 agents
+- [ ] Create `RPG_ACHIEVEMENTS.md` for all 62 agents
+- [ ] Update `TASK_HISTORY.md` template with timestamp fields
+- [ ] Update `CHANGE_HISTORY.md` template with risk notes field
+
+### Phase 1: Manual Tracking (1 week)
+- [ ] Train agents on XP calculation
+- [ ] Establish session-end reporting process
+- [ ] Operator reviews and approves first sessions
+- [ ] Weekly level update process
+
+### Phase 2: Semi-Automated (2 weeks)
+- [ ] Agents log events in real-time
+- [ ] Auto-generate session summaries
+- [ ] Operator approval workflow
+- [ ] Update `RPG_STATE.md` on approval
+
+### Phase 3: Pre-Axiom (1 week)
+- [ ] Add proof verification layer
+- [ ] Complete audit trail requirements
+- [ ] Test edge cases
+- [ ] Document any formula adjustments
+
+**Total: ~5 weeks to Axiom-ready**
+
+---
+
+## RECOMMENDED FIRST CODING STEP
+
+### Step 0.1: Create RPG State Files
+
+**Action:** Create the three core RPG files for all 62 agents.
+
+**Why this first:**
+- No runtime code changes
+- No risk to existing systems
+- Establishes data foundation
+- Can be done with simple script
+
+**Command (one-liner):**
+```bash
+for agent in $(ls ai_agents_memory/); do
+  cat > ai_agents_memory/$agent/RPG_STATE.md << 'EOF'
+# RPG State: $agent
+
+| Field | Value |
+|-------|-------|
+| Level | 1 |
+| Title | Initiate |
+| Total XP | 0 |
+| Accuracy | 0 |
+| Reliability | 0 |
+| Speed | 0 |
+| Judgment | 0 |
+| Sessions | 0 |
+
+## XP Breakdown
+
+| Source | XP |
+|--------|-----|
+| (none yet) | 0 |
+EOF
+done
+```
+
+**Verification:**
+```bash
+ls ai_agents_memory/*/RPG_STATE.md | wc -l
+# Expect: 62
+```
+
+**Next step after this:** Update memory templates (Step 0.2)
+
+---
+
+## WHY AXIOM COMES LATER
+
+### Axiom Should Inherit, Not Build
+
+Axiom is the autonomous orchestration layer. It should:
+- **Use** the RPG system
+- **Not build** the RPG system
+
+If Axiom has to create files, debug formulas, or establish processes, it cannot focus on its actual job: coordinating agents.
+
+### Prerequisites for Axiom
+Before Axiom touches RPG:
+- Data files exist and are populated
+- Formulas are tested and stable
+- Process is established and working
+- Edge cases are handled
+- Operator is comfortable
+
+### What Axiom Will Do
+Once RPG is mature:
+- Read agent stats for task assignment
+- Consider levels when delegating
+- Log its own activities for XP
+- Use RPG data for coordination decisions
+
+### What Axiom Will Not Do
+- Create RPG files
+- Debug XP calculations
+- Establish approval workflows
+- Fix data quality issues
+- Handle formula edge cases
+
+### Timeline
+| Phase | Duration | Axiom Involvement |
+|-------|----------|-------------------|
+| 0-3 | 5 weeks | None |
+| 4+ | Ongoing | Full integration |
+
+Axiom starts using RPG after Week 5, not before.
+
+---
+
+## OPERATOR DECISION POINTS
+
+### Approve This Plan?
+- [ ] Yes, proceed with Phase 0
+- [ ] Yes, with modifications (specify below)
+- [ ] No, revise (specify concerns)
+
+### Priority Adjustments?
+- [ ] Speed up (more resources)
+- [ ] Slow down (more caution)
+- [ ] Skip Phase 1 (go straight to semi-automated)
+
+### Scope Changes?
+- [ ] Add feature: _______________
+- [ ] Remove feature: _______________
+- [ ] Modify: _______________
+
+### Axiom Integration?
+- [ ] Keep separate (Axiom uses RPG as external system)
+- [ ] Merge later (RPG becomes part of Axiom)
+- [ ] Undecided (decide after v1.0)
+
+---
+
+## APPROVAL SIGNATURE
+
+**Approved By:** _______________
+
+**Date:** _______________
+
+**Notes:** _______________
+
+---
+
+Summary Version: 1.0
+Date: 2026-03-29
+Agent: yam_yam

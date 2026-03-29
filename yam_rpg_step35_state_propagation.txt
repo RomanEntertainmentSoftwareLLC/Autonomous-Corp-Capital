@@ -1,0 +1,46 @@
+# RPG STEP 35: STATE PROPAGATION VERIFICATION
+
+## OPERATOR ACTION
+
+Operator manually executed shell commands to propagate the updated RPG_STATE.md template from `_TEMPLATE/` to all live agent memory folders.
+
+The updated template includes:
+- Current Level Threshold field
+- Next Level Threshold field
+- XP To Next Level field
+- Long-term progression formula in notes
+
+Command pattern used:
+```bash
+for agent in $(ls ai_agents_memory/ | grep -v '^_'); do
+  cp ai_agents_memory/_TEMPLATE/RPG_STATE.md ai_agents_memory/$agent/
+done
+```
+
+## RESULT
+
+| File | Status |
+|------|--------|
+| RPG_STATE.md | Updated in all 62 agent folders |
+
+**Verification Check:**
+- All agent folders inspected
+- No outdated RPG_STATE files found
+- All files contain new progression tracking fields
+
+## STATUS
+
+- [x] Updated RPG_STATE.md propagated to all agents
+- [x] New progression fields now available in all agent states
+- [x] Current Level Threshold: Present
+- [x] Next Level Threshold: Present
+- [x] XP To Next Level: Present
+- [x] Long-term progression formula documented
+- [x] All 62 agents have consistent RPG_STATE structure
+
+**Phase 0 foundation now includes long-term progression tracking.**
+
+---
+
+Verification Generated: 2026-03-29
+Agent: yam_yam

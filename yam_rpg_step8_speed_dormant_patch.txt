@@ -1,0 +1,105 @@
+# RPG STEP 8: SPEED DORMANT PATCH CONFIRMATION
+
+## FILES TOUCHED
+
+1. `/opt/openclaw/.openclaw/workspace/yam_rpg_step2_spec.txt`
+2. `/opt/openclaw/.openclaw/workspace/yam_rpg_step4_signal_map.txt`
+3. `/opt/openclaw/.openclaw/workspace/yam_rpg_step5_formula.txt`
+4. `/opt/openclaw/.openclaw/workspace/yam_rpg_step7_operator_summary.txt`
+
+---
+
+## WHAT CHANGED
+
+### yam_rpg_step2_spec.txt
+- Changed section header from "THE 4 STATS" to "THE STATS (v1 Active: 3 / Dormant: 1)"
+- Updated Speed section header to "3. SPEED (DORMANT in v1)"
+- Added explicit dormancy notice, status, and activation criteria to Speed section
+- Updated Judgment section header to "4. JUDGMENT (Active in v1)" for clarity
+- Modified "Stat Thresholds for Level Advancement" table to show SPD as dormant
+- Added note that SPD values in parentheses are NOT required for v1 level advancement
+
+### yam_rpg_step4_signal_map.txt
+- Updated Speed section header to "SPEED (DORMANT in v1)"
+- Added explicit "Status: DORMANT" declaration
+- Added "Why Dormant" explanation section
+- Added "Activation Path" section listing criteria for Speed to become active
+- Noted that potential proxies are "Not Used in v1"
+
+### yam_rpg_step5_formula.txt
+- Updated "Level Requirements" table to remove SPD requirements
+- Added note clarifying that Speed is dormant in v1
+- Specified that only ACC, REL, JUD requirements apply for level advancement
+
+### yam_rpg_step7_operator_summary.txt
+- Updated "Core Purpose" to reference "three active stats" instead of four
+- Split "What Gets Measured" into active stats and dormant stats sections
+- Added explicit mention of Speed dormancy in "Not Implemented in v1" section
+
+---
+
+## WHY SPEED IS DORMANT
+
+### Technical Reason
+Speed requires timing data that does not currently exist in the runtime:
+- No task start timestamps captured
+- No task end timestamps captured
+- No duration calculations available
+- No task complexity baseline established
+
+### Data Gap
+As documented in yam_rpg_step4_signal_map.txt:
+| Stat | Current Evidence | Status |
+|------|------------------|--------|
+| ACC | Strong (CHANGE_HISTORY.md, MISTAKES_TO_AVOID.md) | Active |
+| REL | Strong (TASK_HISTORY.md, tool results) | Active |
+| JUD | Medium (CHANGE_HISTORY.md risk notes, AGENTS.md) | Active |
+| SPD | None | Dormant |
+
+### Activation Criteria
+Speed will activate when:
+1. TASK_HISTORY.md includes `timestamp_start` and `timestamp_end` fields
+2. Agents consistently log task durations
+3. Minimum 100 timed tasks exist in dataset
+4. Operator explicitly enables Speed scoring
+
+---
+
+## V1 ACTIVE STATS
+
+| Stat | Status | Measures | Primary Sources |
+|------|--------|----------|-----------------|
+| **ACC** | Active | Correctness on first attempt | CHANGE_HISTORY.md proof, MISTAKES_TO_AVOID.md |
+| **REL** | Active | Consistency of execution | TASK_HISTORY.md, TOOLS_THAT_WORKED.md, tool results |
+| **JUD** | Active | Decision quality, escalation | CHANGE_HISTORY.md risk notes, AGENTS.md authority |
+| **SPD** | Dormant | Task completion efficiency | (Awaiting timing infrastructure) |
+
+### Level Advancement (v1)
+Only ACC, REL, and JUD requirements apply:
+
+| Level | Total XP | ACC | REL | JUD |
+|-------|----------|-----|-----|-----|
+| 1 | 0 | - | - | - |
+| 2 | 100 | ≥5 | ≥5 | ≥5 |
+| 3 | 200 | ≥10 | ≥10 | ≥10 |
+| 4 | 300 | ≥15 | ≥15 | ≥15 |
+| 5 | 400 | ≥20 | ≥20 | ≥20 |
+| 6 | 500 | ≥30 | ≥30 | ≥30 |
+| 7 | 600 | ≥40 | ≥40 | ≥40 |
+| 8 | 700 | ≥50 | ≥50 | ≥50 |
+| 9 | 800 | ≥60 | ≥60 | ≥60 |
+| 10 | 900 | ≥70 | ≥70 | ≥70 |
+
+---
+
+## SUMMARY
+
+Speed remains defined in the RPG system architecture but is explicitly marked as dormant for v1 implementation. No XP is awarded or tracked for Speed until timing data infrastructure is added. This reduces implementation scope while preserving the full four-stat design for future activation.
+
+All other aspects of the RPG system remain unchanged.
+
+---
+
+Patch Version: 1.0
+Date: 2026-03-29
+Agent: yam_yam

@@ -1,0 +1,89 @@
+# RPG STEP 22: PILOT SCORED VERIFICATION
+
+## FILE TOUCHED
+
+| File | Action | Path |
+|------|--------|------|
+| pilot_001.md | Filled with scoring data | /opt/openclaw/.openclaw/workspace/rpg_runs/pilot_001.md |
+
+## SCORING SUMMARY
+
+| Field | Value |
+|-------|-------|
+| Run ID | pilot_001 |
+| Date | 2026-03-29T19:43:00Z |
+| Agent | yam_yam |
+| Role | Master CEO |
+| Runtime Only | YES |
+| Accuracy Delta | 0 |
+| Reliability Delta | +11 |
+| Judgment Delta | 0 |
+| Speed Delta | 0 (dormant) |
+| XP Delta | +11 |
+| Level Change | None (11/100 to Level 2) |
+| Approved | (pending operator) |
+
+### XP Calculation
+```
+Action 1: Created RPG_RULES.md
+  - Base XP: +5 REL
+  - Proof: File exists at workspace/RPG_RULES.md
+
+Action 2: Re-read verification
+  - Base XP: +2 REL
+  - Proof: Read operation logged in Step 15 verification
+
+Subtotal: 7 REL
+First-try multiplier: 1.5x
+Total: 7 × 1.5 = 10.5 → 11 XP
+
+All XP assigned to Reliability (file operations)
+```
+
+## PROOF BASIS
+
+1. **RPG_RULES.md exists**
+   - Path: `/opt/openclaw/.openclaw/workspace/RPG_RULES.md`
+   - Size: ~5.4KB
+   - Content: Complete RPG rules v1 document
+   - Verified: YES (created in Step 15)
+
+2. **Re-read verification performed**
+   - Step 15 verification shows read of RPG_RULES.md
+   - Content matched expected structure
+   - Verified: YES
+
+3. **First-try success**
+   - File created without errors
+   - No corrections needed
+   - No tool failures
+   - Verified: YES
+
+4. **Runtime work only**
+   - Task requested by operator (Jacob)
+   - Produced verifiable file
+   - Not chatter or planning
+   - Verified: YES
+
+## STATUS
+
+- [x] pilot_001.md filled with scoring data
+- [x] Run ID assigned: pilot_001
+- [x] Date timestamp recorded
+- [x] Agent identified: yam_yam
+- [x] Runtime work documented (RPG_RULES.md creation)
+- [x] XP calculated per RPG_RULES.md formulas
+- [x] Rounding applied (10.5 → 11)
+- [x] Only active stats used (ACC, REL, JUD)
+- [x] Speed correctly set to 0 (dormant)
+- [x] Proof references provided
+- [x] Level progress calculated
+- [x] RPG_STATE.md NOT modified yet (awaiting approval)
+- [x] RPG_HISTORY.md NOT modified yet (awaiting approval)
+
+**Awaiting operator approval to apply score to agent files.**
+
+---
+
+Verification Generated: 2026-03-29
+Agent: yam_yam

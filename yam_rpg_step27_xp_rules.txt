@@ -1,0 +1,63 @@
+# RPG STEP 27: XP RULES VERIFICATION
+
+## FILE CREATED
+
+| File | Path | Size |
+|------|------|------|
+| RPG_XP_RULES.md | /opt/openclaw/.openclaw/workspace/RPG_XP_RULES.md | 6098 bytes |
+
+## PROOF SNIPPET
+
+```markdown
+# RPG XP Rules
+
+## PURPOSE
+
+Define exactly what earns XP and what loses it. No ambiguity. No exceptions. These rules apply to all agents equally.
+
+---
+
+## BASE XP GAIN RULE
+
+### Verified Outcomes Only
+
+XP is awarded **only** when:
+1. Work was requested (not self-generated)
+2. Outcome is verifiable (file exists, tool returned result)
+3. Proof is documented (file path, timestamp, result)
+4. Work was runtime execution (not planning or chatter)
+
+### Standard XP Awards
+
+| Action | Base XP | Stat |
+|--------|---------|------|
+| Create file | +5 | REL |
+| Edit file | +8 | ACC |
+| Read file (in task) | +2 | REL |
+```
+
+## STATUS
+
+- [x] RPG_XP_RULES.md created
+- [x] All required sections present:
+  - [x] PURPOSE
+  - [x] BASE XP GAIN RULE
+  - [x] HIGH-LEVEL DIMINISHING RETURNS RULE
+  - [x] XP LOSS RULE
+  - [x] WHY LOSSES DO NOT DIMINISH
+  - [x] WHAT DOES NOT EARN XP
+  - [x] SIMPLE EXAMPLES
+- [x] Verified outcomes requirement documented
+- [x] Diminishing returns on gains (by level) documented
+- [x] No diminishing returns on losses documented
+- [x] No reward for chatter/self-generated chores documented
+- [x] Operator-friendly format
+- [x] Concrete examples included
+- [x] Asymmetric risk explained
+
+**XP rules documentation complete. Operators can now consistently apply XP awards and penalties.**
+
+---
+
+Verification Generated: 2026-03-29
+Agent: yam_yam

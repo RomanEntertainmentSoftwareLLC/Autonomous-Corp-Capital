@@ -1,9 +1,15 @@
-Log of executed tasks.
+# TASK_HISTORY
 
-Format:
+## Entry Template
+- Timestamp Start:
+- Timestamp End:
+- Agent:
+- Task:
+- Task Complexity:
+- Attempts:
+- First Try Success:
+- Verified Outcome:
+- Notes:
 
-TASK:
-TOOL_USED:
-RESULT:
-PASSED_OR_FAILED:
-LESSON:
+## History
+- No task history yet.

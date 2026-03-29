@@ -1,0 +1,357 @@
+# RPG DATA MODEL v1
+
+## RECOMMENDED FILE PATHS
+
+### Core State Files
+
+| Path | Purpose | Access Pattern |
+|------|---------|----------------|
+| `ai_agents_memory/{agent_name}/RPG_STATE.md` | Current XP, level, stats | Read at session start, write at session end |
+| `ai_agents_memory/{agent_name}/RPG_HISTORY.md` | Per-run scoring records | Append-only |
+| `ai_agents_memory/{agent_name}/RPG_ACHIEVEMENTS.md` | Unlocked milestones | Append-only, rare updates |
+
+### Global Files (Optional)
+
+| Path | Purpose |
+|------|---------|
+| `ai_agents_memory/_global/AGENT_LEVELS.md` | Quick reference of all agent levels |
+| `ai_agents_memory/_global/LEADERBOARD.md` | Cross-agent rankings (opt-in) |
+
+---
+
+## PER-AGENT STATE FIELDS
+
+### RPG_STATE.md Structure
+
+```yaml
+---
+agent: yam_yam
+version: 1.0
+last_updated: 2026-03-29T15:12:00Z
+
+# Core Identity
+level: 1
+title: Initiate
+total_xp: 0
+
+# The 4 Stats (current values, not XP)
+stats:
+  accuracy: 0
+  reliability: 0
+  speed: 0
+  judgment: 0
+
+# XP breakdown by stat
+xp:
+  accuracy: 0
+  reliability: 0
+  speed: 0
+  judgment: 0
+  bonus: 0
+
+# Session tracking
+session_count: 0
+last_session: null
+
+# Anti-cheese
+session_xp_earned: 0  # Reset per session
+last_action_time: null
+
+# Verification
+checksum: sha256:...  # Optional integrity check
+---
+```
+
+### Field Definitions
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `agent` | string | Agent identifier (matches folder name) |
+| `version` | string | Data model version for migrations |
+| `last_updated` | ISO8601 | Last modification timestamp |
+| `level` | int | Current level (1-10) |
+| `title` | string | Human-readable level name |
+| `total_xp` | int | Sum of all XP ever earned |
+| `stats.{stat}` | int | Current stat values (not cumulative) |
+| `xp.{category}` | int | XP earned in each category |
+| `session_count` | int | Total completed sessions |
+| `session_xp_earned` | int | XP this session (anti-cheese limit) |
+| `last_action_time` | ISO8601 | Timestamp of last XP event |
+
+---
+
+## PER-RUN SCORING RECORD FIELDS
+
+### RPG_HISTORY.md Structure
+
+Append-only log. Each entry is a YAML document separated by `---`.
+
+```yaml
+---
+run_id: 2026-03-29-001
+session_id: abc123
+timestamp_start: 2026-03-29T14:00:00Z
+timestamp_end: 2026-03-29T14:30:00Z
+
+# Summary
+xp_earned: 45
+xp_lost: 3
+net_xp: 42
+level_before: 1
+level_after: 1
+
+# Stat changes
+stat_changes:
+  accuracy: +5
+  reliability: +10
+  speed: +2
+  judgment: +3
+
+# Events log
+events:
+  - timestamp: 2026-03-29T14:05:00Z
+    type: file_edit
+    description: "Created yam_rpg_step0_inventory.txt"
+    xp: +10
+    stat: accuracy
+    proof: "file_exists:/opt/openclaw/.openclaw/workspace/yam_rpg_step0_inventory.txt"
+    
+  - timestamp: 2026-03-29T14:10:00Z
+    type: tool_failure
+    description: "Invalid tool call attempted"
+    xp: -3
+    stat: reliability
+    proof: "tool_result:error"
+
+# Audit
+tool_calls_total: 12
+tool_calls_success: 11
+tool_calls_failed: 1
+files_created: 1
+files_edited: 2
+files_read: 8
+
+# Integrity
+verified_by: user  # or 'self', 'system'
+---
+```
+
+### Event Types
+
+| Type | Description | Required Proof |
+|------|-------------|----------------|
+| `file_create` | New file written | File path + hash |
+| `file_edit` | Existing file modified | Before/after context |
+| `file_read` | File read operation | Read result logged |
+| `tool_success` | Tool call succeeded | Tool result |
+| `tool_failure` | Tool call failed | Error message |
+| `correction` | Self-documented fix | MISTAKES_TO_AVOID.md entry |
+| `escalation` | Appropriate escalation | Escalation log |
+| `violation` | UNIVERSAL.md violation | Description |
+
+---
+
+## HOW XP CHANGES SHOULD BE STORED
+
+### Two-Phase Storage
+
+1. **Immediate (Per-Event)**
+   - Log to `RPG_HISTORY.md` events array
+   - Include: timestamp, type, description, xp delta, stat, proof
+   - Append only, never modify
+
+2. **Session-End (Aggregation)**
+   - Read all events from current session
+   - Calculate net changes
+   - Update `RPG_STATE.md` totals
+   - Clear `session_xp_earned` counter
+
+### XP Transaction Format
+
+```yaml
+xp_transaction:
+  id: uuid-or-sequence
+  timestamp: ISO8601
+  type: earn|lose|bonus|penalty
+  amount: int
+  stat: accuracy|reliability|speed|judgment|null
+  source: event_type
+  description: human-readable
+  proof_ref: path/to/proof
+  session_id: abc123
+```
+
+### Integrity Rules
+
+- All XP changes MUST have proof_ref
+- Proof must be verifiable (file exists, log entry present)
+- Negative XP (penalties) use same format as positive
+- Bonus XP tracked separately from stat XP
+
+---
+
+## HOW LEVELS SHOULD BE STORED
+
+### Current Level
+
+Stored in `RPG_STATE.md`:
+```yaml
+level: 3
+title: Journeyman
+xp_for_next_level: 250
+current_xp: 150
+```
+
+### Level History
+
+Append to `RPG_HISTORY.md` when level changes:
+```yaml
+level_up:
+  from_level: 2
+  to_level: 3
+  from_title: Apprentice
+  to_title: Journeyman
+  timestamp: 2026-03-29T15:00:00Z
+  triggered_by: session_end
+  stat_snapshot:
+    accuracy: 25
+    reliability: 30
+    speed: 15
+    judgment: 25
+```
+
+### Level Check Triggers
+
+| Trigger | When |
+|---------|------|
+| `session_end` | After each session summary |
+| `major_event` | After significant XP gain |
+| `user_request` | Manual promotion check |
+
+---
+
+## HOW FUTURE AGENTS FIT IN
+
+### Agent Onboarding
+
+When new agent `new_agent` is created:
+
+1. Create folder: `ai_agents_memory/new_agent/`
+2. Copy templates:
+   - `RPG_STATE.md` (initialized to level 1, all zeros)
+   - `RPG_HISTORY.md` (empty, just header)
+   - `RPG_ACHIEVEMENTS.md` (empty)
+3. Add to global registry: `ai_agents_memory/_global/AGENT_LEVELS.md`
+
+### Agent-Specific Overrides
+
+Some agents may have different scoring rules (e.g., specialized roles):
+
+```yaml
+# In RPG_STATE.md
+scoring_profile: default  # or 'watchdog', 'sw_eng', 'ceo'
+```
+
+Profiles defined in: `ai_agents_memory/_global/SCORING_PROFILES.md`
+
+### Agent Retirement
+
+```yaml
+# In RPG_STATE.md
+status: active  # or 'retired', 'suspended'
+retired_at: null
+career_summary:
+  total_xp_earned: 5000
+  final_level: 5
+  sessions_completed: 120
+```
+
+---
+
+## SIMPLEST SAFE FORMAT
+
+### MVP Recommendation: Markdown Tables
+
+For v1.0, use simple markdown tables in `.md` files. No JSON, no complex parsing.
+
+#### RPG_STATE.md (Simple Version)
+
+```markdown
+# RPG State: yam_yam
+
+Updated: 2026-03-29 15:12 UTC
+
+| Field | Value |
+|-------|-------|
+| Level | 1 |
+| Title | Initiate |
+| Total XP | 45 |
+| Accuracy | 5 |
+| Reliability | 10 |
+| Speed | 2 |
+| Judgment | 3 |
+| Sessions | 1 |
+
+## XP Breakdown
+
+| Source | XP |
+|--------|-----|
+| File edits | 20 |
+| Tool success | 15 |
+| Re-read discipline | 10 |
+```
+
+#### RPG_HISTORY.md (Simple Version)
+
+```markdown
+# RPG History: yam_yam
+
+## Session 2026-03-29-001
+
+| Time | Event | XP | Stat | Proof |
+|------|-------|-----|------|-------|
+| 14:05 | Created inventory file | +10 | ACC | yam_rpg_step0_inventory.txt |
+| 14:10 | Tool failure | -3 | REL | log:tool_error |
+| 14:15 | Re-read verification | +2 | REL | log:re_read_ok |
+
+**Session Total: +42 XP**
+```
+
+### Why Markdown Tables?
+
+- **Human-readable:** Operator can inspect with `cat` or any editor
+- **Version control friendly:** Line-based diffs
+- **No parsing needed:** Agent can read with simple line parsing
+- **Extensible:** Easy to add columns
+- **Safe:** No code execution risk (unlike JSON with potential injection)
+
+### Migration Path
+
+| Version | Format |
+|---------|--------|
+| v1.0 | Markdown tables |
+| v1.5 | YAML frontmatter + markdown |
+| v2.0 | JSON (if automation requires) |
+
+---
+
+## FILE PERMISSIONS
+
+Recommended:
+- `RPG_STATE.md`: 644 (rw-r--r--) - agent writes, operator reads
+- `RPG_HISTORY.md`: 644 - append-only by agent
+- `RPG_ACHIEVEMENTS.md`: 644 - rare updates
+
+---
+
+## BACKUP STRATEGY
+
+- Daily: Copy `ai_agents_memory/` to `ai_agents_memory/.backup/YYYYMMDD/`
+- Before level-up: Snapshot `RPG_STATE.md`
+- On corruption: Restore from backup, replay `RPG_HISTORY.md` events
+
+---
+
+Data Model Version: 1.0
+Date: 2026-03-29
+Agent: yam_yam

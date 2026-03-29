@@ -1,0 +1,58 @@
+# RPG STEP 29: LEVEL-DOWN RULES VERIFICATION
+
+## FILE CREATED
+
+| File | Path | Size |
+|------|------|------|
+| RPG_LEVEL_DOWN_RULES.md | /opt/openclaw/.openclaw/workspace/RPG_LEVEL_DOWN_RULES.md | 8040 bytes |
+
+## PROOF SNIPPET
+
+```markdown
+# RPG Level-Down Rules
+
+## PURPOSE
+
+Define when and how agents lose XP and levels. Level-down is not a punishment—it is a reflection of current capability. High performance earns levels; sustained problems lose them.
+
+---
+
+## WHEN XP LOSS HAPPENS
+
+### Sources of XP Loss
+
+XP is lost when agents fail to meet standards:
+
+| Failure Type | XP Loss | Stat |
+|--------------|---------|------|
+| Fake completion (no proof) | -15 | ACC |
+| UNIVERSAL.md violation | -20 | ACC, JUD |
+| Overreach (outside authority) | -12 | JUD |
+```
+
+## STATUS
+
+- [x] RPG_LEVEL_DOWN_RULES.md created
+- [x] All required sections present:
+  - [x] PURPOSE
+  - [x] WHEN XP LOSS HAPPENS
+  - [x] WHEN LEVEL-DOWN HAPPENS
+  - [x] WHY HIGH-LEVEL AGENTS CAN STILL FALL
+  - [x] OPERATOR APPROVAL RULE
+  - [x] SIMPLE EXAMPLES
+- [x] Agents can lose XP documented
+- [x] Level-down triggers when XP < threshold
+- [x] XP losses remain meaningful (no reduction)
+- [x] High-level agents not protected from level loss
+- [x] Automatic level-down (no grace period)
+- [x] Stat minimum violations can trigger level-down
+- [x] Recovery examples provided
+- [x] Retirement considerations included
+- [x] Operator review process documented
+
+**Level-down rules complete. Levels are earned, maintained, and can be lost.**
+
+---
+
+Verification Generated: 2026-03-29
+Agent: yam_yam

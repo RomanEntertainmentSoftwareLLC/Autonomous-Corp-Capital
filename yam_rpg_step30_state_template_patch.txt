@@ -1,0 +1,58 @@
+# RPG STEP 30: STATE TEMPLATE PATCH VERIFICATION
+
+## FILE TOUCHED
+
+| File | Action | Path |
+|------|--------|------|
+| RPG_STATE.md | Updated | ai_agents_memory/_TEMPLATE/RPG_STATE.md |
+
+## NEW FIELDS ADDED
+
+| Field | Purpose | Example (Level 1) |
+|-------|---------|-------------------|
+| Current Level Threshold | Minimum XP for current level | 0 (Level 1 starts at 0) |
+| Next Level Threshold | XP needed to reach next level | 100 (Level 2 threshold) |
+| XP To Next Level | Remaining XP to level up | 100 (100 - 0 = 100) |
+
+## PROOF SNIPPET
+
+```markdown
+# RPG State: TEMPLATE
+
+| Field | Value |
+|-------|-------|
+| Level | 1 |
+| Title | Initiate |
+| Total XP | 0 |
+| Current Level Threshold | 0 |
+| Next Level Threshold | 100 |
+| XP To Next Level | 100 |
+| Accuracy | 0 |
+| Reliability | 0 |
+| Speed | 0 |
+| Judgment | 0 |
+| Sessions | 0 |
+
+## Notes
+- Speed is dormant in v1 until timing data exists.
+- Level thresholds use long-term progression formula: XP_Next = 100 + 50×(Level-1)
+```
+
+## STATUS
+
+- [x] RPG_STATE.md template updated
+- [x] Current Level Threshold field added
+- [x] Next Level Threshold field added
+- [x] XP To Next Level field added
+- [x] All existing fields preserved (Level, Title, Total XP, Stats, Sessions)
+- [x] Speed field present and marked dormant in notes
+- [x] Long-term progression formula documented in notes
+- [x] File remains operator-friendly and readable
+- [x] Ready for propagation to agent folders
+
+**Template updated for long-term progression tracking.**
+
+---
+
+Verification Generated: 2026-03-29
+Agent: yam_yam

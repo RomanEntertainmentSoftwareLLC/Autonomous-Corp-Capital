@@ -1,0 +1,60 @@
+# RPG STEP 18: MANUAL APPLY PLAN VERIFICATION
+
+## FILE CREATED
+
+| File | Path | Size |
+|------|------|------|
+| yam_rpg_step18_manual_apply_plan.txt | /opt/openclaw/.openclaw/workspace/yam_rpg_step18_manual_apply_plan.txt | 7168 bytes |
+
+## PROOF SNIPPET
+
+```markdown
+# RPG STEP 18: MANUAL RUNTIME SCORE APPLICATION PLAN
+
+## INPUTS REQUIRED
+
+Before applying a score, the following must be documented:
+
+| Input | Source | Required |
+|-------|--------|----------|
+| Run ID | Operator assigns | YES |
+| Date | ISO8601 timestamp | YES |
+| Agent Name | Who performed the work | YES |
+| Verified Outcomes | What actually happened | YES |
+| XP Calculation | Per RPG_RULES.md formulas | YES |
+| Proof References | File paths, log entries | YES |
+| Reviewer Name | Who approves | YES |
+
+[... continues with WHO REVIEWS, WHICH FILES CHANGE, etc.]
+
+## SAFEST FIRST PILOT
+
+### Recommended First Run
+**Agent:** yam_yam (you are here, now)
+**Task:** This very planning document
+**Scope:** Single file creation
+**Complexity:** Simple (1 tool call)
+```
+
+## STATUS
+
+- [x] Manual apply plan created
+- [x] All required sections present:
+  - [x] INPUTS REQUIRED
+  - [x] WHO REVIEWS
+  - [x] WHICH FILES CHANGE
+  - [x] HOW XP IS APPLIED
+  - [x] HOW RPG_HISTORY IS UPDATED
+  - [x] HOW RPG_STATE IS UPDATED
+  - [x] SAFEST FIRST PILOT
+- [x] Example complete workflow included
+- [x] Pilot recommendation: yam_yam, simple file task
+- [x] Process is safe, reversible, operator-controlled
+- [x] Uses existing RPG files and templates only
+
+**Manual scoring process defined. Ready for pilot run.**
+
+---
+
+Verification Generated: 2026-03-29
+Agent: yam_yam

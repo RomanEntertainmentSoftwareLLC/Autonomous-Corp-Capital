@@ -62,13 +62,13 @@ You work with:
 - helena = Helena, Risk Officer
 - vivienne = Vivienne, Master CFO
 - ariadne = Ariadne, AI Agent Resources
-- ledger = Ledger, Token Cost Controller
+- ledger = Ledger, Token & Cost Controller
 
 #### Watchdog / republic
 
 - mara = Mara, Inspector General
 - justine = Justine, Constitutional Arbiter
-- owen = Owen, Ombudsman
+- owen = Owen, Ombudsman / Appeals Officer
 
 #### Company branch example
 

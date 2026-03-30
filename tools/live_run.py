@@ -576,23 +576,14 @@ def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], 
         missing_input_flags.append(role)
         saved = latest_report(saved_reports, role)
         if saved:
+            committee_sources[role] = {"mode": "fallback_saved", "summary": saved.get("analysis_summary") or saved.get("recommendation") or saved.get("research_summary") or saved.get("executive_summary") or saved.get("reply_text")}
+            if role in {"Lucian", "Bianca"}:
+                committee_sources[role]["authority"] = "historical_only"
+                continue
             role_payloads[role] = saved
             source_agents_consulted.append(role)
-            committee_sources[role] = {"mode": "fallback_saved", "summary": saved.get("analysis_summary") or saved.get("recommendation") or saved.get("research_summary") or saved.get("executive_summary") or saved.get("reply_text")}
         else:
-            if role == "Iris":
-                code_only = _fresh_iris_input(company, ranked_candidates, now)
-            elif role == "Vera":
-                code_only = _fresh_vera_input(company, ranked_candidates, now)
-            elif role == "Orion":
-                code_only = _fresh_orion_input(company, ranked_candidates, now)
-            elif role == "Bianca":
-                code_only = _fresh_bianca_posture(company, ranked_candidates, now)
-            else:
-                code_only = _fresh_lucian_posture(company, ranked_candidates, now)
-            role_payloads[role] = code_only
-            source_agents_consulted.append(role)
-            committee_sources[role] = {"mode": "code_only", "summary": code_only.get("summary")}
+            committee_sources[role] = {"mode": "missing", "summary": "missing live committee output"}
 
     rationale = " | ".join(
         role_payloads[name].get("analysis_summary")
@@ -604,11 +595,7 @@ def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], 
         if role_payloads.get(name)
     )
     approval_posture = derive_lucian_posture(role_payloads.get("Lucian", {}))
-    if committee_sources.get("Lucian", {}).get("mode") == "code_only":
-        approval_posture = role_payloads.get("Lucian", {}).get("approval_posture", approval_posture)
     cap_multiplier = derive_bianca_cap_multiplier(role_payloads.get("Bianca", {}))
-    if committee_sources.get("Bianca", {}).get("mode") == "code_only":
-        cap_multiplier = float(role_payloads.get("Bianca", {}).get("cap_multiplier", cap_multiplier))
 
     live_roles = [role for role, meta in committee_sources.items() if meta.get("mode") == "live_session"]
     return {
@@ -792,25 +779,38 @@ def write_agent_performance_report(run_dir: Path, run_id: str, status: str | Non
         committee_sources = packet.get("committee_sources") or {}
         consulted = set(packet.get("source_agents_consulted") or [])
         agents = sorted(set(roles) | consulted | set(committee_sources))
+        company_lines: List[str] = []
         for agent in agents:
             summary = "no measurable impact"
             verdict = "No visible contribution"
+            meaningful = False
             if agent == "Lucian":
+                lucian_meta = committee_sources.get("Lucian") or {}
                 summary = f"approval_posture={packet.get('approval_posture', 'unknown')}"
                 verdict = "Constraining" if packet.get("approval_posture") == "company_veto" else "Impacting"
+                meaningful = packet.get("approval_posture") == "company_veto" or lucian_meta.get("mode") != "live_session" or lucian_meta.get("authority") == "historical_only"
             elif agent == "Bianca":
+                bianca_meta = committee_sources.get("Bianca") or {}
                 summary = f"cap_multiplier={packet.get('cap_multiplier', 'n/a')}"
                 verdict = "Constraining" if float(packet.get("cap_multiplier") or 1.0) < 1.0 else "Impacting"
+                meaningful = float(packet.get("cap_multiplier") or 1.0) < 1.0 or bianca_meta.get("mode") != "live_session" or bianca_meta.get("authority") == "historical_only"
             elif agent in committee_sources:
                 summary = str((committee_sources.get(agent) or {}).get("summary") or "consulted, summary missing")
                 verdict = "Advisory-only"
+                meaningful = summary not in {"no measurable impact", "consulted, summary missing"}
             elif agent in consulted:
                 summary = "consulted, summary missing"
                 verdict = "Advisory-only"
+            if not meaningful:
+                continue
             tokens = usage.get((company, agent))
             token_text = str(tokens) if tokens is not None else "n/a"
-            lines.append(f"- {agent} ({roles.get(agent, 'Unknown')}): {summary} | tokens={token_text} | verdict={verdict}")
-        lines.append("")
+            company_lines.append(f"- {agent} ({roles.get(agent, 'Unknown')}): {summary} | tokens={token_text} | verdict={verdict}")
+        if company_lines:
+            lines.extend(company_lines)
+            lines.append("")
+        else:
+            lines.pop()
     (run_dir / "reports" / "agent_performance.md").write_text("\n".join(lines).rstrip() + "\n")
 
 
@@ -820,6 +820,15 @@ def write_company_meetings_report(run_dir: Path, run_id: str, status: str | None
     included = 0
     for company in sorted(last_packets):
         packet = last_packets[company]
+        committee_sources = packet.get("committee_sources") or {}
+        lucian_meta = committee_sources.get("Lucian") or {}
+        bianca_meta = committee_sources.get("Bianca") or {}
+        lucian_status = f"Lucian={lucian_meta.get('mode', 'missing')}"
+        if lucian_meta.get("authority") == "historical_only":
+            lucian_status += " (historical_only)"
+        bianca_status = f"Bianca={bianca_meta.get('mode', 'missing')}"
+        if bianca_meta.get("authority") == "historical_only":
+            bianca_status += " (historical_only)"
         executed_actions = []
         for candidate in packet.get("top_ranked_candidates") or []:
             decision = str(candidate.get("decision") or "").upper()
@@ -842,6 +851,7 @@ def write_company_meetings_report(run_dir: Path, run_id: str, status: str | None
             outcome_parts.append("Notable veto: " + (", ".join(vetoed_symbols) if vetoed_symbols else "company_veto"))
         lines.append(f"## {company}")
         lines.append(f"- Outcome: {' | '.join(outcome_parts)}")
+        lines.append(f"- Evidence: {lucian_status}; {bianca_status}")
         lines.append(f"- Vote: {packet.get('approval_posture', 'unknown')}")
         lines.append(f"- Constraint: {packet.get('cap_multiplier', 'n/a')}")
         lines.append(f"- Attendance: {attendance}")

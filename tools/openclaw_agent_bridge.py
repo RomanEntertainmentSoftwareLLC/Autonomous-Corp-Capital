@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import subprocess
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict
 
@@ -104,6 +105,28 @@ def _looks_like_lock_error(text: str) -> bool:
  lowered = text.lower()
  return "session file locked" in lowered or ".jsonl.lock" in lowered
 
+def _append_usage_telemetry(acc_agent_id: str, real_agent_id: str, prompt: Dict[str, Any], outcome: str, bridge_error: str | None = None) -> None:
+ target_scope = prompt.get("target_scope")
+ company = target_scope if isinstance(target_scope, str) and target_scope.startswith("company_") else None
+ telemetry = {
+  "timestamp": datetime.now(timezone.utc).isoformat(),
+  "agent": prompt.get("agent_id") or acc_agent_id,
+  "company": company,
+  "model": f"openclaw_agent:{real_agent_id}",
+  "provider": "openclaw_bridge",
+  "prompt_tokens": None,
+  "completion_tokens": None,
+  "total_tokens": None,
+  "estimated_cost": None,
+  "outcome": outcome,
+ }
+ if bridge_error is not None:
+  telemetry["bridge_error"] = bridge_error
+ usage_path = REPO_ROOT / "state" / "agents" / "ledger" / "usage.jsonl"
+ usage_path.parent.mkdir(parents=True, exist_ok=True)
+ with usage_path.open("a", encoding="utf-8") as fh:
+  fh.write(json.dumps(telemetry) + "\n")
+
 class OpenClawAdapter:
  def __init__(self, acc_agent_id: str) -> None:
   self.acc_agent_id = acc_agent_id
@@ -204,6 +227,7 @@ class OpenClawAdapter:
   for attempt in range(1, attempts + 1):
    try:
     parsed = self._invoke_once(wrapped_message, timeout_seconds)
+    _append_usage_telemetry(self.acc_agent_id, self.real_agent_id, prompt, "success")
     return _normalize_result(parsed, prompt)
    except Exception as exc:
     last_error = exc
@@ -211,6 +235,7 @@ class OpenClawAdapter:
     if attempt < attempts and _looks_like_lock_error(text):
      time.sleep(sleep_seconds)
      continue
+    _append_usage_telemetry(self.acc_agent_id, self.real_agent_id, prompt, "error", bridge_error=text)
     raise
 
   if last_error is not None:

@@ -125,12 +125,18 @@ def main() -> None:
     try:
      response = adapter.reason(message, prompt)
     except Exception as exc:
-     response = SimpleLLMAdapter().reason(message, prompt)
-     response["bridge_fallback_used"] = True
-     response["bridge_error"] = str(exc)
-     if response.get("bridge_fallback_used"):
-      response["priority"] = "high"
-      response["queue_action"] = "escalate"
+     response = {
+      "reply_text": f"Bridge call failed for {args.agent}; escalated without Python role fallback.",
+      "priority": "high",
+      "queue_action": "none",
+      "status": "blocked",
+      "escalation": True,
+      "escalate_to": "Yam Yam",
+      "handoff_to": "Yam Yam",
+      "task_type": "bridge_failure",
+      "requested_action": f"Investigate OpenClaw bridge failure for {args.agent}",
+      "bridge_error": str(exc),
+     }
 
     now = datetime.now(timezone.utc).isoformat()
     task_id = str(uuid.uuid4())
@@ -148,10 +154,6 @@ def main() -> None:
         now,
     )
     packet = merge_structured_fields(packet, prompt, response)
-    if response.get("bridge_fallback_used"):
-     packet["bridge_fallback_used"] = True
-     packet["bridge_error"] = response.get("bridge_error", "")
-     packet["status"] = "blocked"
 
     role_type = prompt.get("role_type", "").lower()
     if role_type == "analyst":

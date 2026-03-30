@@ -86,13 +86,35 @@ class OpenAIAdapter(LLMAdapter):
         try:
             with urllib.request.urlopen(request, timeout=60) as response:
                 data = json.loads(response.read().decode())
-        except Exception:
-            return SimpleLLMAdapter().reason(message, prompt)
+        except Exception as exc:
+            return {
+                "reply_text": "Provider call failed; blocked without Python role fallback.",
+                "priority": "high",
+                "queue_action": "none",
+                "status": "blocked",
+                "escalation": True,
+                "escalate_to": "Yam Yam",
+                "handoff_to": "Yam Yam",
+                "task_type": "provider_failure",
+                "requested_action": "Investigate provider/model failure",
+                "provider_error": str(exc),
+            }
         choice = data["choices"][0]["message"]["content"]
         try:
             result = json.loads(choice)
-        except json.JSONDecodeError:
-            return SimpleLLMAdapter().reason(message, prompt)
+        except json.JSONDecodeError as exc:
+            return {
+                "reply_text": "Provider response parse failed; blocked without Python role fallback.",
+                "priority": "high",
+                "queue_action": "none",
+                "status": "blocked",
+                "escalation": True,
+                "escalate_to": "Yam Yam",
+                "handoff_to": "Yam Yam",
+                "task_type": "provider_parse_failure",
+                "requested_action": "Investigate provider response parse failure",
+                "provider_error": str(exc),
+            }
         usage = data.get("usage") or {}
         target_scope = prompt.get("target_scope")
         company = target_scope if isinstance(target_scope, str) and target_scope.startswith("company_") else None

@@ -30,14 +30,17 @@ def orchestrate(run_dir: Path, cycle: int, cycle_decisions: List[Dict[str, Any]]
     if cycle % 5 == 0 and cycle_decisions:
         participants = BRANCH_PARTICIPANTS["company_local"]
         summary = (
-            f"Iris analyzed {len(cycle_decisions)} symbol snapshots; Vera endorsed the leading signals;"
-            f" Bianca affirmed company cash with Lucian signing off; June recorded lessons; Pam coordinated routing."
+            f"Orchestration summary: cycle produced {len(cycle_decisions)} executed decision(s); "
+            "company_local packet records meta-level routing only, not verified fresh direct participation by each listed role."
         )
         branch_packet(run_dir, "company_local", summary, participants)
         master_summary = (
-            "Selene compared treasury posture; Helena reviewed constraints; Vivienne evaluated efficiency; Yam Yam noted the ecosystem direction."
+            "Meta summary from cycle data: master packet reflects orchestration-level oversight context only, not verified fresh direct participation by each listed role."
         )
         branch_packet(run_dir, "master", master_summary, BRANCH_PARTICIPANTS["master"])
     if anomalies:
-        summary = f"Anomalies detected: {', '.join(anomalies)}; Mara auditing integrity, Justine ready for authority issues, Owen tracking appeals."
+        summary = (
+            f"Anomaly meta summary: detected anomalies = {', '.join(anomalies)}; watchdog packet records orchestration-level escalation context only, "
+            "not verified fresh direct participation by each listed role."
+        )
         branch_packet(run_dir, "watchdog", summary, BRANCH_PARTICIPANTS["watchdog"])

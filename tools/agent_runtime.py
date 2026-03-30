@@ -331,13 +331,7 @@ def gather_company_insights(scope: str, target_scope: str, queue: Dict[str, Any]
     insights["leaderboard_summary"] = (
         insights["leaderboard_entries"][0] if insights["leaderboard_entries"] else None
     )
-    manager_actions = load_yaml_file(Path("manager_actions.yaml"))
-    manager_action = None
-    for action in manager_actions.get("actions", []):
-        if action.get("company") == target_scope:
-            manager_action = action
-            break
-    insights["manager_action"] = manager_action
+    insights["manager_action"] = None
     results_dir = ROOT / "results" / target_scope
     if results_dir.exists():
         insights["logs_present"] = True
@@ -353,8 +347,6 @@ def gather_company_insights(scope: str, target_scope: str, queue: Dict[str, Any]
         missing.append("leaderboard")
     if not insights["logs_present"]:
         missing.append("logs")
-    if not insights.get("manager_action"):
-        missing.append("manager_action")
     insights["missing_data"] = missing
     insights["queue_entries"] = queue_snapshot
     insights["allocation"] = {
@@ -365,8 +357,6 @@ def gather_company_insights(scope: str, target_scope: str, queue: Dict[str, Any]
     capital_usage = {
         "allocated": metadata.get("allocation_amount"),
     }
-    if manager_action and manager_action.get("account_value") is not None:
-        capital_usage["manager_account_value"] = manager_action.get("account_value")
     insights["capital_usage"] = capital_usage
     insights["budget_posture"] = metadata.get("allocation_status") or "unknown"
     treasury_path = ROOT / "state" / "treasury.yaml"

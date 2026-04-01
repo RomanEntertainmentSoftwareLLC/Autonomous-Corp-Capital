@@ -16,6 +16,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Dict, Any, List
 import urllib.error
+from urllib.parse import urlparse
 
 from tools.agent_runtime import collect_agent_reports
 from tools.live_decision_engine import build_decision, DecisionResult
@@ -37,6 +38,8 @@ MAX_EXECUTIONS_PER_CYCLE = 6
 MAX_EXECUTIONS_PER_COMPANY_PER_CYCLE = 2
 LIVE_COMMITTEE_TIMEOUT_SECONDS = int(os.getenv("LIVE_COMMITTEE_TIMEOUT_SECONDS", "25"))
 LIVE_COMMITTEE_ROLES = ["Lucian", "Bianca", "Vera", "Iris", "Orion"]
+COMMITTEE_REUSE_WINDOW_SECONDS = 300
+BRIDGE_CALL_BUDGET_PER_RUN = 25
 
 
 def virtual_currency_context(virtual_currency: float | None) -> Dict[str, Any]:
@@ -223,21 +226,142 @@ def _orion_uncertainty_factor(report: Dict[str, Any]) -> float:
 
 
 
+def _normalize_orion_evidence_metadata(report: Dict[str, Any]) -> Dict[str, Any]:
+    evidence = report.get("evidence")
+    evidence_mode = None
+    source_count = None
+    latest_source_ts = None
+    source_domains: List[str] = []
+    if isinstance(evidence, list):
+        evidence_mode = "structured" if any(isinstance(item, dict) for item in evidence) else "unstructured"
+        source_count = 0
+        domains = set()
+        latest_ts = None
+        for item in evidence:
+            if not isinstance(item, dict):
+                continue
+            source_ts_raw = item.get("published_at") or item.get("retrieved_at")
+            source_ts = _parse_report_timestamp({"timestamp": source_ts_raw}) if source_ts_raw else None
+            url = str(item.get("url") or "")
+            domain = urlparse(url).netloc.lower() if url else ""
+            if item.get("title") and url and item.get("source") and source_ts_raw:
+                source_count += 1
+                if domain:
+                    domains.add(domain)
+                if source_ts and (latest_ts is None or source_ts > latest_ts):
+                    latest_ts = source_ts
+        latest_source_ts = latest_ts.isoformat() if latest_ts else None
+        source_domains = sorted(domains)
+    return {
+        "evidence_mode": evidence_mode,
+        "source_count": source_count,
+        "latest_source_ts": latest_source_ts,
+        "source_domains": source_domains,
+    }
+
+
+
+def _orion_has_evidence_metadata(report: Dict[str, Any]) -> bool:
+    return bool(_normalize_orion_evidence_metadata(report).get("source_count"))
+
+
+
+ORION_CACHE_FRESHNESS_HOURS = 1.0
+ORION_CACHE_PATH = ROOT / "state" / "agents" / "orion" / "headlines_cache.jsonl"
+
+
+def _load_orion_cache(symbol: str, max_age_hours: float = ORION_CACHE_FRESHNESS_HOURS) -> List[Dict[str, Any]] | None:
+    if not ORION_CACHE_PATH.exists():
+        return None
+    try:
+        for raw in ORION_CACHE_PATH.read_text().splitlines():
+            if not raw.strip():
+                continue
+            try:
+                row = json.loads(raw)
+            except Exception:
+                continue
+            if row.get("symbol") != symbol:
+                continue
+            cached_at = _parse_report_timestamp({"timestamp": row.get("cached_at")})
+            if cached_at and (datetime.utcnow().replace(tzinfo=timezone.utc) - cached_at) <= timedelta(hours=max_age_hours):
+                return row.get("articles") or []
+    except Exception:
+        pass
+    return None
+
+
+def _save_orion_cache(symbol: str, articles: List[Dict[str, Any]]) -> None:
+    ORION_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    entry = {"symbol": symbol, "cached_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(), "articles": articles}
+    with ORION_CACHE_PATH.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(entry) + "\n")
+
+
+def _fetch_orion_headlines(symbol: str, max_age_hours: float = 24.0, limit: int = 3) -> List[Dict[str, Any]]:
+    cached = _load_orion_cache(symbol, max_age_hours=ORION_CACHE_FRESHNESS_HOURS)
+    if cached is not None:
+        return cached
+    api_key = os.getenv("NEWSAPI_KEY")
+    if not api_key:
+        return []
+    query = symbol.upper()
+    from_date = (datetime.utcnow() - timedelta(hours=max_age_hours)).strftime("%Y-%m-%d")
+    url = f"https://newsapi.org/v2/everything?q={query}&from={from_date}&sortBy=publishedAt&pageSize={limit}&apiKey={api_key}"
+    try:
+        with urllib.request.urlopen(url, timeout=10) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except Exception:
+        return []
+    articles = data.get("articles") or []
+    results: List[Dict[str, Any]] = []
+    cutoff = datetime.utcnow() - timedelta(hours=max_age_hours)
+    for article in articles[:limit]:
+        if not isinstance(article, dict):
+            continue
+        published = article.get("publishedAt")
+        if published:
+            try:
+                pub_dt = datetime.fromisoformat(published.replace("Z", "+00:00")).replace(tzinfo=None)
+                if pub_dt < cutoff:
+                    continue
+            except ValueError:
+                continue
+        item = {
+            "title": str(article.get("title") or "").strip(),
+            "url": str(article.get("url") or "").strip(),
+            "source": str((article.get("source") or {}).get("name") or article.get("source") or "unknown").strip(),
+            "published_at": published,
+            "retrieved_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+        }
+        if item["title"] and item["url"]:
+            results.append(item)
+    _save_orion_cache(symbol, results)
+    return results
+
+
+
 def compute_orion_bias(decision: Dict[str, Any], report: Dict[str, Any], now: datetime | None = None) -> Dict[str, Any]:
     now = now or datetime.utcnow().replace(tzinfo=timezone.utc)
     report_ts = _parse_report_timestamp(report)
+    evidence_meta = _normalize_orion_evidence_metadata(report)
+    has_structured_evidence = _orion_has_evidence_metadata(report)
+    quality_state = "evidence_backed" if has_structured_evidence else "legacy_text_only"
     default = {
         "orion_bias": 0.0,
         "orion_bias_reason": "no_report",
         "orion_report_timestamp": report_ts.isoformat() if report_ts else None,
         "orion_match_fields": [],
         "orion_bias_applied": False,
+        "orion_quality_state": "degraded",
+        **evidence_meta,
     }
     if not report:
         return default
     if _orion_report_is_stale(report, now):
         default["orion_bias_reason"] = "stale_report"
         return default
+    default["orion_quality_state"] = quality_state
     match_fields = _orion_symbol_match_fields(report, str(decision.get("symbol") or ""))
     if not match_fields:
         default["orion_bias_reason"] = "no_symbol_match"
@@ -254,6 +378,8 @@ def compute_orion_bias(decision: Dict[str, Any], report: Dict[str, Any], now: da
         "orion_report_timestamp": report_ts.isoformat() if report_ts else None,
         "orion_match_fields": match_fields,
         "orion_bias_applied": bias != 0.0,
+        "orion_quality_state": quality_state,
+        **evidence_meta,
     }
 
 
@@ -263,8 +389,17 @@ def apply_orion_bias_before_ranking(candidates: List[Dict[str, Any]], now: datet
     report_cache: Dict[str, Dict[str, Any]] = {}
     for candidate in candidates:
         company = str(candidate.get("company_id"))
+        symbol = str(candidate.get("symbol") or "")
         if company not in report_cache:
-            report_cache[company] = latest_report(collect_agent_reports(company), "Orion")
+            report = latest_report(collect_agent_reports(company), "Orion") or {}
+            current_evidence = report.get("evidence") or []
+            has_fresh_evidence = bool(_normalize_orion_evidence_metadata(report).get("source_count"))
+            if symbol and not has_fresh_evidence:
+                fetched = _fetch_orion_headlines(symbol, max_age_hours=24.0, limit=3)
+                if fetched:
+                    current_evidence = fetched
+                    report["evidence"] = current_evidence
+            report_cache[company] = report
         base_score = float(candidate.get("ranking_score") or candidate_ranking_score(candidate))
         candidate["ranking_score_before_orion"] = round(base_score, 6)
         meta = compute_orion_bias(candidate, report_cache[company], now=now)
@@ -329,11 +464,17 @@ def _committee_cycle_message(company: str, company_candidates: List[Dict[str, An
 
 
 
-def _invoke_live_committee_agent(agent_id: str, message: str) -> Dict[str, Any]:
+def _invoke_live_committee_agent(agent_id: str, message: str, run_id: str | None = None, cycle: int | None = None) -> Dict[str, Any]:
     cmd = [sys.executable, str(ROOT / "tools" / "pam.py"), "--agent", agent_id, message]
+    env = dict(os.environ)
+    if run_id is not None:
+        env["ACC_RUN_ID"] = str(run_id)
+    if cycle is not None:
+        env["ACC_CYCLE"] = str(cycle)
     result = subprocess.run(
         cmd,
         cwd=ROOT,
+        env=env,
         capture_output=True,
         text=True,
         timeout=LIVE_COMMITTEE_TIMEOUT_SECONDS,
@@ -349,18 +490,87 @@ def _invoke_live_committee_agent(agent_id: str, message: str) -> Dict[str, Any]:
 
 
 
-def _run_live_committee(company: str, company_candidates: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+def _run_live_committee(company: str, company_candidates: List[Dict[str, Any]], run_id: str | None = None, cycle: int | None = None) -> Dict[str, Dict[str, Any]]:
     message = _committee_cycle_message(company, company_candidates)
     outputs: Dict[str, Dict[str, Any]] = {}
     with ThreadPoolExecutor(max_workers=len(LIVE_COMMITTEE_ROLES)) as pool:
         future_map = {
-            pool.submit(_invoke_live_committee_agent, _committee_agent_id(company, role), message): role
+            pool.submit(_invoke_live_committee_agent, _committee_agent_id(company, role), message, run_id, cycle): role
             for role in LIVE_COMMITTEE_ROLES
         }
         for future in as_completed(future_map):
             role = future_map[future]
             outputs[role] = future.result()
     return outputs
+
+
+
+def _committee_slate_signature(candidates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    return [
+        {
+            "symbol": candidate.get("symbol"),
+            "decision": candidate.get("decision"),
+            "execution_state": candidate.get("execution_state"),
+            "skip_reason": candidate.get("skip_reason"),
+            "ranking_score": round(float(candidate.get("ranking_score") or 0.0), 4),
+            "ranking_score_before_orion": round(float(candidate.get("ranking_score_before_orion") or 0.0), 4),
+            "orion_bias": round(float(candidate.get("orion_bias") or 0.0), 4),
+        }
+        for candidate in candidates[:3]
+    ]
+
+
+
+def _latest_company_packet(company: str) -> Dict[str, Any] | None:
+    try:
+        current = read_current_run()
+    except FileNotFoundError:
+        return None
+    run_id = str(current.get("run_id") or "")
+    if not run_id:
+        return None
+    packets_path = LIVE_RUNS_ROOT / run_id / "artifacts" / "company_packets.jsonl"
+    if not packets_path.exists():
+        return None
+    try:
+        rows = [line for line in packets_path.read_text().splitlines() if line.strip()]
+    except Exception:
+        return None
+    for raw in reversed(rows):
+        try:
+            row = json.loads(raw)
+        except Exception:
+            continue
+        if str(row.get("company_id") or "") == company:
+            return row
+    return None
+
+
+
+def _bridge_calls_used_this_run() -> int:
+    usage_path = ROOT / "state" / "agents" / "ledger" / "usage.jsonl"
+    if not usage_path.exists():
+        return 0
+    try:
+        current = read_current_run()
+    except FileNotFoundError:
+        current = {}
+    started_at = _parse_report_timestamp({"timestamp": current.get("started_at")})
+    used_calls = 0
+    for raw in usage_path.read_text().splitlines():
+        if not raw.strip():
+            continue
+        try:
+            row = json.loads(raw)
+        except Exception:
+            continue
+        if row.get("provider") != "openclaw_bridge":
+            continue
+        row_timestamp = _parse_report_timestamp(row)
+        if started_at and row_timestamp and row_timestamp < started_at:
+            continue
+        used_calls += 1
+    return used_calls
 
 
 
@@ -521,7 +731,7 @@ def _fallback_committee_packet(company: str, ranked_candidates: List[Dict[str, A
 
 
 
-def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], now: datetime | None = None) -> Dict[str, Any]:
+def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], now: datetime | None = None, run_id: str | None = None, cycle: int | None = None) -> Dict[str, Any]:
     now = now or datetime.utcnow().replace(tzinfo=timezone.utc)
     top_candidates = [
         {
@@ -550,12 +760,72 @@ def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], 
     committee_sources: Dict[str, Dict[str, Any]] = {}
     missing_input_flags: List[str] = []
     source_agents_consulted: List[str] = []
+    has_actionable_candidates = any(not c.get("vetoed_by_risk") and c.get("decision") != "HOLD" for c in ranked_candidates)
 
-    try:
-        live_outputs = _run_live_committee(company, ranked_candidates)
-    except Exception as exc:
-        live_outputs = {}
-        committee_sources["_committee"] = {"mode": "fallback", "reason": f"live_committee_failed:{exc}"}
+    if not has_actionable_candidates:
+        committee_sources["_committee"] = {"mode": "skipped", "reason": "no_actionable_candidates"}
+    else:
+        recent_packet = _latest_company_packet(company)
+        recent_packet_timestamp = None
+        if recent_packet:
+            recent_raw_timestamp = recent_packet.get("generated_at") or recent_packet.get("timestamp")
+            if recent_raw_timestamp:
+                try:
+                    recent_packet_timestamp = datetime.fromisoformat(str(recent_raw_timestamp).replace("Z", "+00:00"))
+                except ValueError:
+                    recent_packet_timestamp = None
+                if recent_packet_timestamp and recent_packet_timestamp.tzinfo is None:
+                    recent_packet_timestamp = recent_packet_timestamp.replace(tzinfo=timezone.utc)
+                if recent_packet_timestamp:
+                    recent_packet_timestamp = recent_packet_timestamp.astimezone(timezone.utc)
+        can_reuse_recent_packet = bool(
+            recent_packet
+            and recent_packet_timestamp
+            and (now - recent_packet_timestamp).total_seconds() <= COMMITTEE_REUSE_WINDOW_SECONDS
+            and _committee_slate_signature(top_candidates) == _committee_slate_signature(recent_packet.get("top_ranked_candidates") or [])
+        )
+        if can_reuse_recent_packet:
+            prior_committee_sources = recent_packet.get("committee_sources") or {}
+            for role in LIVE_COMMITTEE_ROLES:
+                if role not in prior_committee_sources:
+                    continue
+                prior_meta = dict(prior_committee_sources[role] or {})
+                prior_mode = prior_meta.get("mode")
+                prior_meta["mode"] = "reused_cached"
+                prior_meta["reused_from_mode"] = prior_mode
+                prior_meta["reused_from_generated_at"] = recent_packet.get("generated_at") or recent_packet.get("timestamp")
+                committee_sources[role] = prior_meta
+            committee_sources["_committee"] = {
+                "mode": "reused_cached",
+                "reason": "matching_recent_slate_within_cooldown",
+                "reused_from_generated_at": recent_packet.get("generated_at") or recent_packet.get("timestamp"),
+            }
+            return {
+                "company_id": company,
+                "packet_generation_mode": "cached_committee_reuse",
+                "generated_at": now.isoformat(),
+                "top_ranked_candidates": top_candidates,
+                "approval_posture": recent_packet.get("approval_posture", "approve_top_candidate"),
+                "cap_multiplier": recent_packet.get("cap_multiplier", 1.0),
+                "sizing_posture": "reduced" if float(recent_packet.get("cap_multiplier") or 1.0) < 1.0 else "baseline",
+                "rationale": recent_packet.get("rationale", ""),
+                "missing_input_flags": list(recent_packet.get("missing_input_flags") or []),
+                "source_agents_consulted": list(recent_packet.get("source_agents_consulted") or []),
+                "committee_sources": committee_sources,
+                "fresh_committee": False,
+                "live_roles_responded": [],
+                "fallback_reason": "reused_recent_committee_packet",
+                "execution_changed_by_packet": False,
+                "packet_effects": [],
+            }
+        if _bridge_calls_used_this_run() + len(LIVE_COMMITTEE_ROLES) > BRIDGE_CALL_BUDGET_PER_RUN:
+            committee_sources["_committee"] = {"mode": "budget_throttled", "reason": "skipped_due_to_budget"}
+        else:
+            try:
+                live_outputs = _run_live_committee(company, ranked_candidates, run_id=run_id, cycle=cycle)
+            except Exception as exc:
+                live_outputs = {}
+                committee_sources["_committee"] = {"mode": "fallback", "reason": f"live_committee_failed:{exc}"}
 
     role_payloads: Dict[str, Dict[str, Any]] = {}
     for role in LIVE_COMMITTEE_ROLES:
@@ -619,14 +889,14 @@ def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], 
 
 
 
-def apply_company_packets(ranked_candidates: List[Dict[str, Any]], now: datetime | None = None) -> Dict[str, Dict[str, Any]]:
+def apply_company_packets(ranked_candidates: List[Dict[str, Any]], now: datetime | None = None, run_id: str | None = None, cycle: int | None = None) -> Dict[str, Dict[str, Any]]:
     packets: Dict[str, Dict[str, Any]] = {}
     by_company: Dict[str, List[Dict[str, Any]]] = {company: [] for company in COMPANIES}
     for candidate in ranked_candidates:
         by_company.setdefault(str(candidate.get("company_id")), []).append(candidate)
 
     for company, company_candidates in by_company.items():
-        packet = build_company_packet(company, company_candidates, now=now)
+        packet = build_company_packet(company, company_candidates, now=now, run_id=run_id, cycle=cycle)
         packets[company] = packet
         evolution_state = load_evolution_state(company)
         cap_baseline = float(evolution_state.get("company_packet_cap_baseline", 1.0) or 1.0)
@@ -754,6 +1024,83 @@ def load_company_rankings(limit: int = 5) -> Dict[str, Any]:
 
 
 
+def write_bridge_usage_report(run_dir: Path, run_id: str, status: str | None, meta: Dict[str, Any]) -> None:
+    usage_path = ROOT / "state" / "agents" / "ledger" / "usage.jsonl"
+    started_at = _parse_report_timestamp({"timestamp": meta.get("started_at")})
+    ended_at = _parse_report_timestamp({"timestamp": meta.get("ended_at")}) or datetime.utcnow().replace(tzinfo=timezone.utc)
+    rows: List[Dict[str, Any]] = []
+    if usage_path.exists():
+        for raw in usage_path.read_text().splitlines():
+            if not raw.strip():
+                continue
+            try:
+                row = json.loads(raw)
+            except Exception:
+                continue
+            if row.get("provider") != "openclaw_bridge":
+                continue
+            row_timestamp = _parse_report_timestamp(row)
+            if started_at and row_timestamp and not (started_at <= row_timestamp <= ended_at):
+                continue
+            rows.append(row)
+    total_calls = len(rows)
+    success_count = sum(1 for row in rows if row.get("outcome") == "success")
+    error_count = sum(1 for row in rows if row.get("outcome") == "error")
+    budget_throttled_count = 0
+    reused_cached_count = 0
+    no_actionable_skip_count = 0
+    packets_path = run_dir / "artifacts" / "company_packets.jsonl"
+    if packets_path.exists():
+        for raw in packets_path.read_text().splitlines():
+            if not raw.strip():
+                continue
+            try:
+                row = json.loads(raw)
+            except Exception:
+                continue
+            committee_meta = (row.get("committee_sources") or {}).get("_committee") or {}
+            if committee_meta.get("reason") == "skipped_due_to_budget" or committee_meta.get("mode") == "budget_throttled":
+                budget_throttled_count += 1
+            if committee_meta.get("mode") == "reused_cached":
+                reused_cached_count += 1
+            if committee_meta.get("reason") == "no_actionable_candidates":
+                no_actionable_skip_count += 1
+    per_company: Dict[str, int] = {}
+    per_agent: Dict[str, int] = {}
+    for row in rows:
+        company = str(row.get("company") or "unscoped")
+        agent = str(row.get("agent") or "unknown")
+        per_company[company] = per_company.get(company, 0) + 1
+        per_agent[agent] = per_agent.get(agent, 0) + 1
+    lines = [
+        "# Bridge Ledger Usage",
+        f"Run: {run_id}",
+        f"Status: {status or 'unknown'}",
+        f"Scope: {'current run window' if started_at else 'visible bridge ledger records'}",
+        f"Total bridge calls: {total_calls}",
+        f"Success: {success_count}",
+        f"Error: {error_count}",
+        "",
+        "Cost controls:",
+        f"- budget_throttled: {budget_throttled_count}",
+        f"- reused_cached: {reused_cached_count}",
+        f"- no_actionable_candidates: {no_actionable_skip_count}",
+        "",
+        "Per company:",
+    ]
+    if per_company:
+        lines.extend(f"- {company}: {count}" for company, count in sorted(per_company.items()))
+    else:
+        lines.append("- none")
+    lines.extend(["", "Per agent:"])
+    if per_agent:
+        lines.extend(f"- {agent}: {count}" for agent, count in sorted(per_agent.items()))
+    else:
+        lines.append("- none")
+    (run_dir / "artifacts" / "ledger_usage.txt").write_text("\n".join(lines).rstrip() + "\n")
+
+
+
 def write_agent_performance_report(run_dir: Path, run_id: str, status: str | None, last_packets: Dict[str, Dict[str, Any]]) -> None:
     roles = {"Lucian": "Executive", "Bianca": "CFO", "Vera": "Manager", "Iris": "Analyst", "Orion": "Operations", "Pam": "Coordinator", "Rowan": "Research", "Bob": "Operations", "Sloane": "Evolution", "Atlas": "Simulator", "June": "Archivist"}
     usage_path = ROOT / "state" / "agents" / "ledger" / "usage.jsonl"
@@ -821,14 +1168,6 @@ def write_company_meetings_report(run_dir: Path, run_id: str, status: str | None
     for company in sorted(last_packets):
         packet = last_packets[company]
         committee_sources = packet.get("committee_sources") or {}
-        lucian_meta = committee_sources.get("Lucian") or {}
-        bianca_meta = committee_sources.get("Bianca") or {}
-        lucian_status = f"Lucian={lucian_meta.get('mode', 'missing')}"
-        if lucian_meta.get("authority") == "historical_only":
-            lucian_status += " (historical_only)"
-        bianca_status = f"Bianca={bianca_meta.get('mode', 'missing')}"
-        if bianca_meta.get("authority") == "historical_only":
-            bianca_status += " (historical_only)"
         executed_actions = []
         for candidate in packet.get("top_ranked_candidates") or []:
             decision = str(candidate.get("decision") or "").upper()
@@ -840,25 +1179,62 @@ def write_company_meetings_report(run_dir: Path, run_id: str, status: str | None
             if str(effect).startswith("vetoed:")
         ]
         notable_veto = packet.get("approval_posture") == "company_veto" or bool(vetoed_symbols)
-        if not executed_actions and not notable_veto:
+        budget_throttled = (committee_sources.get("_committee") or {}).get("reason") == "skipped_due_to_budget"
+        if not executed_actions and not notable_veto and not budget_throttled:
             continue
         included += 1
-        attendance = ", ".join(packet.get("source_agents_consulted") or []) or "none"
         outcome_parts = []
         if executed_actions:
             outcome_parts.append("Actions: " + ", ".join(executed_actions))
         if notable_veto:
-            outcome_parts.append("Notable veto: " + (", ".join(vetoed_symbols) if vetoed_symbols else "company_veto"))
+            outcome_parts.append("Major veto: " + (", ".join(vetoed_symbols) if vetoed_symbols else "company_veto"))
+        if budget_throttled:
+            outcome_parts.append("Budget throttle: skipped_due_to_budget")
         lines.append(f"## {company}")
         lines.append(f"- Outcome: {' | '.join(outcome_parts)}")
-        lines.append(f"- Evidence: {lucian_status}; {bianca_status}")
-        lines.append(f"- Vote: {packet.get('approval_posture', 'unknown')}")
-        lines.append(f"- Constraint: {packet.get('cap_multiplier', 'n/a')}")
-        lines.append(f"- Attendance: {attendance}")
-        lines.append(f"- Motion: {packet.get('rationale', 'n/a')}")
         lines.append("")
-    if included == 0:
-        lines.append("- No buys, sells, or notable vetoes.")
+    anomaly_parts: List[str] = []
+    risk_path = run_dir / "artifacts" / "risk.log"
+    if risk_path.exists():
+        risk_veto_count = 0
+        for raw in risk_path.read_text().splitlines():
+            if not raw.strip():
+                continue
+            try:
+                row = json.loads(raw)
+            except Exception:
+                continue
+            if row.get("veto") is True:
+                risk_veto_count += 1
+        if risk_veto_count:
+            anomaly_parts.append(f"risk_veto_events={risk_veto_count}")
+    log_path = run_dir / "logs" / "run.log"
+    if log_path.exists():
+        rate_limit_count = 0
+        feed_error_count = 0
+        for raw in log_path.read_text().splitlines():
+            if not raw.strip():
+                continue
+            try:
+                row = json.loads(raw)
+            except Exception:
+                continue
+            event = row.get("event")
+            if event == "rate_limit":
+                rate_limit_count += 1
+            elif event == "feed_error":
+                feed_error_count += 1
+        if rate_limit_count:
+            anomaly_parts.append(f"rate_limit_events={rate_limit_count}")
+        if feed_error_count:
+            anomaly_parts.append(f"feed_error_events={feed_error_count}")
+    if anomaly_parts:
+        lines.append("## anomalies")
+        for part in anomaly_parts:
+            lines.append(f"- {part}")
+        lines.append("")
+    if included == 0 and not anomaly_parts:
+        lines.append("- No buys, sells, major vetoes, major anomalies, or budget throttles.")
     (run_dir / "reports" / "company_meetings.md").write_text("\n".join(lines).rstrip() + "\n")
 
 
@@ -915,6 +1291,7 @@ def write_daily_digest(run_id: str) -> None:
     (run_dir / "reports" / "daily_digest.json").write_text(json.dumps(digest, indent=2))
     write_company_meetings_report(run_dir, run_id, meta.get("status"), last_packets)
     write_agent_performance_report(run_dir, run_id, meta.get("status"), last_packets)
+    write_bridge_usage_report(run_dir, run_id, meta.get("status"), meta)
 
 
 def start_run(duration_hours: float = 0.0, virtual_currency: float | None = None) -> None:
@@ -1158,7 +1535,7 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
 
         apply_orion_bias_before_ranking(candidate_decisions)
         ranked_candidates = rank_and_select_candidates(candidate_decisions)
-        company_packets = apply_company_packets(ranked_candidates, now=datetime.utcnow().replace(tzinfo=timezone.utc))
+        company_packets = apply_company_packets(ranked_candidates, now=datetime.utcnow().replace(tzinfo=timezone.utc), run_id=run_id, cycle=cycle)
         for packet in company_packets.values():
             with (run_dir / "artifacts" / "company_packets.jsonl").open("a", encoding="utf-8") as packet_file:
                 packet_file.write(json.dumps({"timestamp": timestamp, **packet}) + "\n")

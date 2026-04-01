@@ -120,6 +120,12 @@ def main() -> None:
     persona = load_persona(agent_info)
     target_scope = detect_target_scope(message, scope)
     prompt = build_prompt(agent_info, scope, message, queue, inbox_history, outbox_history, persona, target_scope)
+    run_id = os.environ.get("ACC_RUN_ID")
+    cycle = os.environ.get("ACC_CYCLE")
+    if run_id is not None:
+        prompt["run_id"] = run_id
+    if cycle is not None:
+        prompt["cycle"] = cycle
     resolved_target_scope = prompt.get("target_scope", scope)
     adapter = choose_adapter(args.agent, agent_info)
     try:

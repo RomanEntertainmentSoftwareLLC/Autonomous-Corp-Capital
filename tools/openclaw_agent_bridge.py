@@ -112,6 +112,8 @@ def _append_usage_telemetry(acc_agent_id: str, real_agent_id: str, prompt: Dict[
   "timestamp": datetime.now(timezone.utc).isoformat(),
   "agent": prompt.get("agent_id") or acc_agent_id,
   "company": company,
+  "run_id": prompt.get("run_id"),
+  "cycle": prompt.get("cycle"),
   "model": f"openclaw_agent:{real_agent_id}",
   "provider": "openclaw_bridge",
   "prompt_tokens": None,

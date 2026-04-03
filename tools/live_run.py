@@ -298,45 +298,85 @@ def _save_orion_cache(symbol: str, articles: List[Dict[str, Any]]) -> None:
         fh.write(json.dumps(entry) + "\n")
 
 
+def _fetch_free_source_headlines(symbol: str, max_age_hours: float = 24.0, limit: int = 3) -> List[Dict[str, Any]]:
+    """Fallback fetch using Yahoo Finance search (no API key required)."""
+    query = symbol.upper()
+    url = f"https://query1.finance.yahoo.com/v1/finance/search?q={query}&news_count={limit}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=10) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except Exception:
+        return []
+    news = data.get("news") or []
+    results: List[Dict[str, Any]] = []
+    cutoff = datetime.utcnow() - timedelta(hours=max_age_hours)
+    for item in news[:limit]:
+        if not isinstance(item, dict):
+            continue
+        pub_ts = item.get("providerPublishTime")
+        if pub_ts:
+            try:
+                pub_dt = datetime.fromtimestamp(pub_ts).replace(tzinfo=None)
+                if pub_dt < cutoff:
+                    continue
+            except (ValueError, TypeError):
+                continue
+        entry = {
+            "title": str(item.get("title") or "").strip(),
+            "url": str(item.get("link") or "").strip(),
+            "source": str(item.get("publisher") or "yahoo_finance").strip(),
+            "published_at": datetime.fromtimestamp(pub_ts).isoformat() if pub_ts else None,
+            "retrieved_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+        }
+        if entry["title"] and entry["url"]:
+            results.append(entry)
+    return results
+
+
 def _fetch_orion_headlines(symbol: str, max_age_hours: float = 24.0, limit: int = 3) -> List[Dict[str, Any]]:
     cached = _load_orion_cache(symbol, max_age_hours=ORION_CACHE_FRESHNESS_HOURS)
     if cached is not None:
         return cached
-    api_key = os.getenv("NEWSAPI_KEY")
-    if not api_key:
-        return []
-    query = symbol.upper()
-    from_date = (datetime.utcnow() - timedelta(hours=max_age_hours)).strftime("%Y-%m-%d")
-    url = f"https://newsapi.org/v2/everything?q={query}&from={from_date}&sortBy=publishedAt&pageSize={limit}&apiKey={api_key}"
-    try:
-        with urllib.request.urlopen(url, timeout=10) as response:
-            data = json.loads(response.read().decode("utf-8"))
-    except Exception:
-        return []
-    articles = data.get("articles") or []
     results: List[Dict[str, Any]] = []
-    cutoff = datetime.utcnow() - timedelta(hours=max_age_hours)
-    for article in articles[:limit]:
-        if not isinstance(article, dict):
-            continue
-        published = article.get("publishedAt")
-        if published:
-            try:
-                pub_dt = datetime.fromisoformat(published.replace("Z", "+00:00")).replace(tzinfo=None)
-                if pub_dt < cutoff:
+    api_key = os.getenv("NEWSAPI_KEY")
+    if api_key:
+        query = symbol.upper()
+        from_date = (datetime.utcnow() - timedelta(hours=max_age_hours)).strftime("%Y-%m-%d")
+        url = f"https://newsapi.org/v2/everything?q={query}&from={from_date}&sortBy=publishedAt&pageSize={limit}&apiKey={api_key}"
+        try:
+            with urllib.request.urlopen(url, timeout=10) as response:
+                data = json.loads(response.read().decode("utf-8"))
+            articles = data.get("articles") or []
+            cutoff = datetime.utcnow() - timedelta(hours=max_age_hours)
+            for article in articles[:limit]:
+                if not isinstance(article, dict):
                     continue
-            except ValueError:
-                continue
-        item = {
-            "title": str(article.get("title") or "").strip(),
-            "url": str(article.get("url") or "").strip(),
-            "source": str((article.get("source") or {}).get("name") or article.get("source") or "unknown").strip(),
-            "published_at": published,
-            "retrieved_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
-        }
-        if item["title"] and item["url"]:
-            results.append(item)
-    _save_orion_cache(symbol, results)
+                published = article.get("publishedAt")
+                if published:
+                    try:
+                        pub_dt = datetime.fromisoformat(published.replace("Z", "+00:00")).replace(tzinfo=None)
+                        if pub_dt < cutoff:
+                            continue
+                    except ValueError:
+                        continue
+                item = {
+                    "title": str(article.get("title") or "").strip(),
+                    "url": str(article.get("url") or "").strip(),
+                    "source": str((article.get("source") or {}).get("name") or article.get("source") or "unknown").strip(),
+                    "published_at": published,
+                    "retrieved_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+                }
+                if item["title"] and item["url"]:
+                    results.append(item)
+        except Exception:
+            pass
+    if results:
+        _save_orion_cache(symbol, results)
+    else:
+        results = _fetch_free_source_headlines(symbol, max_age_hours, limit)
+        if results:
+            _save_orion_cache(symbol, results)
     return results
 
 
@@ -346,7 +386,10 @@ def compute_orion_bias(decision: Dict[str, Any], report: Dict[str, Any], now: da
     report_ts = _parse_report_timestamp(report)
     evidence_meta = _normalize_orion_evidence_metadata(report)
     has_structured_evidence = _orion_has_evidence_metadata(report)
-    quality_state = "evidence_backed" if has_structured_evidence else "legacy_text_only"
+    if not has_structured_evidence and report.get("_orion_fetch_empty"):
+        quality_state = "no_fresh_provider_results"
+    else:
+        quality_state = "evidence_backed" if has_structured_evidence else "legacy_text_only"
     default = {
         "orion_bias": 0.0,
         "orion_bias_reason": "no_report",
@@ -399,6 +442,8 @@ def apply_orion_bias_before_ranking(candidates: List[Dict[str, Any]], now: datet
                 if fetched:
                     current_evidence = fetched
                     report["evidence"] = current_evidence
+                else:
+                    report["_orion_fetch_empty"] = True
             report_cache[company] = report
         base_score = float(candidate.get("ranking_score") or candidate_ranking_score(candidate))
         candidate["ranking_score_before_orion"] = round(base_score, 6)

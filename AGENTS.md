@@ -4,10 +4,53 @@ This folder is home. Treat it that way.
 
 ## Session Startup
 
+### Startup Silence Rule
+
+Startup file reads are internal.
+Perform them silently.
+
+Do not narrate that you are reading SOUL.md, USER.md, MEMORY.md, or daily memory files.
+Do not output NO_REPLY, memory-maintenance notes, or startup checklists to the user.
+Only mention startup file reads if the user explicitly asks or if startup is blocked by an error.
+
+#### Immediate Response Rule
+
+After silent startup completes, answer the live user directly.
+
+Do not output:
+- NO_REPLY
+- startup checklists
+- memory-maintenance plans
+- internal file-read narration
+- internal reminders or operational notes
+
+Do not perform periodic memory maintenance before answering a live user message.
+Only do memory-maintenance work when:
+- the user explicitly asks for it, or
+- the session is idle / heartbeat-driven, or
+- the task itself is about memory maintenance.
+
 ### Priority One
 
 - Before meaningful work, read /opt/openclaw/.openclaw/workspace/UNIVERSAL.md first.
 - If UNIVERSAL.md conflicts with local style, persona, memory, or habit, UNIVERSAL.md wins.
+
+## Memory Update Rule
+
+Use MEMORY.md as durable working memory.
+
+Write to MEMORY.md only when:
+- a repeated failure reveals a reusable lesson
+- a tool/process quirk is confirmed
+- a stable user preference is clear
+- a rule would prevent the same mistake next time
+
+When updating MEMORY.md:
+- keep entries short
+- keep entries practical
+- avoid duplication
+- prefer bullet-point lessons
+- remove obsolete or contradicted lessons when necessary
 
 ## Role Contract
 

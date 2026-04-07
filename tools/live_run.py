@@ -328,6 +328,7 @@ def _fetch_free_source_headlines(symbol: str, max_age_hours: float = 24.0, limit
             "source": str(item.get("publisher") or "yahoo_finance").strip(),
             "published_at": datetime.fromtimestamp(pub_ts).isoformat() if pub_ts else None,
             "retrieved_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+            "source_provenance": "yahoo_fallback",
         }
         if entry["title"] and entry["url"]:
             results.append(entry)
@@ -366,6 +367,7 @@ def _fetch_orion_headlines(symbol: str, max_age_hours: float = 24.0, limit: int 
                     "source": str((article.get("source") or {}).get("name") or article.get("source") or "unknown").strip(),
                     "published_at": published,
                     "retrieved_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+                    "source_provenance": "newsapi",
                 }
                 if item["title"] and item["url"]:
                     results.append(item)
@@ -405,6 +407,10 @@ def compute_orion_bias(decision: Dict[str, Any], report: Dict[str, Any], now: da
         default["orion_bias_reason"] = "stale_report"
         return default
     default["orion_quality_state"] = quality_state
+    if quality_state == "no_fresh_provider_results":
+        default["orion_bias_reason"] = "no_fresh_provider_results"
+        default["orion_match_fields"] = []
+        return default
     match_fields = _orion_symbol_match_fields(report, str(decision.get("symbol") or ""))
     if not match_fields:
         default["orion_bias_reason"] = "no_symbol_match"

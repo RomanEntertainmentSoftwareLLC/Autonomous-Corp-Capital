@@ -270,8 +270,8 @@ def _orion_has_evidence_metadata(report: Dict[str, Any]) -> bool:
 ORION_CACHE_FRESHNESS_HOURS = 1.0
 ORION_CACHE_PATH = ROOT / "state" / "agents" / "orion" / "headlines_cache.jsonl"
 ORION_SEARCH_GOVERNOR_PATH = ROOT / "state" / "agents" / "orion" / "search_governor.json"
-ORION_SEARCH_DAILY_LIMIT = int(os.getenv("ORION_SEARCH_DAILY_LIMIT", "100"))
-ORION_SEARCH_MONTHLY_LIMIT = int(os.getenv("ORION_SEARCH_MONTHLY_LIMIT", "1000"))
+ORION_SEARCH_DAILY_LIMIT = int(os.getenv("ORION_SEARCH_DAILY_LIMIT", "8"))
+ORION_SEARCH_MONTHLY_LIMIT = int(os.getenv("ORION_SEARCH_MONTHLY_LIMIT", "250"))
 ORION_LAST_FETCH_STATE = "unknown"
 
 
@@ -574,7 +574,8 @@ def apply_orion_bias_before_ranking(candidates: List[Dict[str, Any]], now: datet
             report = latest_report(collect_agent_reports(company), "Orion") or {}
             current_evidence = report.get("evidence") or []
             has_fresh_evidence = bool(_normalize_orion_evidence_metadata(report).get("source_count"))
-            if symbol and not has_fresh_evidence:
+            symbol_match_fields = _orion_symbol_match_fields(report, symbol) if symbol else []
+            if symbol and not has_fresh_evidence and symbol_match_fields:
                 fetched = _fetch_orion_headlines(symbol, max_age_hours=24.0, limit=3, actor_name="Orion")
                 fetch_state = ORION_LAST_FETCH_STATE
                 if fetched:

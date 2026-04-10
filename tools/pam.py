@@ -33,7 +33,7 @@ from tools.agent_runtime import (
     read_queue,
     write_queue,
 )
-from tools.agent_packets import build_packet
+from tools.agent_packets import build_packet, normalize_role
 from tools.agent_context import build_prompt
 from tools.agent_reports import load_agent_histories
 
@@ -161,7 +161,7 @@ def main() -> None:
     )
     packet = merge_structured_fields(packet, prompt, response)
 
-    role_type = prompt.get("role_type", "").lower()
+    role_type = normalize_role(prompt.get("role_type", "")).lower()
     if role_type == "analyst":
         packet["analysis_summary"] = response.get("analysis_summary", "")
         packet["evidence"] = response.get("evidence", [])

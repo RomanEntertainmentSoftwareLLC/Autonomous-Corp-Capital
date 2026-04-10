@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
+from tools.agent_packets import normalize_role
 from tools.agent_roles import ALLOWED_RECIPIENTS, ROLE_SPECS, ROLE_STRUCTURED_OUTPUT
 from tools.agent_runtime import (
     gather_company_insights,
@@ -32,7 +33,7 @@ def build_prompt(
     persona: Dict[str, Any],
     target_scope: str,
 ) -> Dict[str, Any]:
-    role_type = agent_info.get("role", "").strip()
+    role_type = normalize_role(agent_info.get("role", ""))
     role_key = role_type.lower()
     role_spec = ROLE_SPECS.get(role_type, ROLE_SPECS.get("administrative_coordinator", ""))
     structured = ROLE_STRUCTURED_OUTPUT.get(role_type, ROLE_STRUCTURED_OUTPUT["administrative_coordinator"])

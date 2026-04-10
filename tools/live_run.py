@@ -16,7 +16,8 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Dict, Any, List
 import urllib.error
-from urllib.parse import urlparse
+import urllib.request
+from urllib.parse import quote_plus, urlparse
 
 from tools.agent_runtime import collect_agent_reports
 from tools.live_decision_engine import build_decision, DecisionResult
@@ -268,9 +269,19 @@ def _orion_has_evidence_metadata(report: Dict[str, Any]) -> bool:
 
 ORION_CACHE_FRESHNESS_HOURS = 1.0
 ORION_CACHE_PATH = ROOT / "state" / "agents" / "orion" / "headlines_cache.jsonl"
+ORION_SEARCH_GOVERNOR_PATH = ROOT / "state" / "agents" / "orion" / "search_governor.json"
+ORION_SEARCH_DAILY_LIMIT = int(os.getenv("ORION_SEARCH_DAILY_LIMIT", "100"))
+ORION_SEARCH_MONTHLY_LIMIT = int(os.getenv("ORION_SEARCH_MONTHLY_LIMIT", "1000"))
+ORION_LAST_FETCH_STATE = "unknown"
+
+
+def _normalize_orion_query(symbol: str) -> str:
+    return str(symbol or "").strip().upper()
+
 
 
 def _load_orion_cache(symbol: str, max_age_hours: float = ORION_CACHE_FRESHNESS_HOURS) -> List[Dict[str, Any]] | None:
+    symbol = _normalize_orion_query(symbol)
     if not ORION_CACHE_PATH.exists():
         return None
     try:
@@ -281,11 +292,12 @@ def _load_orion_cache(symbol: str, max_age_hours: float = ORION_CACHE_FRESHNESS_
                 row = json.loads(raw)
             except Exception:
                 continue
-            if row.get("symbol") != symbol:
+            row_symbol = _normalize_orion_query(row.get("normalized_query") or row.get("symbol", ""))
+            if row_symbol != symbol:
                 continue
-            cached_at = _parse_report_timestamp({"timestamp": row.get("cached_at")})
+            cached_at = _parse_report_timestamp({"timestamp": row.get("timestamp") or row.get("cached_at")})
             if cached_at and (datetime.utcnow().replace(tzinfo=timezone.utc) - cached_at) <= timedelta(hours=max_age_hours):
-                return row.get("articles") or []
+                return row.get("top_results") or row.get("articles") or []
     except Exception:
         pass
     return None
@@ -293,9 +305,144 @@ def _load_orion_cache(symbol: str, max_age_hours: float = ORION_CACHE_FRESHNESS_
 
 def _save_orion_cache(symbol: str, articles: List[Dict[str, Any]]) -> None:
     ORION_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    entry = {"symbol": symbol, "cached_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(), "articles": articles}
+    top_results = []
+    source_counts: Dict[str, int] = {}
+    for article in articles[:3]:
+        if not isinstance(article, dict):
+            continue
+        compact = {
+            "title": str(article.get("title") or "").strip(),
+            "url": str(article.get("url") or "").strip(),
+            "source": str(article.get("source") or "unknown").strip(),
+            "published_at": article.get("published_at"),
+            "retrieved_at": article.get("retrieved_at"),
+            "source_provenance": article.get("source_provenance"),
+        }
+        if compact["title"] and compact["url"]:
+            top_results.append(compact)
+            source_key = str(compact.get("source_provenance") or compact.get("source") or "unknown")
+            source_counts[source_key] = source_counts.get(source_key, 0) + 1
+    source_used = max(source_counts, key=source_counts.get) if source_counts else "unknown"
+    summary = "; ".join(item["title"] for item in top_results[:3]) or f"{_normalize_orion_query(symbol)} cache entry"
+    entry = {
+        "normalized_query": _normalize_orion_query(symbol),
+        "timestamp": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+        "source_used": source_used,
+        "top_results": top_results,
+        "summary": summary,
+    }
     with ORION_CACHE_PATH.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(entry) + "\n")
+
+
+def _load_orion_search_governor_state(now: datetime | None = None) -> Dict[str, Any]:
+    now = now or datetime.utcnow().replace(tzinfo=timezone.utc)
+    today = now.date().isoformat()
+    this_month = now.strftime("%Y-%m")
+    default = {"monthly_used": 0, "daily_used": 0, "last_reset_day": today, "last_reset_month": this_month}
+    if not ORION_SEARCH_GOVERNOR_PATH.exists():
+        return default
+    try:
+        raw = json.loads(ORION_SEARCH_GOVERNOR_PATH.read_text())
+    except Exception:
+        return default
+    state = {
+        "monthly_used": max(0, int(raw.get("monthly_used", 0) or 0)),
+        "daily_used": max(0, int(raw.get("daily_used", 0) or 0)),
+        "last_reset_day": str(raw.get("last_reset_day") or today),
+        "last_reset_month": str(raw.get("last_reset_month") or this_month),
+    }
+    if state["last_reset_day"] != today:
+        state["daily_used"] = 0
+        state["last_reset_day"] = today
+    if state["last_reset_month"] != this_month:
+        state["monthly_used"] = 0
+        state["last_reset_month"] = this_month
+    return state
+
+
+
+def _save_orion_search_governor_state(state: Dict[str, Any]) -> None:
+    ORION_SEARCH_GOVERNOR_PATH.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "monthly_used": max(0, int(state.get("monthly_used", 0) or 0)),
+        "daily_used": max(0, int(state.get("daily_used", 0) or 0)),
+        "last_reset_day": str(state.get("last_reset_day") or datetime.utcnow().date().isoformat()),
+        "last_reset_month": str(state.get("last_reset_month") or datetime.utcnow().strftime("%Y-%m")),
+    }
+    ORION_SEARCH_GOVERNOR_PATH.write_text(json.dumps(payload, indent=2))
+
+
+
+def _orion_search_budget_available(state: Dict[str, Any]) -> bool:
+    return state["daily_used"] < ORION_SEARCH_DAILY_LIMIT and state["monthly_used"] < ORION_SEARCH_MONTHLY_LIMIT
+
+
+
+def _orion_hermes_serpapi_headlines(symbol: str, max_age_hours: float = 24.0, limit: int = 3) -> List[Dict[str, Any]]:
+    global ORION_LAST_FETCH_STATE
+    results: List[Dict[str, Any]] = []
+    ORION_LAST_FETCH_STATE = "no_fresh_results"
+    provider_failed = False
+    api_key = os.getenv("SERPAPI_API_KEY") or os.getenv("SERPAPI_KEY")
+    if api_key:
+        query = _normalize_orion_query(symbol)
+        url = (
+            "https://serpapi.com/search.json?"
+            f"engine=google_news&q={quote_plus(query)}&hl=en&gl=us&api_key={quote_plus(api_key)}&num={int(limit)}"
+        )
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=10) as response:
+                data = json.loads(response.read().decode("utf-8"))
+            articles = data.get("news_results") or data.get("organic_results") or []
+            cutoff = datetime.utcnow() - timedelta(hours=max_age_hours)
+            for article in articles[:limit]:
+                if not isinstance(article, dict):
+                    continue
+                published = article.get("date") or article.get("published_at") or article.get("publishedAt")
+                if published:
+                    try:
+                        pub_dt = datetime.fromisoformat(str(published).replace("Z", "+00:00")).replace(tzinfo=None)
+                        if pub_dt < cutoff:
+                            continue
+                    except ValueError:
+                        pass
+                item = {
+                    "title": str(article.get("title") or "").strip(),
+                    "url": str(article.get("link") or article.get("url") or "").strip(),
+                    "source": str(article.get("source") or article.get("publisher") or article.get("publication") or "serpapi").strip(),
+                    "published_at": published,
+                    "retrieved_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+                    "source_provenance": "serpapi",
+                }
+                if item["title"] and item["url"]:
+                    results.append(item)
+            if results:
+                ORION_LAST_FETCH_STATE = "ok"
+        except Exception:
+            provider_failed = True
+            ORION_LAST_FETCH_STATE = "provider_fails"
+    else:
+        provider_failed = True
+        ORION_LAST_FETCH_STATE = "provider_fails"
+    if not results:
+        results = _fetch_free_source_headlines(symbol, max_age_hours, limit)
+        if results and not provider_failed:
+            ORION_LAST_FETCH_STATE = "no_fresh_results"
+        elif results and provider_failed:
+            ORION_LAST_FETCH_STATE = "provider_fails"
+        elif provider_failed:
+            ORION_LAST_FETCH_STATE = "provider_fails"
+        else:
+            ORION_LAST_FETCH_STATE = "no_fresh_results"
+    return results
+
+
+
+def _orion_live_search(symbol: str, max_age_hours: float = 24.0, limit: int = 3) -> List[Dict[str, Any]]:
+    return _orion_hermes_serpapi_headlines(symbol, max_age_hours=max_age_hours, limit=limit)
+
 
 
 def _fetch_free_source_headlines(symbol: str, max_age_hours: float = 24.0, limit: int = 3) -> List[Dict[str, Any]]:
@@ -335,50 +482,29 @@ def _fetch_free_source_headlines(symbol: str, max_age_hours: float = 24.0, limit
     return results
 
 
-def _fetch_orion_headlines(symbol: str, max_age_hours: float = 24.0, limit: int = 3) -> List[Dict[str, Any]]:
-    cached = _load_orion_cache(symbol, max_age_hours=ORION_CACHE_FRESHNESS_HOURS)
+def _orion_cache_window_hours(max_age_hours: float) -> float:
+    return ORION_CACHE_FRESHNESS_HOURS if float(max_age_hours or 0.0) <= 24.0 else float(max_age_hours)
+
+
+def _fetch_orion_headlines(symbol: str, max_age_hours: float = 24.0, limit: int = 3, actor_name: str = "Orion") -> List[Dict[str, Any]]:
+    global ORION_LAST_FETCH_STATE
+    if str(actor_name or "").strip().lower() != "orion":
+        return []
+    symbol = _normalize_orion_query(symbol)
+    cached = _load_orion_cache(symbol, max_age_hours=_orion_cache_window_hours(max_age_hours))
     if cached is not None:
+        ORION_LAST_FETCH_STATE = "cache_hit"
         return cached
-    results: List[Dict[str, Any]] = []
-    api_key = os.getenv("NEWSAPI_KEY")
-    if api_key:
-        query = symbol.upper()
-        from_date = (datetime.utcnow() - timedelta(hours=max_age_hours)).strftime("%Y-%m-%d")
-        url = f"https://newsapi.org/v2/everything?q={query}&from={from_date}&sortBy=publishedAt&pageSize={limit}&apiKey={api_key}"
-        try:
-            with urllib.request.urlopen(url, timeout=10) as response:
-                data = json.loads(response.read().decode("utf-8"))
-            articles = data.get("articles") or []
-            cutoff = datetime.utcnow() - timedelta(hours=max_age_hours)
-            for article in articles[:limit]:
-                if not isinstance(article, dict):
-                    continue
-                published = article.get("publishedAt")
-                if published:
-                    try:
-                        pub_dt = datetime.fromisoformat(published.replace("Z", "+00:00")).replace(tzinfo=None)
-                        if pub_dt < cutoff:
-                            continue
-                    except ValueError:
-                        continue
-                item = {
-                    "title": str(article.get("title") or "").strip(),
-                    "url": str(article.get("url") or "").strip(),
-                    "source": str((article.get("source") or {}).get("name") or article.get("source") or "unknown").strip(),
-                    "published_at": published,
-                    "retrieved_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
-                    "source_provenance": "newsapi",
-                }
-                if item["title"] and item["url"]:
-                    results.append(item)
-        except Exception:
-            pass
+    state = _load_orion_search_governor_state()
+    if not _orion_search_budget_available(state):
+        ORION_LAST_FETCH_STATE = "budget_exhausted"
+        return []
+    results = _orion_live_search(symbol, max_age_hours=max_age_hours, limit=limit)
     if results:
+        state["daily_used"] += 1
+        state["monthly_used"] += 1
+        _save_orion_search_governor_state(state)
         _save_orion_cache(symbol, results)
-    else:
-        results = _fetch_free_source_headlines(symbol, max_age_hours, limit)
-        if results:
-            _save_orion_cache(symbol, results)
     return results
 
 
@@ -388,7 +514,10 @@ def compute_orion_bias(decision: Dict[str, Any], report: Dict[str, Any], now: da
     report_ts = _parse_report_timestamp(report)
     evidence_meta = _normalize_orion_evidence_metadata(report)
     has_structured_evidence = _orion_has_evidence_metadata(report)
-    if not has_structured_evidence and report.get("_orion_fetch_empty"):
+    fetch_state = str(report.get("_orion_fetch_state") or "")
+    if not has_structured_evidence and fetch_state in {"budget_exhausted", "provider_fails", "no_fresh_results"}:
+        quality_state = fetch_state
+    elif not has_structured_evidence and report.get("_orion_fetch_empty"):
         quality_state = "no_fresh_provider_results"
     else:
         quality_state = "evidence_backed" if has_structured_evidence else "legacy_text_only"
@@ -399,6 +528,7 @@ def compute_orion_bias(decision: Dict[str, Any], report: Dict[str, Any], now: da
         "orion_match_fields": [],
         "orion_bias_applied": False,
         "orion_quality_state": "degraded",
+        "orion_fetch_state": fetch_state or None,
         **evidence_meta,
     }
     if not report:
@@ -407,8 +537,8 @@ def compute_orion_bias(decision: Dict[str, Any], report: Dict[str, Any], now: da
         default["orion_bias_reason"] = "stale_report"
         return default
     default["orion_quality_state"] = quality_state
-    if quality_state == "no_fresh_provider_results":
-        default["orion_bias_reason"] = "no_fresh_provider_results"
+    if quality_state in {"budget_exhausted", "provider_fails", "no_fresh_results", "no_fresh_provider_results"}:
+        default["orion_bias_reason"] = quality_state
         default["orion_match_fields"] = []
         return default
     match_fields = _orion_symbol_match_fields(report, str(decision.get("symbol") or ""))
@@ -428,6 +558,7 @@ def compute_orion_bias(decision: Dict[str, Any], report: Dict[str, Any], now: da
         "orion_match_fields": match_fields,
         "orion_bias_applied": bias != 0.0,
         "orion_quality_state": quality_state,
+        "orion_fetch_state": fetch_state or None,
         **evidence_meta,
     }
 
@@ -444,12 +575,15 @@ def apply_orion_bias_before_ranking(candidates: List[Dict[str, Any]], now: datet
             current_evidence = report.get("evidence") or []
             has_fresh_evidence = bool(_normalize_orion_evidence_metadata(report).get("source_count"))
             if symbol and not has_fresh_evidence:
-                fetched = _fetch_orion_headlines(symbol, max_age_hours=24.0, limit=3)
+                fetched = _fetch_orion_headlines(symbol, max_age_hours=24.0, limit=3, actor_name="Orion")
+                fetch_state = ORION_LAST_FETCH_STATE
                 if fetched:
                     current_evidence = fetched
                     report["evidence"] = current_evidence
                 else:
                     report["_orion_fetch_empty"] = True
+                if fetch_state and fetch_state not in {"ok", "cache_hit"}:
+                    report["_orion_fetch_state"] = fetch_state
             report_cache[company] = report
         base_score = float(candidate.get("ranking_score") or candidate_ranking_score(candidate))
         candidate["ranking_score_before_orion"] = round(base_score, 6)

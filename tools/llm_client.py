@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from typing import Any, Dict, List
 
+from tools.agent_packets import normalize_role
 from tools.global_watchdog_fallbacks import GLOBAL_WATCHDOG_ROLES, build_global_watchdog_fallback
 
 def _global_context_blob(prompt: Dict[str, Any]) -> Dict[str, str]:
@@ -147,7 +148,7 @@ class SimpleLLMAdapter(LLMAdapter):
         lowered = message.lower()
         persona = prompt.get("persona", {})
         examples = persona.get("example_responses", {})
-        role_display = prompt.get("role_type", "").strip()
+        role_display = normalize_role(prompt.get("role_type", ""))
         role_type = role_display.lower()
         target_scope = prompt.get("target_scope", prompt.get("scope", ""))
         agent_scope = prompt.get("agent_scope", prompt.get("scope", ""))

@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta, timezone
+import json
 
 from tools.live_decision_engine import LIVE_PATTERN_SCORE_MAX_ABS, build_live_pattern_payload
-from tools.live_run import apply_orion_bias_before_ranking, candidate_ranking_score
+from tools.live_run import apply_orion_bias_before_ranking, candidate_ranking_score, _fetch_orion_headlines
 
 
 UTC = timezone.utc
@@ -31,6 +32,20 @@ def report(text, ts, **extra):
     }
     payload.update(extra)
     return payload
+
+
+
+def live_article(ts, title="BTC-USD catalyst from live provider"):
+    return [
+        {
+            "title": title,
+            "url": "https://example.com/article",
+            "source": "Reuters",
+            "published_at": ts.isoformat(),
+            "retrieved_at": ts.isoformat(),
+            "source_provenance": "newsapi",
+        }
+    ]
 
 
 def test_orion_fresh_bullish_match_applies_point_zero_two(monkeypatch):
@@ -83,6 +98,62 @@ def test_orion_no_symbol_match_is_zero(monkeypatch):
     rows = apply_orion_bias_before_ranking([candidate()], now=now)
     assert rows[0]["orion_bias"] == 0.0
     assert rows[0]["orion_bias_reason"] == "no_symbol_match"
+
+
+
+def test_orion_allowed_live_search_updates_governor(monkeypatch, tmp_path):
+    now = datetime(2026, 3, 22, 1, 0, tzinfo=UTC)
+    state_path = tmp_path / "search_governor.json"
+    cache_path = tmp_path / "headlines_cache.jsonl"
+    monkeypatch.setattr("tools.live_run.ORION_SEARCH_GOVERNOR_PATH", state_path)
+    monkeypatch.setattr("tools.live_run.ORION_CACHE_PATH", cache_path)
+    calls = []
+    monkeypatch.setattr("tools.live_run._orion_live_search", lambda symbol, max_age_hours=24.0, limit=3: calls.append(symbol) or live_article(now))
+
+    rows = _fetch_orion_headlines("btc-usd", actor_name="Orion")
+
+    assert rows == live_article(now)
+    assert calls == ["BTC-USD"]
+    state = json.loads(state_path.read_text())
+    assert state["daily_used"] == 1
+    assert state["monthly_used"] == 1
+    assert state["last_reset_day"] == datetime.utcnow().date().isoformat()
+    assert state["last_reset_month"] == datetime.utcnow().strftime("%Y-%m")
+
+
+
+def test_rowan_is_blocked_from_orion_live_search(monkeypatch, tmp_path):
+    state_path = tmp_path / "search_governor.json"
+    cache_path = tmp_path / "headlines_cache.jsonl"
+    monkeypatch.setattr("tools.live_run.ORION_SEARCH_GOVERNOR_PATH", state_path)
+    monkeypatch.setattr("tools.live_run.ORION_CACHE_PATH", cache_path)
+    monkeypatch.setattr("tools.live_run._orion_live_search", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("Rowan should not reach live Orion search")))
+
+    rows = _fetch_orion_headlines("btc-usd", actor_name="Rowan")
+
+    assert rows == []
+    assert not state_path.exists()
+    assert not cache_path.exists()
+
+
+
+def test_duplicate_orion_query_reuses_fresh_cache(monkeypatch, tmp_path):
+    now = datetime(2026, 3, 22, 1, 0, tzinfo=UTC)
+    state_path = tmp_path / "search_governor.json"
+    cache_path = tmp_path / "headlines_cache.jsonl"
+    monkeypatch.setattr("tools.live_run.ORION_SEARCH_GOVERNOR_PATH", state_path)
+    monkeypatch.setattr("tools.live_run.ORION_CACHE_PATH", cache_path)
+    calls = []
+    monkeypatch.setattr("tools.live_run._orion_live_search", lambda symbol, max_age_hours=24.0, limit=3: calls.append(symbol) or live_article(now, title=f"{symbol} catalyst from live provider"))
+
+    first = _fetch_orion_headlines("btc-usd", actor_name="Orion")
+    second = _fetch_orion_headlines(" BTC-usd ", actor_name="Orion")
+
+    assert first == second
+    assert calls == ["BTC-USD"]
+    state = json.loads(state_path.read_text())
+    assert state["daily_used"] == 1
+    assert state["monthly_used"] == 1
 
 
 def test_close_only_rising_falling_patterns_are_bounded():

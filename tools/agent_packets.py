@@ -15,7 +15,12 @@ def resolve_packet_targets(response: Dict[str, Any]) -> Tuple[str, str]:
     return "user", ""
 
 
-def normalize_role(role: str) -> str:
+def normalize_role(role: Any) -> str:
+    if isinstance(role, list):
+        role = role[0] if role else ""
+    if role is None:
+        return ""
+    role = str(role).strip()
     if not role:
         return ""
     normalized = role.replace("_", " ").replace("-", " ")

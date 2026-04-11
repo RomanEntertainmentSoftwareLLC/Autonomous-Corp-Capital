@@ -39,9 +39,36 @@ def _global_context_blob(prompt: Dict[str, Any]) -> Dict[str, str]:
     }
 
 
+def _estimate_openai_cost(prompt_tokens: Any, completion_tokens: Any) -> float | None:
+    input_rate_raw = os.environ.get("OPENAI_INPUT_COST_PER_1K_TOKENS")
+    output_rate_raw = os.environ.get("OPENAI_OUTPUT_COST_PER_1K_TOKENS")
+    total_rate_raw = os.environ.get("OPENAI_COST_PER_1K_TOKENS")
+    try:
+        prompt_count = int(prompt_tokens) if prompt_tokens is not None else None
+        completion_count = int(completion_tokens) if completion_tokens is not None else None
+    except (TypeError, ValueError):
+        return None
+    try:
+        if total_rate_raw is not None:
+            rate = float(total_rate_raw)
+            token_total = (prompt_count or 0) + (completion_count or 0)
+            return round((token_total / 1000.0) * rate, 6)
+        if input_rate_raw is None or output_rate_raw is None:
+            return None
+        input_rate = float(input_rate_raw)
+        output_rate = float(output_rate_raw)
+    except (TypeError, ValueError):
+        return None
+    cost = 0.0
+    if prompt_count is not None:
+        cost += (prompt_count / 1000.0) * input_rate
+    if completion_count is not None:
+        cost += (completion_count / 1000.0) * output_rate
+    return round(cost, 6)
 
 
 class LLMAdapter(ABC):
+
     @abstractmethod
     def reason(self, message: str, prompt: Dict[str, Any]) -> Dict[str, Any]:
         pass
@@ -100,6 +127,32 @@ class OpenAIAdapter(LLMAdapter):
                 "requested_action": "Investigate provider/model failure",
                 "provider_error": str(exc),
             }
+        usage = data.get("usage") or {}
+        target_scope = prompt.get("target_scope")
+        company = target_scope if isinstance(target_scope, str) and target_scope.startswith("company_") else None
+        run_id = prompt.get("run_id") or os.environ.get("ACC_RUN_ID")
+        estimated_cost = _estimate_openai_cost(usage.get("prompt_tokens"), usage.get("completion_tokens"))
+        telemetry = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "agent": prompt.get("agent_id"),
+            "company": company,
+            "run_id": run_id,
+            "model": self._model,
+            "provider": "openai",
+            "prompt_tokens": usage.get("prompt_tokens"),
+            "completion_tokens": usage.get("completion_tokens"),
+            "total_tokens": usage.get("total_tokens"),
+            "estimated_cost": estimated_cost,
+        }
+        usage_path = os.path.join(os.path.dirname(__file__), "..", "state", "agents", "ledger", "usage.jsonl")
+        os.makedirs(os.path.dirname(usage_path), exist_ok=True)
+        with open(os.path.abspath(usage_path), "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(telemetry) + "\n")
+        if isinstance(run_id, str) and run_id:
+            run_usage_path = os.path.join(os.path.dirname(__file__), "..", "state", "live_runs", run_id, "artifacts", "ledger_usage.jsonl")
+            os.makedirs(os.path.dirname(run_usage_path), exist_ok=True)
+            with open(os.path.abspath(run_usage_path), "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(telemetry) + "\n")
         choice = data["choices"][0]["message"]["content"]
         try:
             result = json.loads(choice)
@@ -116,24 +169,6 @@ class OpenAIAdapter(LLMAdapter):
                 "requested_action": "Investigate provider response parse failure",
                 "provider_error": str(exc),
             }
-        usage = data.get("usage") or {}
-        target_scope = prompt.get("target_scope")
-        company = target_scope if isinstance(target_scope, str) and target_scope.startswith("company_") else None
-        telemetry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "agent": prompt.get("agent_id"),
-            "company": company,
-            "model": self._model,
-            "provider": "openai",
-            "prompt_tokens": usage.get("prompt_tokens"),
-            "completion_tokens": usage.get("completion_tokens"),
-            "total_tokens": usage.get("total_tokens"),
-            "estimated_cost": None,
-        }
-        usage_path = os.path.join(os.path.dirname(__file__), "..", "state", "agents", "ledger", "usage.jsonl")
-        os.makedirs(os.path.dirname(usage_path), exist_ok=True)
-        with open(os.path.abspath(usage_path), "a", encoding="utf-8") as fh:
-            fh.write(json.dumps(telemetry) + "\n")
         return result
 
 

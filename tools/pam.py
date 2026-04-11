@@ -37,8 +37,8 @@ from tools.agent_packets import build_packet, normalize_role
 from tools.agent_context import build_prompt
 from tools.agent_reports import load_agent_histories
 
-from tools.llm_client import SimpleLLMAdapter
-from tools.openclaw_agent_bridge import OpenClawAdapter
+from tools.llm_client import OpenAIAdapter, SimpleLLMAdapter
+from tools.openclaw_agent_bridge import OpenClawAdapter, _append_usage_telemetry
 
 load_env_file(AGENT_ROOT / ".env")
 
@@ -126,6 +126,31 @@ def main() -> None:
         prompt["run_id"] = run_id
     if cycle is not None:
         prompt["cycle"] = cycle
+    if os.environ.get("LIVE_RUN_PROOF_TELEMETRY", "").lower() in {"1", "true", "yes", "on"} and message.startswith("Paper-proof telemetry probe."):
+        proof_prompt = {
+            "agent_id": args.agent,
+            "target_scope": target_scope,
+            "cycle": cycle,
+            "run_id": run_id,
+            "role_spec": "Proof telemetry probe",
+            "persona_description": "Return a minimal JSON object for a paper proof run.",
+            "structured_output": {
+                "description": "Paper-proof telemetry probe",
+                "required_keys": ["status"],
+                "default_queue_action": "none",
+            },
+        }
+        response = OpenAIAdapter().reason(message, proof_prompt)
+        print(json.dumps({
+            "reply_text": response.get("reply_text", "Proof telemetry probe recorded."),
+            "priority": response.get("priority", "low"),
+            "queue_action": response.get("queue_action", "none"),
+            "status": response.get("status", "ok"),
+            "escalation": response.get("escalation", False),
+            "task_type": response.get("task_type", "proof_telemetry"),
+            "requested_action": response.get("requested_action", "Proof telemetry probe only"),
+        }))
+        return
     resolved_target_scope = prompt.get("target_scope", scope)
     adapter = choose_adapter(args.agent, agent_info)
     try:

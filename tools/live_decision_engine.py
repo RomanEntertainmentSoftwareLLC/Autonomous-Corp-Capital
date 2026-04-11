@@ -133,12 +133,12 @@ def compute_signal(snapshot: Dict[str, object], last_price: Optional[float]) -> 
 
 
 
-def map_score_to_decision(score: float, threshold: float) -> str:
+def map_score_to_decision(score: float, threshold: float, position_state: float = 0.0) -> str:
     if score > threshold:
         return "BUY"
     if score < -threshold:
         return "SELL"
-    return "HOLD"
+    return "HOLD_POSITION" if float(position_state) > 0 else "WAIT"
 
 
 
@@ -336,10 +336,11 @@ def build_decision(
     if candle_confidence in (None, ""):
         candle_confidence = latest_candle.get("candle_confidence", 0.0)
     policy = company_policy(company_id)
+    position_state = float(snapshot.get("position_state") or 0.0)
     raw_signal_score = compute_signal(snapshot, last_price)
     adjusted_signal_score = raw_signal_score * float(policy["signal_multiplier"])
     threshold = float(policy["threshold"])
-    signal_decision = map_score_to_decision(adjusted_signal_score, threshold)
+    signal_decision = map_score_to_decision(adjusted_signal_score, threshold, position_state)
     ml_result = infer_ml_signal(snapshot, last_price)
 
     decision = signal_decision
@@ -348,9 +349,9 @@ def build_decision(
     if ml_result["ml_scoring_active"]:
         model_score = float(ml_result["model_score"])
         if signal_decision == "BUY" and model_score < 0.5:
-            decision = "HOLD"
+            decision = "HOLD_POSITION" if position_state > 0 else "WAIT"
         elif signal_decision == "SELL" and model_score > 0.5:
-            decision = "HOLD"
+            decision = "HOLD_POSITION" if position_state > 0 else "WAIT"
         notes = f"signal confirmed by real ML artifact under {policy['policy_name']}"
         scoring_method = "ml_plus_signal"
 
@@ -374,7 +375,7 @@ def build_decision(
         or not pattern_result["detected_patterns"]
         or not pattern_result["pattern_confirmation"].get("satisfied")
     ):
-        decision = "HOLD"
+        decision = "HOLD_POSITION" if position_state > 0 else "WAIT"
     if (
         decision in {"BUY", "SELL"}
         and pattern_result["matched_context"]["candle_source"] == "real_ohlc"
@@ -385,9 +386,9 @@ def build_decision(
     ):
         model_score = float(ml_result["model_score"])
         if decision == "BUY" and model_score <= 0.55:
-            decision = "HOLD"
+            decision = "HOLD_POSITION" if position_state > 0 else "WAIT"
         elif decision == "SELL" and model_score >= 0.45:
-            decision = "HOLD"
+            decision = "HOLD_POSITION" if position_state > 0 else "WAIT"
 
     result = DecisionResult(
         {

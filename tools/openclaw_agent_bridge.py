@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import time
 from datetime import datetime, timezone
@@ -105,29 +106,39 @@ def _looks_like_lock_error(text: str) -> bool:
  lowered = text.lower()
  return "session file locked" in lowered or ".jsonl.lock" in lowered
 
+def _append_jsonl(path: Path, payload: Dict[str, Any]) -> None:
+ path.parent.mkdir(parents=True, exist_ok=True)
+ with path.open("a", encoding="utf-8") as fh:
+  fh.write(json.dumps(payload) + "\n")
+
+
 def _append_usage_telemetry(acc_agent_id: str, real_agent_id: str, prompt: Dict[str, Any], outcome: str, bridge_error: str | None = None) -> None:
- target_scope = prompt.get("target_scope")
- company = target_scope if isinstance(target_scope, str) and target_scope.startswith("company_") else None
- telemetry = {
-  "timestamp": datetime.now(timezone.utc).isoformat(),
-  "agent": prompt.get("agent_id") or acc_agent_id,
-  "company": company,
-  "run_id": prompt.get("run_id"),
-  "cycle": prompt.get("cycle"),
-  "model": f"openclaw_agent:{real_agent_id}",
-  "provider": "openclaw_bridge",
-  "prompt_tokens": None,
-  "completion_tokens": None,
-  "total_tokens": None,
-  "estimated_cost": None,
-  "outcome": outcome,
- }
- if bridge_error is not None:
-  telemetry["bridge_error"] = bridge_error
- usage_path = REPO_ROOT / "state" / "agents" / "ledger" / "usage.jsonl"
- usage_path.parent.mkdir(parents=True, exist_ok=True)
- with usage_path.open("a", encoding="utf-8") as fh:
-  fh.write(json.dumps(telemetry) + "\n")
+    target_scope = prompt.get("target_scope")
+    company = target_scope if isinstance(target_scope, str) and target_scope.startswith("company_") else None
+    run_id = prompt.get("run_id") or os.environ.get("ACC_RUN_ID")
+    telemetry = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "agent": prompt.get("agent_id") or acc_agent_id,
+        "company": company,
+        "run_id": run_id,
+        "cycle": prompt.get("cycle"),
+        "model": f"openclaw_agent:{real_agent_id}",
+        "provider": "openclaw_bridge",
+        "prompt_tokens": None,
+        "completion_tokens": None,
+        "total_tokens": None,
+        "estimated_cost": None,
+        "outcome": outcome,
+    }
+    if bridge_error is not None:
+        telemetry["bridge_error"] = bridge_error
+    usage_path = REPO_ROOT / "state" / "agents" / "ledger" / "usage.jsonl"
+    _append_jsonl(usage_path, telemetry)
+    if isinstance(run_id, str) and run_id:
+        run_ledger_path = REPO_ROOT / "state" / "live_runs" / run_id / "artifacts" / "ledger_usage.jsonl"
+        _append_jsonl(run_ledger_path, telemetry)
+        run_usage_path = REPO_ROOT / "state" / "live_runs" / run_id / "artifacts" / "bridge_usage.jsonl"
+        _append_jsonl(run_usage_path, telemetry)
 
 class OpenClawAdapter:
  def __init__(self, acc_agent_id: str) -> None:

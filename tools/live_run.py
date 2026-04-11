@@ -100,7 +100,7 @@ def rank_and_select_candidates(candidates: List[Dict[str, Any]]) -> List[Dict[st
             candidate["execution_state"] = "skipped"
             candidate["skip_reason"] = "risk_veto"
             continue
-        if candidate.get("decision") == "HOLD":
+        if candidate.get("decision") not in {"BUY", "SELL"}:
             candidate["execution_state"] = "skipped"
             candidate["skip_reason"] = "hold_candidate"
             continue
@@ -675,6 +675,22 @@ def _invoke_live_committee_agent(agent_id: str, message: str, run_id: str | None
         raise RuntimeError(f"live_committee_parse_failed:{agent_id}:{combined}") from exc
 
 
+def _proof_telemetry_enabled() -> bool:
+    return os.environ.get("LIVE_RUN_PROOF_TELEMETRY", "").lower() in {"1", "true", "yes", "on"}
+
+
+def _emit_paper_proof_telemetry(run_id: str) -> None:
+    if not _proof_telemetry_enabled():
+        return
+    if os.environ.get("LIVE_RUN_PROOF_TELEMETRY_SUPPRESSED", "").lower() in {"1", "true", "yes", "on"}:
+        return
+    _invoke_live_committee_agent(
+        _committee_agent_id("company_001", "Iris"),
+        "Paper-proof telemetry probe. Return a minimal JSON object with status=ok.",
+        run_id=run_id,
+        cycle=0,
+    )
+
 
 def _run_live_committee(company: str, company_candidates: List[Dict[str, Any]], run_id: str | None = None, cycle: int | None = None) -> Dict[str, Dict[str, Any]]:
     message = _committee_cycle_message(company, company_candidates)
@@ -761,7 +777,7 @@ def _bridge_calls_used_this_run() -> int:
 
 
 def _top_candidate_fresh_summary(company_candidates: List[Dict[str, Any]]) -> Dict[str, Any]:
-    executable = [c for c in company_candidates if not c.get("vetoed_by_risk") and c.get("decision") != "HOLD"]
+    executable = [c for c in company_candidates if not c.get("vetoed_by_risk") and c.get("decision") in {"BUY", "SELL"}]
     top_candidate = executable[0] if executable else (company_candidates[0] if company_candidates else {})
     confidence = float(top_candidate.get("confidence") or 0.0)
     ranking_score = float(top_candidate.get("ranking_score") or 0.0)
@@ -946,7 +962,7 @@ def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], 
     committee_sources: Dict[str, Dict[str, Any]] = {}
     missing_input_flags: List[str] = []
     source_agents_consulted: List[str] = []
-    has_actionable_candidates = any(not c.get("vetoed_by_risk") and c.get("decision") != "HOLD" for c in ranked_candidates)
+    has_actionable_candidates = any(not c.get("vetoed_by_risk") and c.get("decision") in {"BUY", "SELL"} for c in ranked_candidates)
 
     if not has_actionable_candidates:
         committee_sources["_committee"] = {"mode": "skipped", "reason": "no_actionable_candidates"}
@@ -1211,24 +1227,36 @@ def load_company_rankings(limit: int = 5) -> Dict[str, Any]:
 
 
 def write_bridge_usage_report(run_dir: Path, run_id: str, status: str | None, meta: Dict[str, Any]) -> None:
-    usage_path = ROOT / "state" / "agents" / "ledger" / "usage.jsonl"
-    started_at = _parse_report_timestamp({"timestamp": meta.get("started_at")})
-    ended_at = _parse_report_timestamp({"timestamp": meta.get("ended_at")}) or datetime.utcnow().replace(tzinfo=timezone.utc)
-    rows: List[Dict[str, Any]] = []
-    if usage_path.exists():
-        for raw in usage_path.read_text().splitlines():
+    def _read_jsonl_rows(path: Path, provider: str | None = None) -> List[Dict[str, Any]]:
+        rows: List[Dict[str, Any]] = []
+        if not path.exists():
+            return rows
+        for raw in path.read_text().splitlines():
             if not raw.strip():
                 continue
             try:
                 row = json.loads(raw)
             except Exception:
                 continue
-            if row.get("provider") != "openclaw_bridge":
-                continue
-            row_timestamp = _parse_report_timestamp(row)
-            if started_at and row_timestamp and not (started_at <= row_timestamp <= ended_at):
+            if provider and row.get("provider") != provider:
                 continue
             rows.append(row)
+        return rows
+
+    started_at = _parse_report_timestamp({"timestamp": meta.get("started_at")})
+    ended_at = _parse_report_timestamp({"timestamp": meta.get("ended_at")}) or datetime.utcnow().replace(tzinfo=timezone.utc)
+    bridge_local_path = run_dir / "artifacts" / "bridge_usage.jsonl"
+    bridge_global_path = ROOT / "state" / "agents" / "ledger" / "usage.jsonl"
+    bridge_rows = _read_jsonl_rows(bridge_local_path, "openclaw_bridge")
+    bridge_source = "run-local bridge_usage.jsonl" if bridge_rows else "global usage.jsonl"
+    if not bridge_rows:
+        bridge_rows = _read_jsonl_rows(bridge_global_path, "openclaw_bridge")
+    rows: List[Dict[str, Any]] = []
+    for row in bridge_rows:
+        row_timestamp = _parse_report_timestamp(row)
+        if started_at and row_timestamp and not (started_at <= row_timestamp <= ended_at):
+            continue
+        rows.append(row)
     total_calls = len(rows)
     success_count = sum(1 for row in rows if row.get("outcome") == "success")
     error_count = sum(1 for row in rows if row.get("outcome") == "error")
@@ -1251,6 +1279,18 @@ def write_bridge_usage_report(run_dir: Path, run_id: str, status: str | None, me
                 reused_cached_count += 1
             if committee_meta.get("reason") == "no_actionable_candidates":
                 no_actionable_skip_count += 1
+    ledger_local_path = run_dir / "artifacts" / "ledger_usage.jsonl"
+    ledger_global_path = ROOT / "state" / "agents" / "ledger" / "usage.jsonl"
+    ledger_rows = _read_jsonl_rows(ledger_local_path)
+    ledger_source = "run-local ledger_usage.jsonl" if ledger_rows else "global usage.jsonl"
+    if not ledger_rows:
+        ledger_rows = _read_jsonl_rows(ledger_global_path)
+    token_rows = [row for row in ledger_rows if row.get("total_tokens") is not None]
+    cost_rows = [row for row in ledger_rows if row.get("estimated_cost") is not None]
+    prompt_tokens = sum(int(row.get("prompt_tokens") or 0) for row in token_rows)
+    completion_tokens = sum(int(row.get("completion_tokens") or 0) for row in token_rows)
+    total_tokens = sum(int(row.get("total_tokens") or 0) for row in token_rows)
+    estimated_cost_total = round(sum(float(row.get("estimated_cost") or 0.0) for row in cost_rows), 6) if cost_rows else None
     per_company: Dict[str, int] = {}
     per_agent: Dict[str, int] = {}
     for row in rows:
@@ -1262,10 +1302,21 @@ def write_bridge_usage_report(run_dir: Path, run_id: str, status: str | None, me
         "# Bridge Ledger Usage",
         f"Run: {run_id}",
         f"Status: {status or 'unknown'}",
+        f"Bridge source: {bridge_source}",
+        f"Ledger source: {ledger_source}",
         f"Scope: {'current run window' if started_at else 'visible bridge ledger records'}",
         f"Total bridge calls: {total_calls}",
         f"Success: {success_count}",
         f"Error: {error_count}",
+        "",
+        "Ledger telemetry:",
+        f"- rows: {len(ledger_rows)}",
+        f"- token_rows: {len(token_rows)}",
+        f"- cost_rows: {len(cost_rows)}",
+        f"- prompt_tokens: {prompt_tokens}",
+        f"- completion_tokens: {completion_tokens}",
+        f"- total_tokens: {total_tokens}",
+        f"- estimated_cost_total: {estimated_cost_total if estimated_cost_total is not None else 'unavailable'}",
         "",
         "Cost controls:",
         f"- budget_throttled: {budget_throttled_count}",
@@ -1494,14 +1545,22 @@ def start_run(duration_hours: float = 0.0, virtual_currency: float | None = None
         "duration_hours": duration_hours,
         "started_at": datetime.utcnow().isoformat(),
         "status": "scheduled",
+        "proof_telemetry": _proof_telemetry_enabled(),
         **virtual_budget,
         "virtual_currency_note": "testing-only virtual capital pool; not real brokerage cash",
     }
     (run_dir / "run_metadata.json").write_text(json.dumps(meta, indent=2))
+    if _proof_telemetry_enabled():
+        _emit_paper_proof_telemetry(run_id)
     command = [sys.executable, "-m", "tools.live_run", "run", "--run-id", run_id, "--duration-hours", str(duration_hours)]
     if virtual_currency is not None:
         command.extend(["--virtual-currency", str(virtual_currency)])
-    proc = subprocess.Popen(command, env=dict(os.environ, LIVE_RUN_MODE="paper"))
+    if _proof_telemetry_enabled():
+        command.append("--proof-telemetry")
+    child_env = dict(os.environ, LIVE_RUN_MODE="paper")
+    if _proof_telemetry_enabled():
+        child_env["LIVE_RUN_PROOF_TELEMETRY_SUPPRESSED"] = "1"
+    proc = subprocess.Popen(command, env=child_env)
     (run_dir / "run.pid").write_text(str(proc.pid))
     write_current_run(run_id, proc.pid)
     print(f"Live-data paper run started: {run_id}")
@@ -1560,6 +1619,7 @@ def stop_run(run_id: str | None = None) -> None:
         meta["ended_at"] = datetime.utcnow().isoformat()
         meta["status"] = "stopped"
         meta_path.write_text(json.dumps(meta, indent=2))
+        write_daily_digest(target_run)
     if current.get("run_id") == target_run:
         clear_current_run()
     print(f"Live-data paper run {target_run} stopped safely.")
@@ -1657,6 +1717,7 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
         meta["status"] = "running"
         meta["worker_started_at"] = datetime.utcnow().isoformat()
         meta_path.write_text(json.dumps(meta, indent=2))
+    _emit_paper_proof_telemetry(run_id)
     stop_flag = False
     backoff = 0
     end_time = datetime.utcnow() + timedelta(hours=duration_hours) if duration_hours > 0 else None
@@ -1706,6 +1767,7 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
                 candle_history[symbol] = symbol_history[-20:]
                 snapshot["candle_source"] = latest_candle["candle_source"]
                 snapshot["candle_confidence"] = latest_candle["candle_confidence"]
+                snapshot["position_state"] = portfolio.positions[company].get(symbol, 0.0)
                 decision = build_decision(snapshot, company, last_prices.get(price_key), candle_history=candle_history[symbol])
                 decision["vetoed_by_risk"] = abs(decision.get("signal_score", 0)) > 0.08
                 decision["position_state"] = portfolio.positions[company].get(symbol, 0.0)
@@ -1780,7 +1842,7 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
                         "skip_reason": d.get("skip_reason"),
                     }
                     for d in ranked_candidates[: min(10, len(ranked_candidates))]
-                    if not (d.get("decision") == "HOLD" and d.get("execution_state") == "skipped")
+                    if not (d.get("decision") in {"WAIT", "HOLD_POSITION"} and d.get("execution_state") == "skipped")
                 ],
             },
             "company_packet_summary": {
@@ -1873,12 +1935,14 @@ def main() -> None:
     start_parser = subparsers.add_parser("start", help="Start the paper run")
     start_parser.add_argument("--duration-hours", type=float, default=0.0)
     start_parser.add_argument("--virtual-currency", type=float, default=None, help="Testing-only virtual capital pool; not real brokerage cash")
+    start_parser.add_argument("--proof-telemetry", action="store_true", help="Emit one proof-only telemetry event before the worker loop")
     stop_parser = subparsers.add_parser("stop", help="Stop the current paper run")
     stop_parser.add_argument("--run-id", help="Explicit run id to stop")
     run_parser = subparsers.add_parser("run", help="Run worker (internal)")
     run_parser.add_argument("--run-id", required=True)
     run_parser.add_argument("--duration-hours", type=float, default=0.0)
     run_parser.add_argument("--virtual-currency", type=float, default=None, help="Testing-only virtual capital pool; not real brokerage cash")
+    run_parser.add_argument("--proof-telemetry", action="store_true", help="Emit one proof-only telemetry event before the worker loop")
     summary_parser = subparsers.add_parser("summary", help="Generate summary bundle")
     summary_parser.add_argument("--run-id", required=True)
     verify_parser = subparsers.add_parser("verify", help="Verify paper-only mode")
@@ -1886,10 +1950,14 @@ def main() -> None:
     subparsers.add_parser("validate", help="Validate feed/dirs")
     args = parser.parse_args()
     if args.command == "start":
+        if args.proof_telemetry:
+            os.environ["LIVE_RUN_PROOF_TELEMETRY"] = "1"
         start_run(duration_hours=args.duration_hours, virtual_currency=args.virtual_currency)
     elif args.command == "stop":
         stop_run(run_id=args.run_id)
     elif args.command == "run":
+        if args.proof_telemetry:
+            os.environ["LIVE_RUN_PROOF_TELEMETRY"] = "1"
         run_worker(args.run_id, duration_hours=args.duration_hours, virtual_currency=args.virtual_currency)
     elif args.command == "summary":
         summary(args.run_id)

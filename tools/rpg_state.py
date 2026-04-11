@@ -383,6 +383,195 @@ def score_mina_verified_test_report_completion(state: Dict[str, Any], report_pat
     return canonical
 
 
+_PAM_RUNTIME_PACKET_ROUTING_XP_AWARD = 6.0
+_PAM_RUNTIME_PACKET_ROUTING_EVIDENCE_QUALITY_BONUS = 4.0
+_PAM_RUNTIME_PACKET_ROUTING_MISSING_CONSULTATION_PENALTY = 2.0
+
+
+def _load_runtime_evidence_records(evidence_path: Path) -> list[Dict[str, Any]]:
+    try:
+        raw = evidence_path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return []
+    if not raw:
+        return []
+
+    parsed: Any
+    if raw.startswith("{") or raw.startswith("["):
+        try:
+            parsed = json.loads(raw)
+        except Exception:
+            parsed = None
+        if isinstance(parsed, dict):
+            if isinstance(parsed.get("top_company_activity"), list):
+                return [row for row in parsed["top_company_activity"] if isinstance(row, dict)]
+            return [parsed]
+        if isinstance(parsed, list):
+            return [row for row in parsed if isinstance(row, dict)]
+
+    records: list[Dict[str, Any]] = []
+    for line in raw.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        try:
+            row = json.loads(stripped)
+        except Exception:
+            continue
+        if isinstance(row, dict):
+            records.append(row)
+    return records
+
+
+def score_pam_runtime_packet_routing_completion(state: Dict[str, Any], evidence_path: Path) -> Dict[str, Any]:
+    canonical = _canonicalize_state(state)
+    if get_role_scorecard("Pam")["role"] != "pam":
+        return canonical
+
+    records = _load_runtime_evidence_records(evidence_path)
+    if not records:
+        return canonical
+
+    pam_consultations = 0
+    routing_gaps = 0
+    for record in records:
+        consulted = [str(agent).strip() for agent in (record.get("source_agents_consulted") or []) if str(agent).strip()]
+        if "Pam" in consulted:
+            pam_consultations += 1
+        packet_mode = str(record.get("packet_generation_mode") or "").strip().lower()
+        fallback_reason = str(record.get("fallback_reason") or record.get("reason") or "").strip().lower()
+        if (packet_mode in {"fallback", "cached_committee_reuse"} or fallback_reason.startswith("no_actionable") or fallback_reason.startswith("reused_recent_committee_packet")) and "Pam" not in consulted:
+            routing_gaps += 1
+
+    if pam_consultations:
+        canonical["xp"] = max(0.0, canonical["xp"] + min(_PAM_RUNTIME_PACKET_ROUTING_XP_AWARD, float(pam_consultations) * _PAM_RUNTIME_PACKET_ROUTING_XP_AWARD))
+        canonical["usefulness"] = min(100.0, canonical["usefulness"] + _PAM_RUNTIME_PACKET_ROUTING_EVIDENCE_QUALITY_BONUS)
+        canonical["consistency"] = min(100.0, canonical["consistency"] + 2.0)
+        canonical["evidence_quality"] = min(100.0, canonical["evidence_quality"] + _PAM_RUNTIME_PACKET_ROUTING_EVIDENCE_QUALITY_BONUS)
+
+    if routing_gaps:
+        canonical["waste_penalty"] = min(100.0, canonical["waste_penalty"] + float(routing_gaps) * _PAM_RUNTIME_PACKET_ROUTING_MISSING_CONSULTATION_PENALTY)
+        canonical["duplication_penalty"] = min(100.0, canonical["duplication_penalty"] + float(routing_gaps) * 1.0)
+
+    if pam_consultations or routing_gaps:
+        canonical["intelligence"] = derive_intelligence(canonical)
+    return canonical
+
+
+_LUCIAN_LIVE_COMMITTEE_DIRECTION_XP_AWARD = 8.0
+_LUCIAN_LIVE_COMMITTEE_DIRECTION_JUDGMENT_BONUS = 3.0
+_LUCIAN_LIVE_COMMITTEE_DIRECTION_CONSISTENCY_BONUS = 2.0
+_LUCIAN_LIVE_COMMITTEE_DIRECTION_USEFULNESS_BONUS = 2.0
+_LUCIAN_LIVE_COMMITTEE_DIRECTION_EVIDENCE_QUALITY_BONUS = 4.0
+_LUCIAN_LIVE_COMMITTEE_DIRECTION_FALLBACK_PENALTY = 4.0
+
+
+def score_lucian_live_committee_direction_completion(state: Dict[str, Any], evidence_path: Path) -> Dict[str, Any]:
+    canonical = _canonicalize_state(state)
+    if get_role_scorecard("Lucian")["role"] != "lucian":
+        return canonical
+
+    records = _load_runtime_evidence_records(evidence_path)
+    if not records:
+        return canonical
+
+    live_direction_count = 0
+    fallback_count = 0
+    for record in records:
+        committee_sources = record.get("committee_sources") or {}
+        lucian_meta = committee_sources.get("Lucian") or {}
+        consulted = [str(agent).strip() for agent in (record.get("source_agents_consulted") or []) if str(agent).strip()]
+        packet_mode = str(record.get("packet_generation_mode") or "").strip().lower()
+        summary = str(lucian_meta.get("summary") or "").strip()
+        if packet_mode == "live_committee_sessions" and lucian_meta.get("mode") == "live_session" and "Lucian" in consulted and summary and "|" in summary:
+            live_direction_count += 1
+        if packet_mode in {"fallback", "cached_committee_reuse"} or lucian_meta.get("mode") != "live_session":
+            fallback_count += 1
+
+    if live_direction_count:
+        canonical["xp"] = max(0.0, canonical["xp"] + min(_LUCIAN_LIVE_COMMITTEE_DIRECTION_XP_AWARD, float(live_direction_count) * _LUCIAN_LIVE_COMMITTEE_DIRECTION_XP_AWARD))
+        canonical["judgment"] = min(100.0, canonical["judgment"] + _LUCIAN_LIVE_COMMITTEE_DIRECTION_JUDGMENT_BONUS)
+        canonical["consistency"] = min(100.0, canonical["consistency"] + _LUCIAN_LIVE_COMMITTEE_DIRECTION_CONSISTENCY_BONUS)
+        canonical["usefulness"] = min(100.0, canonical["usefulness"] + _LUCIAN_LIVE_COMMITTEE_DIRECTION_USEFULNESS_BONUS)
+        canonical["evidence_quality"] = min(100.0, canonical["evidence_quality"] + _LUCIAN_LIVE_COMMITTEE_DIRECTION_EVIDENCE_QUALITY_BONUS)
+
+    if fallback_count:
+        canonical["waste_penalty"] = min(100.0, canonical["waste_penalty"] + float(fallback_count) * _LUCIAN_LIVE_COMMITTEE_DIRECTION_FALLBACK_PENALTY)
+        canonical["duplication_penalty"] = min(100.0, canonical["duplication_penalty"] + float(fallback_count) * 2.0)
+
+    if live_direction_count or fallback_count:
+        canonical["intelligence"] = derive_intelligence(canonical)
+    return canonical
+
+
+def score_lucian_runtime_packet_direction_completion(state: Dict[str, Any], evidence_path: Path) -> Dict[str, Any]:
+    return score_lucian_live_committee_direction_completion(state, evidence_path)
+
+
+_ROWAN_RESEARCH_COMPLETION_XP_AWARD = 5.0
+_ROWAN_RESEARCH_COMPLETION_EVIDENCE_QUALITY_BONUS = 3.0
+_ROWAN_RESEARCH_COMPLETION_USEFULNESS_BONUS = 2.0
+_ROWAN_RESEARCH_BLOCKED_PENALTY = 3.0
+
+
+def score_rowan_research_completion(state: Dict[str, Any], evidence_path: Path) -> Dict[str, Any]:
+    canonical = _canonicalize_state(state)
+    if get_role_scorecard("Rowan")["role"] != "rowan":
+        return canonical
+
+    records = _load_runtime_evidence_records(evidence_path)
+    if not records:
+        return canonical
+
+    completed_research = 0
+    blocked_reports = 0
+    for record in records:
+        response = record.get("response") if isinstance(record.get("response"), dict) else record
+        if not isinstance(response, dict):
+            continue
+
+        role = str(response.get("role") or response.get("to") or "").strip().lower()
+        task_type = str(response.get("task_type") or "").strip().lower()
+        status = str(response.get("status") or "").strip().lower()
+        if role not in {"researcher", "rowan"} and task_type not in {"research", "bridge_failure"}:
+            continue
+
+        if task_type == "bridge_failure" or status == "blocked":
+            blocked_reports += 1
+            continue
+
+        research_summary = str(response.get("research_summary") or "").strip()
+        ideas = [str(item).strip() for item in (response.get("ideas") or []) if str(item).strip()]
+        hypotheses = [str(item).strip() for item in (response.get("hypotheses") or []) if str(item).strip()]
+        evidence = [str(item).strip() for item in (response.get("evidence") or []) if str(item).strip()]
+        if research_summary and ideas and hypotheses and evidence:
+            completed_research += 1
+
+    if completed_research:
+        canonical["xp"] = max(0.0, canonical["xp"] + float(completed_research) * _ROWAN_RESEARCH_COMPLETION_XP_AWARD)
+        canonical["usefulness"] = min(100.0, canonical["usefulness"] + _ROWAN_RESEARCH_COMPLETION_USEFULNESS_BONUS)
+        canonical["evidence_quality"] = min(
+            100.0,
+            canonical["evidence_quality"] + _ROWAN_RESEARCH_COMPLETION_EVIDENCE_QUALITY_BONUS,
+        )
+        canonical["accuracy"] = min(100.0, canonical["accuracy"] + 1.0)
+
+    if blocked_reports:
+        canonical["waste_penalty"] = min(100.0, canonical["waste_penalty"] + float(blocked_reports) * _ROWAN_RESEARCH_BLOCKED_PENALTY)
+        canonical["fake_productivity_penalty"] = min(
+            100.0,
+            canonical["fake_productivity_penalty"] + float(blocked_reports) * _ROWAN_RESEARCH_BLOCKED_PENALTY,
+        )
+
+    if completed_research or blocked_reports:
+        canonical["intelligence"] = derive_intelligence(canonical)
+    return canonical
+
+
+def score_rowan_research_report_completion(state: Dict[str, Any], evidence_path: Path) -> Dict[str, Any]:
+    return score_rowan_research_completion(state, evidence_path)
+
+
 def format_rpg_identity_line(
     state: Dict[str, Any],
     agent_name: Any = None,
@@ -626,7 +815,12 @@ __all__ = [
     "load_rpg_state",
     "migrate_rpg_state_file",
     "save_rpg_state",
+    "score_lucian_live_committee_direction_completion",
+    "score_lucian_runtime_packet_direction_completion",
     "score_mina_verified_test_report_completion",
+    "score_pam_runtime_packet_routing_completion",
+    "score_rowan_research_completion",
+    "score_rowan_research_report_completion",
     "score_verified_report_completion",
     "format_rpg_identity_line",
     "format_rpg_summary",

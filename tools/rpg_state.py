@@ -96,6 +96,13 @@ _PENALTY_WEIGHTS = {
 # One narrow evidence path only: verified completion reports with a final PASS verdict.
 _VERIFIED_REPORT_COMPLETION_XP_AWARD = 10.0
 _VERIFIED_REPORT_COMPLETION_EVIDENCE_QUALITY_BONUS = 5.0
+_MINA_TEST_REPORT_EVIDENCE_MARKERS = (
+    "pytest",
+    "test_live_runtime_audit",
+    "tests/test_live_runtime_audit.py",
+)
+_MINA_TEST_REPORT_EVIDENCE_QUALITY_BONUS = 3.0
+_MINA_TEST_REPORT_FAILURE_PENALTY = 5.0
 
 
 def _coerce_float(value: Any, default: float = 0.0) -> float:
@@ -339,6 +346,43 @@ def score_verified_report_completion(state: Dict[str, Any], report_path: Path) -
     return canonical
 
 
+def score_mina_verified_test_report_completion(state: Dict[str, Any], report_path: Path) -> Dict[str, Any]:
+    canonical = _canonicalize_state(state)
+    if get_role_scorecard("Mina")["role"] != "mina":
+        return canonical
+
+    try:
+        report_text = report_path.read_text(encoding="utf-8")
+    except OSError:
+        return canonical
+
+    report_text_lower = report_text.lower()
+    has_test_evidence = any(marker in report_text_lower for marker in _MINA_TEST_REPORT_EVIDENCE_MARKERS)
+    if not has_test_evidence:
+        return canonical
+
+    if is_verified_report_completion(report_path):
+        canonical = score_verified_report_completion(canonical, report_path)
+        canonical["evidence_quality"] = min(
+            100.0,
+            canonical["evidence_quality"] + _MINA_TEST_REPORT_EVIDENCE_QUALITY_BONUS,
+        )
+        canonical["intelligence"] = derive_intelligence(canonical)
+        return canonical
+
+    body = _extract_pass_fail_section(report_text)
+    lines = [line.strip().upper() for line in body.splitlines() if line.strip()]
+    has_fail = any(line.startswith("FAIL") or line.startswith("- FAIL") for line in lines) or "FAIL / BLOCKED" in report_text.upper()
+    if has_fail:
+        canonical["waste_penalty"] = min(100.0, canonical["waste_penalty"] + _MINA_TEST_REPORT_FAILURE_PENALTY)
+        canonical["fake_productivity_penalty"] = min(
+            100.0,
+            canonical["fake_productivity_penalty"] + _MINA_TEST_REPORT_FAILURE_PENALTY,
+        )
+        canonical["intelligence"] = derive_intelligence(canonical)
+    return canonical
+
+
 def format_rpg_identity_line(
     state: Dict[str, Any],
     agent_name: Any = None,
@@ -375,16 +419,214 @@ def format_rpg_summary(state: Dict[str, Any], agent_name: Any = None) -> str:
     return "\n".join(lines)
 
 
+_ROLE_SCORECARD_ALIASES = {
+    "pam": "pam",
+    "administrative_coordinator": "pam",
+    "coordinator": "pam",
+    "iris": "iris",
+    "analyst": "iris",
+    "rowan": "rowan",
+    "researcher": "rowan",
+    "bianca": "bianca",
+    "cfo": "bianca",
+    "lucian": "lucian",
+    "ceo": "lucian",
+    "mina": "mina",
+    "tester": "mina",
+}
+
+_ROLE_SCORECARDS = {
+    "pam": {
+        "primary_win_conditions": [
+            "requests land in the right inboxes",
+            "packets are routed cleanly",
+            "task queues stay organized",
+            "summaries are clear and faithful",
+        ],
+        "main_penalty_risks": [
+            "misrouted packets",
+            "duplicated inbox handling",
+            "vague summaries",
+            "unnecessary queue churn",
+        ],
+        "top_stats_to_improve": ["usefulness", "consistency", "speed", "evidence_quality"],
+    },
+    "iris": {
+        "primary_win_conditions": [
+            "missing evidence is flagged early",
+            "discrepancies are identified",
+            "diagnostic notes are specific",
+            "the evidence trail stays usable",
+        ],
+        "main_penalty_risks": [
+            "missed discrepancies",
+            "shallow evidence checks",
+            "overconfident conclusions without support",
+            "repeated false alarms",
+        ],
+        "top_stats_to_improve": ["accuracy", "evidence_quality", "consistency", "usefulness"],
+    },
+    "rowan": {
+        "primary_win_conditions": [
+            "hypotheses are testable",
+            "research questions are sharp",
+            "experiments have enough detail to run",
+            "blind spots are reduced",
+        ],
+        "main_penalty_risks": [
+            "speculative work with no testable shape",
+            "research churn without a question",
+            "repeated ideas without evidence",
+            "ungrounded brainstorming",
+        ],
+        "top_stats_to_improve": ["usefulness", "evidence_quality", "accuracy", "speed"],
+    },
+    "bianca": {
+        "primary_win_conditions": [
+            "spend posture stays disciplined",
+            "runway is protected",
+            "reckless burn is rejected",
+            "decisions reflect actual financial constraints",
+        ],
+        "main_penalty_risks": [
+            "wasteful spend",
+            "ignored runway risk",
+            "approval of reckless burn",
+            "finance language without actual constraint analysis",
+        ],
+        "top_stats_to_improve": ["cost_efficiency", "usefulness", "evidence_quality", "consistency"],
+    },
+    "lucian": {
+        "primary_win_conditions": [
+            "company decisions are coherent",
+            "inputs are composed into executive direction",
+            "blockers are resolved cleanly",
+            "execution stays aligned",
+        ],
+        "main_penalty_risks": [
+            "contradictory directives",
+            "decisions that ignore inputs",
+            "premature executive closure",
+            "coordination that produces churn instead of clarity",
+        ],
+        "top_stats_to_improve": ["judgment", "consistency", "usefulness", "reliability"],
+    },
+    "mina": {
+        "primary_win_conditions": [
+            "tests are run against shared systems",
+            "coverage is real",
+            "regressions are caught",
+            "QA artifacts are trustworthy",
+        ],
+        "main_penalty_risks": [
+            "shallow test claims",
+            "missing coverage",
+            "false sign-off",
+            "repeated test noise that does not improve confidence",
+        ],
+        "top_stats_to_improve": ["accuracy", "reliability", "evidence_quality", "consistency"],
+    },
+}
+
+
+def get_role_scorecard(role_or_agent: Any) -> Dict[str, Any]:
+    if isinstance(role_or_agent, dict):
+        candidates = [
+            role_or_agent.get("role"),
+            role_or_agent.get("agent"),
+            role_or_agent.get("agent_name"),
+            role_or_agent.get("name"),
+            role_or_agent.get("title"),
+            role_or_agent.get("recipient"),
+            role_or_agent.get("recipient_name"),
+        ]
+    else:
+        candidates = [role_or_agent]
+
+    for candidate in candidates:
+        if candidate is None:
+            continue
+        normalized = str(candidate).strip().lower().replace(" ", "_")
+        normalized = _ROLE_SCORECARD_ALIASES.get(normalized, normalized)
+        if normalized in _ROLE_SCORECARDS:
+            scorecard = _ROLE_SCORECARDS[normalized]
+            return {
+                "role": normalized,
+                "primary_win_conditions": list(scorecard["primary_win_conditions"]),
+                "main_penalty_risks": list(scorecard["main_penalty_risks"]),
+                "top_stats_to_improve": list(scorecard["top_stats_to_improve"]),
+            }
+
+    return {
+        "role": "unknown",
+        "primary_win_conditions": [],
+        "main_penalty_risks": [],
+        "top_stats_to_improve": [],
+    }
+
+
+def format_rpg_motivation_block(state: Dict[str, Any], role_or_agent: Any = None) -> str:
+    canonical = _canonicalize_state(state)
+    scorecard = get_role_scorecard(role_or_agent)
+    label = str(role_or_agent).strip() if isinstance(role_or_agent, str) and str(role_or_agent).strip() else scorecard["role"]
+    weakest_stats = sorted(
+        [
+            (field, _normalize_score(canonical.get(field)))
+            for field in ("accuracy", "reliability", "judgment", "consistency", "usefulness", "cost_efficiency", "evidence_quality", "speed")
+        ],
+        key=lambda item: item[1],
+    )[:3]
+    penalties = {
+        "duplication_penalty": _format_value(canonical["duplication_penalty"]),
+        "waste_penalty": _format_value(canonical["waste_penalty"]),
+        "fake_productivity_penalty": _format_value(canonical["fake_productivity_penalty"]),
+    }
+    lines = [
+        f"Focus for {label}:",
+        f"- Current: level {int(canonical['level'])}, XP {_format_value(canonical['xp'])}, intelligence {_format_value(canonical['intelligence'])}.",
+        f"- Role scorecard: {', '.join(scorecard['primary_win_conditions']) if scorecard['primary_win_conditions'] else 'none'}.",
+        f"- Improve first: {', '.join(f'{name} {_format_value(value)}' for name, value in weakest_stats)}.",
+        f"- Penalty exposure: duplication {penalties['duplication_penalty']}, waste {penalties['waste_penalty']}, fake productivity {penalties['fake_productivity_penalty']}.",
+    ]
+    if scorecard["main_penalty_risks"]:
+        lines.append(f"- Watch for: {', '.join(scorecard['main_penalty_risks'])}.")
+    return "\n".join(lines)
+
+
+def format_rpg_self_awareness_block(state: Dict[str, Any], role_or_agent: Any = None) -> str:
+    canonical = _canonicalize_state(state)
+    identity_line = format_rpg_identity_line(canonical, role_or_agent)
+    summary_line = (
+        f"Level {int(canonical['level'])} {canonical['title']} | "
+        f"XP {_format_value(canonical['xp'])} | Intelligence {_format_value(canonical['intelligence'])}."
+    )
+    motivation_block = format_rpg_motivation_block(canonical, role_or_agent)
+    improve_line = next(
+        (
+            line.replace("- Improve first:", "Improve by:", 1).strip()
+            for line in motivation_block.splitlines()
+            if line.startswith("- Improve first:")
+        ),
+        "",
+    )
+    lines = [identity_line, summary_line]
+    if improve_line:
+        lines.append(improve_line)
+    return "\n".join(lines)
+
+
 __all__ = [
     "RPG_STATE_FIELDS",
     "current_level_threshold",
     "default_rpg_state",
     "derive_intelligence",
+    "get_role_scorecard",
     "is_verified_report_completion",
     "level_from_xp",
     "load_rpg_state",
     "migrate_rpg_state_file",
     "save_rpg_state",
+    "score_mina_verified_test_report_completion",
     "score_verified_report_completion",
     "format_rpg_identity_line",
     "format_rpg_summary",

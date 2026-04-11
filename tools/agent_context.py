@@ -7,6 +7,7 @@ from typing import Any, Dict, List
 from tools.agent_packets import normalize_role
 from tools.agent_roles import ALLOWED_RECIPIENTS, ROLE_SPECS, ROLE_STRUCTURED_OUTPUT
 from tools.agent_runtime import (
+    ROOT as AGENT_ROOT,
     gather_company_insights,
     gather_global_finance_insights,
     gather_global_risk_insights,
@@ -17,6 +18,7 @@ from tools.agent_runtime import (
     policy_description,
     summarize_queue,
 )
+from tools.rpg_state import format_rpg_self_awareness_block, load_rpg_state
 
 TREASURY_ROLES = {"master treasurer", "inspector general", "constitutional arbiter", "ombudsman", "master ceo"}
 RISK_ROLES = {"risk officer", "inspector general", "constitutional arbiter", "ombudsman", "master ceo"}
@@ -44,6 +46,9 @@ def build_prompt(
     global_insights = gather_global_treasury_insights() if role_key in TREASURY_ROLES else {}
     global_risk_insights = gather_global_risk_insights() if role_key in RISK_ROLES else {}
     global_finance_insights = gather_global_finance_insights() if role_key in FINANCE_ROLES else {}
+    agent_id = str(agent_info.get("id") or "").strip()
+    rpg_state_path = AGENT_ROOT / "ai_agents_memory" / agent_id / "RPG_STATE.md" if agent_id else AGENT_ROOT / "ai_agents_memory" / "_default" / "RPG_STATE.md"
+    rpg_state = load_rpg_state(rpg_state_path)
     prompt: Dict[str, Any] = {
         "role_type": role_type,
         "role_spec": role_spec,
@@ -63,6 +68,7 @@ def build_prompt(
         "recent_inbox": inbox,
         "recent_outbox": outbox,
         "company_insights": insights,
+        "rpg_self_awareness": format_rpg_self_awareness_block(rpg_state, agent_info.get("name") or agent_info.get("id") or role_type),
         "message": message,
     }
     if global_insights:

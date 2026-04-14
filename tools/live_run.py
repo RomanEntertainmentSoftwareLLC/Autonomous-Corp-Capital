@@ -183,6 +183,8 @@ def _promote_wait_candidate(candidate: Dict[str, Any]) -> bool:
     signal_dir = signal_votes[0]
     if any(direction != signal_dir for direction in signal_votes[1:]):
         return False
+    if signal_dir < 0 and float(candidate.get("position_state") or 0.0) <= 0:
+        return False
 
     evidence_votes = []
     pattern_confirmation = candidate.get("pattern_confirmation") or {}

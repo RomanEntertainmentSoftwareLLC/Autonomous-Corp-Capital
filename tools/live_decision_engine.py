@@ -401,12 +401,14 @@ def build_decision(
         str(candle_source),
         candle_confidence,
     )
+    demoted_by_pattern_gate = False
     if decision in {"BUY", "SELL"} and (
         not pattern_result["detected_patterns"]
         or not pattern_result["pattern_confirmation"].get("satisfied")
     ):
+        demoted_by_pattern_gate = True
         decision = "HOLD_POSITION" if position_state > 0 else "WAIT"
-    if decision == "WAIT" and signal_decision == "WAIT" and position_state <= 0:
+    if decision == "WAIT" and position_state <= 0:
         pattern_aligned = (
             pattern_result["pattern_dir"] != 0
             and pattern_result["pattern_confirmation"].get("satisfied")
@@ -430,10 +432,15 @@ def build_decision(
                 decision = "BUY" if pattern_result["pattern_dir"] > 0 else "SELL"
             notes = f"signal + pattern confirmation under {policy['policy_name']}"
             scoring_method = "signal_plus_pattern"
-        elif real_ohlc_bootstrap:
+        elif real_ohlc_bootstrap and (signal_decision == "WAIT" or demoted_by_pattern_gate):
             decision = "BUY" if adjusted_signal_score > 0 else "SELL"
             notes = f"signal + real_ohlc bootstrap under {policy['policy_name']}"
             scoring_method = "signal_plus_real_ohlc"
+
+    if decision == "SELL" and position_state <= 0:
+        decision = "WAIT"
+        notes = f"flat account blocks sell under {policy['policy_name']}"
+        scoring_method = "flat_account_sell_block"
 
     if (
         decision in {"BUY", "SELL"}

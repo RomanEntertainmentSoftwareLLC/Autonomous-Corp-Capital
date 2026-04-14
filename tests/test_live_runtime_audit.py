@@ -460,6 +460,48 @@ def test_wait_candidate_can_bootstrap_from_previous_real_ohlc_close_when_current
     assert decision["decision"] == "BUY"
 
 
+
+
+def test_flat_account_sell_signal_is_blocked_to_wait():
+    snapshot = {
+        "symbol": "BTC-USD",
+        "price": 99.0,
+        "position_state": 0.0,
+        "candle_source": "real_ohlc",
+        "candle_confidence": 0.8,
+    }
+
+    decision = build_decision(snapshot, "company_001", last_price=100.0, candle_history=[{"open": 100.0, "close": 99.0, "candle_source": "real_ohlc", "candle_confidence": 0.8}])
+
+    assert decision["signal_score"] < 0
+    assert decision["decision"] == "WAIT"
+    assert decision["scoring_method"] == "flat_account_sell_block"
+
+
+def test_ranked_wait_candidate_does_not_promote_to_sell_when_flat():
+    row = candidate("BTC-USD")
+    row.update(
+        {
+            "policy_signal_score": -0.011,
+            "ml_signal_score": 0.0,
+            "model_score": 0.29,
+            "ranking_score": 0.352,
+            "pattern_confirmation": {"satisfied": False},
+            "pattern_dir": 0,
+            "orion_bias": 0.0,
+            "orion_bias_applied": False,
+            "candle_source": "real_ohlc",
+            "candle_confidence": 0.7,
+            "position_state": 0.0,
+        }
+    )
+
+    ranked = rank_and_select_candidates([row])
+
+    assert ranked[0]["decision"] == "WAIT"
+    assert ranked[0]["execution_state"] == "skipped"
+    assert ranked[0]["skip_reason"] == "hold_candidate"
+
 def test_stop_run_refuses_false_safe_when_process_group_survives(monkeypatch, tmp_path):
     run_dir = tmp_path / "run_20260412_050000"
     (run_dir / "artifacts").mkdir(parents=True)

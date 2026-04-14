@@ -2,6 +2,8 @@ from tools.live_decision_engine import build_decision
 from tools.pattern_engine import evaluate_patterns, strat_bar_type
 
 
+
+
 def c(o, h, l, cl, ts="t"):
     return {"open": o, "high": h, "low": l, "close": cl, "timestamp": ts}
 
@@ -233,3 +235,136 @@ def test_live_decision_artifact_exposes_candle_quality_fields():
     assert decision["candle_confidence"] == 0.35
     assert decision["matched_context"]["candle_source"] == "pseudo_snapshot_ohlc"
     assert decision["matched_context"]["candle_confidence"] == 0.35
+
+
+def test_flat_candidate_can_be_actionable_when_signal_and_pattern_support_it(monkeypatch):
+    monkeypatch.setattr(
+        "tools.live_decision_engine.infer_ml_signal",
+        lambda *args, **kwargs: {
+            "ml_scoring_active": False,
+            "model_score": None,
+            "ml_signal_score": None,
+            "decision_path": "signal-only fallback",
+            "ml_inference_status": "unavailable",
+            "ml_inference_reason": "patched-off-for-test",
+            "ml_model_artifact_path": "",
+            "ml_feature_columns": [],
+            "ml_feature_coverage": 0.0,
+        },
+    )
+    candle_history = warmup() + [
+        c(100.0, 101.0, 99.5, 100.5, "p1"),
+        c(100.5, 102.0, 100.0, 101.2, "p2"),
+        c(101.2, 103.0, 101.0, 102.4, "p3"),
+    ]
+    decision = build_decision(
+        {
+            "timestamp": "2026-03-22T00:00:00+00:00",
+            "symbol": "ETH-USD",
+            "price": 101.5,
+            "position_state": 0.0,
+        },
+        "company_001",
+        last_price=100.0,
+        candle_history=candle_history,
+    )
+    assert decision["decision"] == "BUY"
+    assert decision["pattern_confirmation"]["satisfied"] is True
+    assert decision["pattern_score"] > 0
+
+
+def test_flat_candidate_can_survive_wait_collapse_when_signal_and_pattern_align(monkeypatch):
+    monkeypatch.setattr(
+        "tools.live_decision_engine.infer_ml_signal",
+        lambda *args, **kwargs: {
+            "ml_scoring_active": False,
+            "model_score": None,
+            "ml_signal_score": None,
+            "decision_path": "signal-only fallback",
+            "ml_inference_status": "unavailable",
+            "ml_inference_reason": "patched-off-for-test",
+            "ml_model_artifact_path": "",
+            "ml_feature_columns": [],
+            "ml_feature_coverage": 0.0,
+        },
+    )
+    candle_history = warmup() + [
+        c(100.0, 100.2, 99.7, 100.1, "p1"),
+        c(100.1, 100.4, 100.0, 100.2, "p2"),
+        c(100.2, 100.6, 100.1, 100.4, "p3"),
+    ]
+    decision = build_decision(
+        {
+            "timestamp": "2026-03-22T00:00:00+00:00",
+            "symbol": "ETH-USD",
+            "price": 100.3,
+            "position_state": 0.0,
+        },
+        "company_001",
+        last_price=100.0,
+        candle_history=candle_history,
+    )
+    assert decision["decision"] == "BUY"
+    assert decision["pattern_confirmation"]["satisfied"] is True
+    assert decision["pattern_score"] > 0
+
+
+def test_flat_candidate_without_signal_or_pattern_stays_wait(monkeypatch):
+    monkeypatch.setattr(
+        "tools.live_decision_engine.infer_ml_signal",
+        lambda *args, **kwargs: {
+            "ml_scoring_active": False,
+            "model_score": None,
+            "ml_signal_score": None,
+            "decision_path": "signal-only fallback",
+            "ml_inference_status": "unavailable",
+            "ml_inference_reason": "patched-off-for-test",
+            "ml_model_artifact_path": "",
+            "ml_feature_columns": [],
+            "ml_feature_coverage": 0.0,
+        },
+    )
+    decision = build_decision(
+        {
+            "timestamp": "2026-03-22T00:00:00+00:00",
+            "symbol": "ETH-USD",
+            "price": 100.0,
+            "position_state": 0.0,
+        },
+        "company_001",
+        last_price=100.0,
+        candle_history=[],
+    )
+    assert decision["decision"] == "WAIT"
+    assert decision["pattern_confirmation"]["satisfied"] is False
+    assert decision["pattern_score"] == 0.0
+
+
+def test_owned_position_keep_state_stays_hold_position(monkeypatch):
+    monkeypatch.setattr(
+        "tools.live_decision_engine.infer_ml_signal",
+        lambda *args, **kwargs: {
+            "ml_scoring_active": False,
+            "model_score": None,
+            "ml_signal_score": None,
+            "decision_path": "signal-only fallback",
+            "ml_inference_status": "unavailable",
+            "ml_inference_reason": "patched-off-for-test",
+            "ml_model_artifact_path": "",
+            "ml_feature_columns": [],
+            "ml_feature_coverage": 0.0,
+        },
+    )
+    decision = build_decision(
+        {
+            "timestamp": "2026-03-22T00:00:00+00:00",
+            "symbol": "ETH-USD",
+            "price": 100.0,
+            "position_state": 1.0,
+        },
+        "company_001",
+        last_price=100.0,
+        candle_history=[],
+    )
+    assert decision["decision"] == "HOLD_POSITION"
+    assert decision["pattern_confirmation"]["satisfied"] is False

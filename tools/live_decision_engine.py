@@ -229,6 +229,24 @@ def _close_only_pattern_payload(
         elif last_three[0] > last_three[1] > last_three[2]:
             detected_patterns.append("close_three_falling")
             pattern_score = -LIVE_PATTERN_SCORE_MAX_ABS
+    if not detected_patterns and len(closes) >= 2:
+        last_two = closes[-2:]
+        if last_two[0] < last_two[1]:
+            detected_patterns.append("close_bootstrap_rising")
+            pattern_score = LIVE_PATTERN_SCORE_MAX_ABS
+        elif last_two[0] > last_two[1]:
+            detected_patterns.append("close_bootstrap_falling")
+            pattern_score = -LIVE_PATTERN_SCORE_MAX_ABS
+    if not detected_patterns and candle_history:
+        last_candle = candle_history[-1] or {}
+        open_ = float(last_candle.get("open") or 0.0)
+        close = float(last_candle.get("close") or 0.0)
+        if open_ and close > open_:
+            detected_patterns.append("close_bootstrap_rising")
+            pattern_score = LIVE_PATTERN_SCORE_MAX_ABS
+        elif open_ and close < open_:
+            detected_patterns.append("close_bootstrap_falling")
+            pattern_score = -LIVE_PATTERN_SCORE_MAX_ABS
     if len(closes) >= 4:
         prev_three = closes[-4:-1]
         last_close = closes[-1]
@@ -338,6 +356,19 @@ def build_decision(
     policy = company_policy(company_id)
     position_state = float(snapshot.get("position_state") or 0.0)
     raw_signal_score = compute_signal(snapshot, last_price)
+    if (
+        raw_signal_score == 0.0
+        and str(candle_source).lower() == "real_ohlc"
+        and float(candle_confidence or 0.0) >= 0.7
+    ):
+        candle_open = float(latest_candle.get("open") or 0.0)
+        candle_close = float(latest_candle.get("close") or price or 0.0)
+        if candle_open > 0.0 and candle_close != candle_open:
+            raw_signal_score = (candle_close - candle_open) / candle_open
+        elif len(candle_history or []) >= 2:
+            prev_close = float((candle_history or [])[ -2].get("close") or 0.0)
+            if prev_close > 0.0 and candle_close != prev_close:
+                raw_signal_score = (candle_close - prev_close) / prev_close
     adjusted_signal_score = raw_signal_score * float(policy["signal_multiplier"])
     threshold = float(policy["threshold"])
     signal_decision = map_score_to_decision(adjusted_signal_score, threshold, position_state)
@@ -371,11 +402,39 @@ def build_decision(
         candle_confidence,
     )
     if decision in {"BUY", "SELL"} and (
-        pattern_result["matched_context"]["candle_source"] != "real_ohlc"
-        or not pattern_result["detected_patterns"]
+        not pattern_result["detected_patterns"]
         or not pattern_result["pattern_confirmation"].get("satisfied")
     ):
         decision = "HOLD_POSITION" if position_state > 0 else "WAIT"
+    if decision == "WAIT" and signal_decision == "WAIT" and position_state <= 0:
+        pattern_aligned = (
+            pattern_result["pattern_dir"] != 0
+            and pattern_result["pattern_confirmation"].get("satisfied")
+            and (
+                adjusted_signal_score == 0.0
+                or (adjusted_signal_score > 0 and pattern_result["pattern_dir"] > 0)
+                or (adjusted_signal_score < 0 and pattern_result["pattern_dir"] < 0)
+            )
+        )
+        real_ohlc_bootstrap = (
+            pattern_result["matched_context"]["candle_source"] == "real_ohlc"
+            and float(pattern_result["matched_context"]["candle_confidence"] or 0.0) >= 0.7
+            and adjusted_signal_score != 0.0
+        )
+        if pattern_aligned:
+            if adjusted_signal_score > 0:
+                decision = "BUY"
+            elif adjusted_signal_score < 0:
+                decision = "SELL"
+            else:
+                decision = "BUY" if pattern_result["pattern_dir"] > 0 else "SELL"
+            notes = f"signal + pattern confirmation under {policy['policy_name']}"
+            scoring_method = "signal_plus_pattern"
+        elif real_ohlc_bootstrap:
+            decision = "BUY" if adjusted_signal_score > 0 else "SELL"
+            notes = f"signal + real_ohlc bootstrap under {policy['policy_name']}"
+            scoring_method = "signal_plus_real_ohlc"
+
     if (
         decision in {"BUY", "SELL"}
         and pattern_result["matched_context"]["candle_source"] == "real_ohlc"

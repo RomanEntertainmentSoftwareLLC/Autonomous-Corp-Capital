@@ -458,16 +458,14 @@ def main() -> None:
             loop_ts_ns = now_ns()
 
             try:
-                binance_tick = fetch_binance_tick(session)
+                with ThreadPoolExecutor(max_workers=2) as executor:
+                    binance_tick, robinhood_tick = fetch_both_ticks(
+                        executor,
+                        session,
+                        session,
+                    )
             except Exception as e:
-                logging.error("Binance fetch failed: %s", e)
-                time.sleep(POLL_SECONDS)
-                continue
-
-            try:
-                robinhood_tick = fetch_robinhood_tick(session)
-            except Exception as e:
-                logging.error("Robinhood fetch failed: %s", e)
+                logging.error("Parallel market fetch failed: %s", e)
                 time.sleep(POLL_SECONDS)
                 continue
 

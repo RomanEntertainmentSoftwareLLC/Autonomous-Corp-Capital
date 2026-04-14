@@ -43,6 +43,10 @@ COMMITTEE_REUSE_WINDOW_SECONDS = 300
 BRIDGE_CALL_BUDGET_PER_RUN = 25
 
 
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
 def virtual_currency_context(virtual_currency: float | None) -> Dict[str, Any]:
     if virtual_currency is None:
         return {
@@ -65,7 +69,7 @@ def ensure_directories() -> None:
 
 
 def create_run_id() -> str:
-    return datetime.utcnow().strftime("run_%Y%m%d_%H%M%S")
+    return _utcnow().strftime("run_%Y%m%d_%H%M%S")
 
 
 def run_directory(run_id: str) -> Path:
@@ -75,10 +79,64 @@ def run_directory(run_id: str) -> Path:
     return run_dir
 
 
-def write_current_run(run_id: str, pid: int) -> None:
+def write_current_run(run_id: str, pid: int, pgid: int | None = None) -> None:
     ensure_directories()
-    data = {"run_id": run_id, "pid": pid, "mode": "paper", "status": "running", "started_at": datetime.utcnow().isoformat()}
+    data = {
+        "run_id": run_id,
+        "pid": pid,
+        "pgid": pgid if pgid is not None else pid,
+        "mode": "paper",
+        "status": "running",
+        "started_at": _utcnow().isoformat(),
+    }
     CURRENT_RUN_PATH.write_text(json.dumps(data, indent=2))
+
+
+
+def _bootstrap_last_prices_from_previous_run(current_run_id: str, symbols: List[str]) -> Dict[tuple[str, str], float]:
+    requested_symbols = {str(symbol) for symbol in symbols if str(symbol)}
+    if not requested_symbols:
+        return {}
+    eligible_runs: List[Path] = []
+    for run_dir in LIVE_RUNS_ROOT.glob("run_*"):
+        name = run_dir.name
+        if (
+            not run_dir.is_dir()
+            or name >= current_run_id
+            or not (name.startswith("run_") and len(name) == 19 and name[4:12].isdigit() and name[12] == "_" and name[13:19].isdigit())
+        ):
+            continue
+        feed_path = run_dir / "data" / "market_feed.log"
+        if feed_path.exists():
+            eligible_runs.append(run_dir)
+    for run_dir in sorted(eligible_runs, key=lambda path: path.name, reverse=True):
+        feed_path = run_dir / "data" / "market_feed.log"
+        symbol_prices: Dict[str, float] = {}
+        try:
+            rows = [line for line in feed_path.read_text().splitlines() if line.strip()]
+        except Exception:
+            continue
+        for raw in rows:
+            try:
+                row = json.loads(raw)
+            except Exception:
+                continue
+            symbol = str(row.get("symbol") or "")
+            if symbol not in requested_symbols:
+                continue
+            try:
+                price = float(row.get("price") or 0.0)
+            except (TypeError, ValueError):
+                continue
+            if price > 0.0:
+                symbol_prices[symbol] = price
+        if symbol_prices:
+            bootstrapped: Dict[tuple[str, str], float] = {}
+            for company in COMPANIES:
+                for symbol, price in symbol_prices.items():
+                    bootstrapped[(company, symbol)] = price
+            return bootstrapped
+    return {}
 
 
 
@@ -87,7 +145,66 @@ def candidate_ranking_score(decision: Dict[str, Any]) -> float:
     ml_signal_score = abs(float(decision.get("ml_signal_score") or 0.0))
     model_confidence = abs(float(decision.get("model_score") or 0.5) - 0.5) * 2.0
     pattern_score = float(decision.get("pattern_score") or decision.get("pattern_contribution") or 0.0)
-    return round(policy_signal_score + ml_signal_score + model_confidence + pattern_score, 6)
+    score = round(policy_signal_score + ml_signal_score + model_confidence + pattern_score, 6)
+    if score <= 0.0:
+        candle_source = str(decision.get("candle_source") or decision.get("matched_context", {}).get("candle_source") or "").lower()
+        candle_confidence = float(decision.get("candle_confidence") or decision.get("matched_context", {}).get("candle_confidence") or 0.0)
+        if candle_source == "real_ohlc" and candle_confidence >= 0.7 and str(decision.get("decision") or "").upper() == "WAIT":
+            return 0.0001
+    return score
+
+
+def _direction_from_score(value: Any) -> int:
+    score = float(value or 0.0)
+    if score > 0:
+        return 1
+    if score < 0:
+        return -1
+    return 0
+
+
+def _promote_wait_candidate(candidate: Dict[str, Any]) -> bool:
+    if str(candidate.get("decision") or "").upper() != "WAIT":
+        return False
+    if float(candidate.get("position_state") or 0.0) > 0:
+        return False
+    if float(candidate.get("ranking_score") or 0.0) <= 0.0:
+        return False
+
+    signal_votes = []
+    for direction in (
+        _direction_from_score(candidate.get("policy_signal_score")),
+        _direction_from_score(candidate.get("ml_signal_score")),
+    ):
+        if direction:
+            signal_votes.append(direction)
+    if not signal_votes:
+        return False
+    signal_dir = signal_votes[0]
+    if any(direction != signal_dir for direction in signal_votes[1:]):
+        return False
+
+    evidence_votes = []
+    pattern_confirmation = candidate.get("pattern_confirmation") or {}
+    pattern_dir = _direction_from_score(candidate.get("pattern_dir"))
+    if pattern_confirmation.get("satisfied") and pattern_dir:
+        evidence_votes.append(pattern_dir)
+    orion_bias = _direction_from_score(candidate.get("orion_bias"))
+    if candidate.get("orion_bias_applied") and orion_bias:
+        evidence_votes.append(orion_bias)
+    if not evidence_votes:
+        candle_source = str(candidate.get("candle_source") or "").lower()
+        candle_confidence = float(candidate.get("candle_confidence") or 0.0)
+        if candle_source != "real_ohlc" or candle_confidence < 0.7:
+            return False
+        evidence_votes.append(signal_dir)
+    if not any(direction == signal_dir for direction in evidence_votes):
+        return False
+
+    candidate["decision"] = "BUY" if signal_dir > 0 else "SELL"
+    candidate["decision_promoted_from"] = "WAIT"
+    candidate["decision_promotion_reason"] = "aligned_signal_evidence"
+    return True
 
 
 
@@ -100,6 +217,7 @@ def rank_and_select_candidates(candidates: List[Dict[str, Any]]) -> List[Dict[st
             candidate["execution_state"] = "skipped"
             candidate["skip_reason"] = "risk_veto"
             continue
+        _promote_wait_candidate(candidate)
         if candidate.get("decision") not in {"BUY", "SELL"}:
             candidate["execution_state"] = "skipped"
             candidate["skip_reason"] = "hold_candidate"
@@ -296,7 +414,7 @@ def _load_orion_cache(symbol: str, max_age_hours: float = ORION_CACHE_FRESHNESS_
             if row_symbol != symbol:
                 continue
             cached_at = _parse_report_timestamp({"timestamp": row.get("timestamp") or row.get("cached_at")})
-            if cached_at and (datetime.utcnow().replace(tzinfo=timezone.utc) - cached_at) <= timedelta(hours=max_age_hours):
+            if cached_at and (_utcnow() - cached_at) <= timedelta(hours=max_age_hours):
                 return row.get("top_results") or row.get("articles") or []
     except Exception:
         pass
@@ -326,7 +444,7 @@ def _save_orion_cache(symbol: str, articles: List[Dict[str, Any]]) -> None:
     summary = "; ".join(item["title"] for item in top_results[:3]) or f"{_normalize_orion_query(symbol)} cache entry"
     entry = {
         "normalized_query": _normalize_orion_query(symbol),
-        "timestamp": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+        "timestamp": _utcnow().isoformat(),
         "source_used": source_used,
         "top_results": top_results,
         "summary": summary,
@@ -336,7 +454,7 @@ def _save_orion_cache(symbol: str, articles: List[Dict[str, Any]]) -> None:
 
 
 def _load_orion_search_governor_state(now: datetime | None = None) -> Dict[str, Any]:
-    now = now or datetime.utcnow().replace(tzinfo=timezone.utc)
+    now = now or _utcnow()
     today = now.date().isoformat()
     this_month = now.strftime("%Y-%m")
     default = {"monthly_used": 0, "daily_used": 0, "last_reset_day": today, "last_reset_month": this_month}
@@ -367,8 +485,8 @@ def _save_orion_search_governor_state(state: Dict[str, Any]) -> None:
     payload = {
         "monthly_used": max(0, int(state.get("monthly_used", 0) or 0)),
         "daily_used": max(0, int(state.get("daily_used", 0) or 0)),
-        "last_reset_day": str(state.get("last_reset_day") or datetime.utcnow().date().isoformat()),
-        "last_reset_month": str(state.get("last_reset_month") or datetime.utcnow().strftime("%Y-%m")),
+        "last_reset_day": str(state.get("last_reset_day") or _utcnow().date().isoformat()),
+        "last_reset_month": str(state.get("last_reset_month") or _utcnow().strftime("%Y-%m")),
     }
     ORION_SEARCH_GOVERNOR_PATH.write_text(json.dumps(payload, indent=2))
 
@@ -396,24 +514,21 @@ def _orion_hermes_serpapi_headlines(symbol: str, max_age_hours: float = 24.0, li
             with urllib.request.urlopen(req, timeout=10) as response:
                 data = json.loads(response.read().decode("utf-8"))
             articles = data.get("news_results") or data.get("organic_results") or []
-            cutoff = datetime.utcnow() - timedelta(hours=max_age_hours)
+            cutoff = _utcnow() - timedelta(hours=max_age_hours)
             for article in articles[:limit]:
                 if not isinstance(article, dict):
                     continue
                 published = article.get("date") or article.get("published_at") or article.get("publishedAt")
                 if published:
-                    try:
-                        pub_dt = datetime.fromisoformat(str(published).replace("Z", "+00:00")).replace(tzinfo=None)
-                        if pub_dt < cutoff:
-                            continue
-                    except ValueError:
-                        pass
+                    pub_dt = _parse_report_timestamp({"timestamp": published})
+                    if pub_dt and pub_dt < cutoff:
+                        continue
                 item = {
                     "title": str(article.get("title") or "").strip(),
                     "url": str(article.get("link") or article.get("url") or "").strip(),
                     "source": str(article.get("source") or article.get("publisher") or article.get("publication") or "serpapi").strip(),
                     "published_at": published,
-                    "retrieved_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+                    "retrieved_at": _utcnow().isoformat(),
                     "source_provenance": "serpapi",
                 }
                 if item["title"] and item["url"]:
@@ -457,24 +572,26 @@ def _fetch_free_source_headlines(symbol: str, max_age_hours: float = 24.0, limit
         return []
     news = data.get("news") or []
     results: List[Dict[str, Any]] = []
-    cutoff = datetime.utcnow() - timedelta(hours=max_age_hours)
+    cutoff = _utcnow() - timedelta(hours=max_age_hours)
     for item in news[:limit]:
         if not isinstance(item, dict):
             continue
         pub_ts = item.get("providerPublishTime")
+        published_at = None
         if pub_ts:
             try:
-                pub_dt = datetime.fromtimestamp(pub_ts).replace(tzinfo=None)
+                pub_dt = datetime.fromtimestamp(pub_ts, tz=timezone.utc)
                 if pub_dt < cutoff:
                     continue
-            except (ValueError, TypeError):
+                published_at = pub_dt.isoformat()
+            except (ValueError, TypeError, OSError):
                 continue
         entry = {
             "title": str(item.get("title") or "").strip(),
             "url": str(item.get("link") or "").strip(),
             "source": str(item.get("publisher") or "yahoo_finance").strip(),
-            "published_at": datetime.fromtimestamp(pub_ts).isoformat() if pub_ts else None,
-            "retrieved_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+            "published_at": published_at,
+            "retrieved_at": _utcnow().isoformat(),
             "source_provenance": "yahoo_fallback",
         }
         if entry["title"] and entry["url"]:
@@ -510,7 +627,7 @@ def _fetch_orion_headlines(symbol: str, max_age_hours: float = 24.0, limit: int 
 
 
 def compute_orion_bias(decision: Dict[str, Any], report: Dict[str, Any], now: datetime | None = None) -> Dict[str, Any]:
-    now = now or datetime.utcnow().replace(tzinfo=timezone.utc)
+    now = now or _utcnow().replace(tzinfo=timezone.utc)
     report_ts = _parse_report_timestamp(report)
     evidence_meta = _normalize_orion_evidence_metadata(report)
     has_structured_evidence = _orion_has_evidence_metadata(report)
@@ -536,20 +653,25 @@ def compute_orion_bias(decision: Dict[str, Any], report: Dict[str, Any], now: da
     if _orion_report_is_stale(report, now):
         default["orion_bias_reason"] = "stale_report"
         return default
-    default["orion_quality_state"] = quality_state
-    if quality_state in {"budget_exhausted", "provider_fails", "no_fresh_results", "no_fresh_provider_results"}:
-        default["orion_bias_reason"] = quality_state
-        default["orion_match_fields"] = []
-        return default
     match_fields = _orion_symbol_match_fields(report, str(decision.get("symbol") or ""))
     if not match_fields:
+        default["orion_quality_state"] = quality_state
         default["orion_bias_reason"] = "no_symbol_match"
         return default
     base_bias, reason = _orion_direction_from_text(report)
     if base_bias == 0.0:
+        if quality_state in {"budget_exhausted", "provider_fails", "no_fresh_results", "no_fresh_provider_results"}:
+            default["orion_quality_state"] = quality_state
+            default["orion_bias_reason"] = quality_state
+            default["orion_match_fields"] = []
+            return default
+        default["orion_quality_state"] = quality_state
         default["orion_bias_reason"] = reason
         default["orion_match_fields"] = match_fields
         return default
+    if not has_structured_evidence and quality_state in {"budget_exhausted", "provider_fails", "no_fresh_results", "no_fresh_provider_results"}:
+        quality_state = "legacy_text_only"
+    default["orion_quality_state"] = quality_state
     bias = round(base_bias * _orion_uncertainty_factor(report), 6)
     return {
         "orion_bias": bias,
@@ -565,7 +687,7 @@ def compute_orion_bias(decision: Dict[str, Any], report: Dict[str, Any], now: da
 
 
 def apply_orion_bias_before_ranking(candidates: List[Dict[str, Any]], now: datetime | None = None) -> List[Dict[str, Any]]:
-    now = now or datetime.utcnow().replace(tzinfo=timezone.utc)
+    now = now or _utcnow().replace(tzinfo=timezone.utc)
     report_cache: Dict[str, Dict[str, Any]] = {}
     for candidate in candidates:
         company = str(candidate.get("company_id"))
@@ -934,7 +1056,7 @@ def _fallback_committee_packet(company: str, ranked_candidates: List[Dict[str, A
 
 
 def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], now: datetime | None = None, run_id: str | None = None, cycle: int | None = None) -> Dict[str, Any]:
-    now = now or datetime.utcnow().replace(tzinfo=timezone.utc)
+    now = now or _utcnow()
     top_candidates = [
         {
             "symbol": c.get("symbol"),
@@ -1244,7 +1366,7 @@ def write_bridge_usage_report(run_dir: Path, run_id: str, status: str | None, me
         return rows
 
     started_at = _parse_report_timestamp({"timestamp": meta.get("started_at")})
-    ended_at = _parse_report_timestamp({"timestamp": meta.get("ended_at")}) or datetime.utcnow().replace(tzinfo=timezone.utc)
+    ended_at = _parse_report_timestamp({"timestamp": meta.get("ended_at")}) or _utcnow()
     bridge_local_path = run_dir / "artifacts" / "bridge_usage.jsonl"
     bridge_global_path = ROOT / "state" / "agents" / "ledger" / "usage.jsonl"
     bridge_rows = _read_jsonl_rows(bridge_local_path, "openclaw_bridge")
@@ -1531,36 +1653,41 @@ def write_daily_digest(run_id: str) -> None:
     write_bridge_usage_report(run_dir, run_id, meta.get("status"), meta)
 
 
-def start_run(duration_hours: float = 0.0, virtual_currency: float | None = None) -> None:
+def start_run(duration_hours: float = 0.0, virtual_currency: float | None = None, live_trade: bool = False) -> None:
     ensure_directories()
+    if os.environ.get("LIVE_RUN_MODE", "paper").lower() == "live" and not live_trade:
+        raise SystemExit("Live trading requires explicit --live-trade")
     run_id = create_run_id()
     run_dir = run_directory(run_id)
     symbol_list = os.environ.get("LIVE_RUN_SYMBOLS")
     symbols = symbol_list.split(",") if symbol_list else target_symbol_list()
     virtual_budget = virtual_currency_context(virtual_currency)
+    run_mode = "live" if live_trade else "paper"
     meta = {
         "run_id": run_id,
-        "mode": "paper",
+        "mode": run_mode,
         "symbols": symbols,
         "duration_hours": duration_hours,
-        "started_at": datetime.utcnow().isoformat(),
+        "started_at": _utcnow().isoformat(),
         "status": "scheduled",
         "proof_telemetry": _proof_telemetry_enabled(),
         **virtual_budget,
         "virtual_currency_note": "testing-only virtual capital pool; not real brokerage cash",
     }
     (run_dir / "run_metadata.json").write_text(json.dumps(meta, indent=2))
-    if _proof_telemetry_enabled():
+    if _proof_telemetry_enabled() and not live_trade:
         _emit_paper_proof_telemetry(run_id)
     command = [sys.executable, "-m", "tools.live_run", "run", "--run-id", run_id, "--duration-hours", str(duration_hours)]
     if virtual_currency is not None:
         command.extend(["--virtual-currency", str(virtual_currency)])
+    if live_trade:
+        command.append("--live-trade")
     if _proof_telemetry_enabled():
         command.append("--proof-telemetry")
-    child_env = dict(os.environ, LIVE_RUN_MODE="paper")
-    if _proof_telemetry_enabled():
+    child_env = dict(os.environ, LIVE_RUN_MODE=run_mode)
+    if _proof_telemetry_enabled() and not live_trade:
         child_env["LIVE_RUN_PROOF_TELEMETRY_SUPPRESSED"] = "1"
-    proc = subprocess.Popen(command, env=child_env)
+    proc = subprocess.Popen(command, env=child_env, start_new_session=True)
     (run_dir / "run.pid").write_text(str(proc.pid))
     write_current_run(run_id, proc.pid)
     print(f"Live-data paper run started: {run_id}")
@@ -1595,6 +1722,45 @@ def update_evolution_states_from_warehouse() -> None:
 
 
 
+def _pid_is_alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+
+def _wait_for_pid_exit(pid: int, timeout_seconds: float) -> bool:
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() < deadline:
+        if not _pid_is_alive(pid):
+            return True
+        time.sleep(0.2)
+    return not _pid_is_alive(pid)
+
+
+def _process_group_is_alive(pgid: int) -> bool:
+    try:
+        os.killpg(pgid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def _wait_for_process_group_exit(pgid: int, timeout_seconds: float) -> bool:
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() < deadline:
+        if not _process_group_is_alive(pgid):
+            return True
+        time.sleep(0.2)
+    return not _process_group_is_alive(pgid)
+
+
 def stop_run(run_id: str | None = None) -> None:
     current = {}
     try:
@@ -1604,25 +1770,65 @@ def stop_run(run_id: str | None = None) -> None:
     target_run = run_id or current.get("run_id")
     if not target_run:
         raise SystemExit("No run_id provided and no current run tracked")
-    pid = current.get("pid") if current.get("run_id") == target_run else None
     run_dir = run_directory(target_run)
     pid_file = run_dir / "run.pid"
-    if pid and pid_file.exists():
+    pid = current.get("pid") if current.get("run_id") == target_run else None
+    if pid is None and pid_file.exists():
         try:
-            os.kill(int(pid), signal.SIGTERM)
+            pid = int(pid_file.read_text().strip())
+        except Exception:
+            pid = None
+    if pid is None:
+        raise SystemExit(f"Live-data paper run {target_run} stop failed: no worker PID available")
+
+    worker_pid = int(pid)
+    process_group_id = int(current.get("pgid") or worker_pid)
+    graceful_stop = True
+    forced_kill = False
+    try:
+        os.killpg(process_group_id, signal.SIGTERM)
+    except ProcessLookupError:
+        graceful_stop = False
+    else:
+        if not _wait_for_process_group_exit(process_group_id, max(5.0, float(LIVE_RUN_POLL_SECONDS))):
+            graceful_stop = False
+            forced_kill = True
+            try:
+                os.killpg(process_group_id, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            if not _wait_for_process_group_exit(process_group_id, 5.0):
+                raise SystemExit(
+                    f"Live-data paper run {target_run} stop failed: worker process group for PGID {process_group_id} still alive after SIGTERM and SIGKILL"
+                )
+
+    if _process_group_is_alive(process_group_id):
+        raise SystemExit(f"Live-data paper run {target_run} stop failed: worker process group for PGID {process_group_id} is still alive")
+    if _pid_is_alive(worker_pid):
+        graceful_stop = False
+        forced_kill = True
+        try:
+            os.kill(worker_pid, signal.SIGKILL)
         except ProcessLookupError:
             pass
+        if not _wait_for_pid_exit(worker_pid, 5.0):
+            raise SystemExit(f"Live-data paper run {target_run} stop failed: worker PID {worker_pid} is still alive")
+
+    if pid_file.exists():
         pid_file.unlink()
     meta_path = run_dir / "run_metadata.json"
     if meta_path.exists():
         meta = json.loads(meta_path.read_text())
-        meta["ended_at"] = datetime.utcnow().isoformat()
+        meta["ended_at"] = _utcnow().isoformat()
         meta["status"] = "stopped"
         meta_path.write_text(json.dumps(meta, indent=2))
         write_daily_digest(target_run)
     if current.get("run_id") == target_run:
         clear_current_run()
-    print(f"Live-data paper run {target_run} stopped safely.")
+    if graceful_stop and not forced_kill:
+        print(f"Live-data paper run {target_run} stopped safely.")
+    else:
+        print(f"Live-data paper run {target_run} stopped after forced kill.")
 
 
 def record_snapshot(run_dir: Path, snapshot: Dict[str, Any]) -> None:
@@ -1661,11 +1867,14 @@ def build_live_candle(snapshot: Dict[str, Any], last_price: float | None) -> Dic
         return build_pseudo_candle(snapshot, last_price)
 
     def _new_active_candle() -> Dict[str, Any]:
+        open_price = float(last_price if last_price not in (None, 0) else price)
+        high = max(open_price, price)
+        low = min(open_price, price)
         return {
             "timestamp": timestamp,
-            "open": price,
-            "high": price,
-            "low": price,
+            "open": open_price,
+            "high": high,
+            "low": low,
             "close": price,
             "candle_source": "real_ohlc",
             "candle_confidence": 0.7,
@@ -1676,7 +1885,7 @@ def build_live_candle(snapshot: Dict[str, Any], last_price: float | None) -> Dic
     if not entry:
         state[symbol] = {"active_bucket": bucket, "active_candle": _new_active_candle(), "emit_bucket": None, "emitted_candle": None}
         build_live_candle._state = state
-        return build_pseudo_candle(snapshot, last_price)
+        return dict(state[symbol]["active_candle"])
 
     active_candle = dict(entry.get("active_candle") or _new_active_candle())
     if entry.get("active_bucket") == bucket:
@@ -1687,7 +1896,7 @@ def build_live_candle(snapshot: Dict[str, Any], last_price: float | None) -> Dic
         state[symbol] = entry
         build_live_candle._state = state
         emitted_candle = entry.get("emitted_candle") if entry.get("emit_bucket") == bucket else None
-        return dict(emitted_candle) if emitted_candle else build_pseudo_candle(snapshot, last_price)
+        return dict(emitted_candle) if emitted_candle else dict(active_candle)
 
     finalized_candle = active_candle
     state[symbol] = {
@@ -1701,7 +1910,9 @@ def build_live_candle(snapshot: Dict[str, Any], last_price: float | None) -> Dic
 
 
 
-def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float | None = None) -> None:
+def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float | None = None, live_trade: bool = False) -> None:
+    if os.environ.get("LIVE_RUN_MODE", "paper").lower() == "live" and not live_trade:
+        raise SystemExit("Live trading requires explicit --live-trade")
     run_dir = run_directory(run_id)
     pid_file = run_dir / "run.pid"
     symbols = os.environ.get("LIVE_RUN_SYMBOLS")
@@ -1715,13 +1926,13 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
     if meta_path.exists():
         meta = json.loads(meta_path.read_text())
         meta["status"] = "running"
-        meta["worker_started_at"] = datetime.utcnow().isoformat()
+        meta["worker_started_at"] = _utcnow().isoformat()
         meta_path.write_text(json.dumps(meta, indent=2))
     _emit_paper_proof_telemetry(run_id)
     stop_flag = False
     backoff = 0
-    end_time = datetime.utcnow() + timedelta(hours=duration_hours) if duration_hours > 0 else None
-    last_prices: Dict[str, float] = {}
+    end_time = _utcnow() + timedelta(hours=duration_hours) if duration_hours > 0 else None
+    last_prices: Dict[tuple[str, str], float] = _bootstrap_last_prices_from_previous_run(run_id, symbols)
     candle_history: Dict[str, List[Dict[str, Any]]] = {}
     cycle = 0
 
@@ -1731,9 +1942,9 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
 
     signal.signal(signal.SIGTERM, _signal_handler)
     log_path = run_dir / "logs" / "run.log"
-    while not stop_flag and (not end_time or datetime.utcnow() < end_time):
+    while not stop_flag and (not end_time or _utcnow() < end_time):
         cycle += 1
-        timestamp = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
+        timestamp = _utcnow().replace(tzinfo=timezone.utc).isoformat()
         try:
             snapshots = fetch_market_data(symbols)
             backoff = 0
@@ -1757,18 +1968,19 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
         candidate_decisions: List[Dict[str, Any]] = []
         for snapshot in snapshots:
             record_snapshot(run_dir, snapshot)
+        cycle_last_prices = dict(last_prices)
         for company in COMPANIES:
             for snapshot in snapshots:
                 symbol = snapshot["symbol"]
                 price_key = (company, symbol)
                 symbol_history = candle_history.setdefault(symbol, [])
-                latest_candle = build_live_candle(snapshot, last_prices.get(price_key))
+                latest_candle = build_live_candle(snapshot, cycle_last_prices.get(price_key))
                 symbol_history.append(latest_candle)
                 candle_history[symbol] = symbol_history[-20:]
                 snapshot["candle_source"] = latest_candle["candle_source"]
                 snapshot["candle_confidence"] = latest_candle["candle_confidence"]
                 snapshot["position_state"] = portfolio.positions[company].get(symbol, 0.0)
-                decision = build_decision(snapshot, company, last_prices.get(price_key), candle_history=candle_history[symbol])
+                decision = build_decision(snapshot, company, cycle_last_prices.get(price_key), candle_history=candle_history[symbol])
                 decision["vetoed_by_risk"] = abs(decision.get("signal_score", 0)) > 0.08
                 decision["position_state"] = portfolio.positions[company].get(symbol, 0.0)
                 decision["cash_snapshot"] = portfolio.cash.get(company, 0.0)
@@ -1783,7 +1995,7 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
 
         apply_orion_bias_before_ranking(candidate_decisions)
         ranked_candidates = rank_and_select_candidates(candidate_decisions)
-        company_packets = apply_company_packets(ranked_candidates, now=datetime.utcnow().replace(tzinfo=timezone.utc), run_id=run_id, cycle=cycle)
+        company_packets = apply_company_packets(ranked_candidates, now=_utcnow().replace(tzinfo=timezone.utc), run_id=run_id, cycle=cycle)
         for packet in company_packets.values():
             with (run_dir / "artifacts" / "company_packets.jsonl").open("a", encoding="utf-8") as packet_file:
                 packet_file.write(json.dumps({"timestamp": timestamp, **packet}) + "\n")
@@ -1872,7 +2084,7 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
     pid_file.unlink(missing_ok=True)
     if meta_path.exists():
         meta = json.loads(meta_path.read_text())
-        meta["ended_at"] = datetime.utcnow().isoformat()
+        meta["ended_at"] = _utcnow().isoformat()
         if stop_flag:
             meta["status"] = "stopped"
         else:
@@ -1894,7 +2106,7 @@ def summary(run_id: str) -> None:
     logs = list((run_dir / "logs").glob("*.log"))
     summary = {
         "run_id": run_id,
-        "captured": datetime.utcnow().isoformat(),
+        "captured": _utcnow().isoformat(),
         "log_files": [str(p) for p in logs],
     }
     summary_path = run_dir / "summary.json"
@@ -1936,6 +2148,7 @@ def main() -> None:
     start_parser.add_argument("--duration-hours", type=float, default=0.0)
     start_parser.add_argument("--virtual-currency", type=float, default=None, help="Testing-only virtual capital pool; not real brokerage cash")
     start_parser.add_argument("--proof-telemetry", action="store_true", help="Emit one proof-only telemetry event before the worker loop")
+    start_parser.add_argument("--live-trade", action="store_true", help="Explicitly enable live-trade mode")
     stop_parser = subparsers.add_parser("stop", help="Stop the current paper run")
     stop_parser.add_argument("--run-id", help="Explicit run id to stop")
     run_parser = subparsers.add_parser("run", help="Run worker (internal)")
@@ -1943,6 +2156,7 @@ def main() -> None:
     run_parser.add_argument("--duration-hours", type=float, default=0.0)
     run_parser.add_argument("--virtual-currency", type=float, default=None, help="Testing-only virtual capital pool; not real brokerage cash")
     run_parser.add_argument("--proof-telemetry", action="store_true", help="Emit one proof-only telemetry event before the worker loop")
+    run_parser.add_argument("--live-trade", action="store_true", help="Explicitly enable live-trade mode")
     summary_parser = subparsers.add_parser("summary", help="Generate summary bundle")
     summary_parser.add_argument("--run-id", required=True)
     verify_parser = subparsers.add_parser("verify", help="Verify paper-only mode")
@@ -1952,13 +2166,13 @@ def main() -> None:
     if args.command == "start":
         if args.proof_telemetry:
             os.environ["LIVE_RUN_PROOF_TELEMETRY"] = "1"
-        start_run(duration_hours=args.duration_hours, virtual_currency=args.virtual_currency)
+        start_run(duration_hours=args.duration_hours, virtual_currency=args.virtual_currency, live_trade=args.live_trade)
     elif args.command == "stop":
         stop_run(run_id=args.run_id)
     elif args.command == "run":
         if args.proof_telemetry:
             os.environ["LIVE_RUN_PROOF_TELEMETRY"] = "1"
-        run_worker(args.run_id, duration_hours=args.duration_hours, virtual_currency=args.virtual_currency)
+        run_worker(args.run_id, duration_hours=args.duration_hours, virtual_currency=args.virtual_currency, live_trade=args.live_trade)
     elif args.command == "summary":
         summary(args.run_id)
     elif args.command == "verify":

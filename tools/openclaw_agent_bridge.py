@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,6 +31,42 @@ LOCK_RETRY_ATTEMPTS = {
 LOCK_RETRY_SLEEP_SECONDS = {
  "main": 6,
 }
+
+def _bridge_search_path() -> str:
+ env_path = os.environ.get("PATH", "")
+ preferred = [
+  str(Path.home() / ".local" / "bin"),
+  str(Path(sys.executable).resolve().parent),
+  "/usr/local/bin",
+  "/usr/bin",
+ ]
+ parts = []
+ for entry in preferred + env_path.split(os.pathsep):
+  if not entry:
+   continue
+  if entry not in parts:
+   parts.append(entry)
+ return os.pathsep.join(parts)
+
+
+def _resolve_openclaw_command() -> list[str]:
+ override = os.environ.get("OPENCLAW_BIN", "").strip()
+ if override:
+  return [override]
+ resolved = shutil.which("openclaw", path=_bridge_search_path())
+ if resolved:
+  return [resolved]
+ return ["openclaw"]
+
+
+def _bridge_env() -> Dict[str, str]:
+ env = dict(os.environ)
+ env["PATH"] = _bridge_search_path()
+ if not env.get("OPENCLAW_HOME"):
+  repo_parent = REPO_ROOT.parent
+  if repo_parent.name == ".openclaw":
+   env["OPENCLAW_HOME"] = str(repo_parent.parent)
+ return env
 
 def _strip_code_fences(text: str) -> str:
  text = text.strip()
@@ -179,8 +217,7 @@ class OpenClawAdapter:
   return "\n".join(instructions)
 
  def _invoke_once(self, wrapped_message: str, timeout_seconds: int) -> Dict[str, Any]:
-  cmd = [
-  "openclaw",
+  cmd = _resolve_openclaw_command() + [
   "agent",
   "--agent",
   self.real_agent_id,
@@ -192,6 +229,7 @@ class OpenClawAdapter:
    result = subprocess.run(
    cmd,
    cwd=REPO_ROOT,
+   env=_bridge_env(),
    capture_output=True,
    text=True,
    timeout=timeout_seconds,

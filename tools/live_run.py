@@ -772,6 +772,25 @@ def _committee_cycle_message(company: str, company_candidates: List[Dict[str, An
 
 
 
+def _live_committee_payload_failed(payload: Dict[str, Any]) -> bool:
+    if not isinstance(payload, dict):
+        return True
+    if payload.get("bridge_failed"):
+        return True
+    if payload.get("bridge_error"):
+        return True
+    failure_markers = (
+        str(payload.get("reply_text") or ""),
+        str(payload.get("analysis_summary") or ""),
+        str(payload.get("recommendation") or ""),
+        str(payload.get("research_summary") or ""),
+        str(payload.get("executive_summary") or ""),
+        str(payload.get("summary") or ""),
+    )
+    lowered = " | ".join(failure_markers).lower()
+    return "bridge call failed" in lowered
+
+
 def _invoke_live_committee_agent(agent_id: str, message: str, run_id: str | None = None, cycle: int | None = None) -> Dict[str, Any]:
     cmd = [sys.executable, str(ROOT / "tools" / "pam.py"), "--agent", agent_id, message]
     env = dict(os.environ)
@@ -1152,30 +1171,47 @@ def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], 
                 committee_sources["_committee"] = {"mode": "fallback", "reason": f"live_committee_failed:{exc}"}
 
     role_payloads: Dict[str, Dict[str, Any]] = {}
+    failed_live_outputs: Dict[str, Dict[str, Any]] = {}
     for role in LIVE_COMMITTEE_ROLES:
-        if role in live_outputs:
-            role_payloads[role] = live_outputs[role]
+        live_payload = live_outputs.get(role)
+        if live_payload is not None and not _live_committee_payload_failed(live_payload):
+            role_payloads[role] = live_payload
             source_agents_consulted.append(role)
             committee_sources[role] = {
                 "mode": "live_session",
                 "agent_id": _committee_agent_id(company, role),
-                "summary": live_outputs[role].get("analysis_summary")
-                or live_outputs[role].get("recommendation")
-                or live_outputs[role].get("research_summary")
-                or live_outputs[role].get("executive_summary")
-                or live_outputs[role].get("reply_text"),
+                "summary": live_payload.get("analysis_summary")
+                or live_payload.get("recommendation")
+                or live_payload.get("research_summary")
+                or live_payload.get("executive_summary")
+                or live_payload.get("reply_text"),
             }
             continue
+
+        if live_payload is not None:
+            failed_live_outputs[role] = live_payload
 
         missing_input_flags.append(role)
         saved = latest_report(saved_reports, role)
         if saved:
-            committee_sources[role] = {"mode": "fallback_saved", "summary": saved.get("analysis_summary") or saved.get("recommendation") or saved.get("research_summary") or saved.get("executive_summary") or saved.get("reply_text")}
+            committee_sources[role] = {
+                "mode": "fallback_saved_after_live_failure" if role in failed_live_outputs else "fallback_saved",
+                "summary": saved.get("analysis_summary") or saved.get("recommendation") or saved.get("research_summary") or saved.get("executive_summary") or saved.get("reply_text"),
+            }
+            if role in failed_live_outputs:
+                committee_sources[role]["live_failure"] = failed_live_outputs[role].get("bridge_error") or failed_live_outputs[role].get("reply_text")
             if role in {"Lucian", "Bianca"}:
                 committee_sources[role]["authority"] = "historical_only"
                 continue
             role_payloads[role] = saved
             source_agents_consulted.append(role)
+        elif role in failed_live_outputs:
+            committee_sources[role] = {
+                "mode": "live_session_failed",
+                "agent_id": _committee_agent_id(company, role),
+                "summary": failed_live_outputs[role].get("reply_text") or "bridge failure",
+                "bridge_error": failed_live_outputs[role].get("bridge_error"),
+            }
         else:
             committee_sources[role] = {"mode": "missing", "summary": "missing live committee output"}
 

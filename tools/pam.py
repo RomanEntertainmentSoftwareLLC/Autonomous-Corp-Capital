@@ -166,6 +166,7 @@ def main() -> None:
       "handoff_to": "Yam Yam",
       "task_type": "bridge_failure",
       "requested_action": f"Investigate OpenClaw bridge failure for {args.agent}",
+      "bridge_failed": True,
       "bridge_error": str(exc),
      }
 

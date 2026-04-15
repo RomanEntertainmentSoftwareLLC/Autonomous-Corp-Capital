@@ -52,6 +52,38 @@ def company_order_from_digest() -> List[str]:
 
 
 def leaderboard_rows() -> List[Dict[str, Any]]:
+    run_dir = latest_run_dir()
+    if run_dir:
+        portfolio_path = run_dir / "artifacts" / "portfolio_state.jsonl"
+        if portfolio_path.exists():
+            rows: List[Dict[str, Any]] = []
+            latest_by_company: Dict[str, Dict[str, Any]] = {}
+            for raw in portfolio_path.read_text(encoding="utf-8").splitlines():
+                if not raw.strip():
+                    continue
+                try:
+                    row = json.loads(raw)
+                except Exception:
+                    continue
+                company = str(row.get("company") or "")
+                if company:
+                    latest_by_company[company] = row
+            for company, row in latest_by_company.items():
+                positions_detail = row.get("positions_detail") or {}
+                market_value = 0.0
+                if positions_detail:
+                    for meta in positions_detail.values():
+                        market_value += float(meta.get("qty") or 0.0) * float(meta.get("mark_price") or meta.get("entry_price") or 0.0)
+                account_value = float(row.get("cash") or 0.0) + market_value
+                rows.append({
+                    "company": company,
+                    "mode": "paper",
+                    "account_value": account_value,
+                    "realized_pnl": float(row.get("realized_pnl") or 0.0),
+                    "unrealized_pnl": float(row.get("unrealized_pnl") or 0.0),
+                })
+            if rows:
+                return rows
     data = load_json(LEADERBOARD_PATH, {})
     rows = data.get("rows") or []
     return [row for row in rows if isinstance(row, dict)]

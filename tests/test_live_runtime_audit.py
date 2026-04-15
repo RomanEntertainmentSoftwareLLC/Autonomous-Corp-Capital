@@ -603,3 +603,19 @@ def test_ranking_order_changes_when_orion_and_pattern_apply(monkeypatch):
     ranked = sorted(rows, key=lambda row: row["ranking_score"], reverse=True)
     assert ranked[0]["symbol"] == "BTC-USD"
 
+
+
+def test_buy_candidate_is_demoted_when_company_is_full():
+    row = candidate("BTC-USD")
+    row.update({
+        "decision": "BUY",
+        "ranking_score": 0.25,
+        "position_state": 0.0,
+        "open_positions_count": 6,
+    })
+
+    ranked = rank_and_select_candidates([row])
+
+    assert ranked[0]["decision"] == "WAIT"
+    assert ranked[0]["decision_demotion_reason"] == "max_open_positions"
+    assert ranked[0]["skip_reason"] == "hold_candidate"

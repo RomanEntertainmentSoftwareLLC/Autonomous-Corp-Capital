@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 RPG_STATE_FIELDS = [
     "xp",
@@ -572,6 +572,138 @@ def score_rowan_research_report_completion(state: Dict[str, Any], evidence_path:
     return score_rowan_research_completion(state, evidence_path)
 
 
+
+
+_RUNTIME_PACKET_BASE_XP = {
+    "live_session": 3.0,
+    "python_fallback": 1.5,
+}
+
+_RUNTIME_PACKET_ROLE_STAT_BONUSES = {
+    "Lucian": {"judgment": 2.0, "reliability": 1.0, "usefulness": 1.0},
+    "Bianca": {"cost_efficiency": 2.0, "judgment": 1.0, "evidence_quality": 1.0},
+    "Vera": {"consistency": 2.0, "judgment": 1.0, "usefulness": 1.0},
+    "Iris": {"accuracy": 1.0, "evidence_quality": 2.0, "usefulness": 1.0},
+    "Orion": {"evidence_quality": 2.0, "accuracy": 1.0, "usefulness": 1.0},
+    "Pam": {"usefulness": 2.0, "consistency": 1.0, "speed": 1.0},
+}
+
+
+def _history_path_for_state(path: Path) -> Path:
+    return path.with_name("RPG_HISTORY.md")
+
+
+def _append_rpg_history(history_path: Path, line: str) -> None:
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    if not history_path.exists():
+        history_path.write_text("# RPG History\n\n", encoding="utf-8")
+    with history_path.open("a", encoding="utf-8") as handle:
+        handle.write(f"- {line}\n")
+
+
+def _runtime_role_bonus(role_name: str, packet: Dict[str, Any], summary: str) -> tuple[float, Dict[str, float]]:
+    xp_bonus = 0.0
+    stat_bonus = dict(_RUNTIME_PACKET_ROLE_STAT_BONUSES.get(role_name, {}))
+    approval_posture = str(packet.get("approval_posture") or "").strip().lower()
+    packet_effects = [str(item).strip() for item in (packet.get("packet_effects") or []) if str(item).strip()]
+    executed_count = sum(1 for item in (packet.get("top_ranked_candidates") or []) if isinstance(item, dict) and item.get("execution_state") == "executed")
+    summary_lower = summary.lower()
+
+    if executed_count and approval_posture != "company_veto":
+        xp_bonus += 1.0
+        stat_bonus["usefulness"] = stat_bonus.get("usefulness", 0.0) + 1.0
+
+    if approval_posture == "company_veto" and packet_effects and role_name in {"Lucian", "Bianca", "Vera"}:
+        xp_bonus += 1.0
+        stat_bonus["judgment"] = stat_bonus.get("judgment", 0.0) + 1.0
+        stat_bonus["reliability"] = stat_bonus.get("reliability", 0.0) + 1.0
+
+    if "recommendation:" in summary_lower:
+        xp_bonus += 0.5
+        stat_bonus["evidence_quality"] = stat_bonus.get("evidence_quality", 0.0) + 1.0
+
+    if "queue pressure" in summary_lower:
+        stat_bonus["speed"] = stat_bonus.get("speed", 0.0) + 1.0
+
+    return xp_bonus, stat_bonus
+
+
+def apply_runtime_packet_rpg_updates(packet: Dict[str, Any], workspace_root: Path | None = None) -> List[Dict[str, Any]]:
+    if not isinstance(packet, dict):
+        return []
+    committee_sources = packet.get("committee_sources") or {}
+    if not isinstance(committee_sources, dict):
+        return []
+
+    workspace_root = Path(workspace_root) if workspace_root is not None else Path.cwd()
+    packet_mode = str(packet.get("packet_generation_mode") or "").strip().lower()
+    if packet_mode not in {"live_committee_sessions", "fallback", "cached_committee_reuse"}:
+        return []
+
+    timestamp = str(packet.get("timestamp") or packet.get("generated_at") or "unknown")
+    company_id = str(packet.get("company_id") or "global")
+    events: List[Dict[str, Any]] = []
+
+    for role_name, meta in committee_sources.items():
+        if str(role_name).startswith("_") or not isinstance(meta, dict):
+            continue
+        mode = str(meta.get("mode") or "").strip()
+        agent_id = str(meta.get("agent_id") or "").strip()
+        if mode not in _RUNTIME_PACKET_BASE_XP or not agent_id:
+            continue
+
+        state_path = workspace_root / "ai_agents_memory" / agent_id / "RPG_STATE.md"
+        history_path = _history_path_for_state(state_path)
+        before = load_rpg_state(state_path)
+        after = dict(before)
+
+        xp_delta = _RUNTIME_PACKET_BASE_XP[mode]
+        role_xp_bonus, stat_bonus = _runtime_role_bonus(str(role_name), packet, str(meta.get("summary") or ""))
+        xp_delta += role_xp_bonus
+        after["xp"] = float(after.get("xp") or 0.0) + xp_delta
+        after["sessions"] = int(after.get("sessions") or 0) + 1
+        after["consistency"] = min(100.0, float(after.get("consistency") or 0.0) + 1.0)
+        after["usefulness"] = min(100.0, float(after.get("usefulness") or 0.0) + 0.5)
+        for field, delta in stat_bonus.items():
+            after[field] = min(100.0, float(after.get(field) or 0.0) + float(delta))
+
+        saved = save_rpg_state(state_path, after)
+        before_level = int(before.get("level") or 1)
+        after_level = int(saved.get("level") or 1)
+        before_xp = float(before.get("xp") or 0.0)
+        after_xp = float(saved.get("xp") or 0.0)
+        history_line = (
+            f"{timestamp} | {company_id} | {role_name}/{agent_id} | +{round(after_xp - before_xp, 2)} XP | "
+            f"level {before_level}->{after_level} | sessions {int(saved.get('sessions') or 0)} | mode={mode}"
+        )
+        _append_rpg_history(history_path, history_line)
+        events.append({
+            "timestamp": timestamp,
+            "company_id": company_id,
+            "role": str(role_name),
+            "agent_id": agent_id,
+            "mode": mode,
+            "xp_delta": round(after_xp - before_xp, 2),
+            "before_xp": round(before_xp, 2),
+            "after_xp": round(after_xp, 2),
+            "before_level": before_level,
+            "after_level": after_level,
+            "sessions": int(saved.get("sessions") or 0),
+        })
+
+    return events
+
+
+def format_runtime_rpg_event(event: Dict[str, Any]) -> str:
+    label = f"{event.get('role')}/{event.get('agent_id')}"
+    msg = (
+        f"[RPG] {label} +{event.get('xp_delta', 0)} XP "
+        f"({event.get('before_xp', 0)} -> {event.get('after_xp', 0)}) | "
+        f"Level {event.get('after_level', 1)} | Sessions {event.get('sessions', 0)} | {event.get('company_id', 'global')}"
+    )
+    if event.get("after_level") != event.get("before_level"):
+        msg += f" | LEVEL UP {event.get('before_level')} -> {event.get('after_level')}"
+    return msg
 def format_rpg_identity_line(
     state: Dict[str, Any],
     agent_name: Any = None,

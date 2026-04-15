@@ -25,6 +25,7 @@ from tools.live_market_feed import fetch_market_data
 from tools.live_orchestra import orchestrate
 from tools.live_paper_portfolio import PortfolioState
 from tools.live_universe import target_symbol_list
+from tools.rpg_state import apply_runtime_packet_rpg_updates, format_runtime_rpg_event
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -2046,8 +2047,13 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
         ranked_candidates = rank_and_select_candidates(candidate_decisions)
         company_packets = apply_company_packets(ranked_candidates, now=_utcnow().replace(tzinfo=timezone.utc), run_id=run_id, cycle=cycle)
         for packet in company_packets.values():
+            packet_record = {"timestamp": timestamp, **packet}
             with (run_dir / "artifacts" / "company_packets.jsonl").open("a", encoding="utf-8") as packet_file:
-                packet_file.write(json.dumps({"timestamp": timestamp, **packet}) + "\n")
+                packet_file.write(json.dumps(packet_record) + "\n")
+            rpg_events = apply_runtime_packet_rpg_updates(packet_record, workspace_root=ROOT)
+            if os.getenv("RPG_ECHO_RUNTIME", "1").strip().lower() not in {"0", "false", "no", "off"}:
+                for rpg_event in rpg_events:
+                    print(format_runtime_rpg_event(rpg_event), flush=True)
         for decision in ranked_candidates:
             if decision["vetoed_by_risk"]:
                 anomalies.append(f"veto:{decision['company_id']}:{decision['symbol']}")

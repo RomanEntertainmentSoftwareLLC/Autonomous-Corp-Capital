@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+import os
 import sys
 from datetime import datetime, timezone
 from functools import lru_cache
@@ -12,6 +13,12 @@ from typing import Dict, Optional, List, Any
 from tools.pattern_engine import evaluate_patterns
 
 LIVE_PATTERN_SCORE_MAX_ABS = 0.015
+
+
+EXIT_STOP_LOSS_PCT = float(os.environ.get("ACC_EXIT_STOP_LOSS_PCT", "0.015"))
+EXIT_TAKE_PROFIT_PCT = float(os.environ.get("ACC_EXIT_TAKE_PROFIT_PCT", "0.02"))
+EXIT_MAX_HOLD_TICKS = int(os.environ.get("ACC_EXIT_MAX_HOLD_TICKS", "18"))
+EXIT_NEGATIVE_SIGNAL_MULTIPLIER = float(os.environ.get("ACC_EXIT_NEGATIVE_SIGNAL_MULTIPLIER", "0.6"))
 
 ROOT = Path(__file__).resolve().parent.parent
 ML_MODEL_PATH = ROOT / "models" / "ml_model.pkl"
@@ -437,13 +444,46 @@ def build_decision(
             notes = f"signal + real_ohlc bootstrap under {policy['policy_name']}"
             scoring_method = "signal_plus_real_ohlc"
 
+    forced_exit_reason = ""
+    entry_price = float(snapshot.get("entry_price") or 0.0)
+    held_ticks = int(snapshot.get("held_ticks") or 0)
+    pnl_pct = ((price - entry_price) / entry_price) if entry_price > 0.0 else 0.0
+    bearish_pattern = bool(pattern_result["pattern_confirmation"].get("satisfied")) and int(pattern_result["pattern_dir"] or 0) < 0
+    negative_signal = adjusted_signal_score <= -(threshold * EXIT_NEGATIVE_SIGNAL_MULTIPLIER)
+    take_profit_ready = entry_price > 0.0 and pnl_pct >= EXIT_TAKE_PROFIT_PCT and adjusted_signal_score <= max(threshold * 0.25, 0.0)
+    stop_loss_hit = entry_price > 0.0 and pnl_pct <= -EXIT_STOP_LOSS_PCT
+    stale_position = held_ticks >= EXIT_MAX_HOLD_TICKS and adjusted_signal_score <= max(threshold * 0.25, 0.0)
+
     if decision == "SELL" and position_state <= 0:
         decision = "WAIT"
         notes = f"flat account blocks sell under {policy['policy_name']}"
         scoring_method = "flat_account_sell_block"
 
+    if position_state > 0:
+        if stop_loss_hit:
+            decision = "SELL"
+            forced_exit_reason = "stop_loss"
+            notes = f"risk stop triggered under {policy['policy_name']}"
+            scoring_method = "risk_exit"
+        elif take_profit_ready:
+            decision = "SELL"
+            forced_exit_reason = "take_profit"
+            notes = f"take profit triggered under {policy['policy_name']}"
+            scoring_method = "profit_exit"
+        elif stale_position and (decision in {"WAIT", "HOLD_POSITION"} or negative_signal):
+            decision = "SELL"
+            forced_exit_reason = "max_hold"
+            notes = f"max hold exit triggered under {policy['policy_name']}"
+            scoring_method = "time_exit"
+        elif bearish_pattern and negative_signal:
+            decision = "SELL"
+            forced_exit_reason = "signal_reversal"
+            notes = f"bearish reversal exit triggered under {policy['policy_name']}"
+            scoring_method = "reversal_exit"
+
     if (
-        decision in {"BUY", "SELL"}
+        not forced_exit_reason
+        and decision in {"BUY", "SELL"}
         and pattern_result["matched_context"]["candle_source"] == "real_ohlc"
         and pattern_result["detected_patterns"]
         and pattern_result["pattern_confirmation"].get("satisfied")
@@ -487,6 +527,10 @@ def build_decision(
             "pattern_engine_mode": pattern_result["pattern_engine_mode"],
             "strat_pattern": pattern_result["strat_pattern"],
             "strat_available": pattern_result["strat_available"],
+            "entry_price": entry_price,
+            "held_ticks": held_ticks,
+            "pnl_pct": round(pnl_pct, 6),
+            "forced_exit_reason": forced_exit_reason or None,
         }
     )
     result.update(ml_result)

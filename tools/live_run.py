@@ -24,8 +24,8 @@ from tools.live_decision_engine import build_decision, DecisionResult
 from tools.live_market_feed import fetch_market_data
 from tools.live_orchestra import orchestrate
 from tools.live_paper_portfolio import PortfolioState
-from tools.live_universe import target_symbol_list
 from tools.rpg_state import apply_runtime_packet_rpg_updates, format_runtime_rpg_event
+from tools.live_universe import target_symbol_list
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -40,8 +40,9 @@ MAX_EXECUTIONS_PER_CYCLE = 6
 MAX_EXECUTIONS_PER_COMPANY_PER_CYCLE = 2
 LIVE_COMMITTEE_TIMEOUT_SECONDS = int(os.getenv("LIVE_COMMITTEE_TIMEOUT_SECONDS", "25"))
 LIVE_COMMITTEE_ROLES = ["Lucian", "Bianca", "Vera", "Iris", "Orion"]
-COMMITTEE_REUSE_WINDOW_SECONDS = 300
-BRIDGE_CALL_BUDGET_PER_RUN = 25
+COMMITTEE_REUSE_WINDOW_SECONDS = int(os.environ.get("COMMITTEE_REUSE_WINDOW_SECONDS", "600"))
+BRIDGE_CALL_BUDGET_PER_RUN = int(os.environ.get("BRIDGE_CALL_BUDGET_PER_RUN", "120"))
+MAX_OPEN_POSITIONS_PER_COMPANY = int(os.environ.get("ACC_MAX_OPEN_POSITIONS_PER_COMPANY", "6"))
 
 
 def _utcnow() -> datetime:
@@ -225,6 +226,14 @@ def rank_and_select_candidates(candidates: List[Dict[str, Any]]) -> List[Dict[st
             candidate["decision"] = "WAIT"
             candidate["decision_demoted_from"] = "SELL"
             candidate["decision_demotion_reason"] = "flat_account_sell_block"
+        if (
+            candidate.get("decision") == "BUY"
+            and float(candidate.get("position_state") or 0.0) <= 0.0
+            and int(candidate.get("open_positions_count") or 0) >= MAX_OPEN_POSITIONS_PER_COMPANY
+        ):
+            candidate["decision"] = "WAIT"
+            candidate["decision_demoted_from"] = "BUY"
+            candidate["decision_demotion_reason"] = "max_open_positions"
         if candidate.get("decision") not in {"BUY", "SELL"}:
             candidate["execution_state"] = "skipped"
             candidate["skip_reason"] = "hold_candidate"
@@ -862,8 +871,6 @@ def _committee_slate_signature(candidates: List[Dict[str, Any]]) -> List[Dict[st
         {
             "symbol": candidate.get("symbol"),
             "decision": candidate.get("decision"),
-            "execution_state": candidate.get("execution_state"),
-            "skip_reason": candidate.get("skip_reason"),
             "ranking_score": round(float(candidate.get("ranking_score") or 0.0), 4),
             "ranking_score_before_orion": round(float(candidate.get("ranking_score_before_orion") or 0.0), 4),
             "orion_bias": round(float(candidate.get("orion_bias") or 0.0), 4),
@@ -871,6 +878,20 @@ def _committee_slate_signature(candidates: List[Dict[str, Any]]) -> List[Dict[st
         for candidate in candidates[:3]
     ]
 
+
+
+def _sync_packet_top_ranked_candidates(packet: Dict[str, Any], company_candidates: List[Dict[str, Any]]) -> None:
+    by_symbol = {str(candidate.get("symbol")): candidate for candidate in company_candidates}
+    refreshed = []
+    for top in list(packet.get("top_ranked_candidates") or []):
+        current = by_symbol.get(str(top.get("symbol")))
+        merged = dict(top)
+        if current:
+            for field in ("decision", "execution_state", "skip_reason", "ranking_score", "ranking_score_before_orion", "orion_bias", "decision_path"):
+                if field in current:
+                    merged[field] = current.get(field)
+        refreshed.append(merged)
+    packet["top_ranked_candidates"] = refreshed
 
 
 def _latest_company_packet(company: str) -> Dict[str, Any] | None:
@@ -1298,6 +1319,7 @@ def apply_company_packets(ranked_candidates: List[Dict[str, Any]], now: datetime
             candidate["company_packet_cap_multiplier"] = packet["cap_multiplier"]
             executed_for_company += 1
         packet["resulting_execution_posture"] = packet["approval_posture"]
+        _sync_packet_top_ranked_candidates(packet, company_candidates)
     return packets
 
 
@@ -2029,12 +2051,15 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
                 candle_history[symbol] = symbol_history[-20:]
                 snapshot["candle_source"] = latest_candle["candle_source"]
                 snapshot["candle_confidence"] = latest_candle["candle_confidence"]
-                snapshot["position_state"] = portfolio.positions[company].get(symbol, 0.0)
+                portfolio.mark_price(company, symbol, float(snapshot.get("price") or 0.0))
+                position_snapshot = portfolio.get_position_snapshot(company, symbol)
+                snapshot.update(position_snapshot)
                 decision = build_decision(snapshot, company, cycle_last_prices.get(price_key), candle_history=candle_history[symbol])
                 decision["vetoed_by_risk"] = abs(decision.get("signal_score", 0)) > 0.08
-                decision["position_state"] = portfolio.positions[company].get(symbol, 0.0)
+                decision.update(position_snapshot)
                 decision["cash_snapshot"] = portfolio.cash.get(company, 0.0)
                 decision["allocation_context"] = portfolio.allocations.get(company)
+                decision["cycle"] = cycle
                 decision["ranking_score"] = candidate_ranking_score(decision)
                 decision["pretrade_selection_path"] = "ranked_then_company_packet"
                 decision["pretrade_agent_participation"] = "company packet consulted after ranking"

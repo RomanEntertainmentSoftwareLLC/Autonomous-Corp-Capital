@@ -572,138 +572,6 @@ def score_rowan_research_report_completion(state: Dict[str, Any], evidence_path:
     return score_rowan_research_completion(state, evidence_path)
 
 
-
-
-_RUNTIME_PACKET_BASE_XP = {
-    "live_session": 3.0,
-    "python_fallback": 1.5,
-}
-
-_RUNTIME_PACKET_ROLE_STAT_BONUSES = {
-    "Lucian": {"judgment": 2.0, "reliability": 1.0, "usefulness": 1.0},
-    "Bianca": {"cost_efficiency": 2.0, "judgment": 1.0, "evidence_quality": 1.0},
-    "Vera": {"consistency": 2.0, "judgment": 1.0, "usefulness": 1.0},
-    "Iris": {"accuracy": 1.0, "evidence_quality": 2.0, "usefulness": 1.0},
-    "Orion": {"evidence_quality": 2.0, "accuracy": 1.0, "usefulness": 1.0},
-    "Pam": {"usefulness": 2.0, "consistency": 1.0, "speed": 1.0},
-}
-
-
-def _history_path_for_state(path: Path) -> Path:
-    return path.with_name("RPG_HISTORY.md")
-
-
-def _append_rpg_history(history_path: Path, line: str) -> None:
-    history_path.parent.mkdir(parents=True, exist_ok=True)
-    if not history_path.exists():
-        history_path.write_text("# RPG History\n\n", encoding="utf-8")
-    with history_path.open("a", encoding="utf-8") as handle:
-        handle.write(f"- {line}\n")
-
-
-def _runtime_role_bonus(role_name: str, packet: Dict[str, Any], summary: str) -> tuple[float, Dict[str, float]]:
-    xp_bonus = 0.0
-    stat_bonus = dict(_RUNTIME_PACKET_ROLE_STAT_BONUSES.get(role_name, {}))
-    approval_posture = str(packet.get("approval_posture") or "").strip().lower()
-    packet_effects = [str(item).strip() for item in (packet.get("packet_effects") or []) if str(item).strip()]
-    executed_count = sum(1 for item in (packet.get("top_ranked_candidates") or []) if isinstance(item, dict) and item.get("execution_state") == "executed")
-    summary_lower = summary.lower()
-
-    if executed_count and approval_posture != "company_veto":
-        xp_bonus += 1.0
-        stat_bonus["usefulness"] = stat_bonus.get("usefulness", 0.0) + 1.0
-
-    if approval_posture == "company_veto" and packet_effects and role_name in {"Lucian", "Bianca", "Vera"}:
-        xp_bonus += 1.0
-        stat_bonus["judgment"] = stat_bonus.get("judgment", 0.0) + 1.0
-        stat_bonus["reliability"] = stat_bonus.get("reliability", 0.0) + 1.0
-
-    if "recommendation:" in summary_lower:
-        xp_bonus += 0.5
-        stat_bonus["evidence_quality"] = stat_bonus.get("evidence_quality", 0.0) + 1.0
-
-    if "queue pressure" in summary_lower:
-        stat_bonus["speed"] = stat_bonus.get("speed", 0.0) + 1.0
-
-    return xp_bonus, stat_bonus
-
-
-def apply_runtime_packet_rpg_updates(packet: Dict[str, Any], workspace_root: Path | None = None) -> List[Dict[str, Any]]:
-    if not isinstance(packet, dict):
-        return []
-    committee_sources = packet.get("committee_sources") or {}
-    if not isinstance(committee_sources, dict):
-        return []
-
-    workspace_root = Path(workspace_root) if workspace_root is not None else Path.cwd()
-    packet_mode = str(packet.get("packet_generation_mode") or "").strip().lower()
-    if packet_mode not in {"live_committee_sessions", "fallback", "cached_committee_reuse"}:
-        return []
-
-    timestamp = str(packet.get("timestamp") or packet.get("generated_at") or "unknown")
-    company_id = str(packet.get("company_id") or "global")
-    events: List[Dict[str, Any]] = []
-
-    for role_name, meta in committee_sources.items():
-        if str(role_name).startswith("_") or not isinstance(meta, dict):
-            continue
-        mode = str(meta.get("mode") or "").strip()
-        agent_id = str(meta.get("agent_id") or "").strip()
-        if mode not in _RUNTIME_PACKET_BASE_XP or not agent_id:
-            continue
-
-        state_path = workspace_root / "ai_agents_memory" / agent_id / "RPG_STATE.md"
-        history_path = _history_path_for_state(state_path)
-        before = load_rpg_state(state_path)
-        after = dict(before)
-
-        xp_delta = _RUNTIME_PACKET_BASE_XP[mode]
-        role_xp_bonus, stat_bonus = _runtime_role_bonus(str(role_name), packet, str(meta.get("summary") or ""))
-        xp_delta += role_xp_bonus
-        after["xp"] = float(after.get("xp") or 0.0) + xp_delta
-        after["sessions"] = int(after.get("sessions") or 0) + 1
-        after["consistency"] = min(100.0, float(after.get("consistency") or 0.0) + 1.0)
-        after["usefulness"] = min(100.0, float(after.get("usefulness") or 0.0) + 0.5)
-        for field, delta in stat_bonus.items():
-            after[field] = min(100.0, float(after.get(field) or 0.0) + float(delta))
-
-        saved = save_rpg_state(state_path, after)
-        before_level = int(before.get("level") or 1)
-        after_level = int(saved.get("level") or 1)
-        before_xp = float(before.get("xp") or 0.0)
-        after_xp = float(saved.get("xp") or 0.0)
-        history_line = (
-            f"{timestamp} | {company_id} | {role_name}/{agent_id} | +{round(after_xp - before_xp, 2)} XP | "
-            f"level {before_level}->{after_level} | sessions {int(saved.get('sessions') or 0)} | mode={mode}"
-        )
-        _append_rpg_history(history_path, history_line)
-        events.append({
-            "timestamp": timestamp,
-            "company_id": company_id,
-            "role": str(role_name),
-            "agent_id": agent_id,
-            "mode": mode,
-            "xp_delta": round(after_xp - before_xp, 2),
-            "before_xp": round(before_xp, 2),
-            "after_xp": round(after_xp, 2),
-            "before_level": before_level,
-            "after_level": after_level,
-            "sessions": int(saved.get("sessions") or 0),
-        })
-
-    return events
-
-
-def format_runtime_rpg_event(event: Dict[str, Any]) -> str:
-    label = f"{event.get('role')}/{event.get('agent_id')}"
-    msg = (
-        f"[RPG] {label} +{event.get('xp_delta', 0)} XP "
-        f"({event.get('before_xp', 0)} -> {event.get('after_xp', 0)}) | "
-        f"Level {event.get('after_level', 1)} | Sessions {event.get('sessions', 0)} | {event.get('company_id', 'global')}"
-    )
-    if event.get("after_level") != event.get("before_level"):
-        msg += f" | LEVEL UP {event.get('before_level')} -> {event.get('after_level')}"
-    return msg
 def format_rpg_identity_line(
     state: Dict[str, Any],
     agent_name: Any = None,
@@ -936,7 +804,251 @@ def format_rpg_self_awareness_block(state: Dict[str, Any], role_or_agent: Any = 
     return "\n".join(lines)
 
 
+def _runtime_rpg_state_path(root: Path, agent_id: str) -> Path:
+    return root / "ai_agents_memory" / agent_id / "RPG_STATE.md"
+
+
+def _runtime_rpg_history_path(root: Path, agent_id: str) -> Path:
+    return root / "ai_agents_memory" / agent_id / "RPG_HISTORY.md"
+
+
+def _runtime_agent_id(company: str, role: str) -> str | None:
+    role_map = {
+        "Pam": "pam",
+        "Iris": "iris",
+        "Vera": "vera",
+        "Rowan": "rowan",
+        "Bianca": "bianca",
+        "Lucian": "lucian",
+        "Orion": "orion",
+    }
+    prefix = role_map.get(str(role).strip())
+    if not prefix or not company:
+        return None
+    return f"{prefix}_{company}"
+
+
+def apply_runtime_rpg_updates(root: Path, evidence_path: Path) -> Dict[str, Any]:
+    records = _load_runtime_evidence_records(evidence_path)
+    if not records:
+        return {"updated_agents": [], "record_count": 0}
+
+    updated_agents: list[str] = []
+    per_agent_events: Dict[str, Dict[str, float]] = {}
+    seen_sessions: set[tuple[str, str]] = set()
+
+    for record in records:
+        company = str(record.get("company_id") or "").strip()
+        committee_sources = record.get("committee_sources") or {}
+        consulted = {str(agent).strip() for agent in (record.get("source_agents_consulted") or []) if str(agent).strip()}
+        packet_key = str(record.get("generated_at") or record.get("timestamp") or "")
+        for role, meta in committee_sources.items():
+            if role == "_committee":
+                continue
+            agent_id = _runtime_agent_id(company, role)
+            if not agent_id:
+                continue
+            bucket = per_agent_events.setdefault(agent_id, {
+                "xp": 0.0,
+                "sessions": 0.0,
+                "reliability": 0.0,
+                "consistency": 0.0,
+                "usefulness": 0.0,
+                "evidence_quality": 0.0,
+                "cost_efficiency": 0.0,
+                "waste_penalty": 0.0,
+            })
+            if packet_key and (agent_id, packet_key) not in seen_sessions:
+                bucket["sessions"] += 1.0
+                seen_sessions.add((agent_id, packet_key))
+            mode = str((meta or {}).get("mode") or "").strip()
+            summary = str((meta or {}).get("summary") or "").strip()
+            if mode == "live_session":
+                bucket["xp"] += 3.0
+                bucket["reliability"] += 2.0
+                bucket["consistency"] += 1.0
+                bucket["usefulness"] += 1.5
+                bucket["evidence_quality"] += 1.5
+            elif mode == "python_role_fallback":
+                bucket["xp"] += 2.0
+                bucket["reliability"] += 1.0
+                bucket["usefulness"] += 1.0
+                bucket["cost_efficiency"] += 1.5
+            elif mode == "reused_cached":
+                bucket["xp"] += 0.5
+                bucket["consistency"] += 1.0
+                bucket["cost_efficiency"] += 1.0
+            elif mode.startswith("fallback_saved"):
+                bucket["xp"] += 0.25
+                bucket["waste_penalty"] += 0.5
+            elif mode in {"live_session_failed", "missing"}:
+                bucket["waste_penalty"] += 2.0
+            if role in consulted and summary:
+                bucket["usefulness"] += 0.5
+
+    for agent_id, delta in per_agent_events.items():
+        state_path = _runtime_rpg_state_path(root, agent_id)
+        history_path = _runtime_rpg_history_path(root, agent_id)
+        state = load_rpg_state(state_path)
+        state["xp"] = max(0.0, float(state.get("xp") or 0.0) + delta["xp"])
+        state["sessions"] = int(state.get("sessions") or 0) + int(delta["sessions"])
+        for field in ("reliability", "consistency", "usefulness", "evidence_quality", "cost_efficiency"):
+            state[field] = min(100.0, float(state.get(field) or 0.0) + float(delta[field]))
+        state["waste_penalty"] = min(100.0, float(state.get("waste_penalty") or 0.0) + float(delta["waste_penalty"]))
+
+        company_match = re.search(r"company_\d{3}", agent_id)
+        company_id = company_match.group(0) if company_match else ""
+        if agent_id.startswith("pam_") and company_id:
+            state = score_pam_runtime_packet_routing_completion(state, evidence_path)
+        if agent_id.startswith("lucian_") and company_id:
+            state = score_lucian_runtime_packet_direction_completion(state, evidence_path)
+        if agent_id.startswith("rowan_") and company_id:
+            state = score_rowan_research_completion(state, evidence_path)
+
+        saved = save_rpg_state(state_path, state)
+        history_path.parent.mkdir(parents=True, exist_ok=True)
+        with history_path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"agent_id": agent_id, "delta": delta, "xp": saved["xp"], "sessions": saved["sessions"]}) + "\n")
+        updated_agents.append(agent_id)
+
+    return {"updated_agents": sorted(updated_agents), "record_count": len(records)}
+
+
+_RUNTIME_PACKET_BASE_XP = {
+    "live_session": 3.0,
+    "python_fallback": 1.5,
+}
+
+_RUNTIME_PACKET_ROLE_STAT_BONUSES = {
+    "Lucian": {"judgment": 2.0, "reliability": 1.0, "usefulness": 1.0},
+    "Bianca": {"cost_efficiency": 2.0, "judgment": 1.0, "evidence_quality": 1.0},
+    "Vera": {"consistency": 2.0, "judgment": 1.0, "usefulness": 1.0},
+    "Iris": {"accuracy": 1.0, "evidence_quality": 2.0, "usefulness": 1.0},
+    "Orion": {"evidence_quality": 2.0, "accuracy": 1.0, "usefulness": 1.0},
+    "Pam": {"usefulness": 2.0, "consistency": 1.0, "speed": 1.0},
+}
+
+
+def _history_path_for_state(path: Path) -> Path:
+    return path.with_name("RPG_HISTORY.md")
+
+
+def _append_rpg_history(history_path: Path, line: str) -> None:
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    if not history_path.exists():
+        history_path.write_text("# RPG History\n\n", encoding="utf-8")
+    with history_path.open("a", encoding="utf-8") as handle:
+        handle.write(f"- {line}\n")
+
+
+def _runtime_role_bonus(role_name: str, packet: Dict[str, Any], summary: str) -> tuple[float, Dict[str, float]]:
+    xp_bonus = 0.0
+    stat_bonus = dict(_RUNTIME_PACKET_ROLE_STAT_BONUSES.get(role_name, {}))
+    approval_posture = str(packet.get("approval_posture") or "").strip().lower()
+    packet_effects = [str(item).strip() for item in (packet.get("packet_effects") or []) if str(item).strip()]
+    executed_count = sum(1 for item in (packet.get("top_ranked_candidates") or []) if isinstance(item, dict) and item.get("execution_state") == "executed")
+    summary_lower = summary.lower()
+
+    if executed_count and approval_posture != "company_veto":
+        xp_bonus += 1.0
+        stat_bonus["usefulness"] = stat_bonus.get("usefulness", 0.0) + 1.0
+
+    if approval_posture == "company_veto" and packet_effects and role_name in {"Lucian", "Bianca", "Vera"}:
+        xp_bonus += 1.0
+        stat_bonus["judgment"] = stat_bonus.get("judgment", 0.0) + 1.0
+        stat_bonus["reliability"] = stat_bonus.get("reliability", 0.0) + 1.0
+
+    if "recommendation:" in summary_lower:
+        xp_bonus += 0.5
+        stat_bonus["evidence_quality"] = stat_bonus.get("evidence_quality", 0.0) + 1.0
+
+    if "queue pressure" in summary_lower:
+        stat_bonus["speed"] = stat_bonus.get("speed", 0.0) + 1.0
+
+    return xp_bonus, stat_bonus
+
+
+def apply_runtime_packet_rpg_updates(packet: Dict[str, Any], workspace_root: Path | None = None) -> List[Dict[str, Any]]:
+    if not isinstance(packet, dict):
+        return []
+    committee_sources = packet.get("committee_sources") or {}
+    if not isinstance(committee_sources, dict):
+        return []
+
+    workspace_root = Path(workspace_root) if workspace_root is not None else Path.cwd()
+    packet_mode = str(packet.get("packet_generation_mode") or "").strip().lower()
+    if packet_mode not in {"live_committee_sessions", "fallback", "cached_committee_reuse"}:
+        return []
+
+    timestamp = str(packet.get("timestamp") or packet.get("generated_at") or "unknown")
+    company_id = str(packet.get("company_id") or "global")
+    events: List[Dict[str, Any]] = []
+
+    for role_name, meta in committee_sources.items():
+        if str(role_name).startswith("_") or not isinstance(meta, dict):
+            continue
+        mode = str(meta.get("mode") or "").strip()
+        agent_id = str(meta.get("agent_id") or "").strip()
+        if mode not in _RUNTIME_PACKET_BASE_XP or not agent_id:
+            continue
+
+        state_path = workspace_root / "ai_agents_memory" / agent_id / "RPG_STATE.md"
+        history_path = _history_path_for_state(state_path)
+        before = load_rpg_state(state_path)
+        after = dict(before)
+
+        xp_delta = _RUNTIME_PACKET_BASE_XP[mode]
+        role_xp_bonus, stat_bonus = _runtime_role_bonus(str(role_name), packet, str(meta.get("summary") or ""))
+        xp_delta += role_xp_bonus
+        after["xp"] = float(after.get("xp") or 0.0) + xp_delta
+        after["sessions"] = int(after.get("sessions") or 0) + 1
+        after["consistency"] = min(100.0, float(after.get("consistency") or 0.0) + 1.0)
+        after["usefulness"] = min(100.0, float(after.get("usefulness") or 0.0) + 0.5)
+        for field, delta in stat_bonus.items():
+            after[field] = min(100.0, float(after.get(field) or 0.0) + float(delta))
+
+        saved = save_rpg_state(state_path, after)
+        before_level = int(before.get("level") or 1)
+        after_level = int(saved.get("level") or 1)
+        before_xp = float(before.get("xp") or 0.0)
+        after_xp = float(saved.get("xp") or 0.0)
+        history_line = (
+            f"{timestamp} | {company_id} | {role_name}/{agent_id} | +{round(after_xp - before_xp, 2)} XP | "
+            f"level {before_level}->{after_level} | sessions {int(saved.get('sessions') or 0)} | mode={mode}"
+        )
+        _append_rpg_history(history_path, history_line)
+        events.append({
+            "timestamp": timestamp,
+            "company_id": company_id,
+            "role": str(role_name),
+            "agent_id": agent_id,
+            "mode": mode,
+            "xp_delta": round(after_xp - before_xp, 2),
+            "before_xp": round(before_xp, 2),
+            "after_xp": round(after_xp, 2),
+            "before_level": before_level,
+            "after_level": after_level,
+            "sessions": int(saved.get("sessions") or 0),
+        })
+
+    return events
+
+
+def format_runtime_rpg_event(event: Dict[str, Any]) -> str:
+    label = f"{event.get('role')}/{event.get('agent_id')}"
+    msg = (
+        f"[RPG] {label} +{event.get('xp_delta', 0)} XP "
+        f"({event.get('before_xp', 0)} -> {event.get('after_xp', 0)}) | "
+        f"Level {event.get('after_level', 1)} | Sessions {event.get('sessions', 0)} | {event.get('company_id', 'global')}"
+    )
+    if event.get("after_level") != event.get("before_level"):
+        msg += f" | LEVEL UP {event.get('before_level')} -> {event.get('after_level')}"
+    return msg
+
+
 __all__ = [
+    "apply_runtime_packet_rpg_updates",
+    "format_runtime_rpg_event",
     "RPG_STATE_FIELDS",
     "current_level_threshold",
     "default_rpg_state",
@@ -954,6 +1066,7 @@ __all__ = [
     "score_rowan_research_completion",
     "score_rowan_research_report_completion",
     "score_verified_report_completion",
+    "apply_runtime_rpg_updates",
     "format_rpg_identity_line",
     "format_rpg_summary",
     "update_xp",

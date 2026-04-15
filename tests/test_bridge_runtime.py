@@ -29,3 +29,12 @@ def test_live_committee_payload_failed_detects_bridge_failures() -> None:
     assert _live_committee_payload_failed({"bridge_error": "no such file"}) is True
     assert _live_committee_payload_failed({"reply_text": "Bridge call failed for iris_company_001; escalated without Python role fallback."}) is True
     assert _live_committee_payload_failed({"reply_text": "All good.", "analysis_summary": "healthy"}) is False
+
+
+
+def test_live_committee_payload_accepts_python_role_fallback() -> None:
+    assert _live_committee_payload_failed({
+        "bridge_fallback_used": True,
+        "bridge_error": "openclaw missing",
+        "analysis_summary": "Fallback analyst summary.",
+    }) is False

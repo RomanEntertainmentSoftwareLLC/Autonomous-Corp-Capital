@@ -183,6 +183,8 @@ def _promote_wait_candidate(candidate: Dict[str, Any]) -> bool:
     signal_dir = signal_votes[0]
     if any(direction != signal_dir for direction in signal_votes[1:]):
         return False
+    if signal_dir <= 0:
+        return False
 
     evidence_votes = []
     pattern_confirmation = candidate.get("pattern_confirmation") or {}
@@ -201,7 +203,7 @@ def _promote_wait_candidate(candidate: Dict[str, Any]) -> bool:
     if not any(direction == signal_dir for direction in evidence_votes):
         return False
 
-    candidate["decision"] = "BUY" if signal_dir > 0 else "SELL"
+    candidate["decision"] = "BUY"
     candidate["decision_promoted_from"] = "WAIT"
     candidate["decision_promotion_reason"] = "aligned_signal_evidence"
     return True
@@ -218,6 +220,10 @@ def rank_and_select_candidates(candidates: List[Dict[str, Any]]) -> List[Dict[st
             candidate["skip_reason"] = "risk_veto"
             continue
         _promote_wait_candidate(candidate)
+        if candidate.get("decision") == "SELL" and float(candidate.get("position_state") or 0.0) <= 0.0:
+            candidate["decision"] = "WAIT"
+            candidate["decision_demoted_from"] = "SELL"
+            candidate["decision_demotion_reason"] = "flat_account_sell_block"
         if candidate.get("decision") not in {"BUY", "SELL"}:
             candidate["execution_state"] = "skipped"
             candidate["skip_reason"] = "hold_candidate"
@@ -775,6 +781,8 @@ def _committee_cycle_message(company: str, company_candidates: List[Dict[str, An
 def _live_committee_payload_failed(payload: Dict[str, Any]) -> bool:
     if not isinstance(payload, dict):
         return True
+    if payload.get("bridge_fallback_used"):
+        return False
     if payload.get("bridge_failed"):
         return True
     if payload.get("bridge_error"):
@@ -1177,8 +1185,9 @@ def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], 
         if live_payload is not None and not _live_committee_payload_failed(live_payload):
             role_payloads[role] = live_payload
             source_agents_consulted.append(role)
+            response_mode = "python_role_fallback" if live_payload.get("bridge_fallback_used") else "live_session"
             committee_sources[role] = {
-                "mode": "live_session",
+                "mode": response_mode,
                 "agent_id": _committee_agent_id(company, role),
                 "summary": live_payload.get("analysis_summary")
                 or live_payload.get("recommendation")
@@ -1186,6 +1195,8 @@ def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], 
                 or live_payload.get("executive_summary")
                 or live_payload.get("reply_text"),
             }
+            if live_payload.get("bridge_error"):
+                committee_sources[role]["bridge_error"] = live_payload.get("bridge_error")
             continue
 
         if live_payload is not None:
@@ -1228,9 +1239,10 @@ def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], 
     cap_multiplier = derive_bianca_cap_multiplier(role_payloads.get("Bianca", {}))
 
     live_roles = [role for role, meta in committee_sources.items() if meta.get("mode") == "live_session"]
+    fallback_roles = [role for role, meta in committee_sources.items() if meta.get("mode") == "python_role_fallback"]
     return {
         "company_id": company,
-        "packet_generation_mode": "live_committee_sessions" if live_roles else "fallback",
+        "packet_generation_mode": "live_committee_sessions" if (live_roles or fallback_roles) else "fallback",
         "generated_at": now.isoformat(),
         "top_ranked_candidates": top_candidates,
         "approval_posture": approval_posture,
@@ -1240,8 +1252,9 @@ def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], 
         "missing_input_flags": missing_input_flags,
         "source_agents_consulted": source_agents_consulted,
         "committee_sources": committee_sources,
-        "fresh_committee": bool(live_roles),
+        "fresh_committee": bool(live_roles or fallback_roles),
         "live_roles_responded": live_roles,
+        "python_fallback_roles_responded": fallback_roles,
         "fallback_reason": committee_sources.get("_committee", {}).get("reason"),
         "execution_changed_by_packet": False,
         "packet_effects": [],

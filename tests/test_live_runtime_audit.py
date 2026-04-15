@@ -502,6 +502,25 @@ def test_ranked_wait_candidate_does_not_promote_to_sell_when_flat():
     assert ranked[0]["execution_state"] == "skipped"
     assert ranked[0]["skip_reason"] == "hold_candidate"
 
+
+def test_direct_flat_sell_candidate_is_demoted_before_execution():
+    row = candidate("BTC-USD")
+    row.update(
+        {
+            "decision": "SELL",
+            "ranking_score": 0.25,
+            "position_state": 0.0,
+        }
+    )
+
+    ranked = rank_and_select_candidates([row])
+
+    assert ranked[0]["decision"] == "WAIT"
+    assert ranked[0]["decision_demoted_from"] == "SELL"
+    assert ranked[0]["decision_demotion_reason"] == "flat_account_sell_block"
+    assert ranked[0]["execution_state"] == "skipped"
+    assert ranked[0]["skip_reason"] == "hold_candidate"
+
 def test_stop_run_refuses_false_safe_when_process_group_survives(monkeypatch, tmp_path):
     run_dir = tmp_path / "run_20260412_050000"
     (run_dir / "artifacts").mkdir(parents=True)

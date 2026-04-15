@@ -1625,6 +1625,45 @@ class SimpleLLMAdapter(LLMAdapter):
                 "task_type": "treasury_review",
                 "priority": "medium",
             }
+        if role_type == "strategist":
+            target_scope = prompt.get("target_scope", prompt.get("scope", ""))
+            queue_summary = prompt.get("queue_summary", {})
+            new_items = queue_summary.get("new", 0)
+            raw_message = str(message or "")
+            ranked_lines = [line.strip() for line in raw_message.splitlines() if line.strip().startswith(("1.", "2.", "3."))]
+            primary_line = ranked_lines[0] if ranked_lines else "No ranked slate provided."
+            signal_bias = "neutral"
+            lowered_line = primary_line.lower()
+            if "decision=buy" in lowered_line:
+                signal_bias = "supportive"
+            elif "decision=sell" in lowered_line:
+                signal_bias = "defensive"
+            research_summary = (
+                f"Current strategist read for {target_scope}: {primary_line} "
+                f"Queue pressure: {new_items} new item(s). Signal posture appears {signal_bias}."
+            )
+            recommendation = (
+                "Lean into the highest-ranked BUY only if it already survived portfolio and risk checks."
+                if signal_bias == "supportive"
+                else "Do not force new shorts or flat-account sells; preserve discipline until owned-position exits are real."
+                if signal_bias == "defensive"
+                else "Wait for a clearer directional edge before altering the slate."
+            )
+            evidence = [primary_line] if ranked_lines else []
+            return {
+                "reply_text": f"Orion@{agent_scope} notes {research_summary} Recommendation: {recommendation}",
+                "research_summary": research_summary,
+                "ideas": [recommendation],
+                "hypotheses": ["The top-ranked slate is only useful if it aligns with real portfolio state."],
+                "evidence": evidence,
+                "missing_data": [],
+                "suggested_followup": "Re-check owned positions before honoring any SELL posture.",
+                "queue_action": "none",
+                "task_type": "strategy_review",
+                "priority": "medium",
+                "escalation": False,
+            }
+
         if role_type == "ceo":
             insights = prompt.get("company_insights", {})
             queue_summary = prompt.get("queue_summary", {})

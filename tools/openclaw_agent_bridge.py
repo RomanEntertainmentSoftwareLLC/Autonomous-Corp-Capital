@@ -35,10 +35,13 @@ LOCK_RETRY_SLEEP_SECONDS = {
 def _bridge_search_path() -> str:
  env_path = os.environ.get("PATH", "")
  preferred = [
+  str(Path.home() / ".npm-global" / "bin"),
   str(Path.home() / ".local" / "bin"),
   str(Path(sys.executable).resolve().parent),
+  str(REPO_ROOT / ".venv" / "bin"),
   "/usr/local/bin",
   "/usr/bin",
+  "/bin",
  ]
  parts = []
  for entry in preferred + env_path.split(os.pathsep):
@@ -53,10 +56,20 @@ def _resolve_openclaw_command() -> list[str]:
  override = os.environ.get("OPENCLAW_BIN", "").strip()
  if override:
   return [override]
+
+ hardcoded = str(Path.home() / ".npm-global" / "bin" / "openclaw")
+ if Path(hardcoded).exists():
+  return [hardcoded]
+
  resolved = shutil.which("openclaw", path=_bridge_search_path())
  if resolved:
   return [resolved]
- return ["openclaw"]
+
+ raise RuntimeError(
+  "Could not resolve the 'openclaw' executable for bridge calls. "
+  "Set OPENCLAW_BIN to the full binary path or fix PATH. "
+  f"Bridge search PATH was: {_bridge_search_path()}"
+ )
 
 
 def _bridge_env() -> Dict[str, str]:
@@ -150,10 +163,18 @@ def _append_jsonl(path: Path, payload: Dict[str, Any]) -> None:
   fh.write(json.dumps(payload) + "\n")
 
 
-def _append_usage_telemetry(acc_agent_id: str, real_agent_id: str, prompt: Dict[str, Any], outcome: str, bridge_error: str | None = None) -> None:
+def _append_usage_telemetry(
+    acc_agent_id: str,
+    real_agent_id: str,
+    prompt: Dict[str, Any],
+    outcome: str,
+    bridge_error: str | None = None,
+    bridge_command: list[str] | None = None,
+) -> None:
     target_scope = prompt.get("target_scope")
     company = target_scope if isinstance(target_scope, str) and target_scope.startswith("company_") else None
     run_id = prompt.get("run_id") or os.environ.get("ACC_RUN_ID")
+
     telemetry = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "agent": prompt.get("agent_id") or acc_agent_id,
@@ -168,13 +189,20 @@ def _append_usage_telemetry(acc_agent_id: str, real_agent_id: str, prompt: Dict[
         "estimated_cost": None,
         "outcome": outcome,
     }
+
     if bridge_error is not None:
         telemetry["bridge_error"] = bridge_error
+
+    if bridge_command is not None:
+        telemetry["bridge_command"] = bridge_command
+
     usage_path = REPO_ROOT / "state" / "agents" / "ledger" / "usage.jsonl"
     _append_jsonl(usage_path, telemetry)
+
     if isinstance(run_id, str) and run_id:
         run_ledger_path = REPO_ROOT / "state" / "live_runs" / run_id / "artifacts" / "ledger_usage.jsonl"
         _append_jsonl(run_ledger_path, telemetry)
+
         run_usage_path = REPO_ROOT / "state" / "live_runs" / run_id / "artifacts" / "bridge_usage.jsonl"
         _append_jsonl(run_usage_path, telemetry)
 
@@ -217,7 +245,8 @@ class OpenClawAdapter:
   return "\n".join(instructions)
 
  def _invoke_once(self, wrapped_message: str, timeout_seconds: int) -> Dict[str, Any]:
-  cmd = _resolve_openclaw_command() + [
+  bridge_base_cmd = _resolve_openclaw_command()
+  cmd = bridge_base_cmd + [
   "agent",
   "--agent",
   self.real_agent_id,
@@ -274,11 +303,32 @@ class OpenClawAdapter:
   sleep_seconds = self._retry_sleep_seconds()
 
   last_error: Exception | None = None
+  bridge_command_for_log: list[str] | None = None
+
+  try:
+   bridge_command_for_log = _resolve_openclaw_command()
+  except Exception as exc:
+   text = str(exc)
+   _append_usage_telemetry(
+    self.acc_agent_id,
+    self.real_agent_id,
+    prompt,
+    "error",
+    bridge_error=text,
+    bridge_command=None,
+   )
+   raise
 
   for attempt in range(1, attempts + 1):
    try:
     parsed = self._invoke_once(wrapped_message, timeout_seconds)
-    _append_usage_telemetry(self.acc_agent_id, self.real_agent_id, prompt, "success")
+    _append_usage_telemetry(
+     self.acc_agent_id,
+     self.real_agent_id,
+     prompt,
+     "success",
+     bridge_command=bridge_command_for_log,
+    )
     return _normalize_result(parsed, prompt)
    except Exception as exc:
     last_error = exc
@@ -286,7 +336,14 @@ class OpenClawAdapter:
     if attempt < attempts and _looks_like_lock_error(text):
      time.sleep(sleep_seconds)
      continue
-    _append_usage_telemetry(self.acc_agent_id, self.real_agent_id, prompt, "error", bridge_error=text)
+    _append_usage_telemetry(
+     self.acc_agent_id,
+     self.real_agent_id,
+     prompt,
+     "error",
+     bridge_error=text,
+     bridge_command=bridge_command_for_log,
+    )
     raise
 
   if last_error is not None:

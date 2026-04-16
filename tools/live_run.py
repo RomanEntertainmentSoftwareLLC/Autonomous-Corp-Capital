@@ -1757,6 +1757,8 @@ def start_run(duration_hours: float = 0.0, virtual_currency: float | None = None
     if _proof_telemetry_enabled():
         command.append("--proof-telemetry")
     child_env = dict(os.environ, LIVE_RUN_MODE=run_mode)
+    child_env.setdefault("OPENCLAW_BIN", str(Path.home() / ".npm-global" / "bin" / "openclaw"))
+    child_env["PATH"] = f"{Path.home() / '.npm-global' / 'bin'}:{child_env.get('PATH', '')}"
     if _proof_telemetry_enabled() and not live_trade:
         child_env["LIVE_RUN_PROOF_TELEMETRY_SUPPRESSED"] = "1"
     proc = subprocess.Popen(command, env=child_env, start_new_session=True)

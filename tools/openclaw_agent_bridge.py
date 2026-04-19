@@ -297,6 +297,13 @@ class OpenClawAdapter:
   )
 
  def reason(self, message: str, prompt: Dict[str, Any]) -> Dict[str, Any]:
+  _append_usage_telemetry(
+      self.acc_agent_id,
+      self.real_agent_id,
+      prompt,
+      "entered_bridge",
+      bridge_command=None,
+  )
   wrapped_message = self._build_message(message, prompt)
   timeout_seconds = self._timeout_seconds()
   attempts = self._retry_attempts()

@@ -38,7 +38,7 @@ from tools.agent_context import build_prompt
 from tools.agent_reports import load_agent_histories
 
 from tools.llm_client import OpenAIAdapter, SimpleLLMAdapter
-from tools.openclaw_agent_bridge import OpenClawAdapter, _append_usage_telemetry
+from tools.openclaw_agent_bridge import OpenClawAdapter
 
 load_env_file(AGENT_ROOT / ".env")
 
@@ -76,6 +76,59 @@ def load_agents() -> Dict[str, Dict[str, str]]:
 def choose_adapter(agent_id: str, agent_info: Dict[str, Any]) -> OpenClawAdapter:
  return OpenClawAdapter(agent_id)
 
+
+def _ledger_paths(prompt: Dict[str, Any]) -> tuple[Path, Path | None]:
+    usage_path = ROOT / "state" / "agents" / "ledger" / "usage.jsonl"
+    run_id = prompt.get("run_id") or os.environ.get("ACC_RUN_ID")
+    run_usage_path = None
+    if isinstance(run_id, str) and run_id:
+        run_usage_path = ROOT / "state" / "live_runs" / run_id / "artifacts" / "ledger_usage.jsonl"
+    return usage_path, run_usage_path
+
+
+def _ledger_size(path: Path | None) -> int:
+    if path is None or not path.exists():
+        return -1
+    try:
+        return int(path.stat().st_size)
+    except Exception:
+        return -1
+
+
+def _append_pam_usage_telemetry(
+    prompt: Dict[str, Any],
+    outcome: str,
+    provider: str,
+    model: str,
+    error: str | None = None,
+) -> None:
+    target_scope = prompt.get("target_scope")
+    company = target_scope if isinstance(target_scope, str) and target_scope.startswith("company_") else None
+    run_id = prompt.get("run_id") or os.environ.get("ACC_RUN_ID")
+    telemetry = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "agent": prompt.get("agent_id"),
+        "company": company,
+        "run_id": run_id,
+        "cycle": prompt.get("cycle"),
+        "model": model,
+        "provider": provider,
+        "prompt_tokens": None,
+        "completion_tokens": None,
+        "total_tokens": None,
+        "estimated_cost": None,
+        "outcome": outcome,
+    }
+    if error is not None:
+        telemetry["bridge_error"] = error
+    usage_path, run_usage_path = _ledger_paths(prompt)
+    usage_path.parent.mkdir(parents=True, exist_ok=True)
+    with usage_path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(telemetry) + "\n")
+    if run_usage_path is not None:
+        run_usage_path.parent.mkdir(parents=True, exist_ok=True)
+        with run_usage_path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(telemetry) + "\n")
 
 
 def merge_structured_fields(packet: Dict[str, Any], prompt: Dict[str, Any], response: Dict[str, Any]) -> Dict[str, Any]:
@@ -153,6 +206,9 @@ def main() -> None:
         return
     resolved_target_scope = prompt.get("target_scope", scope)
     adapter = choose_adapter(args.agent, agent_info)
+    usage_path, run_usage_path = _ledger_paths(prompt)
+    usage_size_before = _ledger_size(usage_path)
+    run_usage_size_before = _ledger_size(run_usage_path)
     try:
      response = adapter.reason(message, prompt)
     except Exception as exc:
@@ -164,6 +220,17 @@ def main() -> None:
      response["bridge_fallback_used"] = True
      response["bridge_error"] = str(exc)
      response["bridge_failed"] = False
+
+    usage_size_after = _ledger_size(usage_path)
+    run_usage_size_after = _ledger_size(run_usage_path)
+    if usage_size_after == usage_size_before and run_usage_size_after == run_usage_size_before:
+        _append_pam_usage_telemetry(
+            prompt,
+            outcome="fallback" if response.get("bridge_fallback_used") else "success",
+            provider="python_role_fallback" if response.get("bridge_fallback_used") else "pam_runtime",
+            model=adapter.__class__.__name__,
+            error=str(response.get("bridge_error") or "") or None,
+        )
 
     now = datetime.now(timezone.utc).isoformat()
     task_id = str(uuid.uuid4())

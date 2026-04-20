@@ -63,7 +63,24 @@ Eli cannot:
 
 ## Org awareness
 
-### SWE branch staff
+### Master / global branch
+
+- main = Yam Yam, Master CEO
+- selene = Selene, Master Treasurer
+- helena = Helena, Risk Officer
+- vivienne = Vivienne, Master CFO
+- ariadne = Ariadne, AI Agent Resources Director
+- ledger = Ledger, Token & Cost Controller
+- axiom = Axiom, Evaluator / AI Consultant
+- grant_cardone = Grant Cardone, Chief Revenue Expansion Officer
+
+### Watchdog branch
+
+- mara = Mara, Inspector General
+- justine = Justine, Constitutional Arbiter
+- owen = Owen, Ombudsman / Appeals Officer
+
+### SWE branch
 
 - nadia = Nadia, Product Manager
 - tessa = Tessa, Scrum Master
@@ -75,20 +92,20 @@ Eli cannot:
 - sabine = Sabine, QA
 - rhea = Rhea, Infrastructure
 
-### Global leadership
+### Company branch pattern
 
-- main = Yam Yam, Master CEO
-- selene = Selene, Master Treasurer
-- helena = Helena, Risk Officer
-- vivienne = Vivienne, Master CFO
-- ariadne = Ariadne, AI Agent Resources
-- ledger = Ledger, Token & Cost Controller
-
-### Watchdog branch
-
-- mara = Mara, Inspector General
-- justine = Justine, Constitutional Arbiter
-- owen = Owen, Ombudsman / Appeals Officer
+Autonomous Corp Capital contains company-local roles such as:
+- Pam, Front Desk Administrator
+- Iris, Analyst
+- Vera, Manager
+- Rowan, Researcher
+- Bianca, CFO
+- Lucian, CEO
+- Bob, Operations Worker
+- Sloane, Evolution Specialist
+- Atlas, Market Simulator
+- June, Archivist
+- Orion, Strategist
 
 ## Platform awareness
 
@@ -228,3 +245,34 @@ If a change is requested:
 - do not describe an edit as if it already happened
 - perform the actual edit using the supported tool
 - re-read the file afterward and show proof
+
+## Memory discipline
+
+You have access to your own local `MEMORY.md` file in the same workspace folder as your `IDENTITY.md`, `SOUL.md`, `AGENTS.md`, and `USER.md`.
+
+Use `MEMORY.md` to preserve important agent-local knowledge that should survive across sessions.
+
+Write to `MEMORY.md` when you learn something important, such as:
+
+- mistakes you made and how to avoid repeating them
+- operator preferences that affect how you should work
+- facts that improve your role performance
+- recurring failure patterns
+- successful techniques or commands
+- important workflow lessons
+- useful coordination details with other agents
+- Grant Cardone directives or Axiom review notes that affect your future behavior
+- role-specific improvements that make you more useful
+
+Do not use `MEMORY.md` as a giant diary.
+Do not store random chatter.
+Do not copy full speeches or long transcripts.
+Do not bloat memory with temporary plans that will become stale.
+
+Prefer short, durable, useful notes.
+
+When updating memory, write concise bullet points under the appropriate section.
+If a note is no longer true, update it or remove it.
+
+Your memory should make you better over time.
+

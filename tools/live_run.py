@@ -38,7 +38,7 @@ LIVE_RUN_BACKOFF_BASE = int(os.getenv("LIVE_RUN_BACKOFF_SECONDS", "60"))
 COMPANIES = ["company_001", "company_002", "company_003", "company_004"]
 MAX_EXECUTIONS_PER_CYCLE = 6
 MAX_EXECUTIONS_PER_COMPANY_PER_CYCLE = 2
-LIVE_COMMITTEE_TIMEOUT_SECONDS = int(os.getenv("LIVE_COMMITTEE_TIMEOUT_SECONDS", "25"))
+LIVE_COMMITTEE_TIMEOUT_SECONDS = int(os.getenv("LIVE_COMMITTEE_TIMEOUT_SECONDS", "180"))
 LIVE_COMMITTEE_ROLES = ["Lucian", "Bianca", "Vera", "Iris", "Orion"]
 COMMITTEE_REUSE_WINDOW_SECONDS = int(os.environ.get("COMMITTEE_REUSE_WINDOW_SECONDS", "600"))
 BRIDGE_CALL_BUDGET_PER_RUN = int(os.environ.get("BRIDGE_CALL_BUDGET_PER_RUN", "120"))
@@ -1133,10 +1133,23 @@ def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], 
     committee_sources: Dict[str, Dict[str, Any]] = {}
     missing_input_flags: List[str] = []
     source_agents_consulted: List[str] = []
-    has_actionable_candidates = any(not c.get("vetoed_by_risk") and c.get("decision") in {"BUY", "SELL"} for c in ranked_candidates)
+    has_actionable_candidates = any(
+        not c.get("vetoed_by_risk") and c.get("decision") in {"BUY", "SELL"}
+        for c in ranked_candidates
+    )
 
-    if not has_actionable_candidates:
-        committee_sources["_committee"] = {"mode": "skipped", "reason": "no_actionable_candidates"}
+    has_reviewable_wait_candidates = any(
+        not c.get("vetoed_by_risk")
+        and str(c.get("decision") or "").upper() == "WAIT"
+        and float(c.get("ranking_score") or 0.0) > 0.0
+        for c in ranked_candidates[:5]
+    )
+
+    if not has_actionable_candidates and not has_reviewable_wait_candidates:
+        committee_sources["_committee"] = {
+        "mode": "skipped",
+        "reason": "no_actionable_or_reviewable_candidates",
+    }
     else:
         recent_packet = _latest_company_packet(company)
         recent_packet_timestamp = None
@@ -1248,15 +1261,32 @@ def build_company_packet(company: str, ranked_candidates: List[Dict[str, Any]], 
         else:
             committee_sources[role] = {"mode": "missing", "summary": "missing live committee output"}
 
-    rationale = " | ".join(
-        role_payloads[name].get("analysis_summary")
-        or role_payloads[name].get("recommendation")
-        or role_payloads[name].get("research_summary")
-        or role_payloads[name].get("reply_text")
-        or role_payloads[name].get("summary", "")
-        for name in ("Iris", "Vera", "Orion")
-        if role_payloads.get(name)
-    )
+    def _committee_text(value: Any) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, str):
+            return value
+        if isinstance(value, (dict, list)):
+            return json.dumps(value, sort_keys=True)[:800]
+        return str(value)
+
+    rationale_parts: List[str] = []
+    for name in ("Iris", "Vera", "Orion"):
+        payload = role_payloads.get(name)
+        if not isinstance(payload, dict):
+            continue
+        value = (
+            payload.get("analysis_summary")
+            or payload.get("recommendation")
+            or payload.get("research_summary")
+            or payload.get("reply_text")
+            or payload.get("summary", "")
+        )
+        text = _committee_text(value).strip()
+        if text:
+            rationale_parts.append(text)
+
+    rationale = " | ".join(rationale_parts)
     approval_posture = derive_lucian_posture(role_payloads.get("Lucian", {}))
     cap_multiplier = derive_bianca_cap_multiplier(role_payloads.get("Bianca", {}))
 

@@ -19,3 +19,5 @@
 - 2026-04-16T03:56:54.659091+00:00 | company_004 | Iris/iris_company_004 | +3.0 XP | level 1->1 | sessions 68 | mode=live_session
 - 2026-04-16T03:59:21.066771+00:00 | company_004 | Iris/iris_company_004 | +3.0 XP | level 1->1 | sessions 69 | mode=live_session
 - 2026-04-16T04:03:06.368373+00:00 | company_004 | Iris/iris_company_004 | +3.0 XP | level 1->1 | sessions 70 | mode=live_session
+- 2026-04-20T03:48:19.919719+00:00 | company_004 | Iris/iris_company_004 | +4.0 XP | level 1->1 | sessions 71 | mode=live_session
+- 2026-04-20T03:54:56.519675+00:00 | company_004 | Iris/iris_company_004 | +4.0 XP | level 1->1 | sessions 72 | mode=live_session

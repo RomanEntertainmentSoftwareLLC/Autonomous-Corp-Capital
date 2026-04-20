@@ -1,0 +1,89 @@
+V2 STEP 0 - COMMITTEE FALLBACK TRACE
+================================================================================
+latest_run: /opt/openclaw/.openclaw/workspace/state/live_runs/run_20260417_023209
+
+PACKET SUMMARY
+--------------------------------------------------------------------------------
+packet_rows: 20
+fallback_packets: 20
+fresh_committee_true: 0
+fresh_committee_false: 20
+
+packet_generation_mode counts:
+- fallback: 20
+
+fallback_reason counts:
+- no_actionable_candidates: 12
+- live_committee_failed:Command '['/usr/bin/python3', '/opt/openclaw/.openclaw/workspace/tools/pam.py', '--agent', 'lucian_company_001', 'Live committee consult for company_001. This is one bounded per-cycle company committee check, not per-symbol spam. Review the already-ranked candidate slate below and respond only for your role. Preserve role boundaries and do not replace the engine.\n\nCurrent ranked slate:\n1. PEPE-USD decision=BUY ranking_score=0.002551 confidence=0.5102 orion_bias=0.0 policy_signal_score=0.002551 ml_signal_score=None\n2. SHIB-USD decision=WAIT ranking_score=0.001621 confidence=0.3241 orion_bias=0.0 policy_signal_score=-0.001621 ml_signal_score=None\n3. BONK-USD decision=WAIT ranking_score=0.001562 confidence=0.3125 orion_bias=0.0 policy_signal_score=-0.001562 ml_signal_score=None\n\nNeed cycle guidance tied to the current ranked slate only.']' timed out after 25 seconds: 1
+- live_committee_failed:Command '['/usr/bin/python3', '/opt/openclaw/.openclaw/workspace/tools/pam.py', '--agent', 'lucian_company_002', 'Live committee consult for company_002. This is one bounded per-cycle company committee check, not per-symbol spam. Review the already-ranked candidate slate below and respond only for your role. Preserve role boundaries and do not replace the engine.\n\nCurrent ranked slate:\n1. PEPE-USD decision=BUY ranking_score=0.002168 confidence=0.2891 orion_bias=0.0 policy_signal_score=0.002168 ml_signal_score=None\n2. SHIB-USD decision=WAIT ranking_score=0.001378 confidence=0.1837 orion_bias=0.0 policy_signal_score=-0.001378 ml_signal_score=None\n3. BONK-USD decision=WAIT ranking_score=0.001328 confidence=0.1771 orion_bias=0.0 policy_signal_score=-0.001328 ml_signal_score=None\n\nNeed cycle guidance tied to the current ranked slate only.']' timed out after 25 seconds: 1
+- live_committee_failed:Command '['/usr/bin/python3', '/opt/openclaw/.openclaw/workspace/tools/pam.py', '--agent', 'bianca_company_003', 'Live committee consult for company_003. This is one bounded per-cycle company committee check, not per-symbol spam. Review the already-ranked candidate slate below and respond only for your role. Preserve role boundaries and do not replace the engine.\n\nCurrent ranked slate:\n1. PEPE-USD decision=BUY ranking_score=0.003061 confidence=1.0 orion_bias=0.0 policy_signal_score=0.003061 ml_signal_score=None\n2. SHIB-USD decision=WAIT ranking_score=0.001945 confidence=0.6483 orion_bias=0.0 policy_signal_score=-0.001945 ml_signal_score=None\n3. BONK-USD decision=WAIT ranking_score=0.001875 confidence=0.625 orion_bias=0.0 policy_signal_score=-0.001875 ml_signal_score=None\n\nNeed cycle guidance tied to the current ranked slate only.']' timed out after 25 seconds: 1
+- live_committee_failed:Command '['/usr/bin/python3', '/opt/openclaw/.openclaw/workspace/tools/pam.py', '--agent', 'iris_company_004', 'Live committee consult for company_004. This is one bounded per-cycle company committee check, not per-symbol spam. Review the already-ranked candidate slate below and respond only for your role. Preserve role boundaries and do not replace the engine.\n\nCurrent ranked slate:\n1. PEPE-USD decision=BUY ranking_score=0.002679 confidence=0.6696 orion_bias=0.0 policy_signal_score=0.002679 ml_signal_score=None\n2. SHIB-USD decision=WAIT ranking_score=0.001702 confidence=0.4254 orion_bias=0.0 policy_signal_score=-0.001702 ml_signal_score=None\n3. BONK-USD decision=WAIT ranking_score=0.001641 confidence=0.4102 orion_bias=0.0 policy_signal_score=-0.001641 ml_signal_score=None\n\nNeed cycle guidance tied to the current ranked slate only.']' timed out after 25 seconds: 1
+- live_committee_failed:Command '['/usr/bin/python3', '/opt/openclaw/.openclaw/workspace/tools/pam.py', '--agent', 'vera_company_001', 'Live committee consult for company_001. This is one bounded per-cycle company committee check, not per-symbol spam. Review the already-ranked candidate slate below and respond only for your role. Preserve role boundaries and do not replace the engine.\n\nCurrent ranked slate:\n1. PEPE-USD decision=HOLD_POSITION ranking_score=0.016551 confidence=0.5102 orion_bias=0.0 policy_signal_score=0.002551 ml_signal_score=None\n2. BTC-USD decision=WAIT ranking_score=0.014094 confidence=0.0188 orion_bias=0.0 policy_signal_score=-9.4e-05 ml_signal_score=None\n3. ADA-USD decision=BUY ranking_score=0.014059 confidence=0.0118 orion_bias=0.0 policy_signal_score=5.9e-05 ml_signal_score=None\n\nNeed cycle guidance tied to the current ranked slate only.']' timed out after 25 seconds: 1
+- live_committee_failed:Command '['/usr/bin/python3', '/opt/openclaw/.openclaw/workspace/tools/pam.py', '--agent', 'iris_company_002', 'Live committee consult for company_002. This is one bounded per-cycle company committee check, not per-symbol spam. Review the already-ranked candidate slate below and respond only for your role. Preserve role boundaries and do not replace the engine.\n\nCurrent ranked slate:\n1. PEPE-USD decision=HOLD_POSITION ranking_score=0.016168 confidence=0.2891 orion_bias=0.0 policy_signal_score=0.002168 ml_signal_score=None\n2. LINK-USD decision=WAIT ranking_score=0.000902 confidence=0.1203 orion_bias=0.0 policy_signal_score=-0.000902 ml_signal_score=None\n3. SOL-USD decision=BUY ranking_score=0.000388 confidence=0.0517 orion_bias=0.0 policy_signal_score=0.000388 ml_signal_score=None\n\nNeed cycle guidance tied to the current ranked slate only.']' timed out after 25 seconds: 1
+- live_committee_failed:Command '['/usr/bin/python3', '/opt/openclaw/.openclaw/workspace/tools/pam.py', '--agent', 'vera_company_003', 'Live committee consult for company_003. This is one bounded per-cycle company committee check, not per-symbol spam. Review the already-ranked candidate slate below and respond only for your role. Preserve role boundaries and do not replace the engine.\n\nCurrent ranked slate:\n1. PEPE-USD decision=HOLD_POSITION ranking_score=0.003061 confidence=1.0 orion_bias=0.0 policy_signal_score=0.003061 ml_signal_score=None\n2. LINK-USD decision=WAIT ranking_score=0.001274 confidence=0.4246 orion_bias=0.0 policy_signal_score=-0.001274 ml_signal_score=None\n3. SOL-USD decision=BUY ranking_score=0.000548 confidence=0.1826 orion_bias=0.0 policy_signal_score=0.000548 ml_signal_score=None\n\nNeed cycle guidance tied to the current ranked slate only.']' timed out after 25 seconds: 1
+- live_committee_failed:Command '['/usr/bin/python3', '/opt/openclaw/.openclaw/workspace/tools/pam.py', '--agent', 'bianca_company_004', 'Live committee consult for company_004. This is one bounded per-cycle company committee check, not per-symbol spam. Review the already-ranked candidate slate below and respond only for your role. Preserve role boundaries and do not replace the engine.\n\nCurrent ranked slate:\n1. PEPE-USD decision=HOLD_POSITION ranking_score=0.002679 confidence=0.6696 orion_bias=0.0 policy_signal_score=0.002679 ml_signal_score=None\n2. LINK-USD decision=WAIT ranking_score=0.001115 confidence=0.2787 orion_bias=0.0 policy_signal_score=-0.001115 ml_signal_score=None\n3. SOL-USD decision=BUY ranking_score=0.000479 confidence=0.1198 orion_bias=0.0 policy_signal_score=0.000479 ml_signal_score=None\n\nNeed cycle guidance tied to the current ranked slate only.']' timed out after 25 seconds: 1
+
+missing_input_flags counts:
+- Lucian: 20
+- Bianca: 20
+- Vera: 20
+- Iris: 20
+- Orion: 20
+
+live_roles_responded length counts:
+- 0 live roles: 20
+
+DECISION SUMMARY
+--------------------------------------------------------------------------------
+decision_rows: 12
+committee_mode counts:
+- : 12
+
+execution_state counts:
+- executed: 12
+
+decision counts:
+- BUY: 12
+
+company_id counts:
+- company_003: 4
+- company_004: 3
+- company_001: 3
+- company_002: 2
+
+SOURCE CODE GREP
+--------------------------------------------------------------------------------
+
+FILE: /opt/openclaw/.openclaw/workspace/tools/live_run.py
+1090:         "packet_generation_mode": "fallback",
+1096:         "missing_input_flags": missing,
+1099:         "fresh_committee": False,
+1100:         "fallback_reason": reason,
+1134:     missing_input_flags: List[str] = []
+1139:         committee_sources["_committee"] = {"mode": "skipped", "reason": "no_actionable_candidates"}
+1178:                 "packet_generation_mode": "cached_committee_reuse",
+1185:                 "missing_input_flags": list(recent_packet.get("missing_input_flags") or []),
+1188:                 "fresh_committee": False,
+1189:                 "live_roles_responded": [],
+1190:                 "fallback_reason": "reused_recent_committee_packet",
+1227:         missing_input_flags.append(role)
+1267:         "packet_generation_mode": "live_committee_sessions" if (live_roles or fallback_roles) else "fallback",
+1274:         "missing_input_flags": missing_input_flags,
+1277:         "fresh_committee": bool(live_roles or fallback_roles),
+1278:         "live_roles_responded": live_roles,
+1280:         "fallback_reason": committee_sources.get("_committee", {}).get("reason"),
+1303:             candidate["committee_packet_generation_mode"] = packet.get("packet_generation_mode")
+1304:             candidate["committee_fresh_participation"] = packet.get("fresh_committee", False)
+1474:             if committee_meta.get("reason") == "no_actionable_candidates":
+1518:         f"- no_actionable_candidates: {no_actionable_skip_count}",
+
+FILE: /opt/openclaw/.openclaw/workspace/tools/pam.py
+41: from tools.openclaw_agent_bridge import OpenClawAdapter
+76: def choose_adapter(agent_id: str, agent_info: Dict[str, Any]) -> OpenClawAdapter:
+77:  return OpenClawAdapter(agent_id)
+208:     adapter = choose_adapter(args.agent, agent_info)
+
+FILE: /opt/openclaw/.openclaw/workspace/tools/openclaw_agent_bridge.py
+209: class OpenClawAdapter:
+
+FILE: /opt/openclaw/.openclaw/workspace/scripts/live_run_systemd.py

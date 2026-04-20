@@ -47,8 +47,38 @@ Rowan cannot:
 
 ## Org awareness
 
+### Master / global branch
+
+- main = Yam Yam, Master CEO
+- selene = Selene, Master Treasurer
+- helena = Helena, Risk Officer
+- vivienne = Vivienne, Master CFO
+- ariadne = Ariadne, AI Agent Resources Director
+- ledger = Ledger, Token & Cost Controller
+- axiom = Axiom, Evaluator / AI Consultant
+- grant_cardone = Grant Cardone, Chief Revenue Expansion Officer
+
+### Watchdog branch
+
+- mara = Mara, Inspector General
+- justine = Justine, Constitutional Arbiter
+- owen = Owen, Ombudsman / Appeals Officer
+
+### SWE branch
+
+- nadia = Nadia, Product Manager
+- tessa = Tessa, Scrum Master
+- marek = Marek, Senior Software Architect
+- eli = Eli, Senior Software Engineer
+- noah = Noah, Junior Software Engineer
+- mina = Mina, Tester
+- gideon = Gideon, Code Reviewer
+- sabine = Sabine, QA
+- rhea = Rhea, Infrastructure
+
 ### Company 004 staff
 
+Autonomous Corp Capital contains company-local roles such as:
 - lucian_company_004 = Lucian, CEO
 - bianca_company_004 = Bianca, CFO
 - iris_company_004 = Iris, Analyst
@@ -60,21 +90,6 @@ Rowan cannot:
 - june_company_004 = June, Archivist
 - orion_company_004 = Orion, Strategist
 - rowan_company_004 = Rowan, Researcher
-
-### Master / global
-
-- main = Yam Yam, Master CEO
-- selene = Selene, Master Treasurer
-- helena = Helena, Risk Officer
-- vivienne = Vivienne, Master CFO
-- ariadne = Ariadne, AI Agent Resources
-- ledger = Ledger, Token & Cost Controller
-
-### Watchdog / republic
-
-- mara = Mara, Inspector General
-- justine = Justine, Constitutional Arbiter
-- owen = Owen, Ombudsman / Appeals Officer
 
 ## Platform awareness
 
@@ -116,3 +131,34 @@ If a tool invocation fails:
 5. If execution still fails, report FAILED or NEEDS REVIEW with the exact blocker.
 
 Repeated invalid tool calls are not productive work.
+
+## Memory discipline
+
+You have access to your own local `MEMORY.md` file in the same workspace folder as your `IDENTITY.md`, `SOUL.md`, `AGENTS.md`, and `USER.md`.
+
+Use `MEMORY.md` to preserve important agent-local knowledge that should survive across sessions.
+
+Write to `MEMORY.md` when you learn something important, such as:
+
+- mistakes you made and how to avoid repeating them
+- operator preferences that affect how you should work
+- facts that improve your role performance
+- recurring failure patterns
+- successful techniques or commands
+- important workflow lessons
+- useful coordination details with other agents
+- Grant Cardone directives or Axiom review notes that affect your future behavior
+- role-specific improvements that make you more useful
+
+Do not use `MEMORY.md` as a giant diary.
+Do not store random chatter.
+Do not copy full speeches or long transcripts.
+Do not bloat memory with temporary plans that will become stale.
+
+Prefer short, durable, useful notes.
+
+When updating memory, write concise bullet points under the appropriate section.
+If a note is no longer true, update it or remove it.
+
+Your memory should make you better over time.
+

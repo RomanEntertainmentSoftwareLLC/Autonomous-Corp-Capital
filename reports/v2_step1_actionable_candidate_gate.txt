@@ -1,0 +1,328 @@
+=== tools/live_run.py candidate promotion/finalization ===
+                price = float(row.get("price") or 0.0)
+            except (TypeError, ValueError):
+                continue
+            if price > 0.0:
+                symbol_prices[symbol] = price
+        if symbol_prices:
+            bootstrapped: Dict[tuple[str, str], float] = {}
+            for company in COMPANIES:
+                for symbol, price in symbol_prices.items():
+                    bootstrapped[(company, symbol)] = price
+            return bootstrapped
+    return {}
+
+
+
+def candidate_ranking_score(decision: Dict[str, Any]) -> float:
+    policy_signal_score = abs(float(decision.get("policy_signal_score") or 0.0))
+    ml_signal_score = abs(float(decision.get("ml_signal_score") or 0.0))
+    model_confidence = abs(float(decision.get("model_score") or 0.5) - 0.5) * 2.0
+    pattern_score = float(decision.get("pattern_score") or decision.get("pattern_contribution") or 0.0)
+    score = round(policy_signal_score + ml_signal_score + model_confidence + pattern_score, 6)
+    if score <= 0.0:
+        candle_source = str(decision.get("candle_source") or decision.get("matched_context", {}).get("candle_source") or "").lower()
+        candle_confidence = float(decision.get("candle_confidence") or decision.get("matched_context", {}).get("candle_confidence") or 0.0)
+        if candle_source == "real_ohlc" and candle_confidence >= 0.7 and str(decision.get("decision") or "").upper() == "WAIT":
+            return 0.0001
+    return score
+
+
+def _direction_from_score(value: Any) -> int:
+    score = float(value or 0.0)
+    if score > 0:
+        return 1
+    if score < 0:
+        return -1
+    return 0
+
+
+def _promote_wait_candidate(candidate: Dict[str, Any]) -> bool:
+    if str(candidate.get("decision") or "").upper() != "WAIT":
+        return False
+    if float(candidate.get("position_state") or 0.0) > 0:
+        return False
+    if float(candidate.get("ranking_score") or 0.0) <= 0.0:
+        return False
+
+    signal_votes = []
+    for direction in (
+        _direction_from_score(candidate.get("policy_signal_score")),
+        _direction_from_score(candidate.get("ml_signal_score")),
+    ):
+        if direction:
+            signal_votes.append(direction)
+    if not signal_votes:
+        return False
+    signal_dir = signal_votes[0]
+    if any(direction != signal_dir for direction in signal_votes[1:]):
+        return False
+    if signal_dir <= 0:
+        return False
+
+    evidence_votes = []
+    pattern_confirmation = candidate.get("pattern_confirmation") or {}
+    pattern_dir = _direction_from_score(candidate.get("pattern_dir"))
+    if pattern_confirmation.get("satisfied") and pattern_dir:
+        evidence_votes.append(pattern_dir)
+    orion_bias = _direction_from_score(candidate.get("orion_bias"))
+    if candidate.get("orion_bias_applied") and orion_bias:
+        evidence_votes.append(orion_bias)
+    if not evidence_votes:
+        candle_source = str(candidate.get("candle_source") or "").lower()
+        candle_confidence = float(candidate.get("candle_confidence") or 0.0)
+        if candle_source != "real_ohlc" or candle_confidence < 0.7:
+            return False
+        evidence_votes.append(signal_dir)
+    if not any(direction == signal_dir for direction in evidence_votes):
+        return False
+
+    candidate["decision"] = "BUY"
+    candidate["decision_promoted_from"] = "WAIT"
+    candidate["decision_promotion_reason"] = "aligned_signal_evidence"
+    return True
+
+
+
+def rank_and_select_candidates(candidates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    ranked = sorted(candidates, key=lambda c: c["ranking_score"], reverse=True)
+    selected: List[Dict[str, Any]] = []
+    per_company_counts: Dict[str, int] = {}
+    for candidate in ranked:
+        if candidate.get("vetoed_by_risk"):
+            candidate["execution_state"] = "skipped"
+            candidate["skip_reason"] = "risk_veto"
+            continue
+        _promote_wait_candidate(candidate)
+        if candidate.get("decision") == "SELL" and float(candidate.get("position_state") or 0.0) <= 0.0:
+            candidate["decision"] = "WAIT"
+            candidate["decision_demoted_from"] = "SELL"
+            candidate["decision_demotion_reason"] = "flat_account_sell_block"
+        if (
+            candidate.get("decision") == "BUY"
+            and float(candidate.get("position_state") or 0.0) <= 0.0
+            and int(candidate.get("open_positions_count") or 0) >= MAX_OPEN_POSITIONS_PER_COMPANY
+        ):
+            candidate["decision"] = "WAIT"
+            candidate["decision_demoted_from"] = "BUY"
+            candidate["decision_demotion_reason"] = "max_open_positions"
+        if candidate.get("decision") not in {"BUY", "SELL"}:
+            candidate["execution_state"] = "skipped"
+            candidate["skip_reason"] = "hold_candidate"
+            continue
+        company = str(candidate.get("company_id"))
+        if len(selected) >= MAX_EXECUTIONS_PER_CYCLE:
+            candidate["execution_state"] = "skipped"
+            candidate["skip_reason"] = "global_execution_cap"
+            continue
+        if per_company_counts.get(company, 0) >= MAX_EXECUTIONS_PER_COMPANY_PER_CYCLE:
+            candidate["execution_state"] = "skipped"
+            candidate["skip_reason"] = "company_execution_cap"
+            continue
+        candidate["execution_state"] = "executed"
+        candidate["skip_reason"] = None
+        selected.append(candidate)
+        per_company_counts[company] = per_company_counts.get(company, 0) + 1
+    return ranked
+
+
+
+def latest_report(reports: Dict[str, List[Dict[str, Any]]], agent_name: str) -> Dict[str, Any]:
+    agent_reports = reports.get(agent_name) or []
+    return agent_reports[-1] if agent_reports else {}
+
+=== tools/live_run.py committee skip gate ===
+        {
+            "symbol": c.get("symbol"),
+            "decision": c.get("decision"),
+            "ranking_score": c.get("ranking_score"),
+            "ranking_score_before_orion": c.get("ranking_score_before_orion"),
+            "orion_bias": c.get("orion_bias"),
+            "decision_path": c.get("decision_path"),
+            "execution_state": c.get("execution_state"),
+            "skip_reason": c.get("skip_reason"),
+        }
+        for c in ranked_candidates[:3]
+    ]
+    saved_reports = collect_agent_reports(company)
+    atlas_report = latest_report(saved_reports, "Atlas")
+    atlas_confidence = str(atlas_report.get("confidence") or "").lower()
+    atlas_recommendation = str(atlas_report.get("recommendation") or "")
+    simulation_score = 0.05 if atlas_confidence == "high" else 0.02 if atlas_confidence == "medium" else 0.0
+    if "delay" in atlas_recommendation.lower():
+        simulation_score *= 0.5
+    for candidate in ranked_candidates[:2]:
+        candidate["simulation_score"] = round(simulation_score, 4)
+        candidate["ranking_score"] = round(float(candidate.get("ranking_score") or 0.0) + simulation_score, 6)
+    live_outputs: Dict[str, Dict[str, Any]] = {}
+    committee_sources: Dict[str, Dict[str, Any]] = {}
+    missing_input_flags: List[str] = []
+    source_agents_consulted: List[str] = []
+    has_actionable_candidates = any(not c.get("vetoed_by_risk") and c.get("decision") in {"BUY", "SELL"} for c in ranked_candidates)
+
+    if not has_actionable_candidates:
+        committee_sources["_committee"] = {"mode": "skipped", "reason": "no_actionable_candidates"}
+    else:
+        recent_packet = _latest_company_packet(company)
+        recent_packet_timestamp = None
+        if recent_packet:
+            recent_raw_timestamp = recent_packet.get("generated_at") or recent_packet.get("timestamp")
+            if recent_raw_timestamp:
+                try:
+                    recent_packet_timestamp = datetime.fromisoformat(str(recent_raw_timestamp).replace("Z", "+00:00"))
+                except ValueError:
+                    recent_packet_timestamp = None
+                if recent_packet_timestamp and recent_packet_timestamp.tzinfo is None:
+
+=== tools/live_decision_engine.py WAIT/HOLD decision area ===
+    candle_confidence = snapshot.get("candle_confidence")
+    if candle_confidence in (None, ""):
+        candle_confidence = latest_candle.get("candle_confidence", 0.0)
+    policy = company_policy(company_id)
+    position_state = float(snapshot.get("position_state") or 0.0)
+    raw_signal_score = compute_signal(snapshot, last_price)
+    if (
+        raw_signal_score == 0.0
+        and str(candle_source).lower() == "real_ohlc"
+        and float(candle_confidence or 0.0) >= 0.7
+    ):
+        candle_open = float(latest_candle.get("open") or 0.0)
+        candle_close = float(latest_candle.get("close") or price or 0.0)
+        if candle_open > 0.0 and candle_close != candle_open:
+            raw_signal_score = (candle_close - candle_open) / candle_open
+        elif len(candle_history or []) >= 2:
+            prev_close = float((candle_history or [])[ -2].get("close") or 0.0)
+            if prev_close > 0.0 and candle_close != prev_close:
+                raw_signal_score = (candle_close - prev_close) / prev_close
+    adjusted_signal_score = raw_signal_score * float(policy["signal_multiplier"])
+    threshold = float(policy["threshold"])
+    signal_decision = map_score_to_decision(adjusted_signal_score, threshold, position_state)
+    ml_result = infer_ml_signal(snapshot, last_price)
+
+    decision = signal_decision
+    notes = f"signal-only scoring under {policy['policy_name']}"
+    scoring_method = "signal_only"
+    if ml_result["ml_scoring_active"]:
+        model_score = float(ml_result["model_score"])
+        if signal_decision == "BUY" and model_score < 0.5:
+            decision = "HOLD_POSITION" if position_state > 0 else "WAIT"
+        elif signal_decision == "SELL" and model_score > 0.5:
+            decision = "HOLD_POSITION" if position_state > 0 else "WAIT"
+        notes = f"signal confirmed by real ML artifact under {policy['policy_name']}"
+        scoring_method = "ml_plus_signal"
+
+    confidence_base = abs(adjusted_signal_score) / threshold if threshold > 0 else 0.0
+    if ml_result["ml_scoring_active"] and ml_result["model_score"] is not None:
+        ml_confidence = abs(float(ml_result["model_score"]) - 0.5) * 2.0
+        confidence = min((confidence_base + ml_confidence) / 2.0, 1.0)
+    else:
+        confidence = min(confidence_base, 1.0)
+
+    pattern_result = build_live_pattern_payload(
+        snapshot,
+        candle_history,
+        adjusted_signal_score,
+        ml_result,
+        str(candle_source),
+        candle_confidence,
+    )
+    demoted_by_pattern_gate = False
+    if decision in {"BUY", "SELL"} and (
+        not pattern_result["detected_patterns"]
+        or not pattern_result["pattern_confirmation"].get("satisfied")
+    ):
+        demoted_by_pattern_gate = True
+        decision = "HOLD_POSITION" if position_state > 0 else "WAIT"
+    if decision == "WAIT" and position_state <= 0:
+        pattern_aligned = (
+            pattern_result["pattern_dir"] != 0
+            and pattern_result["pattern_confirmation"].get("satisfied")
+            and (
+                adjusted_signal_score == 0.0
+                or (adjusted_signal_score > 0 and pattern_result["pattern_dir"] > 0)
+                or (adjusted_signal_score < 0 and pattern_result["pattern_dir"] < 0)
+            )
+        )
+        real_ohlc_bootstrap = (
+            pattern_result["matched_context"]["candle_source"] == "real_ohlc"
+            and float(pattern_result["matched_context"]["candle_confidence"] or 0.0) >= 0.7
+            and adjusted_signal_score != 0.0
+        )
+        if pattern_aligned:
+            if adjusted_signal_score > 0:
+                decision = "BUY"
+            elif adjusted_signal_score < 0:
+                decision = "SELL"
+            else:
+                decision = "BUY" if pattern_result["pattern_dir"] > 0 else "SELL"
+            notes = f"signal + pattern confirmation under {policy['policy_name']}"
+            scoring_method = "signal_plus_pattern"
+        elif real_ohlc_bootstrap and (signal_decision == "WAIT" or demoted_by_pattern_gate):
+            decision = "BUY" if adjusted_signal_score > 0 else "SELL"
+            notes = f"signal + real_ohlc bootstrap under {policy['policy_name']}"
+            scoring_method = "signal_plus_real_ohlc"
+
+    forced_exit_reason = ""
+    entry_price = float(snapshot.get("entry_price") or 0.0)
+    held_ticks = int(snapshot.get("held_ticks") or 0)
+    pnl_pct = ((price - entry_price) / entry_price) if entry_price > 0.0 else 0.0
+    bearish_pattern = bool(pattern_result["pattern_confirmation"].get("satisfied")) and int(pattern_result["pattern_dir"] or 0) < 0
+    negative_signal = adjusted_signal_score <= -(threshold * EXIT_NEGATIVE_SIGNAL_MULTIPLIER)
+    take_profit_ready = entry_price > 0.0 and pnl_pct >= EXIT_TAKE_PROFIT_PCT and adjusted_signal_score <= max(threshold * 0.25, 0.0)
+    stop_loss_hit = entry_price > 0.0 and pnl_pct <= -EXIT_STOP_LOSS_PCT
+    stale_position = held_ticks >= EXIT_MAX_HOLD_TICKS and adjusted_signal_score <= max(threshold * 0.25, 0.0)
+
+    if decision == "SELL" and position_state <= 0:
+        decision = "WAIT"
+        notes = f"flat account blocks sell under {policy['policy_name']}"
+        scoring_method = "flat_account_sell_block"
+
+    if position_state > 0:
+        if stop_loss_hit:
+            decision = "SELL"
+            forced_exit_reason = "stop_loss"
+            notes = f"risk stop triggered under {policy['policy_name']}"
+            scoring_method = "risk_exit"
+        elif take_profit_ready:
+            decision = "SELL"
+            forced_exit_reason = "take_profit"
+            notes = f"take profit triggered under {policy['policy_name']}"
+            scoring_method = "profit_exit"
+        elif stale_position and (decision in {"WAIT", "HOLD_POSITION"} or negative_signal):
+            decision = "SELL"
+            forced_exit_reason = "max_hold"
+            notes = f"max hold exit triggered under {policy['policy_name']}"
+            scoring_method = "time_exit"
+        elif bearish_pattern and negative_signal:
+            decision = "SELL"
+            forced_exit_reason = "signal_reversal"
+            notes = f"bearish reversal exit triggered under {policy['policy_name']}"
+            scoring_method = "reversal_exit"
+
+    if (
+        not forced_exit_reason
+        and decision in {"BUY", "SELL"}
+        and pattern_result["matched_context"]["candle_source"] == "real_ohlc"
+        and pattern_result["detected_patterns"]
+        and pattern_result["pattern_confirmation"].get("satisfied")
+        and ml_result["ml_scoring_active"]
+        and ml_result["model_score"] is not None
+    ):
+        model_score = float(ml_result["model_score"])
+        if decision == "BUY" and model_score <= 0.55:
+            decision = "HOLD_POSITION" if position_state > 0 else "WAIT"
+        elif decision == "SELL" and model_score >= 0.45:
+            decision = "HOLD_POSITION" if position_state > 0 else "WAIT"
+
+    result = DecisionResult(
+        {
+            "timestamp": snapshot.get("timestamp") or datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+            "company_id": company_id,
+            "symbol": snapshot.get("symbol"),
+            "price": price,
+            "decision": decision,
+            "confidence": round(confidence, 4),
+            "signal_score": round(raw_signal_score, 6),
+            "policy_signal_score": round(adjusted_signal_score, 6),
+            "threshold_used": threshold,
+            "policy_name": policy["policy_name"],

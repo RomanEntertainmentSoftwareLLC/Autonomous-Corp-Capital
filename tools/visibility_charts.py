@@ -17,7 +17,7 @@ import math
 import time
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
 
@@ -183,17 +183,25 @@ def series_by_company(points: List[PortfolioPoint]) -> Dict[str, List[PortfolioP
     return out
 
 
-def build_system_series(points: List[PortfolioPoint], companies: List[str]) -> List[Tuple[datetime, float, float, float]]:
+def build_system_series(
+    points: List[PortfolioPoint],
+    companies: List[str],
+    starting_allocations: Dict[str, float] | None = None,
+) -> List[Tuple[datetime, float, float, float]]:
     if not points:
         return []
 
+    starting_allocations = starting_allocations or {}
     grouped: Dict[datetime, List[PortfolioPoint]] = defaultdict(list)
     for p in points:
         grouped[p.timestamp].append(p)
 
-    last_equity: Dict[str, float] = {}
-    last_realized: Dict[str, float] = {}
-    last_unrealized: Dict[str, float] = {}
+    # Initialize missing companies at their starting allocation. This is display
+    # imputation only so partial portfolio coverage does not look like a $25 loss
+    # while a run is still warming up.
+    last_equity: Dict[str, float] = {c: safe_float(starting_allocations.get(c), 0.0) for c in companies}
+    last_realized: Dict[str, float] = {c: 0.0 for c in companies}
+    last_unrealized: Dict[str, float] = {c: 0.0 for c in companies}
     series: List[Tuple[datetime, float, float, float]] = []
 
     for ts in sorted(grouped.keys()):
@@ -204,16 +212,15 @@ def build_system_series(points: List[PortfolioPoint], companies: List[str]) -> L
             last_realized[p.company] = p.realized_pnl
             last_unrealized[p.company] = p.unrealized_pnl
 
-        if len(last_equity) < len(companies):
+        if not last_equity:
             continue
 
-        total_equity = sum(last_equity[c] for c in companies)
+        total_equity = sum(last_equity.get(c, 0.0) for c in companies)
         total_realized = sum(last_realized.get(c, 0.0) for c in companies)
         total_unrealized = sum(last_unrealized.get(c, 0.0) for c in companies)
         series.append((ts, total_equity, total_realized, total_unrealized))
 
     return series
-
 
 def normalize_company_curve(points: List[PortfolioPoint]) -> List[Tuple[datetime, float]]:
     if not points:
@@ -249,11 +256,178 @@ def compact_time_axis(ax: plt.Axes) -> None:
     ax.xaxis.set_major_formatter(formatter)
 
 
+
+
+def load_allocation_state(run_dir: Path) -> Dict[str, Any]:
+    return load_json(run_dir / "artifacts" / "allocation_state.json", {})
+
+
+def load_target_state(run_dir: Path) -> Dict[str, Any]:
+    return load_json(run_dir / "artifacts" / "target_state.json", {})
+
+
+def allocation_company_order(run_dir: Path, points: Iterable[PortfolioPoint]) -> List[str]:
+    allocation = load_allocation_state(run_dir)
+    per_company = allocation.get("per_company_allocation") or {}
+    preferred = ["company_001", "company_002", "company_003", "company_004"]
+    if isinstance(per_company, dict) and per_company:
+        ordered = [c for c in preferred if c in per_company]
+        for c in sorted(per_company):
+            if c not in ordered:
+                ordered.append(c)
+        return ordered[:4]
+    return company_order(points)
+
+
+def starting_allocations_by_company(run_dir: Path) -> Dict[str, float]:
+    allocation = load_allocation_state(run_dir)
+    per_company = allocation.get("per_company_allocation") or {}
+    if not isinstance(per_company, dict):
+        return {}
+    return {str(k): safe_float(v, 0.0) for k, v in per_company.items()}
+
+
+def build_chart_target_state(run_dir: Path, system_baseline: float, system_equity: List[float]) -> Dict[str, float | str]:
+    """Build target-aware display scaling for charts.
+
+    Prefer Target Engine's target_state.json. Fall back to calculated targets only
+    when the target file does not exist yet. This keeps fractional-penny changes
+    visually flat against the real objective instead of autoscaling around dust.
+    """
+    target_state = load_target_state(run_dir)
+    chart = target_state.get("chart") if isinstance(target_state, dict) else None
+
+    if isinstance(chart, dict) and chart.get("baseline_equity") is not None:
+        baseline = safe_float(chart.get("baseline_equity"), system_baseline)
+        floor_target = safe_float(chart.get("floor_target_equity"), baseline * 1.04)
+        goal_target = safe_float(chart.get("goal_target_equity"), baseline * 1.20)
+        stretch_target = safe_float(chart.get("stretch_target_equity"), baseline * 2.00)
+        grant_10x_target = safe_float(chart.get("grant_10x_target_equity"), baseline * 10.00)
+        target_equity = safe_float(chart.get("ceiling_target_equity"), goal_target)
+        target_name = str(chart.get("ceiling_target_name") or "goal")
+    else:
+        allocation = load_allocation_state(run_dir)
+        deployable = safe_float(allocation.get("deployable_amount"), 0.0)
+        baseline = deployable if deployable > 0 else system_baseline
+        if baseline <= 0:
+            baseline = 100.0
+        floor_target = baseline * 1.04
+        goal_target = baseline * 1.20
+        stretch_target = baseline * 2.00
+        grant_10x_target = baseline * 10.00
+        target_equity = goal_target
+        target_name = "goal"
+
+    actual_values = [safe_float(v) for v in system_equity] or [baseline]
+    min_actual = min(actual_values + [baseline])
+    max_actual = max(actual_values + [baseline])
+
+    target_span = max(abs(target_equity - baseline), 0.01)
+    padding = max(target_span * 0.05, 0.25)
+
+    y_min = min(min_actual, baseline) - padding
+    y_max = max(max_actual, target_equity) + padding
+    if y_max <= y_min:
+        y_max = y_min + max(target_span, 0.50)
+
+    return {
+        "chart_baseline": baseline,
+        "floor_target_equity": floor_target,
+        "goal_target_equity": goal_target,
+        "stretch_target_equity": stretch_target,
+        "grant_10x_target_equity": grant_10x_target,
+        "target_equity": target_equity,
+        "target_name": target_name,
+        "target_profit": target_equity - baseline,
+        "y_min": y_min,
+        "y_max": y_max,
+    }
+
 def atomic_save(fig: plt.Figure, output: Path) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     tmp = output.with_name(f"{output.stem}.tmp{output.suffix}")
     fig.savefig(tmp, dpi=160, facecolor=BG, edgecolor=BG, format="png")
     tmp.replace(output)
+
+
+def render_waiting_placeholder(output: Path, run_dir: Path, reason: str) -> Dict[str, Any]:
+    """Render a non-crashing placeholder chart while a new run has no portfolio history yet.
+
+    Early in a paper/live run, allocation_state.json can exist before
+    portfolio_state.jsonl appears. Watch mode should keep running instead of
+    crashing, because the chart file is often opened before the first
+    portfolio snapshot is written.
+    """
+    allocation = load_allocation_state(run_dir)
+    deployable = safe_float(allocation.get("deployable_amount"), 0.0)
+    baseline = deployable if deployable > 0 else safe_float(allocation.get("parent_total"), 0.0)
+    if baseline <= 0:
+        baseline = 100.0
+
+    chart_target = build_chart_target_state(run_dir, baseline, [baseline])
+    now = datetime.now(timezone.utc)
+    xs = [now, now + timedelta(seconds=1)]
+    ys = [baseline, baseline]
+
+    fig = plt.figure(figsize=(14, 9), facecolor=BG)
+    gs = fig.add_gridspec(3, 1, height_ratios=[2.4, 1.5, 1.1], hspace=0.18)
+    ax_main = fig.add_subplot(gs[0])
+    ax_companies = fig.add_subplot(gs[1], sharex=ax_main)
+    ax_pnl = fig.add_subplot(gs[2], sharex=ax_main)
+
+    for ax in (ax_main, ax_companies, ax_pnl):
+        style_axes(ax)
+        compact_time_axis(ax)
+
+    ax_main.plot(xs, ys, linewidth=2.5, color=MUTED)
+    ax_main.axhline(baseline, color=MUTED, linewidth=1.0, linestyle="--", alpha=0.8)
+    ax_main.axhline(float(chart_target["floor_target_equity"]), color=MUTED, linewidth=0.9, linestyle=":", alpha=0.65)
+    ax_main.axhline(float(chart_target["goal_target_equity"]), color=ROBINHOOD_GREEN, linewidth=1.0, linestyle="--", alpha=0.75)
+    ax_main.set_ylim(float(chart_target["y_min"]), float(chart_target["y_max"]))
+    ax_main.yaxis.set_major_formatter(FuncFormatter(money_fmt))
+    ax_main.set_ylabel("System equity")
+    ax_main.set_title("ACC Paper Trading — Waiting for Portfolio History")
+    ax_main.text(0.01, 0.97, f"${baseline:,.2f}", transform=ax_main.transAxes, va="top", ha="left", color=TEXT, fontsize=22, fontweight="bold")
+    ax_main.text(0.01, 0.88, "Waiting for first portfolio snapshot...", transform=ax_main.transAxes, va="top", ha="left", color=MUTED, fontsize=12, fontweight="bold")
+    ax_main.text(0.99, 0.97, run_dir.name, transform=ax_main.transAxes, va="top", ha="right", color=MUTED, fontsize=10)
+
+    ax_companies.axhline(0.0, color=MUTED, linewidth=1.0, linestyle="--", alpha=0.8)
+    target_return_pct = ((float(chart_target["target_equity"]) / baseline) - 1.0) * 100.0 if baseline else 0.0
+    ax_companies.set_ylim(-0.25, max(target_return_pct, 0.25) + 0.25)
+    ax_companies.set_ylabel("Company return")
+    ax_companies.yaxis.set_major_formatter(FuncFormatter(percent_fmt))
+    ax_companies.set_title("Company Equity Curves — Waiting")
+    ax_companies.text(0.01, 0.80, "No company portfolio rows yet.", transform=ax_companies.transAxes, color=MUTED, fontsize=11)
+
+    ax_pnl.axhline(0.0, color=MUTED, linewidth=1.0, linestyle="--", alpha=0.8)
+    ax_pnl.set_ylim(-0.25, max(float(chart_target["target_profit"]), 0.25) + 0.25)
+    ax_pnl.yaxis.set_major_formatter(FuncFormatter(money_fmt))
+    ax_pnl.set_ylabel("P/L")
+    ax_pnl.set_title("Realized vs Unrealized — Waiting")
+    ax_pnl.text(0.01, 0.75, str(reason), transform=ax_pnl.transAxes, color=MUTED, fontsize=9)
+
+    plt.setp(ax_main.get_xticklabels(), visible=False)
+    plt.setp(ax_companies.get_xticklabels(), visible=False)
+    ax_pnl.set_xlabel("Time")
+
+    atomic_save(fig, output)
+    plt.close(fig)
+
+    return {
+        "output": str(output),
+        "run_dir": str(run_dir),
+        "waiting": True,
+        "reason": str(reason),
+        "points": 0,
+        "companies": [],
+        "system_baseline": baseline,
+        "total_equity": baseline,
+        "total_realized_pnl": 0.0,
+        "total_unrealized_pnl": 0.0,
+        "total_system_pnl": 0.0,
+        "total_system_pct": 0.0,
+        "chart_target": chart_target,
+    }
 
 
 def render(output: Path, run_dir: Path | None = None, max_points: int = 1200) -> Dict[str, Any]:
@@ -265,10 +439,11 @@ def render(output: Path, run_dir: Path | None = None, max_points: int = 1200) ->
     if not points:
         raise FileNotFoundError(f"No portfolio history found at {run_dir / 'artifacts' / 'portfolio_state.jsonl'}")
 
-    companies = company_order(points)
+    companies = allocation_company_order(run_dir, points)
     company_points = series_by_company(points)
-    companies = [c for c in companies if c in company_points]
-    system_series = build_system_series(points, companies)
+    starting_allocations = starting_allocations_by_company(run_dir)
+    visible_companies = [c for c in companies if c in company_points]
+    system_series = build_system_series(points, companies, starting_allocations)
 
     # Downsample lightly if the run gets long.
     def thin[T](items: List[T]) -> List[T]:
@@ -287,11 +462,13 @@ def render(output: Path, run_dir: Path | None = None, max_points: int = 1200) ->
     system_unrealized = [up for _ts, _eq, _rp, up in system_series]
 
     system_baseline = system_equity[0] if system_equity else 0.0
+    chart_target = build_chart_target_state(run_dir, system_baseline, system_equity)
+    chart_baseline = float(chart_target["chart_baseline"])
     current_equity = system_equity[-1] if system_equity else 0.0
     current_realized = system_realized[-1] if system_realized else 0.0
     current_unrealized = system_unrealized[-1] if system_unrealized else 0.0
-    total_pnl = current_realized + current_unrealized
-    total_pct = ((current_equity / system_baseline) - 1.0) * 100.0 if system_baseline else 0.0
+    total_pnl = current_equity - chart_baseline
+    total_pct = ((current_equity / chart_baseline) - 1.0) * 100.0 if chart_baseline else 0.0
 
     fig = plt.figure(figsize=(14, 9), facecolor=BG)
     gs = fig.add_gridspec(3, 1, height_ratios=[2.4, 1.5, 1.1], hspace=0.18)
@@ -304,13 +481,16 @@ def render(output: Path, run_dir: Path | None = None, max_points: int = 1200) ->
         compact_time_axis(ax)
 
     # Main chart: total equity curve.
-    line_color = ROBINHOOD_GREEN if current_equity >= system_baseline else ROBINHOOD_RED
+    line_color = ROBINHOOD_GREEN if current_equity >= chart_baseline else ROBINHOOD_RED
     ax_main.plot(system_times, system_equity, linewidth=2.5, color=line_color)
-    ax_main.fill_between(system_times, system_equity, [system_baseline] * len(system_times), color=line_color, alpha=0.05)
-    ax_main.axhline(system_baseline, color=MUTED, linewidth=1.0, linestyle="--", alpha=0.8)
+    ax_main.fill_between(system_times, system_equity, [chart_baseline] * len(system_times), color=line_color, alpha=0.05)
+    ax_main.axhline(chart_baseline, color=MUTED, linewidth=1.0, linestyle="--", alpha=0.8)
+    ax_main.axhline(float(chart_target["floor_target_equity"]), color=MUTED, linewidth=0.9, linestyle=":", alpha=0.65)
+    ax_main.axhline(float(chart_target["goal_target_equity"]), color=ROBINHOOD_GREEN, linewidth=1.0, linestyle="--", alpha=0.75)
+    ax_main.set_ylim(float(chart_target["y_min"]), float(chart_target["y_max"]))
     ax_main.yaxis.set_major_formatter(FuncFormatter(money_fmt))
     ax_main.set_ylabel("System equity")
-    ax_main.set_title("ACC Paper Trading — Live Portfolio")
+    ax_main.set_title("ACC Paper Trading — Live Portfolio Target Scale")
 
     header_left = f"${current_equity:,.2f}"
     pnl_sign = "+" if total_pnl >= 0 else ""
@@ -320,16 +500,25 @@ def render(output: Path, run_dir: Path | None = None, max_points: int = 1200) ->
     ax_main.text(0.99, 0.97, run_dir.name, transform=ax_main.transAxes, va="top", ha="right", color=MUTED, fontsize=10)
 
     # Company comparison chart: normalized return curves.
-    for idx, company in enumerate(companies):
+    company_return_values: List[float] = []
+    for idx, company in enumerate(visible_companies):
         normalized = normalize_company_curve(company_points[company])
         if not normalized:
             continue
         xs = [ts for ts, _ in normalized]
         ys = [ret for _ts, ret in normalized]
+        company_return_values.extend(ys)
         color = COMPANY_COLORS[idx % len(COMPANY_COLORS)]
         ax_companies.plot(xs, ys, linewidth=1.8, color=color, label=company)
         ax_companies.text(xs[-1], ys[-1], f" {company}", color=color, va="center", fontsize=9)
     ax_companies.axhline(0.0, color=MUTED, linewidth=1.0, linestyle="--", alpha=0.8)
+    target_return_pct = ((float(chart_target["target_equity"]) / chart_baseline) - 1.0) * 100.0 if chart_baseline else 0.0
+    if company_return_values:
+        ret_padding = max(abs(target_return_pct) * 0.05, 0.25)
+        ax_companies.set_ylim(
+            min(min(company_return_values), 0.0) - ret_padding,
+            max(max(company_return_values), target_return_pct) + ret_padding,
+        )
     ax_companies.set_ylabel("Company return")
     ax_companies.yaxis.set_major_formatter(FuncFormatter(percent_fmt))
     ax_companies.set_title("Company Equity Curves")
@@ -340,6 +529,13 @@ def render(output: Path, run_dir: Path | None = None, max_points: int = 1200) ->
     ax_pnl.fill_between(system_times, system_realized, color="#4CAF50", alpha=0.08)
     ax_pnl.fill_between(system_times, system_unrealized, color="#FF9800", alpha=0.08)
     ax_pnl.axhline(0.0, color=MUTED, linewidth=1.0, linestyle="--", alpha=0.8)
+    pnl_values = system_realized + system_unrealized + [0.0]
+    target_profit = float(chart_target["target_profit"])
+    pnl_padding = max(abs(target_profit) * 0.05, 0.25)
+    ax_pnl.set_ylim(
+        min(min(pnl_values), 0.0) - pnl_padding,
+        max(max(pnl_values), target_profit) + pnl_padding,
+    )
     ax_pnl.yaxis.set_major_formatter(FuncFormatter(money_fmt))
     ax_pnl.set_ylabel("P/L")
     ax_pnl.set_title("Realized vs Unrealized")
@@ -353,7 +549,7 @@ def render(output: Path, run_dir: Path | None = None, max_points: int = 1200) ->
     plt.close(fig)
 
     latest_company_snapshots = []
-    for company in companies:
+    for company in visible_companies:
         pts = company_points[company]
         if not pts:
             continue
@@ -376,12 +572,15 @@ def render(output: Path, run_dir: Path | None = None, max_points: int = 1200) ->
         "run_dir": str(run_dir),
         "points": len(points),
         "companies": latest_company_snapshots,
-        "system_baseline": system_baseline,
+        "visible_companies": visible_companies,
+        "expected_companies": companies,
+        "system_baseline": chart_baseline,
         "total_equity": current_equity,
         "total_realized_pnl": current_realized,
         "total_unrealized_pnl": current_unrealized,
         "total_system_pnl": total_pnl,
         "total_system_pct": total_pct,
+        "chart_target": chart_target,
     }
 
 
@@ -406,7 +605,7 @@ def compact_summary(summary: Dict[str, Any]) -> Dict[str, Any]:
             "pct": round(float(item.get("pct_return", 0.0)), 4),
         }
 
-    return {
+    payload = {
         "run_id": Path(summary["run_dir"]).name,
         "points": summary.get("points"),
         "system": {
@@ -420,6 +619,12 @@ def compact_summary(summary: Dict[str, Any]) -> Dict[str, Any]:
         "companies": companies,
     }
 
+    if summary.get("waiting"):
+        payload["waiting"] = True
+        payload["reason"] = str(summary.get("reason", "waiting"))[:240]
+
+    return payload
+
 def main() -> None:
     args = parse_args()
     last_printed = None
@@ -427,7 +632,20 @@ def main() -> None:
     if args.watch:
         try:
             while True:
-                summary = render(args.output, run_dir=args.run_dir, max_points=args.max_points)
+                try:
+                    summary = render(args.output, run_dir=args.run_dir, max_points=args.max_points)
+                except FileNotFoundError as exc:
+                    run_dir = args.run_dir or latest_run_dir()
+                    if run_dir is None:
+                        compact = {"waiting": True, "reason": str(exc), "run_id": None}
+                        payload = json.dumps(compact, separators=(",", ":"))
+                        if payload != last_printed:
+                            print(payload)
+                            last_printed = payload
+                        time.sleep(max(0.5, args.interval))
+                        continue
+                    summary = render_waiting_placeholder(args.output, run_dir, str(exc))
+
                 compact = compact_summary(summary)
                 payload = json.dumps(compact, separators=(",", ":"))
 

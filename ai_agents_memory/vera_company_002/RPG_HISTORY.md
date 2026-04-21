@@ -22,3 +22,5 @@
 - 2026-04-16T04:03:06.368373+00:00 | company_002 | Vera/vera_company_002 | +4.0 XP | level 1->2 | sessions 71 | mode=live_session
 - 2026-04-20T03:48:19.919719+00:00 | company_002 | Vera/vera_company_002 | +4.0 XP | level 2->2 | sessions 72 | mode=live_session
 - 2026-04-20T03:54:56.519675+00:00 | company_002 | Vera/vera_company_002 | +4.0 XP | level 2->2 | sessions 73 | mode=live_session
+- 2026-04-21T02:29:22.412095+00:00 | company_002 | Vera/vera_company_002 | +3.0 XP | level 2->2 | sessions 74 | mode=live_session
+- 2026-04-21T02:36:20.791237+00:00 | company_002 | Vera/vera_company_002 | +4.0 XP | level 2->2 | sessions 75 | mode=live_session

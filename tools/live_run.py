@@ -38,7 +38,7 @@ LIVE_RUN_BACKOFF_BASE = int(os.getenv("LIVE_RUN_BACKOFF_SECONDS", "60"))
 COMPANIES = ["company_001", "company_002", "company_003", "company_004"]
 MAX_EXECUTIONS_PER_CYCLE = 6
 MAX_EXECUTIONS_PER_COMPANY_PER_CYCLE = 2
-LIVE_COMMITTEE_TIMEOUT_SECONDS = int(os.getenv("LIVE_COMMITTEE_TIMEOUT_SECONDS", "180"))
+LIVE_COMMITTEE_TIMEOUT_SECONDS = int(os.getenv("LIVE_COMMITTEE_TIMEOUT_SECONDS", "25"))
 LIVE_COMMITTEE_ROLES = ["Lucian", "Bianca", "Vera", "Iris", "Orion"]
 COMMITTEE_REUSE_WINDOW_SECONDS = int(os.environ.get("COMMITTEE_REUSE_WINDOW_SECONDS", "600"))
 BRIDGE_CALL_BUDGET_PER_RUN = int(os.environ.get("BRIDGE_CALL_BUDGET_PER_RUN", "120"))
@@ -1826,6 +1826,67 @@ def update_evolution_states_from_warehouse() -> None:
 
 
 
+def run_yam_yam_post_run_review(run_id: str) -> None:
+    """Optionally run Yam Yam's post-run Master CEO review.
+
+    This hook is non-fatal by design. A failed executive review should never
+    corrupt or crash live-run finalization.
+    """
+    if os.getenv("ENABLE_YAM_YAM_POST_RUN_REVIEW", "0") != "1":
+        return
+
+    run_dir = run_directory(run_id)
+    artifacts = run_dir / "artifacts"
+    artifacts.mkdir(parents=True, exist_ok=True)
+    timeout = int(os.getenv("YAM_YAM_REVIEW_TIMEOUT_SECONDS", "420"))
+    cmd = [
+        sys.executable,
+        str(ROOT / "tools" / "yam_yam_executive_review.py"),
+        "--run-id",
+        run_id,
+        "--timeout",
+        str(timeout),
+    ]
+
+    try:
+        result = subprocess.run(
+            cmd,
+            cwd=str(ROOT),
+            text=True,
+            capture_output=True,
+            timeout=timeout + 30,
+        )
+        (artifacts / "yam_yam_review_hook.log").write_text(
+            json.dumps(
+                {
+                    "timestamp": _utcnow().isoformat(),
+                    "enabled": True,
+                    "cmd": cmd,
+                    "returncode": result.returncode,
+                    "stdout": result.stdout,
+                    "stderr": result.stderr,
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+    except Exception as exc:
+        (artifacts / "yam_yam_review_hook_error.log").write_text(
+            json.dumps(
+                {
+                    "timestamp": _utcnow().isoformat(),
+                    "enabled": True,
+                    "cmd": cmd,
+                    "error": str(exc),
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+
 def _pid_is_alive(pid: int) -> bool:
     try:
         os.kill(pid, 0)
@@ -2203,6 +2264,7 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
             meta["status"] = "completed"
         meta_path.write_text(json.dumps(meta, indent=2))
     write_daily_digest(run_id)
+    run_yam_yam_post_run_review(run_id)
     update_evolution_states_from_warehouse()
     prune_old_run_artifacts(run_id)
     current = None

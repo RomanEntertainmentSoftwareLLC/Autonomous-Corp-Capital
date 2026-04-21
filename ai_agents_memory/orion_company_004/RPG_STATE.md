@@ -2,22 +2,22 @@
 
 | Field | Value |
 |-------|-------|
-| xp | 99.25 |
-| level | 1 |
+| xp | 107.25 |
+| level | 2 |
 | title | Initiate |
-| sessions | 72 |
-| current_level_threshold | 0 |
-| next_level_threshold | 100 |
-| xp_to_next_level | 100 |
+| sessions | 74 |
+| current_level_threshold | 100 |
+| next_level_threshold | 250 |
+| xp_to_next_level | 150 |
 | speed | 17 |
-| accuracy | 19 |
+| accuracy | 21 |
 | reliability | 12 |
 | judgment | 0 |
-| consistency | 33 |
-| usefulness | 66 |
+| consistency | 35 |
+| usefulness | 71 |
 | cost_efficiency | 8 |
-| evidence_quality | 64 |
+| evidence_quality | 68 |
 | duplication_penalty | 0 |
 | waste_penalty | 19.5 |
 | fake_productivity_penalty | 0 |
-| intelligence | 27.96 |
+| intelligence | 29.93 |

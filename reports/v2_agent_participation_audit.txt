@@ -1,0 +1,218 @@
+ACC V2 AGENT PARTICIPATION / ZERO-XP AUDIT
+================================================================================
+registered_agents: 64
+rpg_state_found: 61
+recent_runs_scanned: 20
+
+SUMMARY
+--------------------------------------------------------------------------------
+missing_rpg_state: 3
+zero_xp_agents: 41
+zero_session_agents: 41
+never_seen_in_bridge_recent_runs: 41
+never_seen_in_ledger_recent_runs: 41
+active_in_bridge_or_ledger_recent_runs: 20
+likely_unwired_or_untriggered: 44
+
+ZERO XP AGENTS
+--------------------------------------------------------------------------------
+- ariadne | sessions=0.0 bridge=0 ledger=0
+- atlas_company_001 | sessions=0.0 bridge=0 ledger=0
+- atlas_company_002 | sessions=0.0 bridge=0 ledger=0
+- atlas_company_003 | sessions=0.0 bridge=0 ledger=0
+- atlas_company_004 | sessions=0.0 bridge=0 ledger=0
+- bob_company_001 | sessions=0.0 bridge=0 ledger=0
+- bob_company_002 | sessions=0.0 bridge=0 ledger=0
+- bob_company_003 | sessions=0.0 bridge=0 ledger=0
+- bob_company_004 | sessions=0.0 bridge=0 ledger=0
+- eli | sessions=0.0 bridge=0 ledger=0
+- gideon | sessions=0.0 bridge=0 ledger=0
+- helena | sessions=0.0 bridge=0 ledger=0
+- june_company_001 | sessions=0.0 bridge=0 ledger=0
+- june_company_002 | sessions=0.0 bridge=0 ledger=0
+- june_company_003 | sessions=0.0 bridge=0 ledger=0
+- june_company_004 | sessions=0.0 bridge=0 ledger=0
+- justine | sessions=0.0 bridge=0 ledger=0
+- ledger | sessions=0.0 bridge=0 ledger=0
+- mara | sessions=0.0 bridge=0 ledger=0
+- marek | sessions=0.0 bridge=0 ledger=0
+- mina | sessions=0.0 bridge=0 ledger=0
+- nadia | sessions=0.0 bridge=0 ledger=0
+- noah | sessions=0.0 bridge=0 ledger=0
+- owen | sessions=0.0 bridge=0 ledger=0
+- pam_company_001 | sessions=0.0 bridge=0 ledger=0
+- pam_company_002 | sessions=0.0 bridge=0 ledger=0
+- pam_company_003 | sessions=0.0 bridge=0 ledger=0
+- pam_company_004 | sessions=0.0 bridge=0 ledger=0
+- rhea | sessions=0.0 bridge=0 ledger=0
+- rowan_company_001 | sessions=0.0 bridge=0 ledger=0
+- rowan_company_002 | sessions=0.0 bridge=0 ledger=0
+- rowan_company_003 | sessions=0.0 bridge=0 ledger=0
+- rowan_company_004 | sessions=0.0 bridge=0 ledger=0
+- sabine | sessions=0.0 bridge=0 ledger=0
+- selene | sessions=0.0 bridge=0 ledger=0
+- sloane_company_001 | sessions=0.0 bridge=0 ledger=0
+- sloane_company_002 | sessions=0.0 bridge=0 ledger=0
+- sloane_company_003 | sessions=0.0 bridge=0 ledger=0
+- sloane_company_004 | sessions=0.0 bridge=0 ledger=0
+- tessa | sessions=0.0 bridge=0 ledger=0
+- vivienne | sessions=0.0 bridge=0 ledger=0
+
+ZERO SESSION AGENTS
+--------------------------------------------------------------------------------
+- ariadne | xp=0.0 bridge=0 ledger=0
+- atlas_company_001 | xp=0.0 bridge=0 ledger=0
+- atlas_company_002 | xp=0.0 bridge=0 ledger=0
+- atlas_company_003 | xp=0.0 bridge=0 ledger=0
+- atlas_company_004 | xp=0.0 bridge=0 ledger=0
+- bob_company_001 | xp=0.0 bridge=0 ledger=0
+- bob_company_002 | xp=0.0 bridge=0 ledger=0
+- bob_company_003 | xp=0.0 bridge=0 ledger=0
+- bob_company_004 | xp=0.0 bridge=0 ledger=0
+- eli | xp=0.0 bridge=0 ledger=0
+- gideon | xp=0.0 bridge=0 ledger=0
+- helena | xp=0.0 bridge=0 ledger=0
+- june_company_001 | xp=0.0 bridge=0 ledger=0
+- june_company_002 | xp=0.0 bridge=0 ledger=0
+- june_company_003 | xp=0.0 bridge=0 ledger=0
+- june_company_004 | xp=0.0 bridge=0 ledger=0
+- justine | xp=0.0 bridge=0 ledger=0
+- ledger | xp=0.0 bridge=0 ledger=0
+- mara | xp=0.0 bridge=0 ledger=0
+- marek | xp=0.0 bridge=0 ledger=0
+- mina | xp=0.0 bridge=0 ledger=0
+- nadia | xp=0.0 bridge=0 ledger=0
+- noah | xp=0.0 bridge=0 ledger=0
+- owen | xp=0.0 bridge=0 ledger=0
+- pam_company_001 | xp=0.0 bridge=0 ledger=0
+- pam_company_002 | xp=0.0 bridge=0 ledger=0
+- pam_company_003 | xp=0.0 bridge=0 ledger=0
+- pam_company_004 | xp=0.0 bridge=0 ledger=0
+- rhea | xp=0.0 bridge=0 ledger=0
+- rowan_company_001 | xp=0.0 bridge=0 ledger=0
+- rowan_company_002 | xp=0.0 bridge=0 ledger=0
+- rowan_company_003 | xp=0.0 bridge=0 ledger=0
+- rowan_company_004 | xp=0.0 bridge=0 ledger=0
+- sabine | xp=0.0 bridge=0 ledger=0
+- selene | xp=0.0 bridge=0 ledger=0
+- sloane_company_001 | xp=0.0 bridge=0 ledger=0
+- sloane_company_002 | xp=0.0 bridge=0 ledger=0
+- sloane_company_003 | xp=0.0 bridge=0 ledger=0
+- sloane_company_004 | xp=0.0 bridge=0 ledger=0
+- tessa | xp=0.0 bridge=0 ledger=0
+- vivienne | xp=0.0 bridge=0 ledger=0
+
+LIKELY UNWIRED OR UNTRIGGERED
+--------------------------------------------------------------------------------
+- ariadne: zero sessions and no recent bridge/ledger presence
+- atlas_company_001: zero sessions and no recent bridge/ledger presence
+- atlas_company_002: zero sessions and no recent bridge/ledger presence
+- atlas_company_003: zero sessions and no recent bridge/ledger presence
+- atlas_company_004: zero sessions and no recent bridge/ledger presence
+- axiom: missing RPG_STATE.md
+- bob_company_001: zero sessions and no recent bridge/ledger presence
+- bob_company_002: zero sessions and no recent bridge/ledger presence
+- bob_company_003: zero sessions and no recent bridge/ledger presence
+- bob_company_004: zero sessions and no recent bridge/ledger presence
+- eli: zero sessions and no recent bridge/ledger presence
+- gideon: zero sessions and no recent bridge/ledger presence
+- grant_cardone: missing RPG_STATE.md
+- helena: zero sessions and no recent bridge/ledger presence
+- june_company_001: zero sessions and no recent bridge/ledger presence
+- june_company_002: zero sessions and no recent bridge/ledger presence
+- june_company_003: zero sessions and no recent bridge/ledger presence
+- june_company_004: zero sessions and no recent bridge/ledger presence
+- justine: zero sessions and no recent bridge/ledger presence
+- ledger: zero sessions and no recent bridge/ledger presence
+- main: missing RPG_STATE.md
+- mara: zero sessions and no recent bridge/ledger presence
+- marek: zero sessions and no recent bridge/ledger presence
+- mina: zero sessions and no recent bridge/ledger presence
+- nadia: zero sessions and no recent bridge/ledger presence
+- noah: zero sessions and no recent bridge/ledger presence
+- owen: zero sessions and no recent bridge/ledger presence
+- pam_company_001: zero sessions and no recent bridge/ledger presence
+- pam_company_002: zero sessions and no recent bridge/ledger presence
+- pam_company_003: zero sessions and no recent bridge/ledger presence
+- pam_company_004: zero sessions and no recent bridge/ledger presence
+- rhea: zero sessions and no recent bridge/ledger presence
+- rowan_company_001: zero sessions and no recent bridge/ledger presence
+- rowan_company_002: zero sessions and no recent bridge/ledger presence
+- rowan_company_003: zero sessions and no recent bridge/ledger presence
+- rowan_company_004: zero sessions and no recent bridge/ledger presence
+- sabine: zero sessions and no recent bridge/ledger presence
+- selene: zero sessions and no recent bridge/ledger presence
+- sloane_company_001: zero sessions and no recent bridge/ledger presence
+- sloane_company_002: zero sessions and no recent bridge/ledger presence
+- sloane_company_003: zero sessions and no recent bridge/ledger presence
+- sloane_company_004: zero sessions and no recent bridge/ledger presence
+- tessa: zero sessions and no recent bridge/ledger presence
+- vivienne: zero sessions and no recent bridge/ledger presence
+
+RECENT BRIDGE ACTIVITY BY AGENT
+--------------------------------------------------------------------------------
+- lucian_company_001: 45
+- iris_company_001: 45
+- bianca_company_001: 45
+- orion_company_001: 44
+- vera_company_001: 44
+- orion_company_002: 40
+- vera_company_002: 40
+- bianca_company_002: 39
+- lucian_company_002: 39
+- iris_company_002: 39
+- bianca_company_003: 33
+- orion_company_003: 33
+- iris_company_003: 33
+- lucian_company_003: 33
+- vera_company_003: 33
+- lucian_company_004: 32
+- orion_company_004: 32
+- vera_company_004: 32
+- iris_company_004: 32
+- bianca_company_004: 32
+
+RECENT LEDGER ACTIVITY BY AGENT
+--------------------------------------------------------------------------------
+- lucian_company_001: 45
+- iris_company_001: 45
+- bianca_company_001: 45
+- orion_company_001: 44
+- vera_company_001: 44
+- orion_company_002: 40
+- vera_company_002: 40
+- bianca_company_002: 39
+- lucian_company_002: 39
+- iris_company_002: 39
+- bianca_company_003: 33
+- orion_company_003: 33
+- iris_company_003: 33
+- lucian_company_003: 33
+- vera_company_003: 33
+- lucian_company_004: 32
+- orion_company_004: 32
+- vera_company_004: 32
+- iris_company_004: 32
+- bianca_company_004: 32
+
+COMPANY PACKET COUNTS
+--------------------------------------------------------------------------------
+- company_001: 28
+- company_002: 28
+- company_003: 28
+- company_004: 28
+
+LIVE ROLE MENTIONS IN PACKETS
+--------------------------------------------------------------------------------
+- Lucian: 8
+- Bianca: 8
+- Vera: 8
+- Iris: 8
+- Orion: 8
+
+TRADE COUNTS BY COMPANY
+--------------------------------------------------------------------------------
+- company_001: 277
+- company_003: 264
+- company_004: 247
+- company_002: 222

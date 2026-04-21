@@ -5,6 +5,7 @@ import argparse
 import json
 import math
 import re
+import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -12,6 +13,10 @@ from typing import Any
 
 
 ROOT = Path("/opt/openclaw/.openclaw/workspace")
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.target_engine import build_target_state_from_run
 RUNS_DIR = ROOT / "state" / "live_runs"
 MEMORY_DIR = ROOT / "ai_agents_memory"
 
@@ -129,15 +134,24 @@ def build_company_scoreboard(
     companies: dict[str, Any] = {}
 
     for company in COMPANIES:
-        snap = latest_portfolio.get(company, {})
+        snap = latest_portfolio.get(company)
         start_alloc = safe_float(per_alloc.get(company), 0.0)
-        cash = safe_float(snap.get("cash"))
-        pos_value = position_value(snap)
-        equity = cash + pos_value if snap else 0.0
-
-        realized = safe_float(snap.get("realized_pnl"))
-        unrealized = safe_float(snap.get("unrealized_pnl"))
-        pnl_vs_alloc = equity - start_alloc if start_alloc else realized + unrealized
+        snapshot_available = isinstance(snap, dict) and bool(snap)
+        if snapshot_available:
+            cash = safe_float(snap.get("cash"))
+            pos_value = position_value(snap)
+            equity = cash + pos_value
+            realized = safe_float(snap.get("realized_pnl"))
+            unrealized = safe_float(snap.get("unrealized_pnl"))
+            pnl_vs_alloc = equity - start_alloc if start_alloc else realized + unrealized
+        else:
+            cash = None
+            pos_value = None
+            equity = None
+            realized = None
+            unrealized = None
+            pnl_vs_alloc = None
+            snap = {}
 
         company_trades = trades_by_company.get(company, [])
         company_decisions = decisions_by_company.get(company, [])
@@ -160,24 +174,27 @@ def build_company_scoreboard(
             if "timed out" in fallback_reason.lower():
                 timeout_count += 1
 
-        if pnl_vs_alloc > 0.01:
+        if pnl_vs_alloc is None:
+            status = "no_snapshot"
+        elif pnl_vs_alloc > 0.01:
             status = "positive"
         elif pnl_vs_alloc < -0.01:
             status = "negative"
-        elif snap:
-            status = "flat"
         else:
-            status = "no_snapshot"
+            status = "flat"
 
         companies[company] = {
             "starting_allocation": round(start_alloc, 8),
-            "cash": round(cash, 8),
-            "position_value": round(pos_value, 8),
-            "equity": round(equity, 8),
-            "realized_pnl": round(realized, 8),
-            "unrealized_pnl": round(unrealized, 8),
-            "pnl_vs_allocation": round(pnl_vs_alloc, 8),
-            "open_positions_count": int(safe_float(snap.get("open_positions_count"), 0.0)),
+            "snapshot_available": snapshot_available,
+            "cash": round(cash, 8) if cash is not None else None,
+            "position_value": round(pos_value, 8) if pos_value is not None else None,
+            "equity": round(equity, 8) if equity is not None else None,
+            "display_equity": round(equity if equity is not None else start_alloc, 8),
+            "display_imputed": equity is None,
+            "realized_pnl": round(realized, 8) if realized is not None else None,
+            "unrealized_pnl": round(unrealized, 8) if unrealized is not None else None,
+            "pnl_vs_allocation": round(pnl_vs_alloc, 8) if pnl_vs_alloc is not None else None,
+            "open_positions_count": int(safe_float(snap.get("open_positions_count"), 0.0)) if snapshot_available else 0,
             "positions": snap.get("positions", {}),
             "trade_count": len(company_trades),
             "trade_actions": dict(actions),
@@ -194,11 +211,13 @@ def build_company_scoreboard(
         }
 
     ranked = sorted(
-        companies.items(),
+        ((company, data) for company, data in companies.items() if data.get("pnl_vs_allocation") is not None),
         key=lambda kv: kv[1]["pnl_vs_allocation"],
         reverse=True,
     )
 
+    for company in companies:
+        companies[company]["rank"] = None
     for idx, (company, _) in enumerate(ranked, start=1):
         companies[company]["rank"] = idx
 
@@ -215,6 +234,7 @@ def build_company_scoreboard(
             }
             for company, data in ranked
         ],
+        "missing_companies": [company for company, data in companies.items() if not data.get("snapshot_available")],
     }
 
 
@@ -519,7 +539,9 @@ def build_briefing(run_dir: Path) -> dict[str, Any]:
     )
 
     market = build_market_summary(run_dir)
-    target_state = build_target_state(allocation, scoreboard)
+    # Use the real Target Engine objective state. It preserves unknown current equity
+    # when portfolio coverage is partial instead of inventing fake missing-company losses.
+    target_state = build_target_state_from_run(run_dir, write=True)
     axiom = build_axiom_metrics()
     committee = build_committee_health(packet_rows)
 
@@ -527,6 +549,10 @@ def build_briefing(run_dir: Path) -> dict[str, Any]:
     laggard = scoreboard.get("laggard")
 
     review_flags = []
+
+    coverage = target_state.get("portfolio_coverage") or {}
+    if not coverage.get("complete", True):
+        review_flags.append("portfolio_coverage_partial")
 
     if target_state["target_status"] in {"negative", "green_but_below_floor"}:
         review_flags.append("target_pressure_needed")
@@ -540,7 +566,9 @@ def build_briefing(run_dir: Path) -> dict[str, Any]:
     if axiom["weak_agents"]:
         review_flags.append("axiom_weak_agents_present")
 
-    if market["condition"] == "green" and target_state["target_status"] in {"negative", "green_but_below_floor"}:
+    if target_state["target_status"] == "unknown_current_equity":
+        recommended_tone = "portfolio_coverage_warning"
+    elif market["condition"] == "green" and target_state["target_status"] in {"negative", "green_but_below_floor"}:
         recommended_tone = "green_market_underperformance"
     elif target_state["target_status"] == "negative":
         recommended_tone = "discipline"
@@ -579,6 +607,7 @@ def build_briefing(run_dir: Path) -> dict[str, Any]:
             f"Leader: {leader}" if leader else "No company leader detected.",
             f"Laggard: {laggard}" if laggard else "No company laggard detected.",
             f"Target status: {target_state['target_status']}",
+            f"Portfolio coverage: {(target_state.get('portfolio_coverage') or {}).get('status')} {(target_state.get('portfolio_coverage') or {}).get('companies_with_snapshot')}/{(target_state.get('portfolio_coverage') or {}).get('expected_companies')}",
             f"Market condition: {market['condition']}",
             f"Committee health: {committee['status']}",
         ],

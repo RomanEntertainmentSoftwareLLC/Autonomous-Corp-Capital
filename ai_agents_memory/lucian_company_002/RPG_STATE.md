@@ -2,19 +2,19 @@
 
 | Field | Value |
 |-------|-------|
-| xp | 117.5 |
+| xp | 124.5 |
 | level | 2 |
 | title | Initiate |
-| sessions | 73 |
+| sessions | 75 |
 | current_level_threshold | 100 |
 | next_level_threshold | 250 |
 | xp_to_next_level | 150 |
 | speed | 0 |
 | accuracy | 0 |
-| reliability | 50 |
-| judgment | 61 |
-| consistency | 35 |
-| usefulness | 47 |
+| reliability | 53 |
+| judgment | 66 |
+| consistency | 37 |
+| usefulness | 50 |
 | cost_efficiency | 7 |
 | evidence_quality | 13 |
 | duplication_penalty | 100 |

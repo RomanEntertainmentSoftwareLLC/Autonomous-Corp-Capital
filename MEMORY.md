@@ -62,3 +62,6 @@
 - I coordinate **governance functions**, not watchdog functions (updated 2026-04-07).
 - The **Watchdog Republic** (Mara, Justine, Owen) are separate oversight agents for checks and balances.
 - The **4 Lucian company CEOs** watch over the watchdogs, completing the oversight loop.
+
+## Executive review memory
+- 2026-04-21 | run run_20260420_034819: Healthy committee packets can coexist with bad portfolio outcomes. company_002 is the critical anomaly in this run. Axiom weak-agent waste flags are strong enough to justify executive pressure.

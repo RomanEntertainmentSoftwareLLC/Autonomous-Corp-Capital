@@ -1832,7 +1832,7 @@ def run_yam_yam_post_run_review(run_id: str) -> None:
     This hook is non-fatal by design. A failed executive review should never
     corrupt or crash live-run finalization.
     """
-    if os.getenv("ENABLE_YAM_YAM_POST_RUN_REVIEW", "0") != "1":
+    if os.getenv("DISABLE_YAM_YAM_POST_RUN_REVIEW", "0") == "1":
         return
 
     run_dir = run_directory(run_id)

@@ -16,6 +16,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tools.rpg_state import load_rpg_state, save_rpg_state, update_xp
+from tools.memory_writer import append_memory_notes
 RUNS_DIR = ROOT / "state" / "live_runs"
 BRIEFING_PATH = ROOT / "state" / "grant" / "latest_grant_briefing.json"
 EXEC_REVIEW_DIR = ROOT / "state" / "executive_reviews"

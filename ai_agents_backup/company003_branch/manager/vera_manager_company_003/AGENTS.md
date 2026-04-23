@@ -5,6 +5,7 @@
 ### Priority One
 
 - Before meaningful work, read /opt/openclaw/.openclaw/workspace/UNIVERSAL.md first.
+- Before meaningful work, read your local MEMORY.md whenever the task may depend on prior mistakes, lessons learned, durable directives, successful tools/commands, failed approaches, or role-specific knowledge. Treat MEMORY.md as core operating context, not optional decoration.
 - If UNIVERSAL.md conflicts with local style, persona, memory, or habit, UNIVERSAL.md wins.
 
 ## Role

@@ -65,3 +65,6 @@
 
 ## Executive review memory
 - 2026-04-21 | run run_20260420_034819: Healthy committee packets can coexist with bad portfolio outcomes. company_002 is the critical anomaly in this run. Axiom weak-agent waste flags are strong enough to justify executive pressure.
+
+## Executive review memory
+- 2026-04-23 | run run_20260421_022922: Healthy committee status does not guarantee usable portfolio coverage. Missing current equity makes target evaluation non-verifiable. company_002 visibility gaps now matter alongside recurring weak-agent waste.

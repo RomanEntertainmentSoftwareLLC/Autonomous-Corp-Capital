@@ -1,0 +1,12 @@
+AGENT STATS REPORT (master)
+================================================================================
+count: 8
+
+main: xp=8.0 sessions=1.0 level=1.0 usefulness=2.0 judgment=2.0 evidence=1.0 rpg_exists=True
+ariadne: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True
+axiom: xp=0.0 sessions=0.0 level=0.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=False
+grant_cardone: xp=0.0 sessions=0.0 level=0.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=False
+helena: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True
+ledger: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True
+selene: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True
+vivienne: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True

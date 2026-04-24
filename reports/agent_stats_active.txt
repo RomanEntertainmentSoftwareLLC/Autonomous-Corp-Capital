@@ -1,0 +1,25 @@
+AGENT STATS REPORT (active)
+================================================================================
+count: 21
+
+orion_company_001: xp=143.0 sessions=81.0 level=2.0 usefulness=94.5 judgment=0.0 evidence=89.0 rpg_exists=True
+lucian_company_001: xp=139.0 sessions=81.0 level=2.0 usefulness=73.0 judgment=59.0 evidence=13.0 rpg_exists=True
+bianca_company_001: xp=131.0 sessions=81.0 level=2.0 usefulness=43.0 judgment=28.0 evidence=37.0 rpg_exists=True
+iris_company_001: xp=131.0 sessions=81.0 level=2.0 usefulness=94.5 judgment=0.0 evidence=65.0 rpg_exists=True
+vera_company_001: xp=131.0 sessions=81.0 level=2.0 usefulness=94.5 judgment=28.0 evidence=9.0 rpg_exists=True
+lucian_company_002: xp=124.5 sessions=75.0 level=2.0 usefulness=50.0 judgment=66.0 evidence=13.0 rpg_exists=True
+lucian_company_004: xp=123.75 sessions=74.0 level=2.0 usefulness=52.5 judgment=62.0 evidence=13.0 rpg_exists=True
+lucian_company_003: xp=123.5 sessions=74.0 level=2.0 usefulness=52.5 judgment=62.0 evidence=13.0 rpg_exists=True
+bianca_company_002: xp=116.5 sessions=75.0 level=2.0 usefulness=26.0 judgment=41.0 evidence=31.0 rpg_exists=True
+vera_company_002: xp=116.5 sessions=75.0 level=2.0 usefulness=68.5 judgment=41.0 evidence=9.0 rpg_exists=True
+bianca_company_004: xp=115.75 sessions=74.0 level=2.0 usefulness=29.5 judgment=38.0 evidence=30.0 rpg_exists=True
+vera_company_004: xp=115.75 sessions=74.0 level=2.0 usefulness=71.0 judgment=38.0 evidence=9.0 rpg_exists=True
+bianca_company_003: xp=115.5 sessions=74.0 level=2.0 usefulness=29.5 judgment=38.0 evidence=30.0 rpg_exists=True
+vera_company_003: xp=115.5 sessions=74.0 level=2.0 usefulness=71.0 judgment=38.0 evidence=9.0 rpg_exists=True
+orion_company_004: xp=107.25 sessions=74.0 level=2.0 usefulness=71.0 judgment=0.0 evidence=68.0 rpg_exists=True
+orion_company_003: xp=107.0 sessions=74.0 level=2.0 usefulness=71.0 judgment=0.0 evidence=68.0 rpg_exists=True
+orion_company_002: xp=106.5 sessions=75.0 level=2.0 usefulness=68.5 judgment=0.0 evidence=71.0 rpg_exists=True
+iris_company_004: xp=98.75 sessions=74.0 level=1.0 usefulness=71.0 judgment=0.0 evidence=51.0 rpg_exists=True
+iris_company_003: xp=98.5 sessions=74.0 level=1.0 usefulness=71.0 judgment=0.0 evidence=51.0 rpg_exists=True
+iris_company_002: xp=97.5 sessions=75.0 level=1.0 usefulness=68.5 judgment=0.0 evidence=53.0 rpg_exists=True
+main: xp=8.0 sessions=1.0 level=1.0 usefulness=2.0 judgment=2.0 evidence=1.0 rpg_exists=True

@@ -1,0 +1,94 @@
+ACC CHECKPOINT CLEANUP REPORT
+=============================
+Root: /opt/openclaw/.openclaw/workspace
+
+Backup health counts:
+- AGENTS.md: 78
+- IDENTITY.md: 64
+- SOUL.md: 64
+- MEMORY.md: 64
+- USER.md: 64
+- TOOLS.md: 64
+- BOOTSTRAP.md: 30
+- HEARTBEAT.md: 64
+
+Expected: AGENTS/IDENTITY/SOUL/MEMORY should not be zero if ai_agents_backup is a true backup.
+
+Nested company004 duplicate check:
+- suspicious nested path: /opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch
+
+Root file suffix summary:
+- .txt: 324
+- .md: 18
+- .py: 5
+- .json: 3
+- [no suffix]: 2
+- .gz: 2
+- .out: 2
+- .jsonl: 1
+- .yaml: 1
+- .pdf: 1
+- .pre_name_fix: 1
+- .pre_step11: 1
+- .sh: 1
+- .csv: 1
+
+Potential visual cleanup candidates:
+
+Pattern: yam_rpg_step*.txt -> docs/archive/yam_rpg_steps
+- yam_rpg_step0_inventory.txt
+- yam_rpg_step10_clone_verify.txt
+- yam_rpg_step11_task_history_template.txt
+- yam_rpg_step12_change_history_template.txt
+- yam_rpg_step13_propagation_audit.txt
+- yam_rpg_step13_verification.txt
+- yam_rpg_step14_propagation_complete.txt
+- yam_rpg_step15_rules_file.txt
+- yam_rpg_step16_run_template.txt
+- yam_rpg_step17_runs_folder.txt
+- yam_rpg_step18_manual_apply_plan.txt
+- yam_rpg_step18_verification.txt
+- yam_rpg_step19_consistency_patch.txt
+- yam_rpg_step1_inventory.txt
+- yam_rpg_step20_pilot_checklist.txt
+- yam_rpg_step21_pilot_sheet.txt
+- yam_rpg_step22_pilot_scored.txt
+- yam_rpg_step23_apply_verify.txt
+- yam_rpg_step24_first_pilot_audit.txt
+- yam_rpg_step25_progression_patch.txt
+- yam_rpg_step26_level_curve.txt
+- yam_rpg_step27_xp_rules.txt
+- yam_rpg_step28_profit_bonus_rules.txt
+- yam_rpg_step29_level_down_rules.txt
+- yam_rpg_step2_spec.txt
+- ... 13 more
+Suggested safe archive command:
+mkdir -p docs/archive/yam_rpg_steps
+git mv yam_rpg_step*.txt docs/archive/yam_rpg_steps/ 2>/dev/null || true
+
+Pattern: step*.out -> docs/archive/old_runtime_outputs
+- step82a3_start.out
+- step82a3_stop.out
+Suggested safe archive command:
+mkdir -p docs/archive/old_runtime_outputs
+git mv step*.out docs/archive/old_runtime_outputs/ 2>/dev/null || true
+
+Pattern: tools/*.broken.py -> docs/archive/old_runtime_files
+- tools/live_run.broken.py
+Suggested safe archive command:
+mkdir -p docs/archive/old_runtime_files
+git mv tools/*.broken.py docs/archive/old_runtime_files/ 2>/dev/null || true
+
+Pattern: acc_backup_*.tar.gz -> docs/archive/old_backups
+- acc_backup_20260321_010214.tar.gz
+Suggested safe archive command:
+mkdir -p docs/archive/old_backups
+git mv acc_backup_*.tar.gz docs/archive/old_backups/ 2>/dev/null || true
+
+Pattern: ai_agents_backup_broken_* -> docs/archive/old_agent_backups
+- ai_agents_backup_broken_20260425_000427.tar.gz
+Suggested safe archive command:
+mkdir -p docs/archive/old_agent_backups
+git mv ai_agents_backup_broken_* docs/archive/old_agent_backups/ 2>/dev/null || true
+
+Do not delete ai_agents_backup blindly. If it is wrong, rebuild from /opt/openclaw/.openclaw/workspaces/ai_agents first.

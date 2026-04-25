@@ -1,0 +1,72 @@
+ACC RPG INITIALIZATION REPORT
+=============================
+Root: /opt/openclaw/.openclaw/workspace
+Discovered agents: 66
+Agents needing file creation: 65
+Dry run: True
+
+- ariadne (Ariadne): create MEMORY.md
+- bianca_cfo_company_001 (Bianca): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- bianca_cfo_company_002 (Bianca): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- bianca_cfo_company_003 (Bianca): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- bianca_cfo_company_004 (Bianca): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- defaults (Defaults): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- desk_administrator_company_001 (Pam): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- desk_administrator_company_002 (Pam): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- desk_administrator_company_003 (Pam): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- desk_administrator_company_004 (Pam): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- eli (Eli): create MEMORY.md
+- evolution_specialist_company_001 (Sloane): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- evolution_specialist_company_002 (Sloane): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- evolution_specialist_company_003 (Sloane): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- evolution_specialist_company_004 (Sloane): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- gideon (Gideon): create MEMORY.md
+- grant_cardone (Grant Cardone): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- helena (Helena): create MEMORY.md
+- iris_analyst_company_001 (Iris): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- iris_analyst_company_002 (Iris): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- iris_analyst_company_003 (Iris): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- iris_analyst_company_004 (Iris): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- june_archivist_company_001 (June): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- june_archivist_company_002 (June): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- june_archivist_company_003 (June): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- june_archivist_company_004 (June): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- justine (Justine): create MEMORY.md
+- ledger (Ledger): create MEMORY.md
+- list (List): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- lucian_ceo_company_001 (Lucian): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- lucian_ceo_company_002 (Lucian): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- lucian_ceo_company_003 (Lucian): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- lucian_ceo_company_004 (Lucian): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- main (Yam Yam): create MEMORY.md
+- mara (Mara): create MEMORY.md
+- marek (Marek): create MEMORY.md
+- market_simulator_company_001 (Atlas): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- market_simulator_company_002 (Atlas): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- market_simulator_company_003 (Atlas): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- market_simulator_company_004 (Atlas): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- mina (Mina): create MEMORY.md
+- nadia (Nadia): create MEMORY.md
+- noah (Noah): create MEMORY.md
+- operations_worker_company_001 (Bob): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- operations_worker_company_002 (Bob): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- operations_worker_company_003 (Bob): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- operations_worker_company_004 (Bob): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- orion_strategist_company_001 (Orion): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- orion_strategist_company_002 (Orion): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- orion_strategist_company_003 (Orion): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- orion_strategist_company_004 (Orion): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- owen (Owen): create MEMORY.md
+- rhea (Rhea): create MEMORY.md
+- rowan_researcher_company_001 (Rowan): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- rowan_researcher_company_002 (Rowan): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- rowan_researcher_company_003 (Rowan): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- rowan_researcher_company_004 (Rowan): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- sabine (Sabine): create MEMORY.md
+- selene (Selene): create MEMORY.md
+- tessa (Tessa): create MEMORY.md
+- vera_manager_company_001 (Vera): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- vera_manager_company_002 (Vera): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- vera_manager_company_003 (Vera): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- vera_manager_company_004 (Vera): create RPG_STATE.md, create RPG_HISTORY.md, create MEMORY.md
+- vivienne (Vivienne): create MEMORY.md

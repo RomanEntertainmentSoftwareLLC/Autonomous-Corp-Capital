@@ -1,0 +1,57 @@
+ACC AGENT ACTIVATION QUEUE
+==========================
+Root: /opt/openclaw/.openclaw/workspace
+Agents considered: 102
+SWE included: False
+
+Top activation candidates:
+- vivienne | branch=master | priority=125.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- grant_cardone | branch=master | priority=123.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- helena | branch=master | priority=120.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- ledger | branch=master | priority=116.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- ariadne | branch=master | priority=114.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- selene | branch=master | priority=110.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- axiom | branch=master | priority=99.65 | xp=7.0 sessions=1.0 | state=True history=True memory=True | Already active; monitor or deepen role wiring rather than first activation.
+- june_company_001 | branch=company | priority=88.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- june_company_002 | branch=company | priority=88.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- june_company_003 | branch=company | priority=88.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- june_company_004 | branch=company | priority=88.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- pam_company_001 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- pam_company_002 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- pam_company_003 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- pam_company_004 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- atlas_company_001 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- atlas_company_002 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- atlas_company_003 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- atlas_company_004 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- sloane_company_001 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- sloane_company_002 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- sloane_company_003 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- sloane_company_004 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- bob_company_001 | branch=company | priority=85.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- bob_company_002 | branch=company | priority=85.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- bob_company_003 | branch=company | priority=85.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- bob_company_004 | branch=company | priority=85.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- bianca_cfo_company_001 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- bianca_cfo_company_002 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- bianca_cfo_company_003 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- bianca_cfo_company_004 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- desk_administrator_company_001 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- desk_administrator_company_002 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- desk_administrator_company_003 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- desk_administrator_company_004 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- evolution_specialist_company_001 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- evolution_specialist_company_002 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- evolution_specialist_company_003 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- evolution_specialist_company_004 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- iris_analyst_company_001 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- iris_analyst_company_002 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- iris_analyst_company_003 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- iris_analyst_company_004 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- june_archivist_company_001 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- june_archivist_company_002 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- june_archivist_company_003 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- june_archivist_company_004 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- lucian_ceo_company_001 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- lucian_ceo_company_002 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- lucian_ceo_company_003 | branch=company | priority=80.0 | xp=0.0 sessions=0.0 | state=False history=False memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.

@@ -20,6 +20,7 @@ from tools.memory_writer import append_memory_notes
 RUNS_DIR = ROOT / "state" / "live_runs"
 BRIEFING_PATH = ROOT / "state" / "grant" / "latest_grant_briefing.json"
 EXEC_REVIEW_DIR = ROOT / "state" / "executive_reviews"
+AXIOM_REVIEW_DIR = ROOT / "state" / "axiom_reviews"
 MAIN_RPG_STATE = ROOT / "ai_agents_memory" / "main" / "RPG_STATE.md"
 MAIN_RPG_HISTORY = ROOT / "ai_agents_memory" / "main" / "RPG_HISTORY.md"
 MAIN_MEMORY = ROOT / "MEMORY.md"
@@ -107,7 +108,28 @@ def _weak_agent_lines(briefing: dict[str, Any]) -> list[str]:
     return lines or ["- No weak agents flagged."]
 
 
-def _build_prompt(briefing: dict[str, Any]) -> str:
+def _read_axiom_review(run_id: str | None) -> str:
+    """Return the latest Axiom evaluator review for this run, if available.
+
+    Axiom is the evidence judge. Yam Yam is the executive synthesizer.
+    Keeping this read-only and optional lets Yam Yam use Axiom when present
+    without making executive review fragile if Axiom fails.
+    """
+    candidates: list[Path] = []
+    if run_id:
+        candidates.append(AXIOM_REVIEW_DIR / f"{run_id}_axiom_review.txt")
+    if AXIOM_REVIEW_DIR.exists():
+        candidates.extend(sorted(AXIOM_REVIEW_DIR.glob("*_axiom_review.txt"), key=lambda p: p.stat().st_mtime, reverse=True))
+    for path in candidates:
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace").strip()
+        if text:
+            return _clip(text, 2400)
+    return "No Axiom evaluator review available yet."
+
+
+def _build_prompt(briefing: dict[str, Any], axiom_review: str | None = None) -> str:
     market = briefing.get("market") or {}
     target = briefing.get("target_state") or {}
     committee = briefing.get("committee_health") or {}
@@ -150,8 +172,11 @@ Committee health:
 - fresh committee packets: {committee.get('fresh_committee_packets')}
 - timeout packets: {committee.get('timeout_packets')}
 
-Axiom weak-agent flags:
+Axiom weak-agent flags from Grant briefing:
 {chr(10).join(_weak_agent_lines(briefing))}
+
+Latest Axiom evaluator review:
+{_clip(axiom_review, 2400) if axiom_review else "No Axiom evaluator review available yet."}
 
 Usage telemetry:
 - ledger rows: {usage.get('ledger_rows')}
@@ -270,7 +295,8 @@ def main() -> None:
 
     briefing = _ensure_briefing(args.run_id)
     run_id = str(briefing.get("run_id") or args.run_id or "unknown")
-    prompt = _build_prompt(briefing)
+    axiom_review = _read_axiom_review(run_id)
+    prompt = _build_prompt(briefing, axiom_review=axiom_review)
 
     EXEC_REVIEW_DIR.mkdir(parents=True, exist_ok=True)
     prompt_path = EXEC_REVIEW_DIR / f"{run_id}_yam_yam_prompt.txt"

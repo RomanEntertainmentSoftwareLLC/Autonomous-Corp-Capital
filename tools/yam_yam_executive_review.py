@@ -21,6 +21,7 @@ RUNS_DIR = ROOT / "state" / "live_runs"
 BRIEFING_PATH = ROOT / "state" / "grant" / "latest_grant_briefing.json"
 EXEC_REVIEW_DIR = ROOT / "state" / "executive_reviews"
 AXIOM_REVIEW_DIR = ROOT / "state" / "axiom_reviews"
+VIVIENNE_REVIEW_DIR = ROOT / "state" / "vivienne_reviews"
 MAIN_RPG_STATE = ROOT / "ai_agents_memory" / "main" / "RPG_STATE.md"
 MAIN_RPG_HISTORY = ROOT / "ai_agents_memory" / "main" / "RPG_HISTORY.md"
 MAIN_MEMORY = ROOT / "MEMORY.md"
@@ -129,7 +130,28 @@ def _read_axiom_review(run_id: str | None) -> str:
     return "No Axiom evaluator review available yet."
 
 
-def _build_prompt(briefing: dict[str, Any], axiom_review: str | None = None) -> str:
+def _read_vivienne_review(run_id: str | None) -> str:
+    """Return the latest Vivienne financial truth review for this run, if available.
+
+    Vivienne is the financial truth judge. Yam Yam should know whether the P/L,
+    target status, and portfolio coverage are trustworthy before making executive
+    directives. This remains optional so Yam Yam can still run if Vivienne fails.
+    """
+    candidates: list[Path] = []
+    if run_id:
+        candidates.append(VIVIENNE_REVIEW_DIR / f"{run_id}_vivienne_review.txt")
+    if VIVIENNE_REVIEW_DIR.exists():
+        candidates.extend(sorted(VIVIENNE_REVIEW_DIR.glob("*_vivienne_review.txt"), key=lambda p: p.stat().st_mtime, reverse=True))
+    for path in candidates:
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace").strip()
+        if text:
+            return _clip(text, 2400)
+    return "No Vivienne financial truth review available yet."
+
+
+def _build_prompt(briefing: dict[str, Any], axiom_review: str | None = None, vivienne_review: str | None = None) -> str:
     market = briefing.get("market") or {}
     target = briefing.get("target_state") or {}
     committee = briefing.get("committee_health") or {}
@@ -178,6 +200,9 @@ Axiom weak-agent flags from Grant briefing:
 Latest Axiom evaluator review:
 {_clip(axiom_review, 2400) if axiom_review else "No Axiom evaluator review available yet."}
 
+Latest Vivienne financial truth review:
+{_clip(vivienne_review, 2400) if vivienne_review else "No Vivienne financial truth review available yet."}
+
 Usage telemetry:
 - ledger rows: {usage.get('ledger_rows')}
 - bridge rows: {usage.get('bridge_rows')}
@@ -186,9 +211,10 @@ Usage telemetry:
 Required output:
 1. Executive verdict: one paragraph.
 2. What actually happened: 3-5 bullets.
-3. Who needs pressure or review: 3-5 bullets.
-4. Next directives: 3-5 bullets.
-5. Memory-worthy cliff notes: 3 bullets max.
+3. Financial/accounting trust: 2-4 bullets based on Vivienne if available.
+4. Who needs pressure or review: 3-5 bullets.
+5. Next directives: 3-5 bullets.
+6. Memory-worthy cliff notes: 3 bullets max.
 
 Keep it concise, direct, and operational. You are the Master CEO. Act like it.
 """.strip()
@@ -296,7 +322,8 @@ def main() -> None:
     briefing = _ensure_briefing(args.run_id)
     run_id = str(briefing.get("run_id") or args.run_id or "unknown")
     axiom_review = _read_axiom_review(run_id)
-    prompt = _build_prompt(briefing, axiom_review=axiom_review)
+    vivienne_review = _read_vivienne_review(run_id)
+    prompt = _build_prompt(briefing, axiom_review=axiom_review, vivienne_review=vivienne_review)
 
     EXEC_REVIEW_DIR.mkdir(parents=True, exist_ok=True)
     prompt_path = EXEC_REVIEW_DIR / f"{run_id}_yam_yam_prompt.txt"

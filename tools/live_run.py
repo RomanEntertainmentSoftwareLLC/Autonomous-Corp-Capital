@@ -1826,6 +1826,77 @@ def run_axiom_post_run_review(run_id: str) -> None:
             encoding="utf-8",
         )
 
+
+def run_vivienne_post_run_review(run_id: str) -> None:
+    """Run Vivienne's post-run financial truth review as non-fatal governance.
+
+    Vivienne is the Master CFO. She reviews target trustworthiness, portfolio
+    coverage, P/L reality, and whether missing artifacts are creating fake wins
+    or fake losses. She should run after Axiom and before Yam Yam so the Master
+    CEO can synthesize evidence truth plus financial truth.
+    """
+    if os.getenv("DISABLE_VIVIENNE_POST_RUN_REVIEW", "0").strip().lower() in {"1", "true", "yes", "on"}:
+        return
+
+    run_dir = run_directory(run_id)
+    artifacts_dir = run_dir / "artifacts"
+    artifacts_dir.mkdir(parents=True, exist_ok=True)
+    log_path = artifacts_dir / "vivienne_review_hook.log"
+
+    cmd = [
+        sys.executable,
+        str(ROOT / "tools" / "vivienne_financial_review.py"),
+        "--run-id",
+        run_id,
+        "--timeout",
+        os.getenv("VIVIENNE_REVIEW_TIMEOUT_SECONDS", "420"),
+    ]
+
+    started_at = _utcnow().isoformat()
+    try:
+        result = subprocess.run(
+            cmd,
+            cwd=str(ROOT),
+            text=True,
+            capture_output=True,
+            timeout=int(os.getenv("VIVIENNE_REVIEW_HOOK_TIMEOUT_SECONDS", "480")),
+            env=dict(os.environ),
+        )
+        log_path.write_text(
+            json.dumps(
+                {
+                    "timestamp": _utcnow().isoformat(),
+                    "started_at": started_at,
+                    "run_id": run_id,
+                    "hook": "vivienne_post_run_review",
+                    "status": "success" if result.returncode == 0 else "failed",
+                    "returncode": result.returncode,
+                    "cmd": cmd,
+                    "stdout": result.stdout,
+                    "stderr": result.stderr,
+                    "review_path": str(ROOT / "state" / "vivienne_reviews" / f"{run_id}_vivienne_review.txt"),
+                },
+                indent=2,
+            ) + "\n",
+            encoding="utf-8",
+        )
+    except Exception as exc:
+        (artifacts_dir / "vivienne_review_hook_error.log").write_text(
+            json.dumps(
+                {
+                    "timestamp": _utcnow().isoformat(),
+                    "started_at": started_at,
+                    "run_id": run_id,
+                    "hook": "vivienne_post_run_review",
+                    "status": "error",
+                    "cmd": cmd,
+                    "error": repr(exc),
+                },
+                indent=2,
+            ) + "\n",
+            encoding="utf-8",
+        )
+
 def run_yam_yam_post_run_review(run_id: str) -> None:
     """Run Yam Yam's post-run executive review as non-fatal governance.
 
@@ -2346,6 +2417,7 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
         meta_path.write_text(json.dumps(meta, indent=2))
     write_daily_digest(run_id)
     run_axiom_post_run_review(run_id)
+    run_vivienne_post_run_review(run_id)
     run_yam_yam_post_run_review(run_id)
     update_evolution_states_from_warehouse()
     prune_old_run_artifacts(run_id)

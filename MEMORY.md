@@ -68,3 +68,6 @@
 
 ## Executive review memory
 - 2026-04-23 | run run_20260421_022922: Healthy committee status does not guarantee usable portfolio coverage. Missing current equity makes target evaluation non-verifiable. company_002 visibility gaps now matter alongside recurring weak-agent waste.
+
+## Executive review memory
+- 2026-04-25 | run run_20260421_022922: Healthy committee status does not guarantee complete portfolio visibility. Missing current equity and total P/L make target evaluation non-verifiable. company_002 coverage gaps now matter alongside recurring Lucian waste.

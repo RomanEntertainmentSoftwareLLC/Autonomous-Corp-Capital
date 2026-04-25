@@ -12,8 +12,13 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
+try:
+    from zoneinfo import ZoneInfo
+except Exception:  # pragma: no cover - older Python fallback
+    ZoneInfo = None  # type: ignore
 
 RPG_STATE_FIELDS = [
     "xp",
@@ -266,6 +271,88 @@ def _format_value(value: Any) -> str:
     if isinstance(value, float) and value.is_integer():
         return str(int(value))
     return str(value)
+
+
+
+def _display_time_et(raw_timestamp: Any = None) -> str:
+    """Return a human-readable Eastern Time timestamp for RPG history logs."""
+    dt: datetime
+    raw = str(raw_timestamp or "").strip()
+    if raw:
+        try:
+            normalized = raw.replace("Z", "+00:00")
+            dt = datetime.fromisoformat(normalized)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+        except Exception:
+            dt = datetime.now(timezone.utc)
+    else:
+        dt = datetime.now(timezone.utc)
+
+    if ZoneInfo is not None:
+        try:
+            dt = dt.astimezone(ZoneInfo("America/New_York"))
+            return dt.strftime("%Y-%m-%d %I:%M:%S %p %Z")
+        except Exception:
+            pass
+    return dt.astimezone(timezone.utc).strftime("%Y-%m-%d %I:%M:%S %p UTC")
+
+
+
+def _clean_history_reason(reason: Any, fallback: str = "Completed role work.") -> str:
+    text = re.sub(r"\s+", " ", str(reason or "").strip())
+    return text or fallback
+
+
+
+def append_human_rpg_history(
+    history_path: Path,
+    *,
+    timestamp: Any = None,
+    agent_id: str = "",
+    event_type: str = "RPG Event",
+    xp_delta: Any = 0.0,
+    before_xp: Any = None,
+    after_xp: Any = None,
+    before_level: Any = None,
+    after_level: Any = None,
+    reason: Any = "",
+    context: Any = "",
+) -> None:
+    """Append a human-readable RPG event line.
+
+    This is intentionally Markdown text, not JSON. It is the agent's career/combat log:
+    what happened, why it mattered, and how XP changed.
+    """
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    if not history_path.exists():
+        history_path.write_text("# RPG History\n\n", encoding="utf-8")
+
+    xp_number = round(_coerce_float(xp_delta, 0.0), 2)
+    xp_text = _format_value(xp_number)
+    sign = "+" if xp_number >= 0 else ""
+    time_text = _display_time_et(timestamp)
+    reason_text = _clean_history_reason(reason)
+    context_text = _clean_history_reason(context, "")
+
+    parts = [f"{time_text} | {sign}{xp_text} XP | {event_type}"]
+    if agent_id:
+        parts.append(f"Agent: {agent_id}")
+    if before_xp is not None and after_xp is not None:
+        before_text = _format_value(round(_coerce_float(before_xp), 2))
+        after_text = _format_value(round(_coerce_float(after_xp), 2))
+        parts.append(f"XP {before_text} -> {after_text}")
+    if before_level is not None and after_level is not None:
+        level_note = f"Level {_format_value(before_level)} -> {_format_value(after_level)}"
+        if _coerce_int(before_level, 1) != _coerce_int(after_level, 1):
+            level_note += " | LEVEL UP"
+        parts.append(level_note)
+    if context_text:
+        parts.append(context_text)
+    parts.append(reason_text)
+
+    with history_path.open("a", encoding="utf-8") as handle:
+        handle.write("- " + " | ".join(parts) + "\n")
 
 
 
@@ -906,9 +993,24 @@ def apply_runtime_rpg_updates(root: Path, evidence_path: Path) -> Dict[str, Any]
             state = score_rowan_research_completion(state, evidence_path)
 
         saved = save_rpg_state(state_path, state)
-        history_path.parent.mkdir(parents=True, exist_ok=True)
-        with history_path.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"agent_id": agent_id, "delta": delta, "xp": saved["xp"], "sessions": saved["sessions"]}) + "\n")
+        append_human_rpg_history(
+            history_path,
+            timestamp=records[-1].get("timestamp") if records and isinstance(records[-1], dict) else None,
+            agent_id=agent_id,
+            event_type="Runtime Evidence Batch",
+            xp_delta=delta["xp"],
+            before_xp=None,
+            after_xp=saved["xp"],
+            before_level=None,
+            after_level=saved["level"],
+            context=f"Processed {len(records)} runtime evidence records.",
+            reason=(
+                f"Credited runtime participation: sessions +{int(delta['sessions'])}, "
+                f"reliability +{round(delta['reliability'], 2)}, usefulness +{round(delta['usefulness'], 2)}, "
+                f"evidence +{round(delta['evidence_quality'], 2)}, cost efficiency +{round(delta['cost_efficiency'], 2)}, "
+                f"waste penalty +{round(delta['waste_penalty'], 2)}."
+            ),
+        )
         updated_agents.append(agent_id)
 
     return {"updated_agents": sorted(updated_agents), "record_count": len(records)}
@@ -934,6 +1036,10 @@ def _history_path_for_state(path: Path) -> Path:
 
 
 def _append_rpg_history(history_path: Path, line: str) -> None:
+    """Backward-compatible raw history appender.
+
+    Prefer append_human_rpg_history for new XP events.
+    """
     history_path.parent.mkdir(parents=True, exist_ok=True)
     if not history_path.exists():
         history_path.write_text("# RPG History\n\n", encoding="utf-8")
@@ -1012,11 +1118,30 @@ def apply_runtime_packet_rpg_updates(packet: Dict[str, Any], workspace_root: Pat
         after_level = int(saved.get("level") or 1)
         before_xp = float(before.get("xp") or 0.0)
         after_xp = float(saved.get("xp") or 0.0)
-        history_line = (
-            f"{timestamp} | {company_id} | {role_name}/{agent_id} | +{round(after_xp - before_xp, 2)} XP | "
-            f"level {before_level}->{after_level} | sessions {int(saved.get('sessions') or 0)} | mode={mode}"
+        xp_delta_actual = round(after_xp - before_xp, 2)
+        reason_parts = [f"Contributed to {company_id} committee packet as {role_name}."]
+        if mode == "live_session":
+            reason_parts.append("Live OpenClaw committee response was used.")
+        elif mode == "python_fallback":
+            reason_parts.append("Python fallback response kept the packet moving.")
+        if role_xp_bonus:
+            reason_parts.append(f"Role bonus +{round(role_xp_bonus, 2)} XP for useful posture/evidence.")
+        if stat_bonus:
+            readable_stats = ", ".join(f"{field} +{round(value, 2)}" for field, value in sorted(stat_bonus.items()))
+            reason_parts.append(f"Stat gains: {readable_stats}.")
+        append_human_rpg_history(
+            history_path,
+            timestamp=timestamp,
+            agent_id=agent_id,
+            event_type="Runtime Committee Contribution",
+            xp_delta=xp_delta_actual,
+            before_xp=before_xp,
+            after_xp=after_xp,
+            before_level=before_level,
+            after_level=after_level,
+            context=f"{company_id} | role={role_name} | mode={mode} | sessions={int(saved.get('sessions') or 0)}",
+            reason=" ".join(reason_parts),
         )
-        _append_rpg_history(history_path, history_line)
         events.append({
             "timestamp": timestamp,
             "company_id": company_id,
@@ -1067,6 +1192,7 @@ __all__ = [
     "score_rowan_research_report_completion",
     "score_verified_report_completion",
     "apply_runtime_rpg_updates",
+    "append_human_rpg_history",
     "format_rpg_identity_line",
     "format_rpg_summary",
     "update_xp",

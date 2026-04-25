@@ -83,13 +83,15 @@ def build_rows() -> list[dict]:
             "waste_penalty": 0.0,
             "fake_productivity_penalty": 0.0,
         }
-        rows.append({"agent": aid, **stats, "rpg_exists": p.exists()})
+        history_path = MEM / alias / "RPG_HISTORY.md"
+        rows.append({"agent": aid, **stats, "rpg_exists": p.exists(), "history_exists": history_path.exists()})
     return rows
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Write full agent RPG stats report to file.")
-    ap.add_argument("--filter", choices=["zero", "active", "master", "company_001", "company_002", "company_003", "company_004", "all"], default="all")
+    ap.add_argument("--filter", choices=["zero", "active", "master", "company_001", "company_002", "company_003", "company_004", "top", "unwired", "all"], default="all")
+    ap.add_argument("--limit", type=int, default=0, help="Optional row limit after filtering/sorting.")
     ap.add_argument("--output", default=None)
     args = ap.parse_args()
 
@@ -98,18 +100,24 @@ def main() -> None:
         rows = [r for r in rows if r["xp"] <= 0]
     elif args.filter == "active":
         rows = [r for r in rows if r["sessions"] > 0]
+    elif args.filter == "unwired":
+        rows = [r for r in rows if (not r["rpg_exists"]) or r["sessions"] <= 0]
+    elif args.filter == "top":
+        rows = [r for r in rows if r["xp"] > 0 or r["sessions"] > 0]
     elif args.filter == "master":
         rows = [r for r in rows if r["agent"] in {"main", "selene", "helena", "vivienne", "ariadne", "ledger", "axiom", "grant_cardone"}]
     elif args.filter.startswith("company_"):
         rows = [r for r in rows if args.filter in r["agent"]]
 
-    rows.sort(key=lambda r: (-r["xp"], r["agent"]))
+    rows.sort(key=lambda r: (-r["xp"], -r["sessions"], r["agent"]))
+    if args.limit and args.limit > 0:
+        rows = rows[: args.limit]
     REPORTS.mkdir(parents=True, exist_ok=True)
     out = Path(args.output) if args.output else REPORTS / f"agent_stats_{args.filter}.txt"
     lines = [f"AGENT STATS REPORT ({args.filter})", "=" * 80, f"count: {len(rows)}", ""]
     for r in rows:
         lines.append(
-            f"{r['agent']}: xp={r['xp']} sessions={r['sessions']} level={r['level']} usefulness={r['usefulness']} judgment={r['judgment']} evidence={r['evidence_quality']} rpg_exists={r['rpg_exists']}"
+            f"{r['agent']}: xp={r['xp']} sessions={r['sessions']} level={r['level']} usefulness={r['usefulness']} judgment={r['judgment']} evidence={r['evidence_quality']} rpg_exists={r['rpg_exists']} history_exists={r['history_exists']}"
         )
     out.write_text("\n".join(lines) + "\n")
     print(f"Wrote: {out}")

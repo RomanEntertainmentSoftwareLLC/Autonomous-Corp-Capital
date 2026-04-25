@@ -15,7 +15,7 @@ ROOT = Path("/opt/openclaw/.openclaw/workspace")
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.rpg_state import load_rpg_state, save_rpg_state, update_xp
+from tools.rpg_state import append_human_rpg_history, load_rpg_state, save_rpg_state, update_xp
 from tools.memory_writer import append_memory_notes
 RUNS_DIR = ROOT / "state" / "live_runs"
 BRIEFING_PATH = ROOT / "state" / "grant" / "latest_grant_briefing.json"
@@ -215,15 +215,19 @@ def _update_yam_yam_rpg(run_id: str, review_text: str, dry_run: bool = False) ->
     }
 
     if not dry_run:
-        MAIN_RPG_HISTORY.parent.mkdir(parents=True, exist_ok=True)
-        if not MAIN_RPG_HISTORY.exists():
-            MAIN_RPG_HISTORY.write_text("# RPG History\n\n", encoding="utf-8")
-        with MAIN_RPG_HISTORY.open("a", encoding="utf-8") as fh:
-            fh.write(
-                f"- {event['timestamp']} | {event['event']} | {run_id} | "
-                f"+{event['xp_delta']} XP | {event['before_xp']} -> {event['after_xp']} | "
-                f"sessions {event['sessions']}\n"
-            )
+        append_human_rpg_history(
+            MAIN_RPG_HISTORY,
+            timestamp=event["timestamp"],
+            agent_id="main",
+            event_type="Post-Run Executive Review",
+            xp_delta=event["xp_delta"],
+            before_xp=event["before_xp"],
+            after_xp=event["after_xp"],
+            before_level=before.get("level"),
+            after_level=saved.get("level"),
+            context=f"run_id={run_id} | sessions={event['sessions']}",
+            reason="Yam Yam reviewed the latest run, produced an executive artifact, issued directives, and created memory-worthy cliff notes.",
+        )
     return event
 
 

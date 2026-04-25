@@ -1,0 +1,47 @@
+AGENT STATS REPORT (unwired)
+================================================================================
+count: 43
+
+ariadne: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+atlas_company_001: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+atlas_company_002: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+atlas_company_003: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+atlas_company_004: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+axiom: xp=0.0 sessions=0.0 level=0.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=False history_exists=False
+bob_company_001: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+bob_company_002: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+bob_company_003: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+bob_company_004: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+eli: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+gideon: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+grant_cardone: xp=0.0 sessions=0.0 level=0.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=False history_exists=False
+helena: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+june_company_001: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+june_company_002: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+june_company_003: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+june_company_004: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+justine: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+ledger: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+mara: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+marek: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+mina: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+nadia: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+noah: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+owen: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+pam_company_001: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+pam_company_002: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+pam_company_003: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+pam_company_004: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+rhea: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+rowan_company_001: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+rowan_company_002: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+rowan_company_003: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+rowan_company_004: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+sabine: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+selene: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+sloane_company_001: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+sloane_company_002: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+sloane_company_003: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+sloane_company_004: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+tessa: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True
+vivienne: xp=0.0 sessions=0.0 level=1.0 usefulness=0.0 judgment=0.0 evidence=0.0 rpg_exists=True history_exists=True

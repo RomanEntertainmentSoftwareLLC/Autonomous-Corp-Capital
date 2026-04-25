@@ -1755,6 +1755,77 @@ def write_daily_digest(run_id: str) -> None:
     write_bridge_usage_report(run_dir, run_id, meta.get("status"), meta)
 
 
+
+def run_axiom_post_run_review(run_id: str) -> None:
+    """Run Axiom's post-run evaluator review as non-fatal governance.
+
+    Axiom is an evaluator, not a trade-cycle participant. He should review the
+    completed run after core artifacts and reports exist, then write his own
+    review, RPG history, and memory notes. This is default governance; disable
+    only for emergency/debug cases with DISABLE_AXIOM_POST_RUN_REVIEW=1.
+    """
+    if os.getenv("DISABLE_AXIOM_POST_RUN_REVIEW", "0").strip().lower() in {"1", "true", "yes", "on"}:
+        return
+
+    run_dir = run_directory(run_id)
+    artifacts_dir = run_dir / "artifacts"
+    artifacts_dir.mkdir(parents=True, exist_ok=True)
+    log_path = artifacts_dir / "axiom_review_hook.log"
+
+    cmd = [
+        sys.executable,
+        str(ROOT / "tools" / "axiom_evaluator_review.py"),
+        "--run-id",
+        run_id,
+        "--timeout",
+        os.getenv("AXIOM_REVIEW_TIMEOUT_SECONDS", "420"),
+    ]
+
+    started_at = _utcnow().isoformat()
+    try:
+        result = subprocess.run(
+            cmd,
+            cwd=str(ROOT),
+            text=True,
+            capture_output=True,
+            timeout=int(os.getenv("AXIOM_REVIEW_HOOK_TIMEOUT_SECONDS", "480")),
+            env=dict(os.environ),
+        )
+        log_path.write_text(
+            json.dumps(
+                {
+                    "timestamp": _utcnow().isoformat(),
+                    "started_at": started_at,
+                    "run_id": run_id,
+                    "hook": "axiom_post_run_review",
+                    "status": "success" if result.returncode == 0 else "failed",
+                    "returncode": result.returncode,
+                    "cmd": cmd,
+                    "stdout": result.stdout,
+                    "stderr": result.stderr,
+                    "review_path": str(ROOT / "state" / "axiom_reviews" / f"{run_id}_axiom_review.txt"),
+                },
+                indent=2,
+            ) + "\n",
+            encoding="utf-8",
+        )
+    except Exception as exc:
+        (artifacts_dir / "axiom_review_hook_error.log").write_text(
+            json.dumps(
+                {
+                    "timestamp": _utcnow().isoformat(),
+                    "started_at": started_at,
+                    "run_id": run_id,
+                    "hook": "axiom_post_run_review",
+                    "status": "error",
+                    "cmd": cmd,
+                    "error": repr(exc),
+                },
+                indent=2,
+            ) + "\n",
+            encoding="utf-8",
+        )
+
 def start_run(duration_hours: float = 0.0, virtual_currency: float | None = None, live_trade: bool = False) -> None:
     ensure_directories()
     if os.environ.get("LIVE_RUN_MODE", "paper").lower() == "live" and not live_trade:
@@ -1824,67 +1895,6 @@ def update_evolution_states_from_warehouse() -> None:
         state["company_packet_cap_baseline"] = baseline
         save_evolution_state(str(company), state)
 
-
-
-def run_yam_yam_post_run_review(run_id: str) -> None:
-    """Optionally run Yam Yam's post-run Master CEO review.
-
-    This hook is non-fatal by design. A failed executive review should never
-    corrupt or crash live-run finalization.
-    """
-    if os.getenv("DISABLE_YAM_YAM_POST_RUN_REVIEW", "0") == "1":
-        return
-
-    run_dir = run_directory(run_id)
-    artifacts = run_dir / "artifacts"
-    artifacts.mkdir(parents=True, exist_ok=True)
-    timeout = int(os.getenv("YAM_YAM_REVIEW_TIMEOUT_SECONDS", "420"))
-    cmd = [
-        sys.executable,
-        str(ROOT / "tools" / "yam_yam_executive_review.py"),
-        "--run-id",
-        run_id,
-        "--timeout",
-        str(timeout),
-    ]
-
-    try:
-        result = subprocess.run(
-            cmd,
-            cwd=str(ROOT),
-            text=True,
-            capture_output=True,
-            timeout=timeout + 30,
-        )
-        (artifacts / "yam_yam_review_hook.log").write_text(
-            json.dumps(
-                {
-                    "timestamp": _utcnow().isoformat(),
-                    "enabled": True,
-                    "cmd": cmd,
-                    "returncode": result.returncode,
-                    "stdout": result.stdout,
-                    "stderr": result.stderr,
-                },
-                indent=2,
-            )
-            + "\n",
-            encoding="utf-8",
-        )
-    except Exception as exc:
-        (artifacts / "yam_yam_review_hook_error.log").write_text(
-            json.dumps(
-                {
-                    "timestamp": _utcnow().isoformat(),
-                    "enabled": True,
-                    "cmd": cmd,
-                    "error": str(exc),
-                },
-                indent=2,
-            )
-            + "\n",
-            encoding="utf-8",
-        )
 
 
 def _pid_is_alive(pid: int) -> bool:
@@ -2264,7 +2274,7 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
             meta["status"] = "completed"
         meta_path.write_text(json.dumps(meta, indent=2))
     write_daily_digest(run_id)
-    run_yam_yam_post_run_review(run_id)
+    run_axiom_post_run_review(run_id)
     update_evolution_states_from_warehouse()
     prune_old_run_artifacts(run_id)
     current = None

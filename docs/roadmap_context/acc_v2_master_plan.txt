@@ -1,0 +1,84 @@
+ACC v2 Master Plan
+
+1. Durable data + checkpoints
+Stop relying on scattered run artifacts. Get the warehouse path working cleanly and make learned state/checkpoints persist between runs.
+
+2. Real ML lifecycle
+Log features and outcomes, train offline, save checkpoints, and load them on startup. No more "maybe the app learned something."
+ML must actually retain:
+- raw feature/outcome data
+- cleaned training data
+- saved checkpoints
+- saved weights and biases
+- startup reload of the latest approved model
+
+3. Stricter trading discipline
+Use stronger 3-candle confirmation, market-regime filters, and smarter exits.
+Do not buy garbage just because it moved.
+The bot should:
+- require confirmed bullish structure before entries
+- avoid broad red tape unless setup is exceptional
+- use smarter sell timing and stop behavior
+- become more selective in weak markets
+
+4. Measured evolution
+Promotions, cloning, demotions, and agent/company evolution should come from real outcomes, not vibes.
+Hardwire RPG, Axiom-style evaluation, and prove paper mode first.
+Track outcomes like:
+- realized P/L
+- drawdown
+- false-entry rate
+- stop-out rate
+- token/cost burn
+- committee usefulness
+- waste / duplication / fake productivity
+
+5. Token exhaustion failover (top priority)
+Ledger watches spend. At 70/80/90/98%, the app degrades in stages:
+- less committee chatter
+- cheaper models for low-stakes work
+- deterministic rules for BUY/SELL/HOLD
+- eventually no new risky entries if budget gets too low
+
+Critical rule:
+The business carries on even when tokens are exhausted.
+The app must not die because AI budget ran low.
+It must degrade gracefully, with deterministic execution taking over when needed.
+
+6. Grant Cardone 10X doctrine, but civilized
+Not "YOLO into red candles."
+More like:
+- make money in up markets
+- survive sideways chop
+- extract edge in down markets
+- keep dead capital from sitting around uselessly
+- eventually add short/downside logic only after the long-side system is trustworthy
+
+7. Agents must actually learn from mistakes
+Memory alone is not enough.
+Agents should not just store logs, RPG sheets, and history—they need a true learn-from-mistakes loop.
+
+Desired loop:
+mistake happens -> artifact/history captures it -> Axiom/June/RPG score it -> company/agent policy updates -> future behavior changes
+
+What must persist:
+- agent memory/state
+- RPG state/history
+- evaluated mistakes and repeated failures
+- behavior-changing rules or policy updates derived from those failures
+
+Goal:
+Agents should become harder to fool, less wasteful, and more effective over time—not just more talkative or more experienced on paper.
+
+Power Structure
+- Grant = ambition
+- Bianca = sizing and capital discipline
+- Helena = veto reckless stupidity
+- Ledger = budget guardrails
+- Deterministic core = survival when AI budget gets ugly
+- ML = improvement over time, with memory
+- Axiom/June/RPG = accountability and learning from mistakes
+
+This is the version that can actually become a beast instead of a very expensive mood swing.
+
+When back at home, the smartest move is turning these into an exact patch order.

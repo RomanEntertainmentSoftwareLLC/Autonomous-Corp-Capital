@@ -16,20 +16,6 @@
       "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/master_cfo/vivienne_master_cfo"
     },
     {
-      "agent_id": "grant_cardone",
-      "branch": "master",
-      "priority_score": 123.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/revenue_expansion_officer/grant_cardone_revenue_expansion_officer"
-    },
-    {
       "agent_id": "helena",
       "branch": "master",
       "priority_score": 120.0,
@@ -154,6 +140,20 @@
       "has_memory": false,
       "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
       "workspace": ""
+    },
+    {
+      "agent_id": "grant_cardone",
+      "branch": "master",
+      "priority_score": 87.7,
+      "xp": 6.0,
+      "sessions": 1.0,
+      "usefulness": 2.0,
+      "evidence_quality": 1.0,
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": true,
+      "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
+      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/revenue_expansion_officer/grant_cardone_revenue_expansion_officer"
     },
     {
       "agent_id": "pam_company_001",
@@ -324,20 +324,6 @@
       "workspace": ""
     },
     {
-      "agent_id": "bob_company_001",
-      "branch": "company",
-      "priority_score": 85.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": true,
-      "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
-    },
-    {
       "agent_id": "bob_company_002",
       "branch": "company",
       "priority_score": 85.0,
@@ -489,7 +475,7 @@
       "has_rpg_history": false,
       "has_memory": false,
       "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch/front_desk_administrator/pam_front_desk_administrator_company_004"
+      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/front_desk_administrator/pam_front_desk_administrator_company_004"
     },
     {
       "agent_id": "evolution_specialist_company_001",
@@ -545,7 +531,7 @@
       "has_rpg_history": false,
       "has_memory": false,
       "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch/evolution_specialist/sloane_evolution_specialist_company_004"
+      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/evolution_specialist/sloane_evolution_specialist_company_004"
     },
     {
       "agent_id": "iris_analyst_company_001",
@@ -769,7 +755,7 @@
       "has_rpg_history": false,
       "has_memory": false,
       "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch/market_simulator/atlas_market_simulator_company_004"
+      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/market_simulator/atlas_market_simulator_company_004"
     },
     {
       "agent_id": "operations_worker_company_001",
@@ -825,7 +811,7 @@
       "has_rpg_history": false,
       "has_memory": false,
       "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch/operations_worker/bob_operations_worker_company_004"
+      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/operations_worker/bob_operations_worker_company_004"
     },
     {
       "agent_id": "orion_strategist_company_001",
@@ -881,7 +867,7 @@
       "has_rpg_history": false,
       "has_memory": false,
       "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch/strategist/orion_strategist_company_004"
+      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/strategist/orion_strategist_company_004"
     },
     {
       "agent_id": "rowan_researcher_company_001",
@@ -937,7 +923,7 @@
       "has_rpg_history": false,
       "has_memory": false,
       "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch/researcher/rowan_researcher_company_004"
+      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/researcher/rowan_researcher_company_004"
     },
     {
       "agent_id": "vera_manager_company_001",
@@ -993,7 +979,7 @@
       "has_rpg_history": false,
       "has_memory": false,
       "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch/manager/vera_manager_company_004"
+      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/manager/vera_manager_company_004"
     },
     {
       "agent_id": "main",
@@ -1134,6 +1120,20 @@
       "has_memory": false,
       "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
       "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/watchdog_branch/ombudsman/owen_ombudsman"
+    },
+    {
+      "agent_id": "bob_company_001",
+      "branch": "company",
+      "priority_score": 54.95,
+      "xp": 1.0,
+      "sessions": 1.0,
+      "usefulness": 0.5,
+      "evidence_quality": 0.0,
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": true,
+      "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
+      "workspace": ""
     },
     {
       "agent_id": "yam_yam",

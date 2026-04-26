@@ -1,0 +1,29 @@
+ACC ML Readiness Report
+========================
+Run: run_20260421_022922
+Verdict: blocked_model_load_failed
+
+Model:
+- path: /opt/openclaw/.openclaw/workspace/models/ml_model.pkl
+- exists: True
+- loads: False
+- error: ModuleNotFoundError("No module named 'joblib'")
+- class: None
+
+Live feature count: 19
+Training feature count: 19
+Features match exactly: True
+Missing from live: []
+Extra in live: []
+
+Recent decisions:
+- rows: 10
+- ml_score_rows: 0
+- ml_active_rows: 0
+- ml_influenced_or_traced_rows: 0
+- avg_feature_coverage: 0.0
+- coverage_rows: 10
+
+Feature order:
+- live: ema_fast, ema_slow, ema_spread, rsi, price_change_1, price_change_2, price_change_3, momentum_3, slope_3, pattern_three_rising, pattern_three_falling, pattern_reversal_after_two_decline, pattern_reversal_after_two_rise, pattern_short_momentum_burst, pattern_short_exhaustion, higher_highs, higher_lows, lower_highs, lower_lows
+- train: ema_fast, ema_slow, ema_spread, rsi, price_change_1, price_change_2, price_change_3, momentum_3, slope_3, pattern_three_rising, pattern_three_falling, pattern_reversal_after_two_decline, pattern_reversal_after_two_rise, pattern_short_momentum_burst, pattern_short_exhaustion, higher_highs, higher_lows, lower_highs, lower_lows

@@ -1,0 +1,65 @@
+ACC V2 Readiness Report
+========================
+
+Readiness score: 55.6% (5/9 checks)
+Latest run: state/live_runs/run_20260421_022922
+
+Checklist:
+- [OK] core_tools_present
+- [OK] python_compile_clean
+- [OK] full_agent_backup_64
+- [OK] latest_run_exists
+- [NO] decision_trace_artifacts_seen
+- [NO] ml_scores_seen_in_recent_decisions
+- [NO] all_major_governance_artifacts_seen
+- [NO] master_agents_have_memory
+- [OK] master_agents_have_rpg_history
+
+Backup counts:
+- AGENTS.md: 64
+- IDENTITY.md: 64
+- SOUL.md: 64
+- MEMORY.md: 64
+- USER.md: 64
+- TOOLS.md: 64
+- HEARTBEAT.md: 64
+
+Decision health:
+- has_run: True
+- run_id: run_20260421_022922
+- decision_rows: 10
+- rows_with_trace: 0
+- rows_with_ml_score: 0
+- rows_with_evidence: 0
+- trace_coverage: 0.0
+- ml_score_coverage: 0.0
+- evidence_coverage: 0.0
+
+Latest governance artifacts:
+- ledger: MISSING
+- helena: MISSING
+- axiom: state/axiom_reviews/run_20260421_022922_axiom_review.txt
+- vivienne: MISSING
+- selene: MISSING
+- ariadne: MISSING
+- grant: state/grant_speeches/run_20260421_022922_grant_speech.txt
+- yam_yam: state/executive_reviews/run_20260421_022922_yam_yam_review.txt
+- june: MISSING
+
+Master agent RPG/memory states:
+- main: xp=None sessions=None memory=False history=True
+- ledger: xp=None sessions=None memory=False history=True
+- helena: xp=None sessions=None memory=False history=True
+- axiom: xp=None sessions=None memory=True history=True
+- vivienne: xp=None sessions=None memory=False history=True
+- selene: xp=None sessions=None memory=False history=True
+- ariadne: xp=None sessions=None memory=False history=True
+- grant_cardone: xp=None sessions=None memory=True history=True
+
+Remaining V2 focus:
+- prove ML scores after a fresh run
+- prove warehouse persistence after a fresh run
+- prove full post-run governance chain after a fresh run
+- roll Hermes beyond audit into phased second-brain activation
+- finish Orion/Rowan separation proof
+- run roadmap step #7 paper proof only after readiness is acceptable

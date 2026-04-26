@@ -1,0 +1,259 @@
+ACC V3 — Dreambot Delta Ideas
+(Only new additions beyond ACC V2 and the existing roadmap)
+
+1. Regime detector first
+Before any trade logic runs, ACC should classify the market regime:
+- trending up
+- trending down
+- sideways chop
+- volatility shock
+- low-liquidity / disorderly conditions
+
+The rest of the system should adapt to the detected regime instead of using one personality in every market.
+
+2. Strategy ensemble by regime
+ACC should not rely on one “magic” strategy.
+It should eventually support multiple engines and select or weight them by regime:
+
+- Trend engine
+  For strong directional continuation and breakouts
+
+- Mean-reversion engine
+  For oversold / overbought snapbacks and reversal bounces
+
+- Relative-strength rotation engine
+  For identifying the few assets showing life while the rest of the tape is weak
+
+- Market-neutral / spread engine
+  For exploiting mispricings and lag relationships when direction is messy
+
+Goal:
+No single engine should be expected to work in all conditions.
+
+3. Ruthless risk hierarchy
+Risk should have higher authority than signal generation.
+Every trade and every company should operate inside hard limits such as:
+- max loss per trade
+- max loss per day
+- max drawdown per company
+- max total drawdown
+- max open positions
+- max correlation exposure
+- max theme concentration
+- forced flatten / risk-off states
+
+ACC should always ask:
+Can this trade kill the company if it is wrong?
+
+4. Entry quality and exit quality must be separate systems
+ACC should not treat exits as an afterthought.
+
+Entry logic should focus on:
+- confirmation
+- context
+- setup quality
+- regime fit
+
+Exit logic should focus on:
+- invalidation
+- take-profit behavior
+- trailing protection
+- time-based exits
+- regime-change exits
+- opportunity-cost exits
+
+The system should be able to admit:
+a decent entry can still make money with excellent exits,
+and a great entry can still lose with bad exits.
+
+5. Execution-aware decision making
+Paper alpha dies if execution reality is ignored.
+
+ACC should incorporate:
+- spread
+- slippage
+- fee drag
+- liquidity quality
+- speed of move
+- whether the setup still has edge after costs
+
+A setup is not good just because price moved.
+It is only good if the trade is still worth taking after friction.
+
+6. High-quality WAIT / no-trade posture
+One of the strongest behaviors ACC can learn is refusing bad trades.
+
+WAIT should become a first-class state, not just “nothing happened.”
+The system should prefer no trade when:
+- confirmation is weak
+- regime is hostile
+- correlation is too high
+- cost/friction destroys the edge
+- the market is broad red mush with no exceptional setup
+
+The dream version of ACC should be selective, not hyperactive.
+
+7. Tradable universe vs signal-only universe
+ACC should separate:
+- assets that can be traded through the current broker/exchange
+- assets that cannot be traded but still provide useful signal information
+
+Example:
+A non-tradable coin showing unusual strength can still act as a signal leader.
+ACC should then search for tradable cousins showing the same confirmed behavior.
+
+This prevents the system from being blind just because the broker’s tradable universe is limited.
+
+8. Regime-specific posture switching
+The dream version of ACC should not just generate BUY / SELL / HOLD.
+It should switch posture by regime, such as:
+
+- Uptrend:
+  favor trend-following and relative-strength longs
+
+- Downtrend:
+  favor risk-off behavior, selective downside logic, short logic later, or cash
+
+- Sideways:
+  smaller size, quicker exits, mean-reversion only
+
+- Volatility shock / chaos:
+  reduce size sharply or stop trading entirely
+
+This is different from raw signal generation.
+It is the strategic posture of the machine.
+
+9. Champion vs challenger strategy framework
+ACC should eventually support:
+- champion model / strategy = currently trusted live paper leader
+- challenger model / strategy = experimental alternative being evaluated quietly
+
+The challenger should earn promotion only through measured performance, not novelty.
+This helps prevent unstable strategy swaps driven by vibes.
+
+10. Walk-forward validation discipline
+Before any major strategy or model is trusted, ACC should test it through walk-forward style evaluation:
+- train on earlier data
+- validate on later unseen data
+- repeat across multiple market regimes
+
+No strategy should be trusted just because it looked good on one backtest slice.
+
+11. Post-trade attribution engine
+ACC should classify why a trade won or lost.
+
+Examples:
+- good entry, bad exit
+- bad entry, good recovery
+- regime mismatch
+- spread/slippage killed the edge
+- correct idea, wrong timing
+- correct timing, over-sized risk
+
+This attribution layer should feed future rule tuning, model tuning, and agent evaluation.
+
+12. Correlation and exposure intelligence
+ACC should understand when multiple open positions are basically the same bet.
+It should detect:
+- correlated positions
+- duplicate thematic exposure
+- fake diversification
+- “all roads lead to BTC” style dependence
+
+The goal is to avoid pretending 6 altcoins equals diversification when they all move together.
+
+13. Market-neutral and downside capability later
+The dreambot eventually needs the ability to make money when the market is falling, but only after the long-side system is trustworthy.
+
+That means later additions may include:
+- downside / short logic
+- inverse posture
+- spread or lag exploitation
+- volatility harvesting
+- relative-value trades
+
+This is a later-stage capability, not an early shortcut.
+
+14. Strategic role tension inside the machine
+ACC already has the bones of internal debate.
+The dream version should lean into governed tension, where:
+- ambition pushes for opportunity
+- capital discipline restrains sizing
+- risk veto prevents stupidity
+- budget guardrails constrain AI burn
+- deterministic survival logic keeps the business alive
+
+The goal is not unanimous optimism.
+The goal is governed aggression.
+
+15. Always in the right posture, not always in the market
+Final principle:
+The “perfect” bot is not always trading.
+It is always in the right posture for the market.
+
+Sometimes that means:
+- long
+- short later
+- neutral
+- scaling down
+- or doing nothing at all
+
+The dream is not constant action.
+The dream is persistent edge with survivability.
+
+16. Confidence-weighted sizing
+Position size should scale with setup quality, not just available cash.
+Higher-confidence setups can earn more size, while weaker-but-valid setups get smaller allocations.
+
+17. Cooldown and revenge-trade prevention
+After a loss cluster, failed breakout, or volatility shock, ACC should cool itself down.
+The machine should not immediately try to win everything back with more trades.
+
+18. Session and time-of-day awareness
+Some edges may be stronger or weaker depending on the time of day, liquidity window, or event schedule.
+ACC should eventually learn whether specific setups are more reliable during specific trading windows.
+
+19. Data quality scoring
+Not all signals deserve equal trust.
+ACC should track the quality of the data feed itself:
+- stale data
+- partial data
+- lagging sources
+- inconsistent marks
+- suspicious spread anomalies
+
+Low-trust data should automatically lower aggressiveness.
+
+20. Edge decay detection
+If a once-good setup starts underperforming, ACC should notice and reduce trust in it.
+No strategy should coast forever on old glory.
+
+21. Anti-overfitting discipline
+ACC should prefer simpler, more robust edges over fragile cleverness.
+If a strategy only works in one narrow slice of history, it should not earn promotion.
+
+22. Recovery mode after drawdown
+When a company or strategy falls into drawdown, ACC should shift into a more defensive operating mode:
+- smaller size
+- fewer entries
+- higher confirmation threshold
+- slower re-risking
+
+23. Explainability snapshots
+For important trades, ACC should preserve a concise explanation of why the trade was taken:
+- regime
+- setup type
+- confidence
+- risk posture
+- key supporting signals
+
+This will help debugging, attribution, and future ML labeling.
+
+24. Portfolio construction awareness
+ACC should think about the whole book, not just one coin at a time.
+A good trade can still be a bad addition if it worsens overall portfolio structure.
+
+25. Survive first, compound second
+Dreambot doctrine:
+The machine should optimize first for staying alive, then for compounding.
+No edge matters if one bad cycle wipes out the company.

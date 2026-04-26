@@ -1,0 +1,14 @@
+WAREHOUSE AUDIT
+===============
+Verdict: artifact_only_no_sqlite_warehouse_found
+SQLite files: 0
+Tables: 0 | non-empty: 0
+
+Latest runs:
+- run_20260421_022922: decisions=10 trades=10 portfolio=10 packets=8 target=True grant=True
+- run_20260420_034819: decisions=10 trades=10 portfolio=10 packets=8 target=True grant=True
+- run_20260420_034400: decisions=0 trades=0 portfolio=0 packets=0 target=False grant=False
+- run_20260420_030740: decisions=10 trades=10 portfolio=10 packets=12 target=False grant=True
+- run_20260420_030521: decisions=6 trades=6 portfolio=6 packets=4 target=False grant=False
+
+SQLite tables:

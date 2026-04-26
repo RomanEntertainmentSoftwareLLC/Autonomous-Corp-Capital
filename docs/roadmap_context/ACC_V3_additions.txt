@@ -1,0 +1,387 @@
+ACC V3 Additions - New Ideas Consolidation
+========================================
+
+Purpose
+-------
+This file captures the newer ACC V3 / Dreambot-adjacent ideas discussed after the earlier V2 and V3 planning documents.
+It is meant as a supplement to the existing ACC V3 / Dreambot deltas plan, not a replacement.
+
+Core Theme
+----------
+V3 should push ACC from a working autonomous trading organization into a broader autonomous operating system:
+- deeper memory
+- stronger governance
+- richer visibility
+- better agent participation
+- better explainability
+- better operator oversight
+- future platform expansion
+
+1. Memory Must Become a Real Operating Layer
+--------------------------------------------
+MEMORY.md is not just for Grant speeches.
+MEMORY.md should be treated as durable operational memory for every agent.
+
+It should capture:
+- important facts
+- durable directives
+- lessons learned
+- mistakes and what caused them
+- successful tools, commands, and workflows
+- failed approaches and why they failed
+- role-specific knowledge
+- board meeting directives
+- Grant pressure directives
+- Axiom review outcomes
+- Yam Yam executive guidance
+- anything that makes the agent more effective next time
+
+Important rule:
+- MEMORY.md is not optional decoration
+- MEMORY.md is not just a clipboard
+- MEMORY.md is not a giant diary
+- MEMORY.md should be consulted whenever the task depends on prior lessons, directives, mistakes, or operator preferences
+
+Desired outcome:
+Agents stop behaving like goldfish with job titles.
+
+2. Hermes as the Second Memory / Brain Layer
+--------------------------------------------
+Every agent should eventually have two memory layers:
+
+1. MEMORY.md
+   - local durable file memory
+   - human-readable
+   - easy to inspect and edit
+
+2. Hermes-backed memory/context
+   - deeper context and memory assistance
+   - second brain layer
+   - less chance of forgetting or drifting
+   - helps reduce repeated re-teaching
+
+Architectural split:
+- OpenClaw = hands / runtime / tools
+- MEMORY.md = local file memory
+- Hermes = deeper memory/context brain
+
+Goal:
+Every agent gets both memory layers before ACC moves much deeper into V2 / Dreambot territory.
+
+3. Yam Yam Must Be Real Executive Authority
+-------------------------------------------
+Yam Yam should not be decorative.
+
+She should not approve every trade,
+but she should be involved in:
+- default post-run executive review
+- major event escalation
+- serious anomalies
+- governance-level decisions
+- board meetings
+
+Major event triggers should include:
+- huge dip / drawdown
+- huge gain / "to the moon" anomaly
+- massive losses
+- impossible or suspicious profits
+- accounting anomalies
+- hallucinated or structurally invalid agent decisions
+- repeated committee failures
+- risk breach / Helena escalation
+- Vivienne financial inconsistency warning
+- Axiom serious review / Grant severe escalation
+
+Yam Yam's role:
+- executive synthesis
+- final high-level authority
+- durable directive generation
+- major policy / pressure / structural follow-up
+
+4. Daily AI Board Meetings
+--------------------------
+ACC should eventually have real daily board meetings.
+
+Core participants:
+- Yam Yam
+- Selene
+- Helena
+- Vivienne
+- Ariadne
+- Ledger
+- Axiom
+- Grant Cardone
+
+Optional participants only when needed:
+- watchdogs
+- June
+- Pam
+- Atlas
+- other relevant agents
+
+Board meetings should output:
+- board minutes
+- executive summary
+- key directives
+- who is under pressure or review
+- next-day priorities
+- memory cliff notes written to relevant agents
+
+Goal:
+The organization should not just trade.
+It should govern itself, review itself, and improve itself.
+
+5. Agent Event Bus / Job Router
+-------------------------------
+ACC should move away from isolated one-off scripts toward event-driven autonomous participation.
+
+Not every agent on every cycle.
+Instead, agents are invoked when their role matters.
+
+Example events:
+- post_run_review
+- target_miss
+- drawdown_alert
+- accounting_anomaly
+- risk_breach
+- workforce_audit
+- board_meeting_daily
+- archive_run
+- simulation_request
+- cost_warning
+- impossible_profit_spike
+- hallucinated_decision_alert
+
+Example agent routing:
+- Yam Yam = executive governance
+- Vivienne = financial truth
+- Helena = risk
+- Grant = pressure / target doctrine
+- Axiom = evaluation / consequence recommendations
+- Ledger = cost / token usage
+- Ariadne = workforce participation and staffing
+- June = archive / minutes
+- Pam = coordination / routing / distribution
+- Atlas = scenario simulation
+- Bob = operational grunt work when useful
+- Watchdogs = only on disputes / abuse / governance issues
+- SWE = much later, ticket-driven only
+
+Goal:
+Agents should actually work, but only when relevant, so the app does not become a token-eating circus.
+
+6. One-Agent-at-a-Time Activation Doctrine
+------------------------------------------
+V3 should preserve the principle of proving each agent one at a time.
+
+For each new runtime agent activation, prove:
+- real trigger
+- real job
+- real artifact output
+- RPG XP gain
+- readable RPG history entry
+- MEMORY.md note when appropriate
+- token use justified by actual value
+
+Suggested activation order after Yam Yam:
+- Axiom
+- Vivienne
+- Helena
+- Grant
+- Ledger
+- Ariadne
+- Selene
+- then event-driven support agents
+
+SWE branch remains later.
+
+7. Human-Readable RPG History
+-----------------------------
+RPG progression should not be mystery math.
+
+Each agent should have:
+- RPG_STATE.md
+- RPG_HISTORY.md
+
+RPG_HISTORY.md should grow over time and explain:
+- what happened
+- when it happened
+- how much XP was gained or lost
+- why it was earned or penalized
+- what event or job caused it
+
+Preferred format:
+human-readable, timestamped, readable by Jacob and by the agents.
+
+Example:
+- 6:42 PM ET | +8 XP | Post-Run Executive Review | Reviewed run, identified target miss, flagged company_002 anomaly.
+
+Goal:
+Agent growth should feel like a real career history, not random number mutation.
+
+8. Timezone Consistency
+-----------------------
+Human-facing timestamps should be consistent and readable.
+
+Preferred display:
+- Eastern Time for human-readable histories, meetings, and XP logs
+
+Machine storage may still use ISO timestamps,
+but the human-facing layer should not be a mess of mixed timezones.
+
+9. Better Stats and Visibility
+------------------------------
+The current stats_all helper is not enough.
+
+Need a better full-agent stats reporter that:
+- writes full reports to files
+- supports filters
+- does not get cut off in terminal
+- shows zero-XP / active / master / company / top-XP / unwired views
+
+Desired reports:
+- reports/agent_stats_all.txt
+- reports/agent_stats_zero.txt
+- reports/agent_stats_active.txt
+- reports/agent_stats_master.txt
+- additional filtered reports later
+
+Goal:
+It should be easy to see who is working, who is decorative, who is improving, and who needs wiring.
+
+10. Local Dashboard / Operating Console
+---------------------------------------
+ACC should eventually have a local web dashboard.
+
+Suggested stack:
+- React
+- Vite
+- TypeScript
+- likely FastAPI backend for APIs / artifact reading
+
+Dashboard should show:
+- executive overview
+- portfolio equity
+- total P/L
+- current run state
+- live / paper mode
+- target status
+- market condition
+- committee health
+- company comparison charts
+- individual company charts
+- trade feed
+- decision feed
+- veto / approval details
+- who proposed what
+- board meeting minutes
+- Grant speeches
+- Yam Yam reviews
+- Axiom evaluations
+- agent stats, XP, levels, and profiles
+- live alerts and anomalies
+- token/cost data later via Ledger
+
+Portfolio chart behavior:
+- chart should scale to targets
+- microscopic fractional-penny gains should not look like a moonshot
+- missing company data should not create fake loss visuals
+
+Goal:
+Turn ACC into a real operating console, not just terminal sorcery.
+
+11. Android App Later
+---------------------
+Much later, ACC should also have an Android app.
+
+This should come after:
+- core ACC is trustworthy
+- V2 foundation is solid
+- Dreambot deltas are mature enough
+- local dashboard MVP already exists and is useful
+- paper mode is proven
+- live-money flow is safe
+
+Android app purpose:
+- mobile command center
+- portfolio oversight
+- alerts
+- board meeting summaries
+- Grant speeches
+- live decision feed
+- emergency pause / governance controls
+
+Goal:
+Web dashboard first, Android app later.
+
+12. Migration / Portability
+---------------------------
+ACC may eventually need to be moved to another machine (for example a Mac running localized Ubuntu).
+
+GitHub alone is not enough because important things are often gitignored:
+- ai agents
+- env files
+- local wiring
+- agent state
+- memory
+- runtime-specific config
+- Hermes-related config/state
+
+Preferred migration strategy:
+- treat the current machine as the golden image
+- transfer important folders over WiFi with rsync over SSH
+- copy real state, not just repo code
+- rebuild runtime dependencies cleanly on the destination
+- include Hermes config/state too
+
+Important directories likely involved:
+- workspace/
+- workspaces/
+- agent_state/
+- ai_agents_memory/
+- bash helpers
+- env vars/config files
+- Hermes-related state/config
+
+13. Dreambot Direction
+----------------------
+After V2 foundation is real and memory/governance are solid, V3 / Dreambot deltas should push ACC toward:
+- stronger autonomy
+- better self-improvement
+- richer governance
+- more explainable organization behavior
+- smarter pressure and consequence systems
+- platform-level usability
+- broader autonomous-business operating capability
+
+Dreambot should not be pure fantasy fluff.
+It should be the layer that makes ACC nastier, smarter, more ambitious, and more usable after the base machine is trustworthy.
+
+14. Token Discipline Must Remain Sacred
+---------------------------------------
+No matter how many agents are added,
+ACC must not eat tokens like an arcade cabinet eating quarters.
+
+Rules:
+- use the smallest number of agents needed
+- keep prompts short
+- keep outputs short and useful
+- event-driven activation only
+- no decorative agent spam
+- no giant speeches in memory
+- no always-on chatter without purpose
+
+The whole point is:
+working agents, not sitting pretty agents
+without turning the app into a token bonfire.
+
+15. Final Guiding Principle
+---------------------------
+ACC V3 should make the organization:
+- remember
+- govern
+- explain itself
+- improve over time
+- surface useful visibility
+- operate across multiple interfaces
+- and still stay disciplined enough to make money instead of just making noise

@@ -1,0 +1,66 @@
+ACC / OpenClaw Next Actions Roadmap (11-Step)
+
+1. Finish Orion properly
+- Replace or supplement the delayed/free NewsAPI path with a fresher source.
+- Do not cache empty fetch results.
+- Add truthful degraded states like no_fresh_provider_results.
+- Keep legacy_text_only fallback until fresh-source retrieval is reliable.
+
+2. Separate Rowan from Orion in runtime
+- Rowan = deep context, heavily cached, infrequent, no real-time headlines.
+- Orion = latest external signal, cheap, fresh, cached, no deep essays.
+- Remove overlap so they stop duplicating work and burning tokens.
+
+3. Hardwire the RPG system
+- Reward useful, cheap, evidence-backed work.
+- Penalize fluff, duplication, wasted calls, and fake productivity.
+- Persist scores and progression state.
+- Make scoring predictable enough to trust.
+
+4. Build Axiom on top of RPG
+- Axiom = AI consultant / evaluator.
+- Grade agent work quality, usefulness, and cost-efficiency.
+- Flag fake work, duplicated effort, and narrative-only output.
+- Keep Axiom short, structured, and cheap.
+
+5. Clean up internal decision semantics
+- Use NOT_INTERESTED for unowned coins that should not be entered.
+- Use HOLD_POSITION for owned positions that should be kept.
+- Keep operator-facing logs as BUY / SELL only.
+- Leave HOLD-like states internal for ML / analytics only.
+
+6. Add visibility before the serious run
+- Add 4-company portfolio progress visualization.
+- Add total system profit / loss visualization.
+- Later add cost overlay from Ledger.
+- Prefer matplotlib first; local dashboard can come later.
+
+7. Prove paper mode works
+- Run only disciplined paper tests first.
+- Verify low bridge-call volume, quiet logs, Orion caching, and Ledger reports.
+- No serious test until token burn is under control and cost-saving controls are confirmed.
+
+8. Add explicit --live-trade safely
+- Paper must remain the default-safe mode.
+- Live trading must be impossible to trigger accidentally.
+- Only honor live trading when the system is truly ready.
+
+9. Then PayPal / treasury automation
+- Route profits to a separate operating account.
+- Allocate percentages for token/model refills, reserve, and payout.
+- Do this only after a successful 24-hour paper proof.
+
+10. Then security hardening
+- Basic security always, serious security branch later.
+- Protect secrets, access, treasury/payment workflows, and runtime boundaries.
+- Prefer event-driven security agents to save tokens.
+
+11. Then ticket-driven SWE maintenance mode
+- No ticket = no SWE work.
+- Maintenance windows only.
+- Tickets may come from you or authorized higher-up agents.
+- Use this as the governed self-improvement path for the app.
+
+Guiding Principle:
+The whole operation should not eat tokens like Ms. Pac-Man eats pellets.
+It must be cost-saving, quiet by design, measurable, and capable of generating revenue.

@@ -1,0 +1,197 @@
+{
+  "timestamp": "2026-04-26T02:58:06.665196+00:00",
+  "readiness_pct": 55.6,
+  "checklist": [
+    {
+      "name": "core_tools_present",
+      "ok": true
+    },
+    {
+      "name": "python_compile_clean",
+      "ok": true
+    },
+    {
+      "name": "full_agent_backup_64",
+      "ok": true
+    },
+    {
+      "name": "latest_run_exists",
+      "ok": true
+    },
+    {
+      "name": "decision_trace_artifacts_seen",
+      "ok": false
+    },
+    {
+      "name": "ml_scores_seen_in_recent_decisions",
+      "ok": false
+    },
+    {
+      "name": "all_major_governance_artifacts_seen",
+      "ok": false
+    },
+    {
+      "name": "master_agents_have_memory",
+      "ok": false
+    },
+    {
+      "name": "master_agents_have_rpg_history",
+      "ok": true
+    }
+  ],
+  "missing_tools": [],
+  "compile_result": {
+    "ok": true,
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "backup": {
+    "counts": {
+      "AGENTS.md": 64,
+      "IDENTITY.md": 64,
+      "SOUL.md": 64,
+      "MEMORY.md": 64,
+      "USER.md": 64,
+      "TOOLS.md": 64,
+      "HEARTBEAT.md": 64
+    },
+    "nested_duplicate_dirs": [],
+    "healthy_64": true
+  },
+  "latest_run": "state/live_runs/run_20260421_022922",
+  "decision_health": {
+    "has_run": true,
+    "run_id": "run_20260421_022922",
+    "decision_rows": 10,
+    "rows_with_trace": 0,
+    "rows_with_ml_score": 0,
+    "rows_with_evidence": 0,
+    "trace_coverage": 0.0,
+    "ml_score_coverage": 0.0,
+    "evidence_coverage": 0.0
+  },
+  "governance_latest_artifacts": {
+    "ledger": null,
+    "helena": null,
+    "axiom": "state/axiom_reviews/run_20260421_022922_axiom_review.txt",
+    "vivienne": null,
+    "selene": null,
+    "ariadne": null,
+    "grant": "state/grant_speeches/run_20260421_022922_grant_speech.txt",
+    "yam_yam": "state/executive_reviews/run_20260421_022922_yam_yam_review.txt",
+    "june": null
+  },
+  "master_agent_states": [
+    {
+      "agent_id": "main",
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": false,
+      "xp": null,
+      "sessions": null
+    },
+    {
+      "agent_id": "ledger",
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": false,
+      "xp": null,
+      "sessions": null
+    },
+    {
+      "agent_id": "helena",
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": false,
+      "xp": null,
+      "sessions": null
+    },
+    {
+      "agent_id": "axiom",
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": true,
+      "xp": null,
+      "sessions": null
+    },
+    {
+      "agent_id": "vivienne",
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": false,
+      "xp": null,
+      "sessions": null
+    },
+    {
+      "agent_id": "selene",
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": false,
+      "xp": null,
+      "sessions": null
+    },
+    {
+      "agent_id": "ariadne",
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": false,
+      "xp": null,
+      "sessions": null
+    },
+    {
+      "agent_id": "grant_cardone",
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": true,
+      "xp": null,
+      "sessions": null
+    }
+  ],
+  "refresh_results": {
+    "ml_readiness": {
+      "ok": true,
+      "returncode": 0,
+      "stdout": "ACC ML Readiness Report\n========================\nRun: run_20260421_022922\nVerdict: blocked_model_load_failed\n\nModel:\n- path: /opt/openclaw/.openclaw/workspace/models/ml_model.pkl\n- exists: True\n- loads: False\n- error: ModuleNotFoundError(\"No module named 'joblib'\")\n- class: None\n\nLive feature count: 19\nTraining feature count: 19\nFeatures match exactly: True\nMissing from live: []\nExtra in live: []\n\nRecent decisions:\n- rows: 10\n- ml_score_rows: 0\n- ml_active_rows: 0\n- ml_influenced_or_traced_rows: 0\n- avg_feature_coverage: 0.0\n- coverage_rows: 10\n\nFeature order:\n- live: ema_fast, ema_slow, ema_spread, rsi, price_change_1, price_change_2, price_change_3, momentum_3, slope_3, pattern_three_rising, pattern_three_falling, pattern_reversal_after_two_decline, pattern_reversal_after_two_rise, pattern_short_momentum_burst, pattern_short_exhaustion, higher_highs, higher_lows, lower_highs, lower_lows\n- train: ema_fast, ema_slow, ema_spread, rsi, price_change_1, price_change_2, price_change_3, momentum_3, slope_3, pattern_three_rising, pattern_three_falling, pattern_reversal_after_two_decline, pattern_reversal_after_two_rise, pattern_short_momentum_burst, pattern_short_exhaustion, higher_highs, higher_lows, lower_highs, lower_lows\n\nReport saved to: /opt/openclaw/.openclaw/workspace/reports/ml_readiness_report.txt\n",
+      "stderr": ""
+    },
+    "warehouse_audit": {
+      "ok": true,
+      "returncode": 0,
+      "stdout": "WAREHOUSE AUDIT\n===============\nVerdict: artifact_only_no_sqlite_warehouse_found\nSQLite files: 0\nTables: 0 | non-empty: 0\n\nLatest runs:\n- run_20260421_022922: decisions=10 trades=10 portfolio=10 packets=8 target=True grant=True\n- run_20260420_034819: decisions=10 trades=10 portfolio=10 packets=8 target=True grant=True\n- run_20260420_034400: decisions=0 trades=0 portfolio=0 packets=0 target=False grant=False\n- run_20260420_030740: decisions=10 trades=10 portfolio=10 packets=12 target=False grant=True\n- run_20260420_030521: decisions=6 trades=6 portfolio=6 packets=4 target=False grant=False\n\nSQLite tables:\n\nWrote: /opt/openclaw/.openclaw/workspace/reports/warehouse_audit.json\nWrote: /opt/openclaw/.openclaw/workspace/reports/warehouse_audit.txt\n",
+      "stderr": ""
+    },
+    "hermes_inventory": {
+      "ok": true,
+      "returncode": 0,
+      "stdout": "HERMES INVENTORY AUDIT\n======================\nVerdict: hermes_provider_present_but_no_agents_assigned\nOpenClaw config exists: True (/opt/openclaw/.openclaw/openclaw.json)\nAgents in config: 2\nHermes providers: hermes, hermes_rowan\nHermes assigned agents: 0\nOpenAI assigned agents: 1\n\nModel counts:\n- UNKNOWN: 1\n- {'primary': 'openai/gpt-5.4'}: 1\n\nFile counts:\n- ai_agents:AGENTS.md: 77\n- ai_agents:BOOTSTRAP.md: 30\n- ai_agents:HEARTBEAT.md: 63\n- ai_agents:IDENTITY.md: 63\n- ai_agents:MEMORY.md: 63\n- ai_agents:SOUL.md: 63\n- ai_agents:TOOLS.md: 63\n- ai_agents:USER.md: 63\n- ai_agents_backup:AGENTS.md: 64\n- ai_agents_backup:BOOTSTRAP.md: 30\n- ai_agents_backup:HEARTBEAT.md: 64\n- ai_agents_backup:IDENTITY.md: 64\n- ai_agents_backup:MEMORY.md: 64\n- ai_agents_backup:SOUL.md: 64\n- ai_agents_backup:TOOLS.md: 64\n- ai_agents_backup:USER.md: 64\n- ai_agents_memory:MEMORY.md: 3\n- ai_agents_memory:RPG_HISTORY.md: 66\n- ai_agents_memory:RPG_STATE.md: 66\n\nWrote: /opt/openclaw/.openclaw/workspace/reports/hermes_inventory_audit.json\nWrote: /opt/openclaw/.openclaw/workspace/reports/hermes_inventory_audit.txt\n",
+      "stderr": ""
+    },
+    "agent_activation_queue": {
+      "ok": true,
+      "returncode": 0,
+      "stdout": "r or deepen role wiring rather than first activation.\n- pam_company_001 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.\n- pam_company_002 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.\n- pam_company_003 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.\n- pam_company_004 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.\n- atlas_company_001 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.\n- atlas_company_002 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.\n- atlas_company_003 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.\n- atlas_company_004 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.\n- sloane_company_001 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.\n- sloane_company_002 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.\n- sloane_company_003 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.\n- sloane_company_004 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.\n- bob_company_002 | branch=company | priority=85.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.\n- bob_company_003 | branch=company | priority=85.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.\n\nWrote: /opt/openclaw/.openclaw/workspace/reports/agent_activation_queue.txt\nWrote: /opt/openclaw/.openclaw/workspace/reports/agent_activation_queue.json\n",
+      "stderr": ""
+    },
+    "idle_employee_activation": {
+      "ok": true,
+      "returncode": 0,
+      "stdout": "any_002\n- pam_front_desk_administrator_company_003 (company): # No activation command mapped yet for pam_front_desk_administrator_company_003\n- pam_front_desk_administrator_company_004 (company): # No activation command mapped yet for pam_front_desk_administrator_company_004\n- rowan_company_001 (company): python3 tools/support_agent_review.py --agent rowan_company_001 --task research\n- rowan_company_002 (company): python3 tools/support_agent_review.py --agent rowan_company_002 --task research\n- rowan_company_003 (company): python3 tools/support_agent_review.py --agent rowan_company_003 --task research\n- rowan_company_004 (company): python3 tools/support_agent_review.py --agent rowan_company_004 --task research\n- rowan_researcher_company_001 (company): # No activation command mapped yet for rowan_researcher_company_001\n- rowan_researcher_company_002 (company): # No activation command mapped yet for rowan_researcher_company_002\n- rowan_researcher_company_003 (company): # No activation command mapped yet for rowan_researcher_company_003\n- rowan_researcher_company_004 (company): # No activation command mapped yet for rowan_researcher_company_004\n- selene (master): python3 tools/selene_treasury_review.py\n- sloane_company_001 (company): python3 tools/support_agent_review.py --agent sloane_company_001 --task evolution\n- sloane_company_002 (company): python3 tools/support_agent_review.py --agent sloane_company_002 --task evolution\n- sloane_company_003 (company): python3 tools/support_agent_review.py --agent sloane_company_003 --task evolution\n- sloane_company_004 (company): python3 tools/support_agent_review.py --agent sloane_company_004 --task evolution\n- sloane_evolution_specialist_company_001 (company): # No activation command mapped yet for sloane_evolution_specialist_company_001\n- sloane_evolution_specialist_company_002 (company): # No activation command mapped yet for sloane_evolution_specialist_company_002\n- sloane_evolution_specialist_company_003 (company): # No activation command mapped yet for sloane_evolution_specialist_company_003\n- sloane_evolution_specialist_company_004 (company): # No activation command mapped yet for sloane_evolution_specialist_company_004\n- vera_manager_company_001 (company): # No activation command mapped yet for vera_manager_company_001\n- vera_manager_company_002 (company): # No activation command mapped yet for vera_manager_company_002\n- vera_manager_company_003 (company): # No activation command mapped yet for vera_manager_company_003\n- vera_manager_company_004 (company): # No activation command mapped yet for vera_manager_company_004\n- vivienne (master): python3 tools/vivienne_financial_review.py\n- yam_yam_old_20260420_225259 (unknown): # No activation command mapped yet for yam_yam_old_20260420_225259\n\nSuggested Grant listener dry run:\npython3 tools/grant_listener_notes.py --branch all_non_swe --dry-run\n\nSuggested safe Grant listener rollout after review:\npython3 tools/grant_listener_notes.py --branch company_001\n\n",
+      "stderr": ""
+    },
+    "decision_trace_report": {
+      "ok": true,
+      "returncode": 0,
+      "stdout": "ACC Decision Trace Report\n=========================\nRun: run_20260421_022922\nDecision rows: 10\nRows without trace: 10\n\nActions:\n- BUY: 10\n\nML:\n- ml_active_rows: 0\n- ml_score_rows: 0\n- avg_ml_feature_coverage: 0.0\n- coverage_rows: 10\n\nEvidence winners:\n\nPattern gate demotions estimate: 0\nBootstrap recoveries estimate: 0\nFlat SELL blocks estimate: 0\nLow-margin rows estimate: 10\n\nTop trace stages:\n\nTop WAIT/skip reasons:\n\nExamples:\n- company_003 AVAX-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None\n- company_003 BTC-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None\n- company_004 AVAX-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None\n- company_001 AVAX-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None\n- company_004 BTC-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None\n- company_001 BTC-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None\n- company_003 XRP-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None\n- company_004 XRP-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None\n- company_001 XRP-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None\n- company_003 PEPE-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None\n\nReport saved to: /opt/openclaw/.openclaw/workspace/reports/decision_trace_report_run_20260421_022922.txt\nLatest report saved to: /opt/openclaw/.openclaw/workspace/reports/decision_trace_report_latest.txt\n",
+      "stderr": ""
+    }
+  },
+  "remaining_v2_focus": [
+    "prove ML scores after a fresh run",
+    "prove warehouse persistence after a fresh run",
+    "prove full post-run governance chain after a fresh run",
+    "roll Hermes beyond audit into phased second-brain activation",
+    "finish Orion/Rowan separation proof",
+    "run roadmap step #7 paper proof only after readiness is acceptable"
+  ]
+}

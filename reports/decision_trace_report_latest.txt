@@ -1,0 +1,37 @@
+ACC Decision Trace Report
+=========================
+Run: run_20260421_022922
+Decision rows: 10
+Rows without trace: 10
+
+Actions:
+- BUY: 10
+
+ML:
+- ml_active_rows: 0
+- ml_score_rows: 0
+- avg_ml_feature_coverage: 0.0
+- coverage_rows: 10
+
+Evidence winners:
+
+Pattern gate demotions estimate: 0
+Bootstrap recoveries estimate: 0
+Flat SELL blocks estimate: 0
+Low-margin rows estimate: 10
+
+Top trace stages:
+
+Top WAIT/skip reasons:
+
+Examples:
+- company_003 AVAX-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None
+- company_003 BTC-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None
+- company_004 AVAX-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None
+- company_001 AVAX-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None
+- company_004 BTC-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None
+- company_001 BTC-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None
+- company_003 XRP-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None
+- company_004 XRP-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None
+- company_001 XRP-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None
+- company_003 PEPE-USD BUY | winner=None margin=None ml=None coverage=0.0 | trace=None

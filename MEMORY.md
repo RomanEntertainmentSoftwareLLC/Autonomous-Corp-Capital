@@ -71,3 +71,6 @@
 
 ## Executive review memory
 - 2026-04-25 | run run_20260421_022922: Healthy committee status does not guarantee complete portfolio visibility. Missing current equity and total P/L make target evaluation non-verifiable. company_002 coverage gaps now matter alongside recurring Lucian waste.
+
+## Executive review memory
+- 2026-04-26 | run run_20260421_022922: Active trading is not proof without coverage, traceability, and grounded equity. company_002 missing state keeps blocking trustworthy portfolio evaluation. Repeated Lucian waste plus absent ML/trace evidence is now a governance pattern, not a one-off.

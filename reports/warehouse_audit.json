@@ -1,0 +1,63 @@
+{
+  "latest_runs": [
+    {
+      "decision_rows": 10,
+      "grant_briefing": true,
+      "mtime": "2026-04-21T02:42:13.732463+00:00",
+      "packet_rows": 8,
+      "portfolio_rows": 10,
+      "run_id": "run_20260421_022922",
+      "target_state": true,
+      "trade_rows": 10
+    },
+    {
+      "decision_rows": 10,
+      "grant_briefing": true,
+      "mtime": "2026-04-20T04:01:06.738817+00:00",
+      "packet_rows": 8,
+      "portfolio_rows": 10,
+      "run_id": "run_20260420_034819",
+      "target_state": true,
+      "trade_rows": 10
+    },
+    {
+      "decision_rows": 0,
+      "grant_briefing": false,
+      "mtime": "2026-04-20T03:44:00.195113+00:00",
+      "packet_rows": 0,
+      "portfolio_rows": 0,
+      "run_id": "run_20260420_034400",
+      "target_state": false,
+      "trade_rows": 0
+    },
+    {
+      "decision_rows": 10,
+      "grant_briefing": true,
+      "mtime": "2026-04-20T03:07:40.480208+00:00",
+      "packet_rows": 12,
+      "portfolio_rows": 10,
+      "run_id": "run_20260420_030740",
+      "target_state": false,
+      "trade_rows": 10
+    },
+    {
+      "decision_rows": 6,
+      "grant_briefing": false,
+      "mtime": "2026-04-20T03:07:00.543781+00:00",
+      "packet_rows": 4,
+      "portfolio_rows": 6,
+      "run_id": "run_20260420_030521",
+      "target_state": false,
+      "trade_rows": 6
+    }
+  ],
+  "nonempty_table_count": 0,
+  "root": "/opt/openclaw/.openclaw/workspace",
+  "sqlite_count": 0,
+  "sqlite_files": [],
+  "sqlite_inspection": [],
+  "state_dir_exists": true,
+  "table_count": 0,
+  "timestamp": "2026-04-26T02:58:05.477931+00:00",
+  "verdict": "artifact_only_no_sqlite_warehouse_found"
+}

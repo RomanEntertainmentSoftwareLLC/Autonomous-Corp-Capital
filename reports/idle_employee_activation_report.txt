@@ -1,0 +1,79 @@
+ACC Idle Employee Activation Report
+====================================
+
+Agents discovered: 99
+Active agents: 25
+Zero-XP non-SWE agents: 65
+
+Recommended no-paper activation commands:
+- _TEMPLATE (unknown): # No activation command mapped yet for _TEMPLATE
+- ariadne (master): python3 tools/ariadne_workforce_review.py
+- atlas_company_001 (company): python3 tools/support_agent_review.py --agent atlas_company_001 --task simulation
+- atlas_company_002 (company): python3 tools/support_agent_review.py --agent atlas_company_002 --task simulation
+- atlas_company_003 (company): python3 tools/support_agent_review.py --agent atlas_company_003 --task simulation
+- atlas_company_004 (company): python3 tools/support_agent_review.py --agent atlas_company_004 --task simulation
+- atlas_market_simulator_company_001 (company): # No activation command mapped yet for atlas_market_simulator_company_001
+- atlas_market_simulator_company_002 (company): # No activation command mapped yet for atlas_market_simulator_company_002
+- atlas_market_simulator_company_003 (company): # No activation command mapped yet for atlas_market_simulator_company_003
+- atlas_market_simulator_company_004 (company): # No activation command mapped yet for atlas_market_simulator_company_004
+- bob_company_002 (company): python3 tools/support_agent_review.py --agent bob_company_002 --task operations
+- bob_company_003 (company): python3 tools/support_agent_review.py --agent bob_company_003 --task operations
+- bob_company_004 (company): python3 tools/support_agent_review.py --agent bob_company_004 --task operations
+- bob_operations_worker_company_001 (company): # No activation command mapped yet for bob_operations_worker_company_001
+- bob_operations_worker_company_002 (company): # No activation command mapped yet for bob_operations_worker_company_002
+- bob_operations_worker_company_003 (company): # No activation command mapped yet for bob_operations_worker_company_003
+- bob_operations_worker_company_004 (company): # No activation command mapped yet for bob_operations_worker_company_004
+- helena (master): python3 tools/helena_risk_review.py
+- june_archivist_company_001 (company): # No activation command mapped yet for june_archivist_company_001
+- june_archivist_company_002 (company): # No activation command mapped yet for june_archivist_company_002
+- june_archivist_company_003 (company): # No activation command mapped yet for june_archivist_company_003
+- june_archivist_company_004 (company): # No activation command mapped yet for june_archivist_company_004
+- june_company_001 (company): python3 tools/support_agent_review.py --agent june_company_001 --task archive
+- june_company_002 (company): python3 tools/support_agent_review.py --agent june_company_002 --task archive
+- june_company_003 (company): python3 tools/support_agent_review.py --agent june_company_003 --task archive
+- june_company_004 (company): python3 tools/support_agent_review.py --agent june_company_004 --task archive
+- justine (watchdog): python3 tools/lucian_watchdog_accountability_review.py --dry-run  # watchdog checked by Lucian; direct watchdog activation later only on dispute
+- ledger (master): python3 tools/ledger_cost_review.py
+- mara (watchdog): python3 tools/lucian_watchdog_accountability_review.py --dry-run  # watchdog checked by Lucian; direct watchdog activation later only on dispute
+- orion_strategist_company_001 (company): # No activation command mapped yet for orion_strategist_company_001
+- orion_strategist_company_002 (company): # No activation command mapped yet for orion_strategist_company_002
+- orion_strategist_company_003 (company): # No activation command mapped yet for orion_strategist_company_003
+- orion_strategist_company_004 (company): # No activation command mapped yet for orion_strategist_company_004
+- owen (watchdog): python3 tools/lucian_watchdog_accountability_review.py --dry-run  # watchdog checked by Lucian; direct watchdog activation later only on dispute
+- pam_company_001 (company): python3 tools/support_agent_review.py --agent pam_company_001 --task coordination
+- pam_company_002 (company): python3 tools/support_agent_review.py --agent pam_company_002 --task coordination
+- pam_company_003 (company): python3 tools/support_agent_review.py --agent pam_company_003 --task coordination
+- pam_company_004 (company): python3 tools/support_agent_review.py --agent pam_company_004 --task coordination
+- pam_front_desk_administrator_company_001 (company): # No activation command mapped yet for pam_front_desk_administrator_company_001
+- pam_front_desk_administrator_company_002 (company): # No activation command mapped yet for pam_front_desk_administrator_company_002
+- pam_front_desk_administrator_company_003 (company): # No activation command mapped yet for pam_front_desk_administrator_company_003
+- pam_front_desk_administrator_company_004 (company): # No activation command mapped yet for pam_front_desk_administrator_company_004
+- rowan_company_001 (company): python3 tools/support_agent_review.py --agent rowan_company_001 --task research
+- rowan_company_002 (company): python3 tools/support_agent_review.py --agent rowan_company_002 --task research
+- rowan_company_003 (company): python3 tools/support_agent_review.py --agent rowan_company_003 --task research
+- rowan_company_004 (company): python3 tools/support_agent_review.py --agent rowan_company_004 --task research
+- rowan_researcher_company_001 (company): # No activation command mapped yet for rowan_researcher_company_001
+- rowan_researcher_company_002 (company): # No activation command mapped yet for rowan_researcher_company_002
+- rowan_researcher_company_003 (company): # No activation command mapped yet for rowan_researcher_company_003
+- rowan_researcher_company_004 (company): # No activation command mapped yet for rowan_researcher_company_004
+- selene (master): python3 tools/selene_treasury_review.py
+- sloane_company_001 (company): python3 tools/support_agent_review.py --agent sloane_company_001 --task evolution
+- sloane_company_002 (company): python3 tools/support_agent_review.py --agent sloane_company_002 --task evolution
+- sloane_company_003 (company): python3 tools/support_agent_review.py --agent sloane_company_003 --task evolution
+- sloane_company_004 (company): python3 tools/support_agent_review.py --agent sloane_company_004 --task evolution
+- sloane_evolution_specialist_company_001 (company): # No activation command mapped yet for sloane_evolution_specialist_company_001
+- sloane_evolution_specialist_company_002 (company): # No activation command mapped yet for sloane_evolution_specialist_company_002
+- sloane_evolution_specialist_company_003 (company): # No activation command mapped yet for sloane_evolution_specialist_company_003
+- sloane_evolution_specialist_company_004 (company): # No activation command mapped yet for sloane_evolution_specialist_company_004
+- vera_manager_company_001 (company): # No activation command mapped yet for vera_manager_company_001
+- vera_manager_company_002 (company): # No activation command mapped yet for vera_manager_company_002
+- vera_manager_company_003 (company): # No activation command mapped yet for vera_manager_company_003
+- vera_manager_company_004 (company): # No activation command mapped yet for vera_manager_company_004
+- vivienne (master): python3 tools/vivienne_financial_review.py
+- yam_yam_old_20260420_225259 (unknown): # No activation command mapped yet for yam_yam_old_20260420_225259
+
+Suggested Grant listener dry run:
+python3 tools/grant_listener_notes.py --branch all_non_swe --dry-run
+
+Suggested safe Grant listener rollout after review:
+python3 tools/grant_listener_notes.py --branch company_001

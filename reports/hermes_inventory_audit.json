@@ -1,0 +1,46 @@
+{
+  "agent_count_in_config": 2,
+  "file_counts": {
+    "ai_agents:AGENTS.md": 77,
+    "ai_agents:BOOTSTRAP.md": 30,
+    "ai_agents:HEARTBEAT.md": 63,
+    "ai_agents:IDENTITY.md": 63,
+    "ai_agents:MEMORY.md": 63,
+    "ai_agents:SOUL.md": 63,
+    "ai_agents:TOOLS.md": 63,
+    "ai_agents:USER.md": 63,
+    "ai_agents_backup:AGENTS.md": 64,
+    "ai_agents_backup:BOOTSTRAP.md": 30,
+    "ai_agents_backup:HEARTBEAT.md": 64,
+    "ai_agents_backup:IDENTITY.md": 64,
+    "ai_agents_backup:MEMORY.md": 64,
+    "ai_agents_backup:SOUL.md": 64,
+    "ai_agents_backup:TOOLS.md": 64,
+    "ai_agents_backup:USER.md": 64,
+    "ai_agents_memory:MEMORY.md": 3,
+    "ai_agents_memory:RPG_HISTORY.md": 66,
+    "ai_agents_memory:RPG_STATE.md": 66
+  },
+  "hermes_assigned_agents": [],
+  "hermes_provider_names": [
+    "hermes",
+    "hermes_rowan"
+  ],
+  "model_counts": {
+    "UNKNOWN": 1,
+    "{'primary': 'openai/gpt-5.4'}": 1
+  },
+  "note": "This is an inventory/audit only. It does not modify Hermes or agent model wiring.",
+  "openai_assigned_count": 1,
+  "openclaw_json": "/opt/openclaw/.openclaw/openclaw.json",
+  "openclaw_json_exists": true,
+  "provider_names": [
+    "hermes",
+    "hermes_rowan",
+    "moonshot",
+    "nvkimi",
+    "openai"
+  ],
+  "timestamp": "2026-04-26T02:58:05.550569+00:00",
+  "verdict": "hermes_provider_present_but_no_agents_assigned"
+}

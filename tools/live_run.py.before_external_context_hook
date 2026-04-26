@@ -1821,56 +1821,6 @@ def _run_governance_hook(run_id: str, hook: str, script_name: str, disable_env: 
         )
 
 
-def run_external_plan_context_snapshot(run_id):
-    """Bind roadmap/planning docs into the live-run artifact stream.
-
-    This is intentionally non-fatal. The external plan context helps governance
-    agents remember roadmap/V2/V3/Hermes/Grant doctrine, but a snapshot failure
-    must never kill a trading run.
-    """
-    if os.environ.get("DISABLE_EXTERNAL_PLAN_CONTEXT") == "1":
-        print("External plan context snapshot disabled via DISABLE_EXTERNAL_PLAN_CONTEXT=1")
-        return
-
-    try:
-        project_root = globals().get("ROOT", Path("/opt/openclaw/.openclaw/workspace"))
-        cmd = [sys.executable, "tools/external_plan_context_snapshot.py"]
-        if run_id:
-            cmd.extend(["--run-id", str(run_id)])
-
-        proc = subprocess.run(
-            cmd,
-            cwd=str(project_root),
-            text=True,
-            capture_output=True,
-            timeout=120,
-        )
-
-        out_dir = Path("state") / "external_plan_context"
-        out_dir.mkdir(parents=True, exist_ok=True)
-
-        hook_log = out_dir / f"{run_id or 'NO_RUN'}_external_plan_context_hook.log"
-        hook_log.write_text(
-            (proc.stdout or "") + ("\nSTDERR:\n" + proc.stderr if proc.stderr else ""),
-            encoding="utf-8",
-        )
-
-        if proc.returncode != 0:
-            print(f"External plan context snapshot failed: {proc.returncode}; see {hook_log}")
-        else:
-            print(f"External plan context snapshot completed; see {hook_log}")
-
-    except Exception as exc:
-        try:
-            out_dir = Path("state") / "external_plan_context"
-            out_dir.mkdir(parents=True, exist_ok=True)
-            error_log = out_dir / f"{run_id or 'NO_RUN'}_external_plan_context_hook_error.log"
-            error_log.write_text(str(exc), encoding="utf-8")
-        except Exception:
-            pass
-
-        print(f"External plan context snapshot skipped after error: {exc}")
-
 def run_ledger_post_run_review(run_id: str) -> None:
     """Run Ledger's token/cost governance review after core reports exist."""
     _run_governance_hook(

@@ -1,0 +1,992 @@
+[
+  {
+    "agent_id": "_TEMPLATE",
+    "role": "unknown",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for _TEMPLATE"
+  },
+  {
+    "agent_id": "ariadne",
+    "role": "master",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/ariadne_workforce_review.py"
+  },
+  {
+    "agent_id": "atlas_company_001",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent atlas_company_001 --task simulation"
+  },
+  {
+    "agent_id": "atlas_company_002",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent atlas_company_002 --task simulation"
+  },
+  {
+    "agent_id": "atlas_company_003",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent atlas_company_003 --task simulation"
+  },
+  {
+    "agent_id": "atlas_company_004",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent atlas_company_004 --task simulation"
+  },
+  {
+    "agent_id": "atlas_market_simulator_company_001",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for atlas_market_simulator_company_001"
+  },
+  {
+    "agent_id": "atlas_market_simulator_company_002",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for atlas_market_simulator_company_002"
+  },
+  {
+    "agent_id": "atlas_market_simulator_company_003",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for atlas_market_simulator_company_003"
+  },
+  {
+    "agent_id": "atlas_market_simulator_company_004",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for atlas_market_simulator_company_004"
+  },
+  {
+    "agent_id": "axiom",
+    "role": "master",
+    "xp": 7.0,
+    "sessions": 1,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": true,
+    "recommended_command": "python3 tools/axiom_evaluator_review.py"
+  },
+  {
+    "agent_id": "bianca_company_001",
+    "role": "company",
+    "xp": 131.0,
+    "sessions": 81,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for bianca_company_001"
+  },
+  {
+    "agent_id": "bianca_company_002",
+    "role": "company",
+    "xp": 116.5,
+    "sessions": 75,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for bianca_company_002"
+  },
+  {
+    "agent_id": "bianca_company_003",
+    "role": "company",
+    "xp": 115.5,
+    "sessions": 74,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for bianca_company_003"
+  },
+  {
+    "agent_id": "bianca_company_004",
+    "role": "company",
+    "xp": 115.75,
+    "sessions": 74,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for bianca_company_004"
+  },
+  {
+    "agent_id": "bob_company_001",
+    "role": "company",
+    "xp": 1.0,
+    "sessions": 1,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": true,
+    "recommended_command": "python3 tools/support_agent_review.py --agent bob_company_001 --task operations"
+  },
+  {
+    "agent_id": "bob_company_002",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent bob_company_002 --task operations"
+  },
+  {
+    "agent_id": "bob_company_003",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent bob_company_003 --task operations"
+  },
+  {
+    "agent_id": "bob_company_004",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent bob_company_004 --task operations"
+  },
+  {
+    "agent_id": "bob_operations_worker_company_001",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for bob_operations_worker_company_001"
+  },
+  {
+    "agent_id": "bob_operations_worker_company_002",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for bob_operations_worker_company_002"
+  },
+  {
+    "agent_id": "bob_operations_worker_company_003",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for bob_operations_worker_company_003"
+  },
+  {
+    "agent_id": "bob_operations_worker_company_004",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for bob_operations_worker_company_004"
+  },
+  {
+    "agent_id": "eli",
+    "role": "swe",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for eli"
+  },
+  {
+    "agent_id": "gideon",
+    "role": "swe",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for gideon"
+  },
+  {
+    "agent_id": "grant_cardone",
+    "role": "master",
+    "xp": 6.0,
+    "sessions": 1,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": true,
+    "recommended_command": "python3 tools/grant_speech_review.py"
+  },
+  {
+    "agent_id": "helena",
+    "role": "master",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/helena_risk_review.py"
+  },
+  {
+    "agent_id": "iris_company_001",
+    "role": "company",
+    "xp": 131.0,
+    "sessions": 81,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for iris_company_001"
+  },
+  {
+    "agent_id": "iris_company_002",
+    "role": "company",
+    "xp": 97.5,
+    "sessions": 75,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for iris_company_002"
+  },
+  {
+    "agent_id": "iris_company_003",
+    "role": "company",
+    "xp": 98.5,
+    "sessions": 74,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for iris_company_003"
+  },
+  {
+    "agent_id": "iris_company_004",
+    "role": "company",
+    "xp": 98.75,
+    "sessions": 74,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for iris_company_004"
+  },
+  {
+    "agent_id": "june_archivist_company_001",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for june_archivist_company_001"
+  },
+  {
+    "agent_id": "june_archivist_company_002",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for june_archivist_company_002"
+  },
+  {
+    "agent_id": "june_archivist_company_003",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for june_archivist_company_003"
+  },
+  {
+    "agent_id": "june_archivist_company_004",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for june_archivist_company_004"
+  },
+  {
+    "agent_id": "june_company_001",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent june_company_001 --task archive"
+  },
+  {
+    "agent_id": "june_company_002",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent june_company_002 --task archive"
+  },
+  {
+    "agent_id": "june_company_003",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent june_company_003 --task archive"
+  },
+  {
+    "agent_id": "june_company_004",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent june_company_004 --task archive"
+  },
+  {
+    "agent_id": "justine",
+    "role": "watchdog",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/lucian_watchdog_accountability_review.py --dry-run  # watchdog checked by Lucian; direct watchdog activation later only on dispute"
+  },
+  {
+    "agent_id": "ledger",
+    "role": "master",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/ledger_cost_review.py"
+  },
+  {
+    "agent_id": "lucian_company_001",
+    "role": "company",
+    "xp": 139.0,
+    "sessions": 81,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/lucian_watchdog_accountability_review.py --agent lucian_company_001"
+  },
+  {
+    "agent_id": "lucian_company_002",
+    "role": "company",
+    "xp": 124.5,
+    "sessions": 75,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/lucian_watchdog_accountability_review.py --agent lucian_company_002"
+  },
+  {
+    "agent_id": "lucian_company_003",
+    "role": "company",
+    "xp": 123.5,
+    "sessions": 74,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/lucian_watchdog_accountability_review.py --agent lucian_company_003"
+  },
+  {
+    "agent_id": "lucian_company_004",
+    "role": "company",
+    "xp": 123.75,
+    "sessions": 74,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/lucian_watchdog_accountability_review.py --agent lucian_company_004"
+  },
+  {
+    "agent_id": "main",
+    "role": "master",
+    "xp": 24.0,
+    "sessions": 3,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/yam_yam_executive_review.py"
+  },
+  {
+    "agent_id": "mara",
+    "role": "watchdog",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/lucian_watchdog_accountability_review.py --dry-run  # watchdog checked by Lucian; direct watchdog activation later only on dispute"
+  },
+  {
+    "agent_id": "marek",
+    "role": "swe",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for marek"
+  },
+  {
+    "agent_id": "mina",
+    "role": "swe",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for mina"
+  },
+  {
+    "agent_id": "nadia",
+    "role": "swe",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for nadia"
+  },
+  {
+    "agent_id": "noah",
+    "role": "swe",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for noah"
+  },
+  {
+    "agent_id": "orion_company_001",
+    "role": "company",
+    "xp": 143.0,
+    "sessions": 81,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for orion_company_001"
+  },
+  {
+    "agent_id": "orion_company_002",
+    "role": "company",
+    "xp": 106.5,
+    "sessions": 75,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for orion_company_002"
+  },
+  {
+    "agent_id": "orion_company_003",
+    "role": "company",
+    "xp": 107.0,
+    "sessions": 74,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for orion_company_003"
+  },
+  {
+    "agent_id": "orion_company_004",
+    "role": "company",
+    "xp": 107.25,
+    "sessions": 74,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for orion_company_004"
+  },
+  {
+    "agent_id": "orion_strategist_company_001",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for orion_strategist_company_001"
+  },
+  {
+    "agent_id": "orion_strategist_company_002",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for orion_strategist_company_002"
+  },
+  {
+    "agent_id": "orion_strategist_company_003",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for orion_strategist_company_003"
+  },
+  {
+    "agent_id": "orion_strategist_company_004",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for orion_strategist_company_004"
+  },
+  {
+    "agent_id": "owen",
+    "role": "watchdog",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/lucian_watchdog_accountability_review.py --dry-run  # watchdog checked by Lucian; direct watchdog activation later only on dispute"
+  },
+  {
+    "agent_id": "pam_company_001",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent pam_company_001 --task coordination"
+  },
+  {
+    "agent_id": "pam_company_002",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent pam_company_002 --task coordination"
+  },
+  {
+    "agent_id": "pam_company_003",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent pam_company_003 --task coordination"
+  },
+  {
+    "agent_id": "pam_company_004",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent pam_company_004 --task coordination"
+  },
+  {
+    "agent_id": "pam_front_desk_administrator_company_001",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for pam_front_desk_administrator_company_001"
+  },
+  {
+    "agent_id": "pam_front_desk_administrator_company_002",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for pam_front_desk_administrator_company_002"
+  },
+  {
+    "agent_id": "pam_front_desk_administrator_company_003",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for pam_front_desk_administrator_company_003"
+  },
+  {
+    "agent_id": "pam_front_desk_administrator_company_004",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for pam_front_desk_administrator_company_004"
+  },
+  {
+    "agent_id": "rhea",
+    "role": "swe",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for rhea"
+  },
+  {
+    "agent_id": "rowan_company_001",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent rowan_company_001 --task research"
+  },
+  {
+    "agent_id": "rowan_company_002",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent rowan_company_002 --task research"
+  },
+  {
+    "agent_id": "rowan_company_003",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent rowan_company_003 --task research"
+  },
+  {
+    "agent_id": "rowan_company_004",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent rowan_company_004 --task research"
+  },
+  {
+    "agent_id": "rowan_researcher_company_001",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for rowan_researcher_company_001"
+  },
+  {
+    "agent_id": "rowan_researcher_company_002",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for rowan_researcher_company_002"
+  },
+  {
+    "agent_id": "rowan_researcher_company_003",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for rowan_researcher_company_003"
+  },
+  {
+    "agent_id": "rowan_researcher_company_004",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for rowan_researcher_company_004"
+  },
+  {
+    "agent_id": "sabine",
+    "role": "swe",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for sabine"
+  },
+  {
+    "agent_id": "selene",
+    "role": "master",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/selene_treasury_review.py"
+  },
+  {
+    "agent_id": "sloane_company_001",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent sloane_company_001 --task evolution"
+  },
+  {
+    "agent_id": "sloane_company_002",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent sloane_company_002 --task evolution"
+  },
+  {
+    "agent_id": "sloane_company_003",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent sloane_company_003 --task evolution"
+  },
+  {
+    "agent_id": "sloane_company_004",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/support_agent_review.py --agent sloane_company_004 --task evolution"
+  },
+  {
+    "agent_id": "sloane_evolution_specialist_company_001",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for sloane_evolution_specialist_company_001"
+  },
+  {
+    "agent_id": "sloane_evolution_specialist_company_002",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for sloane_evolution_specialist_company_002"
+  },
+  {
+    "agent_id": "sloane_evolution_specialist_company_003",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for sloane_evolution_specialist_company_003"
+  },
+  {
+    "agent_id": "sloane_evolution_specialist_company_004",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for sloane_evolution_specialist_company_004"
+  },
+  {
+    "agent_id": "tessa",
+    "role": "swe",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for tessa"
+  },
+  {
+    "agent_id": "vera_company_001",
+    "role": "company",
+    "xp": 131.0,
+    "sessions": 81,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for vera_company_001"
+  },
+  {
+    "agent_id": "vera_company_002",
+    "role": "company",
+    "xp": 116.5,
+    "sessions": 75,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for vera_company_002"
+  },
+  {
+    "agent_id": "vera_company_003",
+    "role": "company",
+    "xp": 115.5,
+    "sessions": 74,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for vera_company_003"
+  },
+  {
+    "agent_id": "vera_company_004",
+    "role": "company",
+    "xp": 115.75,
+    "sessions": 74,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for vera_company_004"
+  },
+  {
+    "agent_id": "vera_manager_company_001",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for vera_manager_company_001"
+  },
+  {
+    "agent_id": "vera_manager_company_002",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for vera_manager_company_002"
+  },
+  {
+    "agent_id": "vera_manager_company_003",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for vera_manager_company_003"
+  },
+  {
+    "agent_id": "vera_manager_company_004",
+    "role": "company",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": false,
+    "has_rpg_history": false,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for vera_manager_company_004"
+  },
+  {
+    "agent_id": "vivienne",
+    "role": "master",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "python3 tools/vivienne_financial_review.py"
+  },
+  {
+    "agent_id": "yam_yam",
+    "role": "unknown",
+    "xp": 24.0,
+    "sessions": 3,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for yam_yam"
+  },
+  {
+    "agent_id": "yam_yam_old_20260420_225259",
+    "role": "unknown",
+    "xp": 0.0,
+    "sessions": 0,
+    "has_rpg_state": true,
+    "has_rpg_history": true,
+    "has_memory": false,
+    "recommended_command": "# No activation command mapped yet for yam_yam_old_20260420_225259"
+  }
+]

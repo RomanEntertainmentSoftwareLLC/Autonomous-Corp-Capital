@@ -1,0 +1,116 @@
+{
+  "timestamp": "2026-04-26T02:58:22.969106+00:00",
+  "dry_run": true,
+  "ok_count": 9,
+  "total": 9,
+  "results": [
+    {
+      "name": "ledger",
+      "cmd": [
+        "python3",
+        "tools/ledger_cost_review.py",
+        "--dry-run"
+      ],
+      "ok": true,
+      "returncode": 0,
+      "stdout": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/ledger_reviews/run_20260421_022922_ledger_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/ledger_reviews/run_20260421_022922_ledger_prompt.txt\n",
+      "stderr": ""
+    },
+    {
+      "name": "helena",
+      "cmd": [
+        "python3",
+        "tools/helena_risk_review.py",
+        "--dry-run"
+      ],
+      "ok": true,
+      "returncode": 0,
+      "stdout": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/helena_reviews/run_20260421_022922_helena_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/helena_reviews/run_20260421_022922_helena_prompt.txt\n",
+      "stderr": ""
+    },
+    {
+      "name": "axiom",
+      "cmd": [
+        "python3",
+        "tools/axiom_evaluator_review.py",
+        "--dry-run"
+      ],
+      "ok": true,
+      "returncode": 0,
+      "stdout": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/axiom_reviews/run_20260421_022922_axiom_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/axiom_reviews/run_20260421_022922_axiom_prompt.txt\n",
+      "stderr": ""
+    },
+    {
+      "name": "vivienne",
+      "cmd": [
+        "python3",
+        "tools/vivienne_financial_review.py",
+        "--dry-run"
+      ],
+      "ok": true,
+      "returncode": 0,
+      "stdout": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/vivienne_reviews/run_20260421_022922_vivienne_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/vivienne_reviews/run_20260421_022922_vivienne_prompt.txt\n",
+      "stderr": ""
+    },
+    {
+      "name": "selene",
+      "cmd": [
+        "python3",
+        "tools/selene_treasury_review.py",
+        "--dry-run"
+      ],
+      "ok": true,
+      "returncode": 0,
+      "stdout": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/selene_reviews/run_20260421_022922_selene_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/selene_reviews/run_20260421_022922_selene_prompt.txt\n",
+      "stderr": ""
+    },
+    {
+      "name": "ariadne",
+      "cmd": [
+        "python3",
+        "tools/ariadne_workforce_review.py",
+        "--dry-run"
+      ],
+      "ok": true,
+      "returncode": 0,
+      "stdout": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/ariadne_reviews/run_20260421_022922_ariadne_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/ariadne_reviews/run_20260421_022922_ariadne_prompt.txt\n",
+      "stderr": ""
+    },
+    {
+      "name": "grant",
+      "cmd": [
+        "python3",
+        "tools/grant_speech_review.py",
+        "--dry-run"
+      ],
+      "ok": true,
+      "returncode": 0,
+      "stdout": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/grant_speeches/run_20260421_022922_grant_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/grant_speeches/run_20260421_022922_grant_prompt.txt\nListeners: none\n",
+      "stderr": ""
+    },
+    {
+      "name": "yam_yam",
+      "cmd": [
+        "python3",
+        "tools/yam_yam_executive_review.py",
+        "--dry-run"
+      ],
+      "ok": true,
+      "returncode": 0,
+      "stdout": "Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/executive_reviews/run_20260421_022922_yam_yam_prompt.txt\n",
+      "stderr": ""
+    },
+    {
+      "name": "june",
+      "cmd": [
+        "python3",
+        "tools/june_archive_review.py",
+        "--dry-run"
+      ],
+      "ok": true,
+      "returncode": 0,
+      "stdout": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/board_archives/run_20260421_022922_june_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/board_archives/run_20260421_022922_june_prompt.txt\n",
+      "stderr": ""
+    }
+  ]
+}

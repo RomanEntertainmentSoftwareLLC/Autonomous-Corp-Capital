@@ -1,0 +1,318 @@
+ACC Additions Since the Last Grant Cardone Plan
+===============================================
+
+Purpose
+-------
+This file captures the newer ideas discussed after the original Grant Cardone plan file.
+It is meant as a supplement, not a replacement.
+
+Main New Priorities Before ACC V2
+---------------------------------
+Before moving into ACC V2 proper, the following pre-V2 work should be completed:
+
+1. Wire Grant Cardone into the entire non-SWE org
+2. Wire Axiom into the org roster blocks as well
+3. Ensure every single agent has its own MEMORY.md file
+4. Back up Grant Cardone and Axiom properly
+5. Consider broader Hermes wiring beyond Yam Yam
+6. Add motivational speech testing and scheduled speech behavior
+7. Keep repeated paper runs as the proving ground while these changes are folded in
+
+Pre-V2 Order
+------------
+Recommended order:
+1. Update all relevant AGENTS.md roster blocks to include Grant Cardone and Axiom
+2. Create a MEMORY.md file for every agent
+3. Back up Grant Cardone and Axiom
+4. Expand Hermes wiring if desired
+5. Smoke test identity retention and stability
+6. Then begin ACC V2
+
+Grant Cardone Org Wiring
+------------------------
+Grant is not useful if he only exists as an employee entry.
+He must be visible in the organization so agents can recognize and consult him.
+
+The clean approach:
+- add grant_cardone and axiom to the master-branch roster block inside relevant AGENTS.md files
+- do not bloat every SOUL.md file
+- use the roster/org-awareness section only unless a specific personality change is needed
+
+Recommended roster lines:
+- grant_cardone = Grant Cardone, Chief Revenue Expansion Officer
+- axiom = Axiom, Evaluator / AI Consultant
+
+Grant should be visible to:
+- company001_branch
+- company002_branch
+- company003_branch
+- company004_branch
+- master_branch
+- watchdog_branch
+
+SWE should be excluded from Grant's motivational speech audience by default.
+
+Agent MEMORY.md Files
+---------------------
+Every single agent should have its own MEMORY.md file in its workspace folder.
+
+Goal:
+- give each agent a local memory file to write to
+- keep it short, structured, and useful
+- avoid giant bloated lore dumps
+
+Recommended MEMORY.md template:
+
+# MEMORY
+
+## Persistent facts
+- 
+
+## Current directives
+- 
+
+## Recent lessons
+- 
+
+## Relationships / org awareness
+- 
+
+## Last updated
+- YYYY-MM-DD
+
+Guidelines:
+- memory should be agent-local
+- memory should be writable
+- memory should stay small and structured
+- this is not meant to become a giant diary
+
+Backups for Grant and Axiom
+---------------------------
+Grant Cardone and Axiom both need to be backed up before larger wiring work begins.
+
+Back up:
+- workspace folder
+- agent_state folder
+- roster file if updated
+- openclaw.json if their paths/models/registrations were modified
+
+Hermes Expansion
+----------------
+Right now Yam Yam uses Hermes.
+A broader Hermes rollout is desired because Hermes already has a brain and is designed to evolve.
+
+Possible rollout approaches:
+- start with Grant Cardone and Axiom
+- then expand to other high-value agents
+- or, if acceptable, wire the whole org cleanly in one backed-up sweep
+
+Important note:
+- back up first
+- flip model mappings second
+- smoke test third
+
+Manual and Scheduled Grant Speeches
+-----------------------------------
+Grant should not only have a scheduled daily speech.
+He should also have a manual speech trigger for testing.
+
+Two modes are needed:
+1. Daily scheduled speech at a fixed time
+2. Manual speech test on demand
+
+Speech Audience
+---------------
+Default Grant speech audience should be:
+
+- companies 001 through 004
+- master branch
+- watchdog branch
+
+Excluded by default:
+- swe_branch
+
+This default audience can be thought of as:
+all_non_swe
+
+Speech Types
+------------
+Useful speech modes to support:
+- kickoff
+- target_pressure
+- victory
+- discipline
+- recovery
+
+These can be tested manually before the 8:30 AM scheduled version is relied upon.
+
+Speech Packet Inputs
+--------------------
+Grant speeches should not be blind.
+He should receive structured context such as:
+- current equity
+- floor target
+- goal target
+- stretch target
+- previous run/day result
+- strongest opportunities
+- worst failures
+- weak agents / weak companies
+- branch-wide expectations
+- pressure level
+
+Daily Speech Memory Cliff Notes
+-------------------------------
+Do NOT store the full Grant speech in every agent memory file.
+
+Instead:
+- generate cliff notes
+- store only the important directives
+- tailor them where useful
+
+Suggested memory fields for speech notes:
+- directive date
+- target floor
+- target goal
+- stretch target
+- today's priority
+- Grant pressure level
+- penalty risk level
+- key behavioral expectation
+- who is under pressure or review
+
+Keep only:
+- current daily directive
+- maybe the last few directives
+
+Do not turn memory into an endless speech archive.
+
+Grant Speech Style Updates
+--------------------------
+Grant should occasionally curse to drive the point home, especially around:
+- money
+- missed opportunity
+- weak ambition
+- weak execution
+- failure to hit target
+
+But he should NOT sound like a sailor.
+
+Desired style:
+- high-pressure
+- money-focused
+- motivational
+- sharp
+- memorable
+- occasional F-bombs for impact
+- never nonstop swearing
+
+A good rule:
+- normal speech: 0 to 1 strong curse
+- high-pressure speech: 1 to 3 strong curses
+- severe underperformance speech: stronger, but still controlled
+
+Goal:
+Grant should feel intense enough that the agents metaphorically get chills up their digital claws.
+
+Target-Driven Grant Pressure
+----------------------------
+Grant should not just be mad in the abstract.
+He needs a target framework.
+
+Each run or day should define:
+- starting_equity
+- profit_floor
+- profit_goal
+- profit_stretch
+- actual_pnl
+- target_status
+
+Recommended structure:
+- floor target = minimum acceptable result
+- goal target = realistic result
+- stretch target = Grant's 10X expectation
+
+Example:
+- start: $100
+- floor: +$10
+- goal: +$30
+- stretch: +$300
+
+The core system target should remain sane.
+Grant's stretch target can be ridiculous as pressure.
+
+Consequences and Fear System
+----------------------------
+Grant should put real pressure on the org, but not in a stupid way.
+
+Bad version:
+- agents collapse
+- agents freeze
+- agents go full help-desk mode
+- agents become afraid to act
+
+Good version:
+- agents become sharper
+- agents improve evidence quality
+- agents reduce fake productivity
+- agents stop drifting
+- agents escalate when needed
+- agents act with more discipline
+
+Grant should be the prosecutor.
+Axiom should be the evaluator.
+Yam Yam should remain the final authority for severe sanctions.
+
+Penalties can include:
+- XP gain/loss
+- trust score changes
+- committee vote weight changes
+- temporary suspension
+- mandatory consultation
+- mandatory review
+
+The key principle:
+punish negligence, fake productivity, repeated stupidity, weak process, and cowardly non-action
+do not punish normal market randomness as if it were negligence
+
+Bob Additions
+-------------
+Bob's persona should explicitly include his obsession with synergy.
+
+This should not be left to memory alone.
+It should be in his actual persona files.
+
+Core Bob flavor:
+- Bob is irrationally obsessed with synergy
+- his coffee mug literally says "SYNERGY"
+- he sincerely believes synergy solves more problems than it actually does
+- he sometimes proposes bizarre morale or coordination ideas with full confidence
+- this should be funny, but not so overdone that it ruins usefulness
+
+Example Bob flavor line:
+Bob is irrationally obsessed with synergy and occasionally proposes bizarre morale or coordination ideas with complete sincerity.
+
+Operational Note
+----------------
+Repeated paper runs should continue to happen while all this is being wired in.
+These runs remain the proving ground for:
+- Grant pressure behavior
+- speech routing
+- memory cliff notes
+- discipline loops
+- Hermes stability
+- org identity retention
+
+Bottom Line
+-----------
+The new direction is:
+
+- Grant becomes a real org-wide pressure force
+- Axiom becomes part of the consequence and evaluation structure
+- every agent gets a MEMORY.md
+- Grant and Axiom are backed up
+- Hermes expands beyond Yam Yam
+- speeches become testable manually and scheduled daily
+- daily speeches create cliff-note directives, not memory bloat
+- Bob gains proper synergy canon
+- all of this becomes the launchpad before ACC V2

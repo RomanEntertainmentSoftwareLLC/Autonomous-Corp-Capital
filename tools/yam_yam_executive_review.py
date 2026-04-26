@@ -22,6 +22,9 @@ BRIEFING_PATH = ROOT / "state" / "grant" / "latest_grant_briefing.json"
 EXEC_REVIEW_DIR = ROOT / "state" / "executive_reviews"
 AXIOM_REVIEW_DIR = ROOT / "state" / "axiom_reviews"
 VIVIENNE_REVIEW_DIR = ROOT / "state" / "vivienne_reviews"
+LEDGER_REVIEW_DIR = ROOT / "state" / "ledger_reviews"
+HELENA_REVIEW_DIR = ROOT / "state" / "helena_reviews"
+GRANT_SPEECH_DIR = ROOT / "state" / "grant_speeches"
 MAIN_RPG_STATE = ROOT / "ai_agents_memory" / "main" / "RPG_STATE.md"
 MAIN_RPG_HISTORY = ROOT / "ai_agents_memory" / "main" / "RPG_HISTORY.md"
 MAIN_MEMORY = ROOT / "MEMORY.md"
@@ -109,6 +112,24 @@ def _weak_agent_lines(briefing: dict[str, Any]) -> list[str]:
     return lines or ["- No weak agents flagged."]
 
 
+
+def _read_latest_text(folder: Path, run_id: str | None, suffix: str, missing: str, limit: int = 2400) -> str:
+    candidates: list[Path] = []
+    if run_id:
+        candidates.append(folder / f"{run_id}_{suffix}.txt")
+    if folder.exists():
+        candidates.extend(sorted(folder.glob(f"*_{suffix}.txt"), key=lambda p: p.stat().st_mtime, reverse=True))
+    seen: set[Path] = set()
+    for path in candidates:
+        if path in seen or not path.exists():
+            continue
+        seen.add(path)
+        text = path.read_text(encoding="utf-8", errors="replace").strip()
+        if text:
+            return _clip(text, limit)
+    return missing
+
+
 def _read_axiom_review(run_id: str | None) -> str:
     """Return the latest Axiom evaluator review for this run, if available.
 
@@ -151,7 +172,40 @@ def _read_vivienne_review(run_id: str | None) -> str:
     return "No Vivienne financial truth review available yet."
 
 
-def _build_prompt(briefing: dict[str, Any], axiom_review: str | None = None, vivienne_review: str | None = None) -> str:
+def _read_ledger_review(run_id: str | None) -> str:
+    """Return the latest Ledger cost governance review for this run, if available."""
+    return _read_latest_text(
+        LEDGER_REVIEW_DIR,
+        run_id,
+        "ledger_review",
+        "No Ledger token/cost governance review available yet.",
+        1800,
+    )
+
+
+def _read_helena_review(run_id: str | None) -> str:
+    """Return the latest Helena risk review for this run, if available."""
+    return _read_latest_text(
+        HELENA_REVIEW_DIR,
+        run_id,
+        "helena_review",
+        "No Helena risk review available yet.",
+        1800,
+    )
+
+
+def _read_grant_speech(run_id: str | None) -> str:
+    """Return the latest Grant pressure speech for this run, if available."""
+    return _read_latest_text(
+        GRANT_SPEECH_DIR,
+        run_id,
+        "grant_speech",
+        "No Grant pressure speech available yet.",
+        1600,
+    )
+
+
+def _build_prompt(briefing: dict[str, Any], axiom_review: str | None = None, vivienne_review: str | None = None, ledger_review: str | None = None, helena_review: str | None = None, grant_speech: str | None = None) -> str:
     market = briefing.get("market") or {}
     target = briefing.get("target_state") or {}
     committee = briefing.get("committee_health") or {}
@@ -203,6 +257,15 @@ Latest Axiom evaluator review:
 Latest Vivienne financial truth review:
 {_clip(vivienne_review, 2400) if vivienne_review else "No Vivienne financial truth review available yet."}
 
+Latest Ledger token/cost governance review:
+{_clip(ledger_review, 1800) if ledger_review else "No Ledger token/cost governance review available yet."}
+
+Latest Helena risk review:
+{_clip(helena_review, 1800) if helena_review else "No Helena risk review available yet."}
+
+Latest Grant pressure speech:
+{_clip(grant_speech, 1600) if grant_speech else "No Grant pressure speech available yet."}
+
 Usage telemetry:
 - ledger rows: {usage.get('ledger_rows')}
 - bridge rows: {usage.get('bridge_rows')}
@@ -212,9 +275,10 @@ Required output:
 1. Executive verdict: one paragraph.
 2. What actually happened: 3-5 bullets.
 3. Financial/accounting trust: 2-4 bullets based on Vivienne if available.
-4. Who needs pressure or review: 3-5 bullets.
-5. Next directives: 3-5 bullets.
-6. Memory-worthy cliff notes: 3 bullets max.
+4. Risk and cost governance: 2-4 bullets based on Helena and Ledger if available.
+5. Who needs pressure or review: 3-5 bullets.
+6. Next directives: 3-5 bullets.
+7. Memory-worthy cliff notes: 3 bullets max.
 
 Keep it concise, direct, and operational. You are the Master CEO. Act like it.
 """.strip()
@@ -323,7 +387,17 @@ def main() -> None:
     run_id = str(briefing.get("run_id") or args.run_id or "unknown")
     axiom_review = _read_axiom_review(run_id)
     vivienne_review = _read_vivienne_review(run_id)
-    prompt = _build_prompt(briefing, axiom_review=axiom_review, vivienne_review=vivienne_review)
+    ledger_review = _read_ledger_review(run_id)
+    helena_review = _read_helena_review(run_id)
+    grant_speech = _read_grant_speech(run_id)
+    prompt = _build_prompt(
+        briefing,
+        axiom_review=axiom_review,
+        vivienne_review=vivienne_review,
+        ledger_review=ledger_review,
+        helena_review=helena_review,
+        grant_speech=grant_speech,
+    )
 
     EXEC_REVIEW_DIR.mkdir(parents=True, exist_ok=True)
     prompt_path = EXEC_REVIEW_DIR / f"{run_id}_yam_yam_prompt.txt"

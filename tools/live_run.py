@@ -1756,6 +1756,118 @@ def write_daily_digest(run_id: str) -> None:
 
 
 
+
+def _run_governance_hook(run_id: str, hook: str, script_name: str, disable_env: str, timeout_env: str, hook_timeout_env: str, extra_args: list[str] | None = None) -> None:
+    """Run a post-run governance script without making the live run fragile."""
+    if os.getenv(disable_env, "0").strip().lower() in {"1", "true", "yes", "on"}:
+        return
+    run_dir = run_directory(run_id)
+    artifacts_dir = run_dir / "artifacts"
+    artifacts_dir.mkdir(parents=True, exist_ok=True)
+    log_path = artifacts_dir / f"{hook}.log"
+    err_path = artifacts_dir / f"{hook}_error.log"
+    cmd = [
+        sys.executable,
+        str(ROOT / "tools" / script_name),
+        "--run-id",
+        run_id,
+        "--timeout",
+        os.getenv(timeout_env, "420"),
+    ]
+    if extra_args:
+        cmd.extend(extra_args)
+    started_at = _utcnow().isoformat()
+    try:
+        result = subprocess.run(
+            cmd,
+            cwd=str(ROOT),
+            text=True,
+            capture_output=True,
+            timeout=int(os.getenv(hook_timeout_env, "480")),
+            env=dict(os.environ),
+        )
+        log_path.write_text(
+            json.dumps(
+                {
+                    "timestamp": _utcnow().isoformat(),
+                    "started_at": started_at,
+                    "run_id": run_id,
+                    "hook": hook,
+                    "status": "success" if result.returncode == 0 else "failed",
+                    "returncode": result.returncode,
+                    "cmd": cmd,
+                    "stdout": result.stdout,
+                    "stderr": result.stderr,
+                },
+                indent=2,
+            ) + "\n",
+            encoding="utf-8",
+        )
+    except Exception as exc:
+        err_path.write_text(
+            json.dumps(
+                {
+                    "timestamp": _utcnow().isoformat(),
+                    "started_at": started_at,
+                    "run_id": run_id,
+                    "hook": hook,
+                    "status": "error",
+                    "cmd": cmd,
+                    "error": repr(exc),
+                },
+                indent=2,
+            ) + "\n",
+            encoding="utf-8",
+        )
+
+
+def run_ledger_post_run_review(run_id: str) -> None:
+    """Run Ledger's token/cost governance review after core reports exist."""
+    _run_governance_hook(
+        run_id,
+        hook="ledger_review_hook",
+        script_name="ledger_cost_review.py",
+        disable_env="DISABLE_LEDGER_POST_RUN_REVIEW",
+        timeout_env="LEDGER_REVIEW_TIMEOUT_SECONDS",
+        hook_timeout_env="LEDGER_REVIEW_HOOK_TIMEOUT_SECONDS",
+    )
+
+
+def run_helena_post_run_review(run_id: str) -> None:
+    """Run Helena's risk review before executive synthesis."""
+    _run_governance_hook(
+        run_id,
+        hook="helena_review_hook",
+        script_name="helena_risk_review.py",
+        disable_env="DISABLE_HELENA_POST_RUN_REVIEW",
+        timeout_env="HELENA_REVIEW_TIMEOUT_SECONDS",
+        hook_timeout_env="HELENA_REVIEW_HOOK_TIMEOUT_SECONDS",
+    )
+
+
+def run_grant_post_run_speech(run_id: str) -> None:
+    """Run Grant's controlled pressure speech.
+
+    Listener note-taking is opt-in through GRANT_SPEECH_LISTENERS so we can test
+    one listener such as bob_company_001 before broadcasting cliff notes broadly.
+    """
+    extra_args: list[str] = []
+    listeners = os.getenv("GRANT_SPEECH_LISTENERS", "").strip()
+    if listeners:
+        extra_args.extend(["--listeners", listeners])
+    speech_type = os.getenv("GRANT_SPEECH_TYPE", "").strip()
+    if speech_type:
+        extra_args.extend(["--speech-type", speech_type])
+    _run_governance_hook(
+        run_id,
+        hook="grant_speech_hook",
+        script_name="grant_speech_review.py",
+        disable_env="DISABLE_GRANT_POST_RUN_SPEECH",
+        timeout_env="GRANT_SPEECH_TIMEOUT_SECONDS",
+        hook_timeout_env="GRANT_SPEECH_HOOK_TIMEOUT_SECONDS",
+        extra_args=extra_args,
+    )
+
 def run_axiom_post_run_review(run_id: str) -> None:
     """Run Axiom's post-run evaluator review as non-fatal governance.
 
@@ -2416,8 +2528,11 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
             meta["status"] = "completed"
         meta_path.write_text(json.dumps(meta, indent=2))
     write_daily_digest(run_id)
+    run_ledger_post_run_review(run_id)
+    run_helena_post_run_review(run_id)
     run_axiom_post_run_review(run_id)
     run_vivienne_post_run_review(run_id)
+    run_grant_post_run_speech(run_id)
     run_yam_yam_post_run_review(run_id)
     update_evolution_states_from_warehouse()
     prune_old_run_artifacts(run_id)

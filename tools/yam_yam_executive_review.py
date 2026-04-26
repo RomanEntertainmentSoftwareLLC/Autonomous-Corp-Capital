@@ -25,6 +25,8 @@ VIVIENNE_REVIEW_DIR = ROOT / "state" / "vivienne_reviews"
 LEDGER_REVIEW_DIR = ROOT / "state" / "ledger_reviews"
 HELENA_REVIEW_DIR = ROOT / "state" / "helena_reviews"
 GRANT_SPEECH_DIR = ROOT / "state" / "grant_speeches"
+SELENE_REVIEW_DIR = ROOT / "state" / "selene_reviews"
+ARIADNE_REVIEW_DIR = ROOT / "state" / "ariadne_reviews"
 MAIN_RPG_STATE = ROOT / "ai_agents_memory" / "main" / "RPG_STATE.md"
 MAIN_RPG_HISTORY = ROOT / "ai_agents_memory" / "main" / "RPG_HISTORY.md"
 MAIN_MEMORY = ROOT / "MEMORY.md"
@@ -205,7 +207,30 @@ def _read_grant_speech(run_id: str | None) -> str:
     )
 
 
-def _build_prompt(briefing: dict[str, Any], axiom_review: str | None = None, vivienne_review: str | None = None, ledger_review: str | None = None, helena_review: str | None = None, grant_speech: str | None = None) -> str:
+
+def _read_selene_review(run_id: str | None) -> str:
+    """Return the latest Selene treasury review for this run, if available."""
+    return _read_latest_text(
+        SELENE_REVIEW_DIR,
+        run_id,
+        "selene_review",
+        "No Selene treasury review available yet.",
+        1800,
+    )
+
+
+def _read_ariadne_review(run_id: str | None) -> str:
+    """Return the latest Ariadne workforce review for this run, if available."""
+    return _read_latest_text(
+        ARIADNE_REVIEW_DIR,
+        run_id,
+        "ariadne_review",
+        "No Ariadne workforce review available yet.",
+        1800,
+    )
+
+
+def _build_prompt(briefing: dict[str, Any], axiom_review: str | None = None, vivienne_review: str | None = None, ledger_review: str | None = None, helena_review: str | None = None, grant_speech: str | None = None, selene_review: str | None = None, ariadne_review: str | None = None) -> str:
     market = briefing.get("market") or {}
     target = briefing.get("target_state") or {}
     committee = briefing.get("committee_health") or {}
@@ -266,6 +291,12 @@ Latest Helena risk review:
 Latest Grant pressure speech:
 {_clip(grant_speech, 1600) if grant_speech else "No Grant pressure speech available yet."}
 
+Latest Selene treasury review:
+{_clip(selene_review, 1600) if selene_review else "No Selene treasury review available yet."}
+
+Latest Ariadne workforce review:
+{_clip(ariadne_review, 1600) if ariadne_review else "No Ariadne workforce review available yet."}
+
 Usage telemetry:
 - ledger rows: {usage.get('ledger_rows')}
 - bridge rows: {usage.get('bridge_rows')}
@@ -276,9 +307,10 @@ Required output:
 2. What actually happened: 3-5 bullets.
 3. Financial/accounting trust: 2-4 bullets based on Vivienne if available.
 4. Risk and cost governance: 2-4 bullets based on Helena and Ledger if available.
-5. Who needs pressure or review: 3-5 bullets.
-6. Next directives: 3-5 bullets.
-7. Memory-worthy cliff notes: 3 bullets max.
+5. Treasury and workforce governance: 2-4 bullets based on Selene and Ariadne if available.
+6. Who needs pressure or review: 3-5 bullets.
+7. Next directives: 3-5 bullets.
+8. Memory-worthy cliff notes: 3 bullets max.
 
 Keep it concise, direct, and operational. You are the Master CEO. Act like it.
 """.strip()
@@ -390,6 +422,8 @@ def main() -> None:
     ledger_review = _read_ledger_review(run_id)
     helena_review = _read_helena_review(run_id)
     grant_speech = _read_grant_speech(run_id)
+    selene_review = _read_selene_review(run_id)
+    ariadne_review = _read_ariadne_review(run_id)
     prompt = _build_prompt(
         briefing,
         axiom_review=axiom_review,
@@ -397,6 +431,8 @@ def main() -> None:
         ledger_review=ledger_review,
         helena_review=helena_review,
         grant_speech=grant_speech,
+        selene_review=selene_review,
+        ariadne_review=ariadne_review,
     )
 
     EXEC_REVIEW_DIR.mkdir(parents=True, exist_ok=True)

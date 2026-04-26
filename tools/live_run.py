@@ -1868,6 +1868,42 @@ def run_grant_post_run_speech(run_id: str) -> None:
         extra_args=extra_args,
     )
 
+
+def run_selene_post_run_review(run_id: str) -> None:
+    """Run Selene's Master Treasurer review before executive synthesis."""
+    _run_governance_hook(
+        run_id,
+        hook="selene_review_hook",
+        script_name="selene_treasury_review.py",
+        disable_env="DISABLE_SELENE_POST_RUN_REVIEW",
+        timeout_env="SELENE_REVIEW_TIMEOUT_SECONDS",
+        hook_timeout_env="SELENE_REVIEW_HOOK_TIMEOUT_SECONDS",
+    )
+
+
+def run_ariadne_post_run_review(run_id: str) -> None:
+    """Run Ariadne's AI Agent Resources workforce review before executive synthesis."""
+    _run_governance_hook(
+        run_id,
+        hook="ariadne_review_hook",
+        script_name="ariadne_workforce_review.py",
+        disable_env="DISABLE_ARIADNE_POST_RUN_REVIEW",
+        timeout_env="ARIADNE_REVIEW_TIMEOUT_SECONDS",
+        hook_timeout_env="ARIADNE_REVIEW_HOOK_TIMEOUT_SECONDS",
+    )
+
+
+def run_june_post_run_archive(run_id: str) -> None:
+    """Run June's archive pass after Yam Yam has produced the executive review."""
+    _run_governance_hook(
+        run_id,
+        hook="june_archive_hook",
+        script_name="june_archive_review.py",
+        disable_env="DISABLE_JUNE_POST_RUN_ARCHIVE",
+        timeout_env="JUNE_ARCHIVE_TIMEOUT_SECONDS",
+        hook_timeout_env="JUNE_ARCHIVE_HOOK_TIMEOUT_SECONDS",
+    )
+
 def run_axiom_post_run_review(run_id: str) -> None:
     """Run Axiom's post-run evaluator review as non-fatal governance.
 
@@ -2532,8 +2568,11 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
     run_helena_post_run_review(run_id)
     run_axiom_post_run_review(run_id)
     run_vivienne_post_run_review(run_id)
+    run_selene_post_run_review(run_id)
+    run_ariadne_post_run_review(run_id)
     run_grant_post_run_speech(run_id)
     run_yam_yam_post_run_review(run_id)
+    run_june_post_run_archive(run_id)
     update_evolution_states_from_warehouse()
     prune_old_run_artifacts(run_id)
     current = None

@@ -1,7 +1,265 @@
 {
-  "agent_count_in_config": 2,
+  "agent_count_in_config": 64,
+  "agent_models": [
+    {
+      "agent_id": "ariadne",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "atlas_company_001",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "atlas_company_002",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "atlas_company_003",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "atlas_company_004",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "axiom",
+      "model": "hermes/hermes-agent"
+    },
+    {
+      "agent_id": "bianca_company_001",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "bianca_company_002",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "bianca_company_003",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "bianca_company_004",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "bob_company_001",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "bob_company_002",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "bob_company_003",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "bob_company_004",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "eli",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "gideon",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "grant_cardone",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "helena",
+      "model": "hermes/hermes-agent"
+    },
+    {
+      "agent_id": "iris_company_001",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "iris_company_002",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "iris_company_003",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "iris_company_004",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "june_company_001",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "june_company_002",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "june_company_003",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "june_company_004",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "justine",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "ledger",
+      "model": "hermes/hermes-agent"
+    },
+    {
+      "agent_id": "lucian_company_001",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "lucian_company_002",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "lucian_company_003",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "lucian_company_004",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "main",
+      "model": "hermes/hermes-agent"
+    },
+    {
+      "agent_id": "mara",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "marek",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "mina",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "nadia",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "noah",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "orion_company_001",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "orion_company_002",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "orion_company_003",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "orion_company_004",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "owen",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "pam_company_001",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "pam_company_002",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "pam_company_003",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "pam_company_004",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "rhea",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "rowan_company_001",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "rowan_company_002",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "rowan_company_003",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "rowan_company_004",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "sabine",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "selene",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "sloane_company_001",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "sloane_company_002",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "sloane_company_003",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "sloane_company_004",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "tessa",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "vera_company_001",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "vera_company_002",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "vera_company_003",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "vera_company_004",
+      "model": "openai/gpt-5.4"
+    },
+    {
+      "agent_id": "vivienne",
+      "model": "hermes/hermes-agent"
+    }
+  ],
   "file_counts": {
-    "ai_agents:AGENTS.md": 77,
+    "ai_agents:AGENTS.md": 63,
     "ai_agents:BOOTSTRAP.md": 30,
     "ai_agents:HEARTBEAT.md": 63,
     "ai_agents:IDENTITY.md": 63,
@@ -17,21 +275,89 @@
     "ai_agents_backup:SOUL.md": 64,
     "ai_agents_backup:TOOLS.md": 64,
     "ai_agents_backup:USER.md": 64,
-    "ai_agents_memory:MEMORY.md": 3,
+    "ai_agents_memory:MEMORY.md": 9,
     "ai_agents_memory:RPG_HISTORY.md": 66,
     "ai_agents_memory:RPG_STATE.md": 66
   },
-  "hermes_assigned_agents": [],
+  "hermes_assigned_agents": [
+    "axiom",
+    "helena",
+    "ledger",
+    "main",
+    "vivienne"
+  ],
   "hermes_provider_names": [
     "hermes",
     "hermes_rowan"
   ],
+  "missing_model_agents": [],
   "model_counts": {
-    "UNKNOWN": 1,
-    "{'primary': 'openai/gpt-5.4'}": 1
+    "hermes/hermes-agent": 5,
+    "openai/gpt-5.4": 59
   },
   "note": "This is an inventory/audit only. It does not modify Hermes or agent model wiring.",
-  "openai_assigned_count": 1,
+  "openai_assigned_agents": [
+    "ariadne",
+    "atlas_company_001",
+    "atlas_company_002",
+    "atlas_company_003",
+    "atlas_company_004",
+    "bianca_company_001",
+    "bianca_company_002",
+    "bianca_company_003",
+    "bianca_company_004",
+    "bob_company_001",
+    "bob_company_002",
+    "bob_company_003",
+    "bob_company_004",
+    "eli",
+    "gideon",
+    "grant_cardone",
+    "iris_company_001",
+    "iris_company_002",
+    "iris_company_003",
+    "iris_company_004",
+    "june_company_001",
+    "june_company_002",
+    "june_company_003",
+    "june_company_004",
+    "justine",
+    "lucian_company_001",
+    "lucian_company_002",
+    "lucian_company_003",
+    "lucian_company_004",
+    "mara",
+    "marek",
+    "mina",
+    "nadia",
+    "noah",
+    "orion_company_001",
+    "orion_company_002",
+    "orion_company_003",
+    "orion_company_004",
+    "owen",
+    "pam_company_001",
+    "pam_company_002",
+    "pam_company_003",
+    "pam_company_004",
+    "rhea",
+    "rowan_company_001",
+    "rowan_company_002",
+    "rowan_company_003",
+    "rowan_company_004",
+    "sabine",
+    "selene",
+    "sloane_company_001",
+    "sloane_company_002",
+    "sloane_company_003",
+    "sloane_company_004",
+    "tessa",
+    "vera_company_001",
+    "vera_company_002",
+    "vera_company_003",
+    "vera_company_004"
+  ],
+  "openai_assigned_count": 59,
   "openclaw_json": "/opt/openclaw/.openclaw/openclaw.json",
   "openclaw_json_exists": true,
   "provider_names": [
@@ -39,8 +365,10 @@
     "hermes_rowan",
     "moonshot",
     "nvkimi",
+    "ollama",
     "openai"
   ],
-  "timestamp": "2026-04-26T02:58:05.550569+00:00",
-  "verdict": "hermes_provider_present_but_no_agents_assigned"
+  "root": "/opt/openclaw/.openclaw/workspace",
+  "timestamp": "2026-04-27T01:11:58.264232+00:00",
+  "verdict": "some_agents_directly_assigned_to_hermes"
 }

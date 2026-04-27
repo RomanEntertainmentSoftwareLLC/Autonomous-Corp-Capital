@@ -58,6 +58,6 @@
   "sqlite_inspection": [],
   "state_dir_exists": true,
   "table_count": 0,
-  "timestamp": "2026-04-26T02:58:05.477931+00:00",
+  "timestamp": "2026-04-27T01:21:43.620959+00:00",
   "verdict": "artifact_only_no_sqlite_warehouse_found"
 }

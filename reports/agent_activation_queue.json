@@ -1,103 +1,51 @@
 {
   "root": "/opt/openclaw/.openclaw/workspace",
+  "config": "/opt/openclaw/.openclaw/openclaw.json",
   "rows": [
-    {
-      "agent_id": "vivienne",
-      "branch": "master",
-      "priority_score": 125.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": true,
-      "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/master_cfo/vivienne_master_cfo"
-    },
-    {
-      "agent_id": "helena",
-      "branch": "master",
-      "priority_score": 120.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": true,
-      "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/risk_officer/helena_risk_officer"
-    },
-    {
-      "agent_id": "ledger",
-      "branch": "master",
-      "priority_score": 116.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": true,
-      "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/token_cost_controller/ledger_token_cost_controller"
-    },
-    {
-      "agent_id": "ariadne",
-      "branch": "master",
-      "priority_score": 114.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": true,
-      "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/ai_agent_resources/ariadne_ai_agent_resources"
-    },
-    {
-      "agent_id": "selene",
-      "branch": "master",
-      "priority_score": 110.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": true,
-      "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/master_treasurer/selene_master_treasurer"
-    },
     {
       "agent_id": "axiom",
       "branch": "master",
-      "priority_score": 99.65,
-      "xp": 7.0,
-      "sessions": 1.0,
-      "usefulness": 2.0,
-      "evidence_quality": 3.0,
+      "priority_score": 99.3,
+      "xp": 14.0,
+      "sessions": 2.0,
+      "usefulness": 4.0,
+      "evidence_quality": 6.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
       "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/axiom_evaluator/axiom_evaluator"
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/axiom_evaluator/axiom_evaluator",
+      "source": "openclaw.json"
     },
     {
-      "agent_id": "june_company_001",
-      "branch": "company",
-      "priority_score": 88.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
+      "agent_id": "vivienne",
+      "branch": "master",
+      "priority_score": 94.65,
+      "xp": 7.0,
+      "sessions": 1.0,
+      "usefulness": 2.0,
+      "evidence_quality": 2.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/master_cfo/vivienne_master_cfo",
+      "source": "openclaw.json"
+    },
+    {
+      "agent_id": "helena",
+      "branch": "master",
+      "priority_score": 89.65,
+      "xp": 7.0,
+      "sessions": 1.0,
+      "usefulness": 2.0,
+      "evidence_quality": 2.0,
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": true,
+      "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/risk_officer/helena_risk_officer",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "june_company_002",
@@ -109,9 +57,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/archivist/june_archivist_company_002",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "june_company_003",
@@ -123,9 +72,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/archivist/june_archivist_company_003",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "june_company_004",
@@ -137,23 +87,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
-    },
-    {
-      "agent_id": "grant_cardone",
-      "branch": "master",
-      "priority_score": 87.7,
-      "xp": 6.0,
-      "sessions": 1.0,
-      "usefulness": 2.0,
-      "evidence_quality": 1.0,
-      "has_rpg_state": true,
-      "has_rpg_history": true,
       "has_memory": true,
-      "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/revenue_expansion_officer/grant_cardone_revenue_expansion_officer"
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/archivist/june_archivist_company_004",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "pam_company_001",
@@ -165,9 +102,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/front_desk_administrator/pam_front_desk_administrator_company_001",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "pam_company_002",
@@ -179,9 +117,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/front_desk_administrator/pam_front_desk_administrator_company_002",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "pam_company_003",
@@ -193,9 +132,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/front_desk_administrator/pam_front_desk_administrator_company_003",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "pam_company_004",
@@ -207,9 +147,25 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/front_desk_administrator/pam_front_desk_administrator_company_004",
+      "source": "openclaw.json"
+    },
+    {
+      "agent_id": "grant_cardone",
+      "branch": "master",
+      "priority_score": 87.4,
+      "xp": 12.0,
+      "sessions": 2.0,
+      "usefulness": 4.0,
+      "evidence_quality": 2.0,
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": true,
+      "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/revenue_expansion_officer/grant_cardone_revenue_expansion_officer",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "atlas_company_001",
@@ -221,9 +177,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/market_simulator/atlas_market_simulator_company_001",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "atlas_company_002",
@@ -235,9 +192,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/market_simulator/atlas_market_simulator_company_002",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "atlas_company_003",
@@ -249,9 +207,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/market_simulator/atlas_market_simulator_company_003",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "atlas_company_004",
@@ -263,9 +222,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/market_simulator/atlas_market_simulator_company_004",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "sloane_company_001",
@@ -277,9 +237,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/evolution_specialist/sloane_evolution_specialist_company_001",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "sloane_company_002",
@@ -291,9 +252,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/evolution_specialist/sloane_evolution_specialist_company_002",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "sloane_company_003",
@@ -305,9 +267,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/evolution_specialist/sloane_evolution_specialist_company_003",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "sloane_company_004",
@@ -319,9 +282,25 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/evolution_specialist/sloane_evolution_specialist_company_004",
+      "source": "openclaw.json"
+    },
+    {
+      "agent_id": "ledger",
+      "branch": "master",
+      "priority_score": 85.65,
+      "xp": 7.0,
+      "sessions": 1.0,
+      "usefulness": 2.0,
+      "evidence_quality": 2.0,
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": true,
+      "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/token_cost_controller/ledger_token_cost_controller",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "bob_company_002",
@@ -333,9 +312,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/operations_worker/bob_operations_worker_company_002",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "bob_company_003",
@@ -347,9 +327,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/operations_worker/bob_operations_worker_company_003",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "bob_company_004",
@@ -361,653 +342,55 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/operations_worker/bob_operations_worker_company_004",
+      "source": "openclaw.json"
     },
     {
-      "agent_id": "bianca_cfo_company_001",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/cfo/bianca_cfo_company_001"
+      "agent_id": "ariadne",
+      "branch": "master",
+      "priority_score": 83.65,
+      "xp": 7.0,
+      "sessions": 1.0,
+      "usefulness": 2.0,
+      "evidence_quality": 1.0,
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": true,
+      "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/ai_agent_resources/ariadne_ai_agent_resources",
+      "source": "openclaw.json"
     },
     {
-      "agent_id": "bianca_cfo_company_002",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
+      "agent_id": "selene",
+      "branch": "master",
+      "priority_score": 79.65,
+      "xp": 7.0,
+      "sessions": 1.0,
       "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/cfo/bianca_cfo_company_002"
-    },
-    {
-      "agent_id": "bianca_cfo_company_003",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/cfo/bianca_cfo_company_003"
-    },
-    {
-      "agent_id": "bianca_cfo_company_004",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/cfo/bianca_cfo_company_004"
-    },
-    {
-      "agent_id": "desk_administrator_company_001",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/front_desk_administrator/pam_front_desk_administrator_company_001"
-    },
-    {
-      "agent_id": "desk_administrator_company_002",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/front_desk_administrator/pam_front_desk_administrator_company_002"
-    },
-    {
-      "agent_id": "desk_administrator_company_003",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/front_desk_administrator/pam_front_desk_administrator_company_003"
-    },
-    {
-      "agent_id": "desk_administrator_company_004",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/front_desk_administrator/pam_front_desk_administrator_company_004"
-    },
-    {
-      "agent_id": "evolution_specialist_company_001",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/evolution_specialist/sloane_evolution_specialist_company_001"
-    },
-    {
-      "agent_id": "evolution_specialist_company_002",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/evolution_specialist/sloane_evolution_specialist_company_002"
-    },
-    {
-      "agent_id": "evolution_specialist_company_003",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/evolution_specialist/sloane_evolution_specialist_company_003"
-    },
-    {
-      "agent_id": "evolution_specialist_company_004",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/evolution_specialist/sloane_evolution_specialist_company_004"
-    },
-    {
-      "agent_id": "iris_analyst_company_001",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/analyst/iris_analyst_company_001"
-    },
-    {
-      "agent_id": "iris_analyst_company_002",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/analyst/iris_analyst_company_002"
-    },
-    {
-      "agent_id": "iris_analyst_company_003",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/analyst/iris_analyst_company_003"
-    },
-    {
-      "agent_id": "iris_analyst_company_004",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/analyst/iris_analyst_company_004"
-    },
-    {
-      "agent_id": "june_archivist_company_001",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/archivist/june_archivist_company_001"
-    },
-    {
-      "agent_id": "june_archivist_company_002",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/archivist/june_archivist_company_002"
-    },
-    {
-      "agent_id": "june_archivist_company_003",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/archivist/june_archivist_company_003"
-    },
-    {
-      "agent_id": "june_archivist_company_004",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/archivist/june_archivist_company_004"
-    },
-    {
-      "agent_id": "lucian_ceo_company_001",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/ceo/lucian_ceo_company_001"
-    },
-    {
-      "agent_id": "lucian_ceo_company_002",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/ceo/lucian_ceo_company_002"
-    },
-    {
-      "agent_id": "lucian_ceo_company_003",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/ceo/lucian_ceo_company_003"
-    },
-    {
-      "agent_id": "lucian_ceo_company_004",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/ceo/lucian_ceo_company_004"
-    },
-    {
-      "agent_id": "market_simulator_company_001",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/market_simulator/atlas_market_simulator_company_001"
-    },
-    {
-      "agent_id": "market_simulator_company_002",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/market_simulator/atlas_market_simulator_company_002"
-    },
-    {
-      "agent_id": "market_simulator_company_003",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/market_simulator/atlas_market_simulator_company_003"
-    },
-    {
-      "agent_id": "market_simulator_company_004",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/market_simulator/atlas_market_simulator_company_004"
-    },
-    {
-      "agent_id": "operations_worker_company_001",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/operations_worker/bob_operations_worker_company_001"
-    },
-    {
-      "agent_id": "operations_worker_company_002",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/operations_worker/bob_operations_worker_company_002"
-    },
-    {
-      "agent_id": "operations_worker_company_003",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/operations_worker/bob_operations_worker_company_003"
-    },
-    {
-      "agent_id": "operations_worker_company_004",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/operations_worker/bob_operations_worker_company_004"
-    },
-    {
-      "agent_id": "orion_strategist_company_001",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/strategist/orion_strategist_company_001"
-    },
-    {
-      "agent_id": "orion_strategist_company_002",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/strategist/orion_strategist_company_002"
-    },
-    {
-      "agent_id": "orion_strategist_company_003",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/strategist/orion_strategist_company_003"
-    },
-    {
-      "agent_id": "orion_strategist_company_004",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/strategist/orion_strategist_company_004"
-    },
-    {
-      "agent_id": "rowan_researcher_company_001",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/researcher/rowan_researcher_company_001"
-    },
-    {
-      "agent_id": "rowan_researcher_company_002",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/researcher/rowan_researcher_company_002"
-    },
-    {
-      "agent_id": "rowan_researcher_company_003",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/researcher/rowan_researcher_company_003"
-    },
-    {
-      "agent_id": "rowan_researcher_company_004",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/researcher/rowan_researcher_company_004"
-    },
-    {
-      "agent_id": "vera_manager_company_001",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/manager/vera_manager_company_001"
-    },
-    {
-      "agent_id": "vera_manager_company_002",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/manager/vera_manager_company_002"
-    },
-    {
-      "agent_id": "vera_manager_company_003",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/manager/vera_manager_company_003"
-    },
-    {
-      "agent_id": "vera_manager_company_004",
-      "branch": "company",
-      "priority_score": 80.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": false,
-      "has_rpg_history": false,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/manager/vera_manager_company_004"
+      "evidence_quality": 2.0,
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": true,
+      "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/master_treasurer/selene_master_treasurer",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "main",
       "branch": "master",
-      "priority_score": 78.8,
-      "xp": 24.0,
-      "sessions": 3.0,
-      "usefulness": 6.0,
-      "evidence_quality": 3.0,
+      "priority_score": 78.4,
+      "xp": 32.0,
+      "sessions": 4.0,
+      "usefulness": 8.0,
+      "evidence_quality": 4.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/yam_yam"
-    },
-    {
-      "agent_id": "_TEMPLATE",
-      "branch": "company",
-      "priority_score": 75.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": true,
-      "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "workspace": "",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "rowan_company_001",
@@ -1019,9 +402,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/researcher/rowan_researcher_company_001",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "rowan_company_002",
@@ -1033,9 +417,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/researcher/rowan_researcher_company_002",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "rowan_company_003",
@@ -1047,9 +432,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/researcher/rowan_researcher_company_003",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "rowan_company_004",
@@ -1061,23 +447,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
-    },
-    {
-      "agent_id": "yam_yam_old_20260420_225259",
-      "branch": "company",
-      "priority_score": 75.0,
-      "xp": 0.0,
-      "sessions": 0.0,
-      "usefulness": 0.0,
-      "evidence_quality": 0.0,
-      "has_rpg_state": true,
-      "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": ""
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/researcher/rowan_researcher_company_004",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "mara",
@@ -1089,9 +462,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/watchdog_branch/inspector_general/mara_inspector_general"
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/watchdog_branch/inspector_general/mara_inspector_general",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "justine",
@@ -1103,9 +477,10 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/watchdog_branch/constitutional_arbiter/justine_constitutional_arbiter"
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/watchdog_branch/constitutional_arbiter/justine_constitutional_arbiter",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "owen",
@@ -1117,9 +492,25 @@
       "evidence_quality": 0.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.",
-      "workspace": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/watchdog_branch/ombudsman/owen_ombudsman"
+      "has_memory": true,
+      "rationale": "Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/watchdog_branch/ombudsman/owen_ombudsman",
+      "source": "openclaw.json"
+    },
+    {
+      "agent_id": "june_company_001",
+      "branch": "company",
+      "priority_score": 57.75,
+      "xp": 5.0,
+      "sessions": 1.0,
+      "usefulness": 1.0,
+      "evidence_quality": 2.0,
+      "has_rpg_state": true,
+      "has_rpg_history": true,
+      "has_memory": true,
+      "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/archivist/june_archivist_company_001",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "bob_company_001",
@@ -1133,21 +524,8 @@
       "has_rpg_history": true,
       "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
-    },
-    {
-      "agent_id": "yam_yam",
-      "branch": "company",
-      "priority_score": 43.8,
-      "xp": 24.0,
-      "sessions": 3.0,
-      "usefulness": 6.0,
-      "evidence_quality": 3.0,
-      "has_rpg_state": true,
-      "has_rpg_history": true,
-      "has_memory": false,
-      "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/operations_worker/bob_operations_worker_company_001",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "iris_company_002",
@@ -1159,9 +537,10 @@
       "evidence_quality": 53.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/analyst/iris_analyst_company_002",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "iris_company_003",
@@ -1173,9 +552,10 @@
       "evidence_quality": 51.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/analyst/iris_analyst_company_003",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "iris_company_004",
@@ -1187,9 +567,10 @@
       "evidence_quality": 51.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/analyst/iris_analyst_company_004",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "orion_company_002",
@@ -1201,9 +582,10 @@
       "evidence_quality": 71.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/strategist/orion_strategist_company_002",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "orion_company_003",
@@ -1215,9 +597,10 @@
       "evidence_quality": 68.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/strategist/orion_strategist_company_003",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "orion_company_004",
@@ -1229,9 +612,10 @@
       "evidence_quality": 68.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/strategist/orion_strategist_company_004",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "bianca_company_003",
@@ -1243,9 +627,10 @@
       "evidence_quality": 30.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/cfo/bianca_cfo_company_003",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "vera_company_003",
@@ -1257,9 +642,10 @@
       "evidence_quality": 9.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/manager/vera_manager_company_003",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "bianca_company_004",
@@ -1271,9 +657,10 @@
       "evidence_quality": 30.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/cfo/bianca_cfo_company_004",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "vera_company_004",
@@ -1285,9 +672,10 @@
       "evidence_quality": 9.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/manager/vera_manager_company_004",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "bianca_company_002",
@@ -1299,9 +687,10 @@
       "evidence_quality": 31.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/cfo/bianca_cfo_company_002",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "vera_company_002",
@@ -1313,9 +702,10 @@
       "evidence_quality": 9.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/manager/vera_manager_company_002",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "lucian_company_003",
@@ -1327,9 +717,10 @@
       "evidence_quality": 13.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/ceo/lucian_ceo_company_003",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "lucian_company_004",
@@ -1341,9 +732,10 @@
       "evidence_quality": 13.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/ceo/lucian_ceo_company_004",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "lucian_company_002",
@@ -1355,9 +747,10 @@
       "evidence_quality": 13.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/ceo/lucian_ceo_company_002",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "bianca_company_001",
@@ -1369,9 +762,10 @@
       "evidence_quality": 37.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/cfo/bianca_cfo_company_001",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "iris_company_001",
@@ -1383,9 +777,10 @@
       "evidence_quality": 65.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/analyst/iris_analyst_company_001",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "vera_company_001",
@@ -1397,9 +792,10 @@
       "evidence_quality": 9.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/manager/vera_manager_company_001",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "lucian_company_001",
@@ -1411,9 +807,10 @@
       "evidence_quality": 13.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/ceo/lucian_ceo_company_001",
+      "source": "openclaw.json"
     },
     {
       "agent_id": "orion_company_001",
@@ -1425,9 +822,10 @@
       "evidence_quality": 89.0,
       "has_rpg_state": true,
       "has_rpg_history": true,
-      "has_memory": false,
+      "has_memory": true,
       "rationale": "Already active; monitor or deepen role wiring rather than first activation.",
-      "workspace": ""
+      "workspace": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/strategist/orion_strategist_company_001",
+      "source": "openclaw.json"
     }
   ]
 }

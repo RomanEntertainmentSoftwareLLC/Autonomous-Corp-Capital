@@ -1,0 +1,25 @@
+Orion / Rowan Separation Audit
+===============================
+
+Rows inspected: 8
+Latest run: run_20260421_022922
+
+Agent language scores:
+- ai_agents_backup/company001_branch/strategist/orion_strategist_company_001: orion_terms=12 rowan_terms=13 identity=True soul=True memory=True
+- ai_agents_backup/company001_branch/researcher/rowan_researcher_company_001: orion_terms=2 rowan_terms=17 identity=True soul=True memory=True
+- ai_agents_backup/company004_branch/strategist/orion_strategist_company_004: orion_terms=12 rowan_terms=13 identity=True soul=True memory=True
+- ai_agents_backup/company004_branch/researcher/rowan_researcher_company_004: orion_terms=2 rowan_terms=17 identity=True soul=True memory=True
+- ai_agents_backup/company002_branch/strategist/orion_strategist_company_002: orion_terms=12 rowan_terms=13 identity=True soul=True memory=True
+- ai_agents_backup/company002_branch/researcher/rowan_researcher_company_002: orion_terms=2 rowan_terms=17 identity=True soul=True memory=True
+- ai_agents_backup/company003_branch/strategist/orion_strategist_company_003: orion_terms=12 rowan_terms=13 identity=True soul=True memory=True
+- ai_agents_backup/company003_branch/researcher/rowan_researcher_company_003: orion_terms=2 rowan_terms=17 identity=True soul=True memory=True
+
+Latest run role counts:
+- Lucian: 8
+- Bianca: 8
+- Vera: 8
+- Iris: 8
+- Orion: 8
+
+Issues:
+- None flagged by wording heuristic.

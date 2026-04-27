@@ -1,18 +1,20 @@
 HERMES INVENTORY AUDIT
 ======================
-Verdict: hermes_provider_present_but_no_agents_assigned
+Verdict: some_agents_directly_assigned_to_hermes
+Root: /opt/openclaw/.openclaw/workspace
 OpenClaw config exists: True (/opt/openclaw/.openclaw/openclaw.json)
-Agents in config: 2
+Agents in config: 64
+Providers: hermes, hermes_rowan, moonshot, nvkimi, ollama, openai
 Hermes providers: hermes, hermes_rowan
-Hermes assigned agents: 0
-OpenAI assigned agents: 1
+Hermes assigned agents: 5
+OpenAI assigned agents: 59
 
 Model counts:
-- UNKNOWN: 1
-- {'primary': 'openai/gpt-5.4'}: 1
+- hermes/hermes-agent: 5
+- openai/gpt-5.4: 59
 
 File counts:
-- ai_agents:AGENTS.md: 77
+- ai_agents:AGENTS.md: 63
 - ai_agents:BOOTSTRAP.md: 30
 - ai_agents:HEARTBEAT.md: 63
 - ai_agents:IDENTITY.md: 63
@@ -28,6 +30,13 @@ File counts:
 - ai_agents_backup:SOUL.md: 64
 - ai_agents_backup:TOOLS.md: 64
 - ai_agents_backup:USER.md: 64
-- ai_agents_memory:MEMORY.md: 3
+- ai_agents_memory:MEMORY.md: 9
 - ai_agents_memory:RPG_HISTORY.md: 66
 - ai_agents_memory:RPG_STATE.md: 66
+
+Hermes assigned agents:
+- axiom
+- helena
+- ledger
+- main
+- vivienne

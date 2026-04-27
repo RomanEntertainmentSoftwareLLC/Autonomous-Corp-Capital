@@ -6,10 +6,10 @@ writes a phased plan so Hermes can be rolled out without a mass breakage event.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import re
-from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -23,8 +23,8 @@ PHASES = [
     ("phase_0_verify", ["main"], "Verify Yam Yam/main has the expected second-brain behavior before expanding."),
     ("phase_1_executive_truth", ["axiom", "vivienne", "helena", "ledger"], "Evidence, financial truth, risk, and token-cost oversight."),
     ("phase_2_revenue_workforce", ["grant_cardone", "ariadne", "selene"], "Revenue pressure, workforce allocation, and treasury guidance."),
-    ("phase_3_company_leadership", ["lucian", "bianca", "orion", "iris", "vera"], "Company decision core, applied by company suffix."),
-    ("phase_4_support_roles", ["rowan", "pam", "june", "atlas", "sloane", "bob"], "Support roles once event routing is clear."),
+    ("phase_3_company_core", ["lucian", "bianca", "iris", "vera", "orion", "rowan"], "Company decision core, applied by company suffix. Rowan uses the Rowan Hermes provider."),
+    ("phase_4_support_roles", ["pam", "bob", "sloane", "atlas", "june"], "Support roles once event routing is clear."),
     ("phase_5_watchdogs", ["mara", "justine", "owen"], "Watchdogs after governance triggers are stable."),
     ("phase_6_swe_later", ["nadia", "tessa", "marek", "eli", "noah", "mina", "gideon", "sabine", "rhea"], "SWE branch later, ticket-driven only."),
 ]
@@ -67,7 +67,53 @@ def _agent_id_from_folder(folder: Path) -> str:
     return m.group(1) if m else name
 
 
-def discover_agents() -> list[str]:
+def _agent_id(entry: dict[str, Any]) -> str | None:
+    for key in ("id", "agent_id", "name"):
+        value = entry.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return None
+
+
+def _model_text(value: Any) -> str:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict):
+        primary = value.get("primary")
+        if primary is not None:
+            return str(primary)
+        return json.dumps(value, sort_keys=True)
+    if value is None:
+        return "unknown"
+    return str(value)
+
+
+def _iter_config_agents(cfg: Any) -> list[dict[str, Any]]:
+    if not isinstance(cfg, dict):
+        return []
+    raw = cfg.get("agents")
+    if isinstance(raw, dict):
+        agent_list = raw.get("list")
+        if isinstance(agent_list, list):
+            return [item for item in agent_list if isinstance(item, dict) and _agent_id(item)]
+        rows = []
+        for key, value in raw.items():
+            if key in {"defaults", "list"}:
+                continue
+            if isinstance(value, dict):
+                rows.append({"id": key, **value})
+        return [item for item in rows if _agent_id(item)]
+    if isinstance(raw, list):
+        return [item for item in raw if isinstance(item, dict) and _agent_id(item)]
+    return []
+
+
+def discover_agents(model_by_agent: dict[str, str]) -> list[str]:
+    # The real OpenClaw config is the source of truth. Filesystem discovery is
+    # fallback only, otherwise backup/template folders create false duplicate agents.
+    if model_by_agent:
+        return sorted(model_by_agent.keys())
+
     ids: set[str] = set()
     if BACKUP_ROOT.exists():
         for ag in BACKUP_ROOT.rglob("AGENTS.md"):
@@ -81,31 +127,39 @@ def discover_agents() -> list[str]:
 
 
 def _providers_and_agent_models(cfg: Any) -> tuple[list[str], dict[str, str]]:
-    providers: list[str] = []
+    providers: set[str] = set()
     models: dict[str, str] = {}
     if not isinstance(cfg, dict):
-        return providers, models
+        return [], models
+
+    models_section = cfg.get("models")
+    if isinstance(models_section, dict):
+        provider_map = models_section.get("providers")
+        if isinstance(provider_map, dict):
+            providers.update(str(k) for k in provider_map.keys())
+
     for key in ("providers", "modelProviders", "model_providers"):
         val = cfg.get(key)
         if isinstance(val, dict):
-            providers.extend(str(k) for k in val.keys())
+            providers.update(str(k) for k in val.keys())
         elif isinstance(val, list):
             for item in val:
                 if isinstance(item, dict) and (item.get("name") or item.get("id")):
-                    providers.append(str(item.get("name") or item.get("id")))
-    for key in ("agents", "agentRegistry", "agent_registry"):
-        val = cfg.get(key)
-        if isinstance(val, dict):
-            for aid, item in val.items():
-                if isinstance(item, dict):
-                    models[str(aid)] = str(item.get("model") or item.get("provider") or "")
-        elif isinstance(val, list):
-            for item in val:
-                if isinstance(item, dict):
-                    aid = item.get("id") or item.get("name") or item.get("agent")
-                    if aid:
-                        models[str(aid)] = str(item.get("model") or item.get("provider") or "")
-    return providers, models
+                    providers.add(str(item.get("name") or item.get("id")))
+
+    auth = cfg.get("auth")
+    if isinstance(auth, dict):
+        profiles = auth.get("profiles")
+        if isinstance(profiles, dict):
+            for profile in profiles.values():
+                if isinstance(profile, dict) and profile.get("provider"):
+                    providers.add(str(profile["provider"]))
+
+    for item in _iter_config_agents(cfg):
+        aid = _agent_id(item)
+        if aid:
+            models[aid] = _model_text(item.get("model"))
+    return sorted(providers), models
 
 
 def _matches_phase(agent_id: str, keys: list[str]) -> bool:
@@ -117,10 +171,10 @@ def _matches_phase(agent_id: str, keys: list[str]) -> bool:
     return False
 
 
-def main() -> None:
-    cfg = _read_json(CONFIG_PATH) or _read_json(ROOT / "openclaw.json")
+def build_plan(root: Path, config_path: Path) -> tuple[list[str], dict[str, Any]]:
+    cfg = _read_json(config_path) or _read_json(root / "openclaw.json")
     providers, model_by_agent = _providers_and_agent_models(cfg)
-    agents = discover_agents()
+    agents = discover_agents(model_by_agent)
     hermes_provider_names = [p for p in providers if "hermes" in p.lower()]
     current_hermes_agents = [aid for aid, model in model_by_agent.items() if "hermes" in model.lower()]
 
@@ -134,15 +188,12 @@ def main() -> None:
     if leftovers:
         phase_rows.append({"phase": "phase_unknown_review", "reason": "Discovered but not classified; inspect before rollout.", "agents": leftovers})
 
-    REPORTS.mkdir(parents=True, exist_ok=True)
-    txt = REPORTS / "hermes_rollout_plan.txt"
-    js = REPORTS / "hermes_rollout_plan.json"
     lines = [
         "ACC HERMES ROLLOUT PLAN",
         "=======================",
-        f"Root: {ROOT}",
-        f"Config inspected: {CONFIG_PATH if CONFIG_PATH.exists() else ROOT / 'openclaw.json'}",
-        f"Discovered agents: {len(agents)}",
+        f"Root: {root}",
+        f"Config inspected: {config_path if config_path.exists() else root / 'openclaw.json'}",
+        f"Discovered configured agents: {len(agents)}",
         f"Providers: {', '.join(providers) if providers else 'none detected'}",
         f"Hermes-like providers: {', '.join(hermes_provider_names) if hermes_provider_names else 'none detected'}",
         f"Agents currently using Hermes-like model/provider: {len(current_hermes_agents)}",
@@ -166,14 +217,40 @@ def main() -> None:
         else:
             lines.append("- none discovered")
         lines.append("")
-    txt.write_text("\n".join(lines), encoding="utf-8")
-    js.write_text(json.dumps({
-        "root": str(ROOT),
+
+    json_report = {
+        "root": str(root),
+        "config_path": str(config_path),
         "providers": providers,
         "hermes_provider_names": hermes_provider_names,
-        "current_hermes_agents": current_hermes_agents,
+        "current_hermes_agents": sorted(current_hermes_agents),
+        "agent_count": len(agents),
+        "model_by_agent": model_by_agent,
         "phases": phase_rows,
-    }, indent=2), encoding="utf-8")
+    }
+    return lines, json_report
+
+
+def main() -> None:
+    global ROOT, CONFIG_PATH, BACKUP_ROOT, MEMORY_ROOT, REPORTS
+
+    parser = argparse.ArgumentParser(description="Create a read-only phased Hermes rollout plan from the real OpenClaw config.")
+    parser.add_argument("--root", type=Path, default=ROOT, help="ACC workspace root")
+    parser.add_argument("--config", type=Path, default=CONFIG_PATH, help="Path to openclaw.json")
+    args = parser.parse_args()
+
+    ROOT = args.root
+    CONFIG_PATH = args.config
+    BACKUP_ROOT = ROOT / "ai_agents_backup"
+    MEMORY_ROOT = ROOT / "ai_agents_memory"
+    REPORTS = ROOT / "reports"
+
+    lines, json_report = build_plan(ROOT, CONFIG_PATH)
+    REPORTS.mkdir(parents=True, exist_ok=True)
+    txt = REPORTS / "hermes_rollout_plan.txt"
+    js = REPORTS / "hermes_rollout_plan.json"
+    txt.write_text("\n".join(lines), encoding="utf-8")
+    js.write_text(json.dumps(json_report, indent=2, sort_keys=True), encoding="utf-8")
     print("\n".join(lines))
     print(f"Wrote: {txt}")
     print(f"Wrote: {js}")

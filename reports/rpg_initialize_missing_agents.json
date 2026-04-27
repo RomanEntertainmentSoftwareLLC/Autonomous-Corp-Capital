@@ -1,824 +1,502 @@
 {
   "root": "/opt/openclaw/.openclaw/workspace",
   "dry_run": true,
+  "exclude_swe": true,
   "results": [
     {
       "agent_id": "ariadne",
       "display_name": "Ariadne",
-      "role_hint": "ai_agent_resources",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/ai_agent_resources/ariadne_ai_agent_resources",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "axiom",
-      "display_name": "Axiom",
-      "role_hint": "axiom_evaluator",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/axiom_evaluator/axiom_evaluator",
+      "role_hint": "AI Agent Resources Director",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/ai_agent_resources/ariadne_ai_agent_resources",
       "actions": [],
       "changed": false
     },
     {
-      "agent_id": "bianca_cfo_company_001",
-      "display_name": "Bianca",
-      "role_hint": "cfo",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/cfo/bianca_cfo_company_001",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "bianca_cfo_company_002",
-      "display_name": "Bianca",
-      "role_hint": "cfo",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/cfo/bianca_cfo_company_002",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "bianca_cfo_company_003",
-      "display_name": "Bianca",
-      "role_hint": "cfo",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/cfo/bianca_cfo_company_003",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "bianca_cfo_company_004",
-      "display_name": "Bianca",
-      "role_hint": "cfo",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/cfo/bianca_cfo_company_004",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "defaults",
-      "display_name": "Defaults",
-      "role_hint": "",
+      "agent_id": "atlas_company_001",
+      "display_name": "Atlas",
+      "role_hint": "Market Simulator, Company 001",
       "source": "openclaw.json",
-      "path": "/opt/openclaw/.openclaw/workspace",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/market_simulator/atlas_market_simulator_company_001",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "desk_administrator_company_001",
-      "display_name": "Pam",
-      "role_hint": "front_desk_administrator",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/front_desk_administrator/pam_front_desk_administrator_company_001",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "agent_id": "atlas_company_002",
+      "display_name": "Atlas",
+      "role_hint": "Market Simulator, Company 002",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/market_simulator/atlas_market_simulator_company_002",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "desk_administrator_company_002",
-      "display_name": "Pam",
-      "role_hint": "front_desk_administrator",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/front_desk_administrator/pam_front_desk_administrator_company_002",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "agent_id": "atlas_company_003",
+      "display_name": "Atlas",
+      "role_hint": "Market Simulator, Company 003",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/market_simulator/atlas_market_simulator_company_003",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "desk_administrator_company_003",
-      "display_name": "Pam",
-      "role_hint": "front_desk_administrator",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/front_desk_administrator/pam_front_desk_administrator_company_003",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "agent_id": "atlas_company_004",
+      "display_name": "Atlas",
+      "role_hint": "Market Simulator, Company 004",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/market_simulator/atlas_market_simulator_company_004",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "desk_administrator_company_004",
-      "display_name": "Pam",
-      "role_hint": "front_desk_administrator",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch/front_desk_administrator/pam_front_desk_administrator_company_004",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "agent_id": "axiom",
+      "display_name": "Axiom",
+      "role_hint": "Evaluator / AI Consultant",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/axiom_evaluator/axiom_evaluator",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "eli",
-      "display_name": "Eli",
-      "role_hint": "senior_software_engineer",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/swe_branch/senior_software_engineer/eli_senior_software_engineer",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "agent_id": "bianca_company_001",
+      "display_name": "Bianca",
+      "role_hint": "CFO, Company 001",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/cfo/bianca_cfo_company_001",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "evolution_specialist_company_001",
-      "display_name": "Sloane",
-      "role_hint": "evolution_specialist",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/evolution_specialist/sloane_evolution_specialist_company_001",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "agent_id": "bianca_company_002",
+      "display_name": "Bianca",
+      "role_hint": "CFO, Company 002",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/cfo/bianca_cfo_company_002",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "evolution_specialist_company_002",
-      "display_name": "Sloane",
-      "role_hint": "evolution_specialist",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/evolution_specialist/sloane_evolution_specialist_company_002",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "agent_id": "bianca_company_003",
+      "display_name": "Bianca",
+      "role_hint": "CFO, Company 003",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/cfo/bianca_cfo_company_003",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "evolution_specialist_company_003",
-      "display_name": "Sloane",
-      "role_hint": "evolution_specialist",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/evolution_specialist/sloane_evolution_specialist_company_003",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "agent_id": "bianca_company_004",
+      "display_name": "Bianca",
+      "role_hint": "CFO, Company 004",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/cfo/bianca_cfo_company_004",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "evolution_specialist_company_004",
-      "display_name": "Sloane",
-      "role_hint": "evolution_specialist",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch/evolution_specialist/sloane_evolution_specialist_company_004",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "agent_id": "bob_company_001",
+      "display_name": "Bob",
+      "role_hint": "Low Tier Operations Worker, Company 001",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/operations_worker/bob_operations_worker_company_001",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "gideon",
-      "display_name": "Gideon",
-      "role_hint": "code_reviewer",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/swe_branch/code_reviewer/gideon_code_reviewer",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "agent_id": "bob_company_002",
+      "display_name": "Bob",
+      "role_hint": "Low Tier Operations Worker, Company 002",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/operations_worker/bob_operations_worker_company_002",
+      "actions": [],
+      "changed": false
+    },
+    {
+      "agent_id": "bob_company_003",
+      "display_name": "Bob",
+      "role_hint": "Low Tier Operations Worker, Company 003",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/operations_worker/bob_operations_worker_company_003",
+      "actions": [],
+      "changed": false
+    },
+    {
+      "agent_id": "bob_company_004",
+      "display_name": "Bob",
+      "role_hint": "Low Tier Operations Worker, Company 004",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/operations_worker/bob_operations_worker_company_004",
+      "actions": [],
+      "changed": false
     },
     {
       "agent_id": "grant_cardone",
       "display_name": "Grant Cardone",
-      "role_hint": "revenue_expansion_officer",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/revenue_expansion_officer/grant_cardone_revenue_expansion_officer",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Chief Revenue Expansion Officer",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/revenue_expansion_officer/grant_cardone_revenue_expansion_officer",
+      "actions": [],
+      "changed": false
     },
     {
       "agent_id": "helena",
       "display_name": "Helena",
-      "role_hint": "risk_officer",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/risk_officer/helena_risk_officer",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Risk Officer",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/risk_officer/helena_risk_officer",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "iris_analyst_company_001",
+      "agent_id": "iris_company_001",
       "display_name": "Iris",
-      "role_hint": "analyst",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/analyst/iris_analyst_company_001",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Analyst, Company 001",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/analyst/iris_analyst_company_001",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "iris_analyst_company_002",
+      "agent_id": "iris_company_002",
       "display_name": "Iris",
-      "role_hint": "analyst",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/analyst/iris_analyst_company_002",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Analyst, Company 002",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/analyst/iris_analyst_company_002",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "iris_analyst_company_003",
+      "agent_id": "iris_company_003",
       "display_name": "Iris",
-      "role_hint": "analyst",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/analyst/iris_analyst_company_003",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Analyst, Company 003",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/analyst/iris_analyst_company_003",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "iris_analyst_company_004",
+      "agent_id": "iris_company_004",
       "display_name": "Iris",
-      "role_hint": "analyst",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/analyst/iris_analyst_company_004",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Analyst, Company 004",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/analyst/iris_analyst_company_004",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "june_archivist_company_001",
+      "agent_id": "june_company_001",
       "display_name": "June",
-      "role_hint": "archivist",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/archivist/june_archivist_company_001",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Archivist, Company 001",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/archivist/june_archivist_company_001",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "june_archivist_company_002",
+      "agent_id": "june_company_002",
       "display_name": "June",
-      "role_hint": "archivist",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/archivist/june_archivist_company_002",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Archivist, Company 002",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/archivist/june_archivist_company_002",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "june_archivist_company_003",
+      "agent_id": "june_company_003",
       "display_name": "June",
-      "role_hint": "archivist",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/archivist/june_archivist_company_003",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Archivist, Company 003",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/archivist/june_archivist_company_003",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "june_archivist_company_004",
+      "agent_id": "june_company_004",
       "display_name": "June",
-      "role_hint": "archivist",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/archivist/june_archivist_company_004",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Archivist, Company 004",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/archivist/june_archivist_company_004",
+      "actions": [],
+      "changed": false
     },
     {
       "agent_id": "justine",
       "display_name": "Justine",
-      "role_hint": "constitutional_arbiter",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/watchdog_branch/constitutional_arbiter/justine_constitutional_arbiter",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Constitutional Arbiter",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/watchdog_branch/constitutional_arbiter/justine_constitutional_arbiter",
+      "actions": [],
+      "changed": false
     },
     {
       "agent_id": "ledger",
       "display_name": "Ledger",
-      "role_hint": "token_cost_controller",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/token_cost_controller/ledger_token_cost_controller",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "list",
-      "display_name": "List",
-      "role_hint": "",
+      "role_hint": "Token & Cost Controller",
       "source": "openclaw.json",
-      "path": "",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/token_cost_controller/ledger_token_cost_controller",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "lucian_ceo_company_001",
+      "agent_id": "lucian_company_001",
       "display_name": "Lucian",
-      "role_hint": "ceo",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/ceo/lucian_ceo_company_001",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "CEO, Company 001",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/ceo/lucian_ceo_company_001",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "lucian_ceo_company_002",
+      "agent_id": "lucian_company_002",
       "display_name": "Lucian",
-      "role_hint": "ceo",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/ceo/lucian_ceo_company_002",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "CEO, Company 002",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/ceo/lucian_ceo_company_002",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "lucian_ceo_company_003",
+      "agent_id": "lucian_company_003",
       "display_name": "Lucian",
-      "role_hint": "ceo",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/ceo/lucian_ceo_company_003",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "CEO, Company 003",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/ceo/lucian_ceo_company_003",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "lucian_ceo_company_004",
+      "agent_id": "lucian_company_004",
       "display_name": "Lucian",
-      "role_hint": "ceo",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/ceo/lucian_ceo_company_004",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "CEO, Company 004",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/ceo/lucian_ceo_company_004",
+      "actions": [],
+      "changed": false
     },
     {
       "agent_id": "main",
       "display_name": "Yam Yam",
-      "role_hint": "yam_yam",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/yam_yam",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Master CEO",
+      "source": "openclaw.json",
+      "path": "",
+      "actions": [],
+      "changed": false
     },
     {
       "agent_id": "mara",
       "display_name": "Mara",
-      "role_hint": "inspector_general",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/watchdog_branch/inspector_general/mara_inspector_general",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Inspector General",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/watchdog_branch/inspector_general/mara_inspector_general",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "marek",
-      "display_name": "Marek",
-      "role_hint": "senior_software_architect",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/swe_branch/senior_software_architect/marek_senior_software_architect",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "market_simulator_company_001",
-      "display_name": "Atlas",
-      "role_hint": "market_simulator",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/market_simulator/atlas_market_simulator_company_001",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "market_simulator_company_002",
-      "display_name": "Atlas",
-      "role_hint": "market_simulator",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/market_simulator/atlas_market_simulator_company_002",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "market_simulator_company_003",
-      "display_name": "Atlas",
-      "role_hint": "market_simulator",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/market_simulator/atlas_market_simulator_company_003",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "market_simulator_company_004",
-      "display_name": "Atlas",
-      "role_hint": "market_simulator",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch/market_simulator/atlas_market_simulator_company_004",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "mina",
-      "display_name": "Mina",
-      "role_hint": "tester",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/swe_branch/tester/mina_tester",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "nadia",
-      "display_name": "Nadia",
-      "role_hint": "product_manager",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/swe_branch/product_manager/nadia_product_manager",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "noah",
-      "display_name": "Noah",
-      "role_hint": "junior_software_engineer",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/swe_branch/junior_software_engineer/noah_junior_software_engineer",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "operations_worker_company_001",
-      "display_name": "Bob",
-      "role_hint": "operations_worker",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/operations_worker/bob_operations_worker_company_001",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "operations_worker_company_002",
-      "display_name": "Bob",
-      "role_hint": "operations_worker",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/operations_worker/bob_operations_worker_company_002",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "operations_worker_company_003",
-      "display_name": "Bob",
-      "role_hint": "operations_worker",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/operations_worker/bob_operations_worker_company_003",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "operations_worker_company_004",
-      "display_name": "Bob",
-      "role_hint": "operations_worker",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch/operations_worker/bob_operations_worker_company_004",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "orion_strategist_company_001",
+      "agent_id": "orion_company_001",
       "display_name": "Orion",
-      "role_hint": "strategist",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/strategist/orion_strategist_company_001",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Strategist, Company 001",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/strategist/orion_strategist_company_001",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "orion_strategist_company_002",
+      "agent_id": "orion_company_002",
       "display_name": "Orion",
-      "role_hint": "strategist",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/strategist/orion_strategist_company_002",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Strategist, Company 002",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/strategist/orion_strategist_company_002",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "orion_strategist_company_003",
+      "agent_id": "orion_company_003",
       "display_name": "Orion",
-      "role_hint": "strategist",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/strategist/orion_strategist_company_003",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Strategist, Company 003",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/strategist/orion_strategist_company_003",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "orion_strategist_company_004",
+      "agent_id": "orion_company_004",
       "display_name": "Orion",
-      "role_hint": "strategist",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch/strategist/orion_strategist_company_004",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Strategist, Company 004",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/strategist/orion_strategist_company_004",
+      "actions": [],
+      "changed": false
     },
     {
       "agent_id": "owen",
       "display_name": "Owen",
-      "role_hint": "ombudsman",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/watchdog_branch/ombudsman/owen_ombudsman",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Ombudsman",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/watchdog_branch/ombudsman/owen_ombudsman",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "rhea",
-      "display_name": "Rhea",
-      "role_hint": "infrastructure",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/swe_branch/infrastructure/rhea_infrastructure",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "agent_id": "pam_company_001",
+      "display_name": "Pam",
+      "role_hint": "Front Desk Administrator, Company 001",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/front_desk_administrator/pam_front_desk_administrator_company_001",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "rowan_researcher_company_001",
+      "agent_id": "pam_company_002",
+      "display_name": "Pam",
+      "role_hint": "Front Desk Administrator, Company 002",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/front_desk_administrator/pam_front_desk_administrator_company_002",
+      "actions": [],
+      "changed": false
+    },
+    {
+      "agent_id": "pam_company_003",
+      "display_name": "Pam",
+      "role_hint": "Front Desk Administrator, Company 003",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/front_desk_administrator/pam_front_desk_administrator_company_003",
+      "actions": [],
+      "changed": false
+    },
+    {
+      "agent_id": "pam_company_004",
+      "display_name": "Pam",
+      "role_hint": "Front Desk Administrator, Company 004",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/front_desk_administrator/pam_front_desk_administrator_company_004",
+      "actions": [],
+      "changed": false
+    },
+    {
+      "agent_id": "rowan_company_001",
       "display_name": "Rowan",
-      "role_hint": "researcher",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/researcher/rowan_researcher_company_001",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Researcher, Company 001",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/researcher/rowan_researcher_company_001",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "rowan_researcher_company_002",
+      "agent_id": "rowan_company_002",
       "display_name": "Rowan",
-      "role_hint": "researcher",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/researcher/rowan_researcher_company_002",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Researcher, Company 002",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/researcher/rowan_researcher_company_002",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "rowan_researcher_company_003",
+      "agent_id": "rowan_company_003",
       "display_name": "Rowan",
-      "role_hint": "researcher",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/researcher/rowan_researcher_company_003",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Researcher, Company 003",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/researcher/rowan_researcher_company_003",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "rowan_researcher_company_004",
+      "agent_id": "rowan_company_004",
       "display_name": "Rowan",
-      "role_hint": "researcher",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch/researcher/rowan_researcher_company_004",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
-    },
-    {
-      "agent_id": "sabine",
-      "display_name": "Sabine",
-      "role_hint": "qa",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/swe_branch/qa/sabine_qa",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Researcher, Company 004",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/researcher/rowan_researcher_company_004",
+      "actions": [],
+      "changed": false
     },
     {
       "agent_id": "selene",
       "display_name": "Selene",
-      "role_hint": "master_treasurer",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/master_treasurer/selene_master_treasurer",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Master Treasurer",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/master_treasurer/selene_master_treasurer",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "tessa",
-      "display_name": "Tessa",
-      "role_hint": "scrum_master",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/swe_branch/scrum_master/tessa_scrum_master",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "agent_id": "sloane_company_001",
+      "display_name": "Sloane",
+      "role_hint": "Evolution Specialist, Company 001",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/evolution_specialist/sloane_evolution_specialist_company_001",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "vera_manager_company_001",
+      "agent_id": "sloane_company_002",
+      "display_name": "Sloane",
+      "role_hint": "Evolution Specialist, Company 002",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/evolution_specialist/sloane_evolution_specialist_company_002",
+      "actions": [],
+      "changed": false
+    },
+    {
+      "agent_id": "sloane_company_003",
+      "display_name": "Sloane",
+      "role_hint": "Evolution Specialist, Company 003",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/evolution_specialist/sloane_evolution_specialist_company_003",
+      "actions": [],
+      "changed": false
+    },
+    {
+      "agent_id": "sloane_company_004",
+      "display_name": "Sloane",
+      "role_hint": "Evolution Specialist, Company 004",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/evolution_specialist/sloane_evolution_specialist_company_004",
+      "actions": [],
+      "changed": false
+    },
+    {
+      "agent_id": "vera_company_001",
       "display_name": "Vera",
-      "role_hint": "manager",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company001_branch/manager/vera_manager_company_001",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Manager, Company 001",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company001_branch/manager/vera_manager_company_001",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "vera_manager_company_002",
+      "agent_id": "vera_company_002",
       "display_name": "Vera",
-      "role_hint": "manager",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company002_branch/manager/vera_manager_company_002",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Manager, Company 002",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company002_branch/manager/vera_manager_company_002",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "vera_manager_company_003",
+      "agent_id": "vera_company_003",
       "display_name": "Vera",
-      "role_hint": "manager",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company003_branch/manager/vera_manager_company_003",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Manager, Company 003",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company003_branch/manager/vera_manager_company_003",
+      "actions": [],
+      "changed": false
     },
     {
-      "agent_id": "vera_manager_company_004",
+      "agent_id": "vera_company_004",
       "display_name": "Vera",
-      "role_hint": "manager",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch/manager/vera_manager_company_004",
-      "actions": [
-        "create RPG_STATE.md",
-        "create RPG_HISTORY.md",
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Manager, Company 004",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/company004_branch/manager/vera_manager_company_004",
+      "actions": [],
+      "changed": false
     },
     {
       "agent_id": "vivienne",
       "display_name": "Vivienne",
-      "role_hint": "master_cfo",
-      "source": "ai_agents_backup",
-      "path": "/opt/openclaw/.openclaw/workspace/ai_agents_backup/master_branch/master_cfo/vivienne_master_cfo",
-      "actions": [
-        "create MEMORY.md"
-      ],
-      "changed": true
+      "role_hint": "Master CFO",
+      "source": "openclaw.json",
+      "path": "/opt/openclaw/.openclaw/workspaces/ai_agents/master_branch/master_cfo/vivienne_master_cfo",
+      "actions": [],
+      "changed": false
     }
   ]
 }

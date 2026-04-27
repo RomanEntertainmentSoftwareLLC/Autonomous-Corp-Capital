@@ -1,32 +1,34 @@
 ACC AGENT ACTIVATION QUEUE
 ==========================
 Root: /opt/openclaw/.openclaw/workspace
-Agents considered: 102
+Config: /opt/openclaw/.openclaw/openclaw.json
+Agents considered: 55
 SWE included: False
+Discovery source: openclaw.json registered agents only
 
 Top activation candidates:
-- vivienne | branch=master | priority=125.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- helena | branch=master | priority=120.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- ledger | branch=master | priority=116.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- ariadne | branch=master | priority=114.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- selene | branch=master | priority=110.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- axiom | branch=master | priority=99.65 | xp=7.0 sessions=1.0 | state=True history=True memory=True | Already active; monitor or deepen role wiring rather than first activation.
-- june_company_001 | branch=company | priority=88.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- june_company_002 | branch=company | priority=88.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- june_company_003 | branch=company | priority=88.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- june_company_004 | branch=company | priority=88.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- grant_cardone | branch=master | priority=87.7 | xp=6.0 sessions=1.0 | state=True history=True memory=True | Already active; monitor or deepen role wiring rather than first activation.
-- pam_company_001 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- pam_company_002 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- pam_company_003 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- pam_company_004 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- atlas_company_001 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- atlas_company_002 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- atlas_company_003 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- atlas_company_004 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- sloane_company_001 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- sloane_company_002 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- sloane_company_003 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- sloane_company_004 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- bob_company_002 | branch=company | priority=85.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
-- bob_company_003 | branch=company | priority=85.0 | xp=0.0 sessions=0.0 | state=True history=True memory=False | Idle/zero-XP agent; needs a real event-driven job before it stops filing its nails.
+- axiom | branch=master | priority=99.3 | xp=14.0 sessions=2.0 | state=True history=True memory=True | Already active; monitor or deepen role wiring rather than first activation.
+- vivienne | branch=master | priority=94.65 | xp=7.0 sessions=1.0 | state=True history=True memory=True | Already active; monitor or deepen role wiring rather than first activation.
+- helena | branch=master | priority=89.65 | xp=7.0 sessions=1.0 | state=True history=True memory=True | Already active; monitor or deepen role wiring rather than first activation.
+- june_company_002 | branch=company | priority=88.0 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- june_company_003 | branch=company | priority=88.0 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- june_company_004 | branch=company | priority=88.0 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- pam_company_001 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- pam_company_002 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- pam_company_003 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- pam_company_004 | branch=company | priority=87.4 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- grant_cardone | branch=master | priority=87.4 | xp=12.0 sessions=2.0 | state=True history=True memory=True | Already active; monitor or deepen role wiring rather than first activation.
+- atlas_company_001 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- atlas_company_002 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- atlas_company_003 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- atlas_company_004 | branch=company | priority=87.0 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- sloane_company_001 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- sloane_company_002 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- sloane_company_003 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- sloane_company_004 | branch=company | priority=86.6 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- ledger | branch=master | priority=85.65 | xp=7.0 sessions=1.0 | state=True history=True memory=True | Already active; monitor or deepen role wiring rather than first activation.
+- bob_company_002 | branch=company | priority=85.0 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- bob_company_003 | branch=company | priority=85.0 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- bob_company_004 | branch=company | priority=85.0 | xp=0.0 sessions=0.0 | state=True history=True memory=True | Idle/zero-XP configured agent; needs a real event-driven job and memory file coverage.
+- ariadne | branch=master | priority=83.65 | xp=7.0 sessions=1.0 | state=True history=True memory=True | Already active; monitor or deepen role wiring rather than first activation.
+- selene | branch=master | priority=79.65 | xp=7.0 sessions=1.0 | state=True history=True memory=True | Already active; monitor or deepen role wiring rather than first activation.

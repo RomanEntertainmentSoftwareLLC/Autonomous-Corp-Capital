@@ -77,29 +77,53 @@ def _load_config(path: Path) -> dict[str, Any]:
     return data if isinstance(data, dict) else {}
 
 
-def _agent_model(config: dict[str, Any], agent_id: str) -> str:
+def _iter_agent_entries(config: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return agent dictionaries from supported OpenClaw config shapes."""
     agents = config.get("agents")
-    entries: list[dict[str, Any]] = []
     if isinstance(agents, dict):
-        raw_list = agents.get("list")
-        if isinstance(raw_list, list):
-            entries = [x for x in raw_list if isinstance(x, dict)]
-        else:
-            for key, value in agents.items():
-                if isinstance(value, dict):
-                    value = {"id": key, **value}
-                    entries.append(value)
-    elif isinstance(agents, list):
-        entries = [x for x in agents if isinstance(x, dict)]
+        agent_list = agents.get("list")
+        if isinstance(agent_list, list):
+            return [item for item in agent_list if isinstance(item, dict)]
 
-    for entry in entries:
-        if entry.get("id") == agent_id or entry.get("name") == agent_id or entry.get("agent_id") == agent_id:
-            value = entry.get("model")
-            if isinstance(value, str):
-                return value
-            if value is None:
-                return "<unset>"
-            return str(value)
+        rows: list[dict[str, Any]] = []
+        for key, value in agents.items():
+            if key in {"defaults", "list"}:
+                continue
+            if isinstance(value, dict):
+                rows.append({"id": key, **value})
+        return rows
+
+    if isinstance(agents, list):
+        return [item for item in agents if isinstance(item, dict)]
+    return []
+
+
+def _agent_id(entry: dict[str, Any]) -> str | None:
+    for key in ("id", "agent_id", "name"):
+        value = entry.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return None
+
+
+def _model_text(value: Any) -> str:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict):
+        primary = value.get("primary")
+        if primary is not None:
+            return str(primary)
+        return json.dumps(value, sort_keys=True)
+    if value is None:
+        return "<unset>"
+    return str(value)
+
+
+def _agent_model(config: dict[str, Any], agent_id: str) -> str:
+    for entry in _iter_agent_entries(config):
+        aid = _agent_id(entry)
+        if aid == agent_id:
+            return _model_text(entry.get("model"))
     return "<missing>"
 
 
@@ -143,6 +167,7 @@ def smoke_agent(agent_id: str, message: str, timeout: int, dry_run: bool) -> boo
     try:
         result = subprocess.run(
             cmd,
+            stdin=subprocess.DEVNULL,
             capture_output=True,
             text=True,
             timeout=timeout,

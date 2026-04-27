@@ -1,0 +1,90 @@
+{
+  "agent_rows": [
+    {
+      "path": "ai_agents_backup/company001_branch/strategist/orion_strategist_company_001",
+      "folder": "orion_strategist_company_001",
+      "orion_term_score": 12,
+      "rowan_term_score": 13,
+      "has_identity": true,
+      "has_soul": true,
+      "has_memory": true
+    },
+    {
+      "path": "ai_agents_backup/company001_branch/researcher/rowan_researcher_company_001",
+      "folder": "rowan_researcher_company_001",
+      "orion_term_score": 2,
+      "rowan_term_score": 17,
+      "has_identity": true,
+      "has_soul": true,
+      "has_memory": true
+    },
+    {
+      "path": "ai_agents_backup/company004_branch/strategist/orion_strategist_company_004",
+      "folder": "orion_strategist_company_004",
+      "orion_term_score": 12,
+      "rowan_term_score": 13,
+      "has_identity": true,
+      "has_soul": true,
+      "has_memory": true
+    },
+    {
+      "path": "ai_agents_backup/company004_branch/researcher/rowan_researcher_company_004",
+      "folder": "rowan_researcher_company_004",
+      "orion_term_score": 2,
+      "rowan_term_score": 17,
+      "has_identity": true,
+      "has_soul": true,
+      "has_memory": true
+    },
+    {
+      "path": "ai_agents_backup/company002_branch/strategist/orion_strategist_company_002",
+      "folder": "orion_strategist_company_002",
+      "orion_term_score": 12,
+      "rowan_term_score": 13,
+      "has_identity": true,
+      "has_soul": true,
+      "has_memory": true
+    },
+    {
+      "path": "ai_agents_backup/company002_branch/researcher/rowan_researcher_company_002",
+      "folder": "rowan_researcher_company_002",
+      "orion_term_score": 2,
+      "rowan_term_score": 17,
+      "has_identity": true,
+      "has_soul": true,
+      "has_memory": true
+    },
+    {
+      "path": "ai_agents_backup/company003_branch/strategist/orion_strategist_company_003",
+      "folder": "orion_strategist_company_003",
+      "orion_term_score": 12,
+      "rowan_term_score": 13,
+      "has_identity": true,
+      "has_soul": true,
+      "has_memory": true
+    },
+    {
+      "path": "ai_agents_backup/company003_branch/researcher/rowan_researcher_company_003",
+      "folder": "rowan_researcher_company_003",
+      "orion_term_score": 2,
+      "rowan_term_score": 17,
+      "has_identity": true,
+      "has_soul": true,
+      "has_memory": true
+    }
+  ],
+  "latest_run": "run_20260421_022922",
+  "latest_run_role_counts": {
+    "Lucian": 8,
+    "Bianca": 8,
+    "Vera": 8,
+    "Iris": 8,
+    "Orion": 8
+  },
+  "issues": [],
+  "interpretation": [
+    "Roadmap Step 1 wants Orion to be fresh external signal / strategy.",
+    "Roadmap Step 2 wants Rowan to be deep cached research/context.",
+    "This audit checks persona wording and latest company packet role participation only; it does not prove runtime behavior alone."
+  ]
+}

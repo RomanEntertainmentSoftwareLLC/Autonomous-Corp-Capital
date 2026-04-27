@@ -2,10 +2,10 @@ ACC HERMES ROLLOUT PLAN
 =======================
 Root: /opt/openclaw/.openclaw/workspace
 Config inspected: /opt/openclaw/.openclaw/openclaw.json
-Discovered agents: 111
-Providers: none detected
-Hermes-like providers: none detected
-Agents currently using Hermes-like model/provider: 0
+Discovered configured agents: 64
+Providers: hermes, hermes_rowan, moonshot, nvkimi, ollama, openai
+Hermes-like providers: hermes, hermes_rowan
+Agents currently using Hermes-like model/provider: 5
 
 Rules:
 - Do not mass-flip all agents at once.
@@ -15,135 +15,85 @@ Rules:
 
 ## phase_0_verify
 Verify Yam Yam/main has the expected second-brain behavior before expanding.
-- main | current_model=unknown | memory=False | history=True
+- main | current_model=hermes/hermes-agent | memory=False | history=True
 
 ## phase_1_executive_truth
 Evidence, financial truth, risk, and token-cost oversight.
-- axiom | current_model=unknown | memory=True | history=True
-- helena | current_model=unknown | memory=False | history=True
-- ledger | current_model=unknown | memory=False | history=True
-- vivienne | current_model=unknown | memory=False | history=True
+- axiom | current_model=hermes/hermes-agent | memory=True | history=True
+- helena | current_model=hermes/hermes-agent | memory=True | history=True
+- ledger | current_model=hermes/hermes-agent | memory=True | history=True
+- vivienne | current_model=hermes/hermes-agent | memory=True | history=True
 
 ## phase_2_revenue_workforce
 Revenue pressure, workforce allocation, and treasury guidance.
-- ariadne | current_model=unknown | memory=False | history=True
-- grant_cardone | current_model=unknown | memory=False | history=False
-- selene | current_model=unknown | memory=False | history=True
+- ariadne | current_model=openai/gpt-5.4 | memory=True | history=True
+- grant_cardone | current_model=openai/gpt-5.4 | memory=True | history=True
+- selene | current_model=openai/gpt-5.4 | memory=True | history=True
 
-## phase_3_company_leadership
-Company decision core, applied by company suffix.
-- bianca_company_001 | current_model=unknown | memory=False | history=True
-- bianca_company_002 | current_model=unknown | memory=False | history=True
-- bianca_company_003 | current_model=unknown | memory=False | history=True
-- bianca_company_004 | current_model=unknown | memory=False | history=True
-- iris_company_001 | current_model=unknown | memory=False | history=True
-- iris_company_002 | current_model=unknown | memory=False | history=True
-- iris_company_003 | current_model=unknown | memory=False | history=True
-- iris_company_004 | current_model=unknown | memory=False | history=True
-- lucian_company_001 | current_model=unknown | memory=False | history=True
-- lucian_company_002 | current_model=unknown | memory=False | history=True
-- lucian_company_003 | current_model=unknown | memory=False | history=True
-- lucian_company_004 | current_model=unknown | memory=False | history=True
-- orion_company_001 | current_model=unknown | memory=False | history=True
-- orion_company_002 | current_model=unknown | memory=False | history=True
-- orion_company_003 | current_model=unknown | memory=False | history=True
-- orion_company_004 | current_model=unknown | memory=False | history=True
-- vera_company_001 | current_model=unknown | memory=False | history=True
-- vera_company_002 | current_model=unknown | memory=False | history=True
-- vera_company_003 | current_model=unknown | memory=False | history=True
-- vera_company_004 | current_model=unknown | memory=False | history=True
+## phase_3_company_core
+Company decision core, applied by company suffix. Rowan uses the Rowan Hermes provider.
+- bianca_company_001 | current_model=openai/gpt-5.4 | memory=False | history=True
+- bianca_company_002 | current_model=openai/gpt-5.4 | memory=False | history=True
+- bianca_company_003 | current_model=openai/gpt-5.4 | memory=False | history=True
+- bianca_company_004 | current_model=openai/gpt-5.4 | memory=False | history=True
+- iris_company_001 | current_model=openai/gpt-5.4 | memory=False | history=True
+- iris_company_002 | current_model=openai/gpt-5.4 | memory=False | history=True
+- iris_company_003 | current_model=openai/gpt-5.4 | memory=False | history=True
+- iris_company_004 | current_model=openai/gpt-5.4 | memory=False | history=True
+- lucian_company_001 | current_model=openai/gpt-5.4 | memory=False | history=True
+- lucian_company_002 | current_model=openai/gpt-5.4 | memory=False | history=True
+- lucian_company_003 | current_model=openai/gpt-5.4 | memory=False | history=True
+- lucian_company_004 | current_model=openai/gpt-5.4 | memory=False | history=True
+- orion_company_001 | current_model=openai/gpt-5.4 | memory=False | history=True
+- orion_company_002 | current_model=openai/gpt-5.4 | memory=False | history=True
+- orion_company_003 | current_model=openai/gpt-5.4 | memory=False | history=True
+- orion_company_004 | current_model=openai/gpt-5.4 | memory=False | history=True
+- rowan_company_001 | current_model=openai/gpt-5.4 | memory=False | history=True
+- rowan_company_002 | current_model=openai/gpt-5.4 | memory=False | history=True
+- rowan_company_003 | current_model=openai/gpt-5.4 | memory=False | history=True
+- rowan_company_004 | current_model=openai/gpt-5.4 | memory=False | history=True
+- vera_company_001 | current_model=openai/gpt-5.4 | memory=False | history=True
+- vera_company_002 | current_model=openai/gpt-5.4 | memory=False | history=True
+- vera_company_003 | current_model=openai/gpt-5.4 | memory=False | history=True
+- vera_company_004 | current_model=openai/gpt-5.4 | memory=False | history=True
 
 ## phase_4_support_roles
 Support roles once event routing is clear.
-- atlas_company_001 | current_model=unknown | memory=False | history=True
-- atlas_company_002 | current_model=unknown | memory=False | history=True
-- atlas_company_003 | current_model=unknown | memory=False | history=True
-- atlas_company_004 | current_model=unknown | memory=False | history=True
-- bob_company_001 | current_model=unknown | memory=False | history=True
-- bob_company_002 | current_model=unknown | memory=False | history=True
-- bob_company_003 | current_model=unknown | memory=False | history=True
-- bob_company_004 | current_model=unknown | memory=False | history=True
-- june_company_001 | current_model=unknown | memory=False | history=True
-- june_company_002 | current_model=unknown | memory=False | history=True
-- june_company_003 | current_model=unknown | memory=False | history=True
-- june_company_004 | current_model=unknown | memory=False | history=True
-- pam_company_001 | current_model=unknown | memory=False | history=True
-- pam_company_002 | current_model=unknown | memory=False | history=True
-- pam_company_003 | current_model=unknown | memory=False | history=True
-- pam_company_004 | current_model=unknown | memory=False | history=True
-- rowan_company_001 | current_model=unknown | memory=False | history=True
-- rowan_company_002 | current_model=unknown | memory=False | history=True
-- rowan_company_003 | current_model=unknown | memory=False | history=True
-- rowan_company_004 | current_model=unknown | memory=False | history=True
-- sloane_company_001 | current_model=unknown | memory=False | history=True
-- sloane_company_002 | current_model=unknown | memory=False | history=True
-- sloane_company_003 | current_model=unknown | memory=False | history=True
-- sloane_company_004 | current_model=unknown | memory=False | history=True
+- atlas_company_001 | current_model=openai/gpt-5.4 | memory=False | history=True
+- atlas_company_002 | current_model=openai/gpt-5.4 | memory=False | history=True
+- atlas_company_003 | current_model=openai/gpt-5.4 | memory=False | history=True
+- atlas_company_004 | current_model=openai/gpt-5.4 | memory=False | history=True
+- bob_company_001 | current_model=openai/gpt-5.4 | memory=True | history=True
+- bob_company_002 | current_model=openai/gpt-5.4 | memory=False | history=True
+- bob_company_003 | current_model=openai/gpt-5.4 | memory=False | history=True
+- bob_company_004 | current_model=openai/gpt-5.4 | memory=False | history=True
+- june_company_001 | current_model=openai/gpt-5.4 | memory=True | history=True
+- june_company_002 | current_model=openai/gpt-5.4 | memory=False | history=True
+- june_company_003 | current_model=openai/gpt-5.4 | memory=False | history=True
+- june_company_004 | current_model=openai/gpt-5.4 | memory=False | history=True
+- pam_company_001 | current_model=openai/gpt-5.4 | memory=False | history=True
+- pam_company_002 | current_model=openai/gpt-5.4 | memory=False | history=True
+- pam_company_003 | current_model=openai/gpt-5.4 | memory=False | history=True
+- pam_company_004 | current_model=openai/gpt-5.4 | memory=False | history=True
+- sloane_company_001 | current_model=openai/gpt-5.4 | memory=False | history=True
+- sloane_company_002 | current_model=openai/gpt-5.4 | memory=False | history=True
+- sloane_company_003 | current_model=openai/gpt-5.4 | memory=False | history=True
+- sloane_company_004 | current_model=openai/gpt-5.4 | memory=False | history=True
 
 ## phase_5_watchdogs
 Watchdogs after governance triggers are stable.
-- justine | current_model=unknown | memory=False | history=True
-- mara | current_model=unknown | memory=False | history=True
-- owen | current_model=unknown | memory=False | history=True
+- justine | current_model=openai/gpt-5.4 | memory=False | history=True
+- mara | current_model=openai/gpt-5.4 | memory=False | history=True
+- owen | current_model=openai/gpt-5.4 | memory=False | history=True
 
 ## phase_6_swe_later
 SWE branch later, ticket-driven only.
-- eli | current_model=unknown | memory=False | history=True
-- gideon | current_model=unknown | memory=False | history=True
-- marek | current_model=unknown | memory=False | history=True
-- mina | current_model=unknown | memory=False | history=True
-- nadia | current_model=unknown | memory=False | history=True
-- noah | current_model=unknown | memory=False | history=True
-- rhea | current_model=unknown | memory=False | history=True
-- sabine | current_model=unknown | memory=False | history=True
-- tessa | current_model=unknown | memory=False | history=True
-
-## phase_unknown_review
-Discovered but not classified; inspect before rollout.
-- _TEMPLATE | current_model=unknown | memory=False | history=True
-- bianca_cfo_company_001 | current_model=unknown | memory=False | history=False
-- bianca_cfo_company_002 | current_model=unknown | memory=False | history=False
-- bianca_cfo_company_003 | current_model=unknown | memory=False | history=False
-- bianca_cfo_company_004 | current_model=unknown | memory=False | history=False
-- desk_administrator_company_001 | current_model=unknown | memory=False | history=False
-- desk_administrator_company_002 | current_model=unknown | memory=False | history=False
-- desk_administrator_company_003 | current_model=unknown | memory=False | history=False
-- desk_administrator_company_004 | current_model=unknown | memory=False | history=False
-- evolution_specialist_company_001 | current_model=unknown | memory=False | history=False
-- evolution_specialist_company_002 | current_model=unknown | memory=False | history=False
-- evolution_specialist_company_003 | current_model=unknown | memory=False | history=False
-- evolution_specialist_company_004 | current_model=unknown | memory=False | history=False
-- iris_analyst_company_001 | current_model=unknown | memory=False | history=False
-- iris_analyst_company_002 | current_model=unknown | memory=False | history=False
-- iris_analyst_company_003 | current_model=unknown | memory=False | history=False
-- iris_analyst_company_004 | current_model=unknown | memory=False | history=False
-- june_archivist_company_001 | current_model=unknown | memory=False | history=False
-- june_archivist_company_002 | current_model=unknown | memory=False | history=False
-- june_archivist_company_003 | current_model=unknown | memory=False | history=False
-- june_archivist_company_004 | current_model=unknown | memory=False | history=False
-- lucian_ceo_company_001 | current_model=unknown | memory=False | history=False
-- lucian_ceo_company_002 | current_model=unknown | memory=False | history=False
-- lucian_ceo_company_003 | current_model=unknown | memory=False | history=False
-- lucian_ceo_company_004 | current_model=unknown | memory=False | history=False
-- market_simulator_company_001 | current_model=unknown | memory=False | history=False
-- market_simulator_company_002 | current_model=unknown | memory=False | history=False
-- market_simulator_company_003 | current_model=unknown | memory=False | history=False
-- market_simulator_company_004 | current_model=unknown | memory=False | history=False
-- operations_worker_company_001 | current_model=unknown | memory=False | history=False
-- operations_worker_company_002 | current_model=unknown | memory=False | history=False
-- operations_worker_company_003 | current_model=unknown | memory=False | history=False
-- operations_worker_company_004 | current_model=unknown | memory=False | history=False
-- orion_strategist_company_001 | current_model=unknown | memory=False | history=False
-- orion_strategist_company_002 | current_model=unknown | memory=False | history=False
-- orion_strategist_company_003 | current_model=unknown | memory=False | history=False
-- orion_strategist_company_004 | current_model=unknown | memory=False | history=False
-- rowan_researcher_company_001 | current_model=unknown | memory=False | history=False
-- rowan_researcher_company_002 | current_model=unknown | memory=False | history=False
-- rowan_researcher_company_003 | current_model=unknown | memory=False | history=False
-- rowan_researcher_company_004 | current_model=unknown | memory=False | history=False
-- vera_manager_company_001 | current_model=unknown | memory=False | history=False
-- vera_manager_company_002 | current_model=unknown | memory=False | history=False
-- vera_manager_company_003 | current_model=unknown | memory=False | history=False
-- vera_manager_company_004 | current_model=unknown | memory=False | history=False
-- yam_yam | current_model=unknown | memory=False | history=True
-- yam_yam_old_20260420_225259 | current_model=unknown | memory=False | history=True
+- eli | current_model=openai/gpt-5.4 | memory=False | history=True
+- gideon | current_model=openai/gpt-5.4 | memory=False | history=True
+- marek | current_model=openai/gpt-5.4 | memory=False | history=True
+- mina | current_model=openai/gpt-5.4 | memory=False | history=True
+- nadia | current_model=openai/gpt-5.4 | memory=False | history=True
+- noah | current_model=openai/gpt-5.4 | memory=False | history=True
+- rhea | current_model=openai/gpt-5.4 | memory=False | history=True
+- sabine | current_model=openai/gpt-5.4 | memory=False | history=True
+- tessa | current_model=openai/gpt-5.4 | memory=False | history=True

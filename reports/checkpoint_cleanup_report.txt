@@ -3,7 +3,7 @@ ACC CHECKPOINT CLEANUP REPORT
 Root: /opt/openclaw/.openclaw/workspace
 
 Backup health counts:
-- AGENTS.md: 78
+- AGENTS.md: 64
 - IDENTITY.md: 64
 - SOUL.md: 64
 - MEMORY.md: 64
@@ -15,7 +15,7 @@ Backup health counts:
 Expected: AGENTS/IDENTITY/SOUL/MEMORY should not be zero if ai_agents_backup is a true backup.
 
 Nested company004 duplicate check:
-- suspicious nested path: /opt/openclaw/.openclaw/workspace/ai_agents_backup/company004_branch/company004_branch
+- no nested company004_branch/company004_branch paths detected
 
 Root file suffix summary:
 - .txt: 324

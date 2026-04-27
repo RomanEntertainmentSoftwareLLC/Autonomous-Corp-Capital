@@ -1,4 +1,5 @@
 {
+  "data_dir_exists": true,
   "latest_runs": [
     {
       "decision_rows": 10,
@@ -53,11 +54,127 @@
   ],
   "nonempty_table_count": 0,
   "root": "/opt/openclaw/.openclaw/workspace",
-  "sqlite_count": 0,
-  "sqlite_files": [],
-  "sqlite_inspection": [],
+  "searched_dirs": [
+    "/opt/openclaw/.openclaw/workspace/data",
+    "/opt/openclaw/.openclaw/workspace/state"
+  ],
+  "sqlite_count": 1,
+  "sqlite_files": [
+    "/opt/openclaw/.openclaw/workspace/data/warehouse.sqlite"
+  ],
+  "sqlite_inspection": [
+    {
+      "error": null,
+      "exists": true,
+      "objects": {
+        "analytics_companies": {
+          "rows": 0,
+          "type": "table"
+        },
+        "companies": {
+          "rows": 0,
+          "type": "table"
+        },
+        "company_performance": {
+          "rows": 0,
+          "type": "table"
+        },
+        "evaluations": {
+          "rows": 0,
+          "type": "table"
+        },
+        "features": {
+          "rows": 0,
+          "type": "table"
+        },
+        "latest_company_results": {
+          "rows": null,
+          "type": "view"
+        },
+        "latest_run_summary": {
+          "rows": null,
+          "type": "view"
+        },
+        "leaderboard_basis": {
+          "rows": null,
+          "type": "view"
+        },
+        "results": {
+          "rows": 0,
+          "type": "table"
+        },
+        "runs": {
+          "rows": 0,
+          "type": "table"
+        },
+        "sqlite_sequence": {
+          "rows": 0,
+          "type": "table"
+        },
+        "ticks": {
+          "rows": 0,
+          "type": "table"
+        },
+        "trade_facts": {
+          "rows": 0,
+          "type": "table"
+        },
+        "trades": {
+          "rows": 0,
+          "type": "table"
+        }
+      },
+      "path": "/opt/openclaw/.openclaw/workspace/data/warehouse.sqlite",
+      "tables": {
+        "analytics_companies": {
+          "rows": 0,
+          "type": "table"
+        },
+        "companies": {
+          "rows": 0,
+          "type": "table"
+        },
+        "company_performance": {
+          "rows": 0,
+          "type": "table"
+        },
+        "evaluations": {
+          "rows": 0,
+          "type": "table"
+        },
+        "features": {
+          "rows": 0,
+          "type": "table"
+        },
+        "results": {
+          "rows": 0,
+          "type": "table"
+        },
+        "runs": {
+          "rows": 0,
+          "type": "table"
+        },
+        "sqlite_sequence": {
+          "rows": 0,
+          "type": "table"
+        },
+        "ticks": {
+          "rows": 0,
+          "type": "table"
+        },
+        "trade_facts": {
+          "rows": 0,
+          "type": "table"
+        },
+        "trades": {
+          "rows": 0,
+          "type": "table"
+        }
+      }
+    }
+  ],
   "state_dir_exists": true,
-  "table_count": 0,
-  "timestamp": "2026-04-27T01:21:43.620959+00:00",
-  "verdict": "artifact_only_no_sqlite_warehouse_found"
+  "table_count": 11,
+  "timestamp": "2026-04-27T02:27:24.693962+00:00",
+  "verdict": "warehouse_empty_or_unverified"
 }

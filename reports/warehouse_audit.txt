@@ -1,8 +1,13 @@
 WAREHOUSE AUDIT
 ===============
-Verdict: artifact_only_no_sqlite_warehouse_found
-SQLite files: 0
-Tables: 0 | non-empty: 0
+Verdict: warehouse_empty_or_unverified
+SQLite files: 1
+Tables: 11 | non-empty: 0
+Data dir exists: True
+State dir exists: True
+Searched dirs:
+- /opt/openclaw/.openclaw/workspace/data
+- /opt/openclaw/.openclaw/workspace/state
 
 Latest runs:
 - run_20260421_022922: decisions=10 trades=10 portfolio=10 packets=8 target=True grant=True
@@ -12,3 +17,18 @@ Latest runs:
 - run_20260420_030521: decisions=6 trades=6 portfolio=6 packets=4 target=False grant=False
 
 SQLite tables:
+- /opt/openclaw/.openclaw/workspace/data/warehouse.sqlite error=None
+  - analytics_companies: rows=0
+  - companies: rows=0
+  - company_performance: rows=0
+  - evaluations: rows=0
+  - features: rows=0
+  - results: rows=0
+  - runs: rows=0
+  - sqlite_sequence: rows=0
+  - ticks: rows=0
+  - trade_facts: rows=0
+  - trades: rows=0
+  - latest_company_results: view
+  - latest_run_summary: view
+  - leaderboard_basis: view

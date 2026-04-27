@@ -1,14 +1,15 @@
 ACC ML Readiness Report
 ========================
 Run: run_20260421_022922
-Verdict: blocked_model_load_failed
+Verdict: not_live_no_ml_scores_in_recent_decisions
 
 Model:
 - path: /opt/openclaw/.openclaw/workspace/models/ml_model.pkl
 - exists: True
-- loads: False
-- error: ModuleNotFoundError("No module named 'joblib'")
-- class: None
+- loads: True
+- error: None
+- class: RandomForestClassifier
+- n_features_in: 19
 
 Live feature count: 19
 Training feature count: 19

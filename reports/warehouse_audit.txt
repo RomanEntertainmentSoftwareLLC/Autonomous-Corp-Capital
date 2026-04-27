@@ -1,8 +1,8 @@
 WAREHOUSE AUDIT
 ===============
-Verdict: warehouse_empty_or_unverified
+Verdict: warehouse_has_data
 SQLite files: 1
-Tables: 11 | non-empty: 0
+Tables: 11 | non-empty: 8
 Data dir exists: True
 State dir exists: True
 Searched dirs:
@@ -10,23 +10,23 @@ Searched dirs:
 - /opt/openclaw/.openclaw/workspace/state
 
 Latest runs:
+- run_20260427_023911: decisions=12 trades=12 portfolio=12 packets=8 target=False grant=False
 - run_20260421_022922: decisions=10 trades=10 portfolio=10 packets=8 target=True grant=True
 - run_20260420_034819: decisions=10 trades=10 portfolio=10 packets=8 target=True grant=True
 - run_20260420_034400: decisions=0 trades=0 portfolio=0 packets=0 target=False grant=False
 - run_20260420_030740: decisions=10 trades=10 portfolio=10 packets=12 target=False grant=True
-- run_20260420_030521: decisions=6 trades=6 portfolio=6 packets=4 target=False grant=False
 
 SQLite tables:
 - /opt/openclaw/.openclaw/workspace/data/warehouse.sqlite error=None
-  - analytics_companies: rows=0
-  - companies: rows=0
-  - company_performance: rows=0
-  - evaluations: rows=0
+  - analytics_companies: rows=1
+  - companies: rows=1
+  - company_performance: rows=1
+  - evaluations: rows=1
   - features: rows=0
-  - results: rows=0
-  - runs: rows=0
-  - sqlite_sequence: rows=0
-  - ticks: rows=0
+  - results: rows=1
+  - runs: rows=1
+  - sqlite_sequence: rows=5
+  - ticks: rows=3
   - trade_facts: rows=0
   - trades: rows=0
   - latest_company_results: view

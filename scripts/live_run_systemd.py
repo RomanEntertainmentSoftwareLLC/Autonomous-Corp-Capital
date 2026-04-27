@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import sqlite3
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -19,6 +20,8 @@ from tools.live_run import (
     run_worker,
 )
 from tools.live_universe import target_symbol_list
+from tools.init_warehouse import init_database, WAREHOUSE_PATH
+from tools.ingest_results_to_db import ingest_live_run
 
 
 def env_float(name: str, default: float | None) -> float | None:
@@ -57,11 +60,23 @@ def main() -> None:
     print(f"Systemd live-data paper run starting: {run_id}", flush=True)
     print(f"Logs at: {run_dir / 'logs' / 'run.log'}", flush=True)
 
-    run_worker(
-        run_id,
-        duration_hours=float(duration_hours or 0.0),
-        virtual_currency=virtual_currency,
-    )
+    try:
+        run_worker(
+            run_id,
+            duration_hours=float(duration_hours or 0.0),
+            virtual_currency=virtual_currency,
+        )
+    finally:
+        if os.environ.get("ACC_SKIP_WAREHOUSE_INGEST", "").strip().lower() not in {"1", "true", "yes"}:
+            try:
+                if not WAREHOUSE_PATH.exists():
+                    init_database(WAREHOUSE_PATH)
+                with sqlite3.connect(WAREHOUSE_PATH) as conn:
+                    ingest_live_run(conn.cursor(), run_dir)
+                    conn.commit()
+                print(f"Warehouse ingest completed for {run_id}", flush=True)
+            except Exception as exc:
+                print(f"WARNING: warehouse ingest failed for {run_id}: {exc!r}", flush=True)
 
 
 if __name__ == "__main__":

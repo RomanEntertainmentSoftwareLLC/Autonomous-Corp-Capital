@@ -2,7 +2,7 @@ WAREHOUSE AUDIT
 ===============
 Verdict: warehouse_has_data
 SQLite files: 1
-Tables: 11 | non-empty: 8
+Tables: 11 | non-empty: 11
 Data dir exists: True
 State dir exists: True
 Searched dirs:
@@ -18,17 +18,17 @@ Latest runs:
 
 SQLite tables:
 - /opt/openclaw/.openclaw/workspace/data/warehouse.sqlite error=None
-  - analytics_companies: rows=1
-  - companies: rows=1
-  - company_performance: rows=1
-  - evaluations: rows=1
-  - features: rows=0
-  - results: rows=1
-  - runs: rows=1
-  - sqlite_sequence: rows=5
-  - ticks: rows=3
-  - trade_facts: rows=0
-  - trades: rows=0
+  - analytics_companies: rows=4
+  - companies: rows=4
+  - company_performance: rows=4
+  - evaluations: rows=5
+  - features: rows=12
+  - results: rows=5
+  - runs: rows=5
+  - sqlite_sequence: rows=8
+  - ticks: rows=15
+  - trade_facts: rows=12
+  - trades: rows=12
   - latest_company_results: view
   - latest_run_summary: view
   - leaderboard_basis: view

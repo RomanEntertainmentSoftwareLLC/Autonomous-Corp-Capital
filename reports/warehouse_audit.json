@@ -52,7 +52,7 @@
       "trade_rows": 10
     }
   ],
-  "nonempty_table_count": 8,
+  "nonempty_table_count": 11,
   "root": "/opt/openclaw/.openclaw/workspace",
   "searched_dirs": [
     "/opt/openclaw/.openclaw/workspace/data",
@@ -68,23 +68,23 @@
       "exists": true,
       "objects": {
         "analytics_companies": {
-          "rows": 1,
+          "rows": 4,
           "type": "table"
         },
         "companies": {
-          "rows": 1,
+          "rows": 4,
           "type": "table"
         },
         "company_performance": {
-          "rows": 1,
+          "rows": 4,
           "type": "table"
         },
         "evaluations": {
-          "rows": 1,
+          "rows": 5,
           "type": "table"
         },
         "features": {
-          "rows": 0,
+          "rows": 12,
           "type": "table"
         },
         "latest_company_results": {
@@ -100,74 +100,74 @@
           "type": "view"
         },
         "results": {
-          "rows": 1,
-          "type": "table"
-        },
-        "runs": {
-          "rows": 1,
-          "type": "table"
-        },
-        "sqlite_sequence": {
           "rows": 5,
           "type": "table"
         },
+        "runs": {
+          "rows": 5,
+          "type": "table"
+        },
+        "sqlite_sequence": {
+          "rows": 8,
+          "type": "table"
+        },
         "ticks": {
-          "rows": 3,
+          "rows": 15,
           "type": "table"
         },
         "trade_facts": {
-          "rows": 0,
+          "rows": 12,
           "type": "table"
         },
         "trades": {
-          "rows": 0,
+          "rows": 12,
           "type": "table"
         }
       },
       "path": "/opt/openclaw/.openclaw/workspace/data/warehouse.sqlite",
       "tables": {
         "analytics_companies": {
-          "rows": 1,
+          "rows": 4,
           "type": "table"
         },
         "companies": {
-          "rows": 1,
+          "rows": 4,
           "type": "table"
         },
         "company_performance": {
-          "rows": 1,
+          "rows": 4,
           "type": "table"
         },
         "evaluations": {
-          "rows": 1,
-          "type": "table"
-        },
-        "features": {
-          "rows": 0,
-          "type": "table"
-        },
-        "results": {
-          "rows": 1,
-          "type": "table"
-        },
-        "runs": {
-          "rows": 1,
-          "type": "table"
-        },
-        "sqlite_sequence": {
           "rows": 5,
           "type": "table"
         },
+        "features": {
+          "rows": 12,
+          "type": "table"
+        },
+        "results": {
+          "rows": 5,
+          "type": "table"
+        },
+        "runs": {
+          "rows": 5,
+          "type": "table"
+        },
+        "sqlite_sequence": {
+          "rows": 8,
+          "type": "table"
+        },
         "ticks": {
-          "rows": 3,
+          "rows": 15,
           "type": "table"
         },
         "trade_facts": {
-          "rows": 0,
+          "rows": 12,
           "type": "table"
         },
         "trades": {
-          "rows": 0,
+          "rows": 12,
           "type": "table"
         }
       }
@@ -175,6 +175,6 @@
   ],
   "state_dir_exists": true,
   "table_count": 11,
-  "timestamp": "2026-04-27T03:09:43.740197+00:00",
+  "timestamp": "2026-04-27T03:23:48.185762+00:00",
   "verdict": "warehouse_has_data"
 }

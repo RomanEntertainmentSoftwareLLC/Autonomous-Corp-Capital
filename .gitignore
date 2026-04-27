@@ -17,3 +17,7 @@ openclaw_backup/credentials/
 yam_step*.txt
 
 yam_step*.txt
+
+# Runtime database/state
+/data/*.sqlite
+/data/*.sqlite-*

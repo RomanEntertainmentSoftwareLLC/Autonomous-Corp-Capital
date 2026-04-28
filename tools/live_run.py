@@ -2435,6 +2435,32 @@ def build_live_candle(snapshot: Dict[str, Any], last_price: float | None) -> Dic
 
 
 
+
+def record_candidate_audit(run_dir: Path, timestamp: str, ranked_candidates: List[Dict[str, Any]]) -> None:
+    """Persist ranked candidate rows even when strict gates execute no trade.
+
+    paper_decisions.jsonl intentionally records executed paper decisions only.
+    candidate_decisions.jsonl records the full ranked slate so ML/readiness
+    and decision-trace reports can still prove the engine evaluated candidates
+    when the correct action is to skip everything.
+    """
+    path = run_dir / "artifacts" / "candidate_decisions.jsonl"
+    with path.open("a", encoding="utf-8") as fh:
+        for rank, decision in enumerate(ranked_candidates, start=1):
+            row = dict(decision)
+            row.setdefault("timestamp", timestamp)
+            row["candidate_audit"] = True
+            row["candidate_rank"] = rank
+            row["candidate_source"] = "ranked_candidate_slate"
+            fh.write(json.dumps(row, default=str) + "\n")
+
+
+def child_post_run_governance_enabled() -> bool:
+    raw = os.environ.get("ACC_SKIP_CHILD_POST_RUN_GOVERNANCE", "").strip().lower()
+    return raw not in {"1", "true", "yes", "on"}
+
+
+
 def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float | None = None, live_trade: bool = False) -> None:
     if os.environ.get("LIVE_RUN_MODE", "paper").lower() == "live" and not live_trade:
         raise SystemExit("Live trading requires explicit --live-trade")
@@ -2523,6 +2549,7 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
 
         apply_orion_bias_before_ranking(candidate_decisions)
         ranked_candidates = rank_and_select_candidates(candidate_decisions)
+        record_candidate_audit(run_dir, timestamp, ranked_candidates)
         company_packets = apply_company_packets(ranked_candidates, now=_utcnow().replace(tzinfo=timezone.utc), run_id=run_id, cycle=cycle)
         for packet in company_packets.values():
             packet_record = {"timestamp": timestamp, **packet}
@@ -2624,16 +2651,26 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
             meta["status"] = "completed"
         meta_path.write_text(json.dumps(meta, indent=2))
     write_daily_digest(run_id)
-    run_ledger_post_run_review(run_id)
-    run_helena_post_run_review(run_id)
-    run_axiom_post_run_review(run_id)
-    run_vivienne_post_run_review(run_id)
-    run_selene_post_run_review(run_id)
-    run_ariadne_post_run_review(run_id)
-    run_grant_post_run_speech(run_id)
-    run_yam_yam_post_run_review(run_id)
-    run_june_post_run_archive(run_id)
-    update_evolution_states_from_warehouse()
+    if child_post_run_governance_enabled():
+        run_ledger_post_run_review(run_id)
+        run_helena_post_run_review(run_id)
+        run_axiom_post_run_review(run_id)
+        run_vivienne_post_run_review(run_id)
+        run_selene_post_run_review(run_id)
+        run_ariadne_post_run_review(run_id)
+        run_grant_post_run_speech(run_id)
+        run_yam_yam_post_run_review(run_id)
+        run_june_post_run_archive(run_id)
+        update_evolution_states_from_warehouse()
+    else:
+        if meta_path.exists():
+            meta = json.loads(meta_path.read_text())
+            meta["child_post_run_governance"] = {
+                "status": "skipped",
+                "reason": "supervisor_handles_post_run_reports",
+                "skipped_at": _utcnow().isoformat(),
+            }
+            meta_path.write_text(json.dumps(meta, indent=2))
     prune_old_run_artifacts(run_id)
     current = None
     try:

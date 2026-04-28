@@ -293,7 +293,10 @@ def supervisor_main() -> int:
     exit_code = 0
     try:
         update_metadata(run_dir, status="running", supervisor_started_worker_at=utc_now())
-        proc = subprocess.Popen(child_cmd, cwd=str(ROOT), start_new_session=True)
+        child_env = os.environ.copy()
+        child_env.setdefault("PYTHONNOUSERSITE", "1")
+        child_env.setdefault("ACC_SKIP_CHILD_POST_RUN_GOVERNANCE", "1")
+        proc = subprocess.Popen(child_cmd, cwd=str(ROOT), env=child_env, start_new_session=True)
         write_current_run(run_id, proc.pid, pgid=proc.pid)
         update_metadata(run_dir, worker_pid=proc.pid, worker_pgid=proc.pid)
 

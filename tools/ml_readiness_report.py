@@ -93,8 +93,15 @@ def summarize(run_id: str = 'latest') -> dict[str, Any]:
     model_status = _model_load_status(model_path)
 
     decision_rows: list[dict[str, Any]] = []
+    decision_source = 'none'
     if run_dir and run_dir.exists():
         decision_rows = _jsonl(run_dir / 'artifacts' / 'paper_decisions.jsonl')
+        decision_source = 'paper_decisions'
+        if not decision_rows:
+            candidate_rows = _jsonl(run_dir / 'artifacts' / 'candidate_decisions.jsonl')
+            if candidate_rows:
+                decision_rows = candidate_rows
+                decision_source = 'candidate_decisions'
     ml_score_rows = [r for r in decision_rows if r.get('ml_signal_score') is not None]
     coverage_values: list[float] = []
     for row in decision_rows:
@@ -116,6 +123,7 @@ def summarize(run_id: str = 'latest') -> dict[str, Any]:
         'features_match_exactly': live_cols == train_cols,
         'missing_from_live': [x for x in train_cols if x not in live_cols],
         'extra_in_live': [x for x in live_cols if x not in train_cols],
+        'decision_source': decision_source,
         'recent_decisions': {
             'rows': len(decision_rows),
             'ml_score_rows': len(ml_score_rows),
@@ -152,6 +160,7 @@ def write_report(summary: dict[str, Any]) -> Path:
         '=' * 24,
         f"Run: {summary.get('run_id')}",
         f"Verdict: {summary.get('verdict')}",
+        f"Decision source: {summary.get('decision_source')}",
         '',
         'Model:',
     ]

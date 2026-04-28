@@ -75,7 +75,15 @@ def _stage_value(stage: dict[str, Any], *keys: str) -> Any:
 
 def summarize(run_dir: Path, max_examples: int = 12) -> dict[str, Any]:
     decisions_path = run_dir / 'artifacts' / 'paper_decisions.jsonl'
+    decision_source = 'paper_decisions'
     decisions = list(_jsonl(decisions_path))
+    if not decisions:
+        candidate_path = run_dir / 'artifacts' / 'candidate_decisions.jsonl'
+        candidate_rows = list(_jsonl(candidate_path))
+        if candidate_rows:
+            decisions_path = candidate_path
+            decision_source = 'candidate_decisions'
+            decisions = candidate_rows
 
     action_counts: Counter[str] = Counter()
     stage_counts: Counter[str] = Counter()
@@ -152,6 +160,7 @@ def summarize(run_dir: Path, max_examples: int = 12) -> dict[str, Any]:
     return {
         'run_id': run_dir.name,
         'decisions_path': str(decisions_path),
+        'decision_source': decision_source,
         'decision_rows': len(decisions),
         'rows_without_trace': no_trace,
         'action_counts': dict(action_counts),
@@ -182,6 +191,7 @@ def write_report(summary: dict[str, Any]) -> Path:
         'ACC Decision Trace Report',
         '=' * 25,
         f"Run: {summary['run_id']}",
+        f"Decision source: {summary.get('decision_source')}",
         f"Decision rows: {summary['decision_rows']}",
         f"Rows without trace: {summary['rows_without_trace']}",
         '',

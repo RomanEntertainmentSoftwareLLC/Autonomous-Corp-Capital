@@ -1,18 +1,21 @@
 ACC Decision Trace Report
 =========================
-Run: run_20260428_025706
-Decision rows: 0
+Run: run_20260428_035900
+Decision source: candidate_decisions
+Decision rows: 48
 Rows without trace: 0
 
 Actions:
+- WAIT: 48
 
 ML:
-- ml_active_rows: 0
-- ml_score_rows: 0
-- avg_ml_feature_coverage: None
-- coverage_rows: 0
+- ml_active_rows: 48
+- ml_score_rows: 48
+- avg_ml_feature_coverage: 0.5875
+- coverage_rows: 48
 
 Evidence winners:
+- WAIT: 48
 
 Pattern gate demotions estimate: 0
 Bootstrap recoveries estimate: 0
@@ -20,7 +23,44 @@ Flat SELL blocks estimate: 0
 Low-margin rows estimate: 0
 
 Top trace stages:
+- base_signal: 48
+- evidence_application: 48
+- evidence_fusion: 48
+- exit_rules: 48
+- final_decision: 48
+- final_ml_guard: 48
+- input_context: 48
+- ml_confirmation_filter: 48
+- ml_inference: 48
+- pattern_engine: 48
+- pattern_gate: 48
+- pattern_recovery: 48
+- policy_signal: 48
 
 Top WAIT/skip reasons:
+- 48x price-vs-last_price policy signal
+- 48x mapped adjusted policy signal to preliminary decision
+- 48x loaded real model artifact
+- 48x ML can demote policy BUY/SELL when model probability disagrees
+- 48x evaluated live pattern/3-step confirmation evidence
+- 48x BUY/SELL requires detected pattern confirmation unless later recovery deliberately re-promotes
+- 48x pattern alignment can re-promote WAIT after gate review; real-OHLC bootstrap is disabled by default unless ACC_ALLOW_REAL_OHLC_BOOTSTRAP=1
+- 48x checked stop-loss, take-profit, max-hold, and reversal exits
+- 48x final ML sanity guard can demote weak BUY/SELL after pattern confirmation
+- 48x final output after policy, ML, evidence, pattern gate, recovery, exits, and final guard
+- 32x WAIT has strongest weighted evidence margin 0.246572
+- 2x WAIT has strongest weighted evidence margin 1.045595
 
 Examples:
+- company_003 DOGE-USD WAIT | winner=WAIT margin=1.045595 ml=0.29869 coverage=0.55 | trace=input_context -> base_signal -> policy_signal -> ml_inference -> ml_confirmation_filter -> pattern_engine -> evidence_fusion -> evidence_application -> pattern_gate -> pattern_recovery -> exit_rules -> final_ml_guard -> final_decision
+- company_004 DOGE-USD WAIT | winner=WAIT margin=0.770931 ml=0.29869 coverage=1.0 | trace=input_context -> base_signal -> policy_signal -> ml_inference -> ml_confirmation_filter -> pattern_engine -> evidence_fusion -> evidence_application -> pattern_gate -> pattern_recovery -> exit_rules -> final_ml_guard -> final_decision
+- company_001 DOGE-USD WAIT | winner=WAIT margin=0.646084 ml=0.29869 coverage=0.25 | trace=input_context -> base_signal -> policy_signal -> ml_inference -> ml_confirmation_filter -> pattern_engine -> evidence_fusion -> evidence_application -> pattern_gate -> pattern_recovery -> exit_rules -> final_ml_guard -> final_decision
+- company_003 BONK-USD WAIT | winner=WAIT margin=0.89487 ml=0.29869 coverage=0.55 | trace=input_context -> base_signal -> policy_signal -> ml_inference -> ml_confirmation_filter -> pattern_engine -> evidence_fusion -> evidence_application -> pattern_gate -> pattern_recovery -> exit_rules -> final_ml_guard -> final_decision
+- company_003 LTC-USD WAIT | winner=WAIT margin=0.823668 ml=0.29869 coverage=0.55 | trace=input_context -> base_signal -> policy_signal -> ml_inference -> ml_confirmation_filter -> pattern_engine -> evidence_fusion -> evidence_application -> pattern_gate -> pattern_recovery -> exit_rules -> final_ml_guard -> final_decision
+- company_004 BONK-USD WAIT | winner=WAIT margin=0.672018 ml=0.29869 coverage=1.0 | trace=input_context -> base_signal -> policy_signal -> ml_inference -> ml_confirmation_filter -> pattern_engine -> evidence_fusion -> evidence_application -> pattern_gate -> pattern_recovery -> exit_rules -> final_ml_guard -> final_decision
+- company_002 DOGE-USD WAIT | winner=WAIT margin=0.472962 ml=0.29869 coverage=0.55 | trace=input_context -> base_signal -> policy_signal -> ml_inference -> ml_confirmation_filter -> pattern_engine -> evidence_fusion -> evidence_application -> pattern_gate -> pattern_recovery -> exit_rules -> final_ml_guard -> final_decision
+- company_001 BONK-USD WAIT | winner=WAIT margin=0.570721 ml=0.29869 coverage=0.25 | trace=input_context -> base_signal -> policy_signal -> ml_inference -> ml_confirmation_filter -> pattern_engine -> evidence_fusion -> evidence_application -> pattern_gate -> pattern_recovery -> exit_rules -> final_ml_guard -> final_decision
+- company_004 LTC-USD WAIT | winner=WAIT margin=0.625292 ml=0.29869 coverage=1.0 | trace=input_context -> base_signal -> policy_signal -> ml_inference -> ml_confirmation_filter -> pattern_engine -> evidence_fusion -> evidence_application -> pattern_gate -> pattern_recovery -> exit_rules -> final_ml_guard -> final_decision
+- company_001 LTC-USD WAIT | winner=WAIT margin=0.53512 ml=0.29869 coverage=0.25 | trace=input_context -> base_signal -> policy_signal -> ml_inference -> ml_confirmation_filter -> pattern_engine -> evidence_fusion -> evidence_application -> pattern_gate -> pattern_recovery -> exit_rules -> final_ml_guard -> final_decision
+- company_002 BONK-USD WAIT | winner=WAIT margin=0.430256 ml=0.29869 coverage=0.55 | trace=input_context -> base_signal -> policy_signal -> ml_inference -> ml_confirmation_filter -> pattern_engine -> evidence_fusion -> evidence_application -> pattern_gate -> pattern_recovery -> exit_rules -> final_ml_guard -> final_decision
+- company_003 LINK-USD WAIT | winner=WAIT margin=0.678071 ml=0.29869 coverage=0.55 | trace=input_context -> base_signal -> policy_signal -> ml_inference -> ml_confirmation_filter -> pattern_engine -> evidence_fusion -> evidence_application -> pattern_gate -> pattern_recovery -> exit_rules -> final_ml_guard -> final_decision

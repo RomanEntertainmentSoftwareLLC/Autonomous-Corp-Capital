@@ -1,16 +1,16 @@
 ACC V2 Readiness Gate
 =====================
-Generated: 2026-04-28T03:44:32.018742+00:00
-Overall: NOT_READY_YET
-OK=5 WARN=2 FAIL=1
+Generated: 2026-04-28T04:00:35.308296+00:00
+Overall: READY_FOR_SHORT_PAPER_PROOF
+OK=8 WARN=0 FAIL=0
 
 Checks:
-- FAIL: ML readiness — not proven in latest report
+- OK: ML readiness — ready_or_active
 - OK: Warehouse persistence — warehouse_has_data
-- WARN: Decision traces — no missing traces, but latest run may have zero decisions
+- OK: Decision traces — trace rows clean
 - OK: Token/cost telemetry — usage rows found
 - OK: Token budget guard — token budget guard normal/caution
-- WARN: Governance smoke — governance chain report exists
+- OK: Governance smoke — governance chain report exists
 - OK: Process supervisor — process group timeout appears wired
 - OK: Auto post-run reports — post-run reports wired
 

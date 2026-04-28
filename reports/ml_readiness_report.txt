@@ -1,7 +1,8 @@
 ACC ML Readiness Report
 ========================
-Run: run_20260428_025706
-Verdict: unknown_no_recent_decisions
+Run: run_20260428_035900
+Verdict: ready_or_active
+Decision source: candidate_decisions
 
 Model:
 - path: /opt/openclaw/.openclaw/workspace/models/ml_model.pkl
@@ -18,12 +19,12 @@ Missing from live: []
 Extra in live: []
 
 Recent decisions:
-- rows: 0
-- ml_score_rows: 0
-- ml_active_rows: 0
-- ml_influenced_or_traced_rows: 0
-- avg_feature_coverage: None
-- coverage_rows: 0
+- rows: 48
+- ml_score_rows: 48
+- ml_active_rows: 48
+- ml_influenced_or_traced_rows: 48
+- avg_feature_coverage: 0.5875
+- coverage_rows: 48
 
 Feature order:
 - live: ema_fast, ema_slow, ema_spread, rsi, price_change_1, price_change_2, price_change_3, momentum_3, slope_3, pattern_three_rising, pattern_three_falling, pattern_reversal_after_two_decline, pattern_reversal_after_two_rise, pattern_short_momentum_burst, pattern_short_exhaustion, higher_highs, higher_lows, lower_highs, lower_lows

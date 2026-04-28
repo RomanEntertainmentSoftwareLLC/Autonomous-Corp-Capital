@@ -1,0 +1,80 @@
+{
+  "generated_at": "2026-04-28T03:53:33.183042+00:00",
+  "latest_run_health": {
+    "counts": {
+      "bridge_usage": 15,
+      "company_packets": 0,
+      "decisions": 0,
+      "ledger_usage": 15,
+      "portfolio": 0,
+      "trades": 0
+    },
+    "duration_hours": 0.005,
+    "hard_timeout_seconds": 33.0,
+    "metadata_status": "timed_out",
+    "path": "/opt/openclaw/.openclaw/workspace/state/live_runs/run_20260428_025706",
+    "run_id": "run_20260428_025706",
+    "signals": {
+      "hard_timeout_seen": true,
+      "has_post_run_reports_log": true,
+      "no_decision_artifacts": true,
+      "sigkill_seen": false,
+      "warehouse_ingest_completed": true
+    },
+    "status": "ok",
+    "supervisor_exit_code": 124,
+    "verdict": "latest_run_timed_out"
+  },
+  "refresh_results": [
+    {
+      "cmd": [
+        "/usr/bin/python3",
+        "tools/ledger_usage_summary.py"
+      ],
+      "ended_at": "2026-04-28T03:53:29.455922+00:00",
+      "name": "ledger_usage_summary",
+      "ok": true,
+      "output": "ACC Ledger Usage Summary\n========================\nGenerated: 2026-04-28T03:53:29.443424+00:00\nVerdict: usage_found\nRuns scanned: 20\nUsage rows: 1032\n\nTotals:\n- calls: 1032\n- prompt_tokens: 0\n- completion_tokens: 0\n- total_tokens: 0\n- estimated_cost: 0.000000\n\nBy agent\n--------\nbianca_company_001: calls=58 tokens=0 cost=0.000000\nvera_company_001: calls=58 tokens=0 cost=0.000000\nlucian_company_001: calls=58 tokens=0 cost=0.000000\norion_company_001: calls=58 tokens=0 cost=0.000000\niris_company_001: calls=58 tokens=0 cost=0.000000\niris_company_002: calls=58 tokens=0 cost=0.000000\norion_company_002: calls=62 tokens=0 cost=0.000000\nbianca_company_002: calls=60 tokens=0 cost=0.000000\nlucian_company_002: calls=60 tokens=0 cost=0.000000\nvera_company_002: calls=62 tokens=0 cost=0.000000\niris_company_003: calls=50 tokens=0 cost=0.000000\norion_company_003: calls=50 tokens=0 cost=0.000000\nlucian_company_003: calls=50 tokens=0 cost=0.000000\nbianca_company_003: calls=50 tokens=0 cost=0.000000\nvera_company_003: calls=50 tokens=0 cost=0.000000\n\nBy model\n--------\nopenclaw_agent:bianca_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:vera_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:lucian_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:orion_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:iris_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:iris_company_002: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:orion_company_002: calls=62 tokens=0 cost=0.000000\nopenclaw_agent:bianca_company_002: calls=60 tokens=0 cost=0.000000\nopenclaw_agent:lucian_company_002: calls=60 tokens=0 cost=0.000000\nopenclaw_agent:vera_company_002: calls=62 tokens=0 cost=0.000000\nopenclaw_agent:iris_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:orion_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:lucian_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:bianca_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:vera_company_003: calls=50 tokens=0 cost=0.000000\n\nBy provider\n-----------\nopenclaw_bridge: calls=1032 tokens=0 cost=0.000000\n\nWrote: /opt/openclaw/.openclaw/workspace/reports/ledger_usage_summary.json\nWrote: /opt/openclaw/.openclaw/workspace/reports/ledger_usage_summary.txt\n",
+      "returncode": 0,
+      "started_at": "2026-04-28T03:53:29.347424+00:00"
+    },
+    {
+      "cmd": [
+        "/usr/bin/python3",
+        "tools/token_budget_guard.py",
+        "--no-refresh"
+      ],
+      "ended_at": "2026-04-28T03:53:29.544559+00:00",
+      "name": "token_budget_guard",
+      "ok": true,
+      "output": "ACC Token Budget Guard\n======================\nGenerated: 2026-04-28T03:53:29.528504+00:00\nStage: NORMAL\nBudget USD: 1.000000\nEstimated cost: 0.000000\nBudget used: 0.00%\nCalls: 1032\nTotal tokens: 0\n\nRecommendation: Budget use is below caution threshold.\n\nDegradation actions:\n- normal_cost_discipline\n- continue_telemetry\n\nThresholds:\n- 70%: CAUTION\n- 80%: DEGRADED\n- 90%: RESTRICTED\n- 98%: EMERGENCY\n\nWrote: /opt/openclaw/.openclaw/workspace/reports/token_budget_guard.json\nWrote: /opt/openclaw/.openclaw/workspace/reports/token_budget_guard.txt\n",
+      "returncode": 0,
+      "started_at": "2026-04-28T03:53:29.456001+00:00"
+    },
+    {
+      "cmd": [
+        "/usr/bin/python3",
+        "tools/v2_readiness_gate.py",
+        "--refresh"
+      ],
+      "ended_at": "2026-04-28T03:53:32.510350+00:00",
+      "name": "v2_readiness_gate",
+      "ok": false,
+      "output": "ACC V2 Readiness Gate\n=====================\nGenerated: 2026-04-28T03:53:32.497644+00:00\nOverall: NOT_READY_YET\nOK=5 WARN=2 FAIL=1\n\nChecks:\n- FAIL: ML readiness \u2014 not proven in latest report\n- OK: Warehouse persistence \u2014 warehouse_has_data\n- WARN: Decision traces \u2014 no missing traces, but latest run may have zero decisions\n- OK: Token/cost telemetry \u2014 usage rows found\n- OK: Token budget guard \u2014 token budget guard normal/caution\n- WARN: Governance smoke \u2014 governance chain report exists\n- OK: Process supervisor \u2014 process group timeout appears wired\n- OK: Auto post-run reports \u2014 post-run reports wired\n\nRefresh commands:\n- OK: db_status rc=0\n- OK: decision_trace_report rc=0\n- OK: ml_readiness_report rc=0\n- OK: warehouse_audit rc=0\n- OK: ledger_usage_summary rc=0\n- OK: token_budget_guard rc=0\n\nWrote: /opt/openclaw/.openclaw/workspace/reports/v2_readiness_gate.json\nWrote: /opt/openclaw/.openclaw/workspace/reports/v2_readiness_gate.txt\n",
+      "returncode": 1,
+      "started_at": "2026-04-28T03:53:29.544780+00:00"
+    },
+    {
+      "cmd": [
+        "/usr/bin/python3",
+        "tools/v2_governance_smoke.py"
+      ],
+      "ended_at": "2026-04-28T03:53:33.182958+00:00",
+      "name": "v2_governance_smoke_dry_run",
+      "ok": true,
+      "output": "ACC V2 Governance Smoke\n=======================\nMode: dry-run\nTools: ledger, helena, axiom, vivienne, yam_yam\n\nRunning ledger: tools/ledger_cost_review.py\n- ledger: OK rc=0\nRunning helena: tools/helena_risk_review.py\n- helena: OK rc=0\nRunning axiom: tools/axiom_evaluator_review.py\n- axiom: OK rc=0\nRunning vivienne: tools/vivienne_financial_review.py\n- vivienne: OK rc=0\nRunning yam_yam: tools/yam_yam_executive_review.py\n- yam_yam: OK rc=0\n\nReport: /opt/openclaw/.openclaw/workspace/reports/v2_governance_smoke_latest.txt\nJSON:   /opt/openclaw/.openclaw/workspace/reports/v2_governance_smoke_latest.json\nResult: 5/5 OK\n",
+      "returncode": 0,
+      "started_at": "2026-04-28T03:53:32.510434+00:00"
+    }
+  ]
+}

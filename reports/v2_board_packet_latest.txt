@@ -1,0 +1,28 @@
+ACC V2 Triple Gate Board Packet
+===============================
+Generated: 2026-04-28T03:53:33.183042+00:00
+
+Executive Summary:
+- V2 readiness overall: NOT_READY_YET
+- Latest run verdict: latest_run_timed_out
+- Latest run id: run_20260428_025706
+- Latest run artifacts: decisions=0 trades=0 portfolio=0 packets=0
+
+Readiness Checks:
+- FAIL: ML readiness
+- OK: Warehouse persistence
+- WARN: Decision traces
+- OK: Token/cost telemetry
+- OK: Token budget guard
+- WARN: Governance smoke
+- OK: Process supervisor
+- OK: Auto post-run reports
+
+Operating Judgment:
+- Latest cycle timed out. Supervisor worked, but worker graceful shutdown still needs improvement.
+- Token budget guard is not blocking expansion, but keep calls disciplined.
+
+Recommended Next Actions:
+1. If governance smoke has not passed, run it in dry-run mode first.
+2. If latest run has zero decisions, inspect whether strict WAIT gating is correctly avoiding weak entries.
+3. Do not start a serious paper proof until readiness gate is OK or explicitly accepted with warnings.

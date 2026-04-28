@@ -9,3 +9,4 @@ _Agent-local durable memory._
 - 2026-04-26: [axiom_review] Fresh committee packets do not compensate for missing portfolio coverage and unknown deployable equity.
 - 2026-04-26: [axiom_review] Executed decisions without ML scores, evidence winners, or trace rows should be treated as weakly auditable.
 - 2026-04-26: [axiom_review] Reward logic needs cross-checking against evidence-quality scores, not just sessions, usefulness, or output volume.
+- 2026-04-28: [axiom_review] Axiom completed an evaluator review; see state/axiom_reviews for full output and recommendations.

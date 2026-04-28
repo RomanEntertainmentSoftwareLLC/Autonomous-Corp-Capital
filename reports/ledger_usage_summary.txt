@@ -1,0 +1,56 @@
+ACC Ledger Usage Summary
+========================
+Generated: 2026-04-28T03:33:17.242918+00:00
+Verdict: usage_found
+Runs scanned: 20
+Usage rows: 1032
+
+Totals:
+- calls: 1032
+- prompt_tokens: 0
+- completion_tokens: 0
+- total_tokens: 0
+- estimated_cost: 0.000000
+
+By agent
+--------
+bianca_company_001: calls=58 tokens=0 cost=0.000000
+vera_company_001: calls=58 tokens=0 cost=0.000000
+lucian_company_001: calls=58 tokens=0 cost=0.000000
+orion_company_001: calls=58 tokens=0 cost=0.000000
+iris_company_001: calls=58 tokens=0 cost=0.000000
+iris_company_002: calls=58 tokens=0 cost=0.000000
+orion_company_002: calls=62 tokens=0 cost=0.000000
+bianca_company_002: calls=60 tokens=0 cost=0.000000
+lucian_company_002: calls=60 tokens=0 cost=0.000000
+vera_company_002: calls=62 tokens=0 cost=0.000000
+iris_company_003: calls=50 tokens=0 cost=0.000000
+orion_company_003: calls=50 tokens=0 cost=0.000000
+lucian_company_003: calls=50 tokens=0 cost=0.000000
+bianca_company_003: calls=50 tokens=0 cost=0.000000
+vera_company_003: calls=50 tokens=0 cost=0.000000
+
+By model
+--------
+openclaw_agent:bianca_company_001: calls=58 tokens=0 cost=0.000000
+openclaw_agent:vera_company_001: calls=58 tokens=0 cost=0.000000
+openclaw_agent:lucian_company_001: calls=58 tokens=0 cost=0.000000
+openclaw_agent:orion_company_001: calls=58 tokens=0 cost=0.000000
+openclaw_agent:iris_company_001: calls=58 tokens=0 cost=0.000000
+openclaw_agent:iris_company_002: calls=58 tokens=0 cost=0.000000
+openclaw_agent:orion_company_002: calls=62 tokens=0 cost=0.000000
+openclaw_agent:bianca_company_002: calls=60 tokens=0 cost=0.000000
+openclaw_agent:lucian_company_002: calls=60 tokens=0 cost=0.000000
+openclaw_agent:vera_company_002: calls=62 tokens=0 cost=0.000000
+openclaw_agent:iris_company_003: calls=50 tokens=0 cost=0.000000
+openclaw_agent:orion_company_003: calls=50 tokens=0 cost=0.000000
+openclaw_agent:lucian_company_003: calls=50 tokens=0 cost=0.000000
+openclaw_agent:bianca_company_003: calls=50 tokens=0 cost=0.000000
+openclaw_agent:vera_company_003: calls=50 tokens=0 cost=0.000000
+
+By provider
+-----------
+openclaw_bridge: calls=1032 tokens=0 cost=0.000000
+
+Wrote: /opt/openclaw/.openclaw/workspace/reports/ledger_usage_summary.json
+Wrote: /opt/openclaw/.openclaw/workspace/reports/ledger_usage_summary.txt

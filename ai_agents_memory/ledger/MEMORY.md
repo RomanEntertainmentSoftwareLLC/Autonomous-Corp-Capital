@@ -9,3 +9,4 @@ _Agent-local durable memory._
 - 2026-04-27: [ledger:run_20260427_033820] Usage rows without token/cost rows are not governance data; they are blind activity.
 - 2026-04-27: [ledger:run_20260427_033820] Zero spend telemetry means no burn-rate analysis, no efficiency ranking, and no cost-safe proof.
 - 2026-04-27: [ledger:run_20260427_033820] Bridge-level logging must exist before cost discipline can be enforced.
+- 2026-04-28: [ledger:run_20260428_025706] Completed cost governance review; see state/ledger_reviews for details.

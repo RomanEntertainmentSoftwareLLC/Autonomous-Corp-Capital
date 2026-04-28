@@ -3,6 +3,36 @@
   "latest_runs": [
     {
       "decision_rows": 0,
+      "grant_briefing": true,
+      "mtime": "2026-04-28T02:57:06.191388+00:00",
+      "packet_rows": 0,
+      "portfolio_rows": 0,
+      "run_id": "run_20260428_025706",
+      "target_state": true,
+      "trade_rows": 0
+    },
+    {
+      "decision_rows": 0,
+      "grant_briefing": false,
+      "mtime": "2026-04-28T02:45:21.355000+00:00",
+      "packet_rows": 0,
+      "portfolio_rows": 0,
+      "run_id": "run_20260428_024521",
+      "target_state": false,
+      "trade_rows": 0
+    },
+    {
+      "decision_rows": 0,
+      "grant_briefing": false,
+      "mtime": "2026-04-28T02:23:58.189696+00:00",
+      "packet_rows": 8,
+      "portfolio_rows": 0,
+      "run_id": "run_20260428_021955",
+      "target_state": false,
+      "trade_rows": 0
+    },
+    {
+      "decision_rows": 0,
       "grant_briefing": false,
       "mtime": "2026-04-28T02:11:53.220788+00:00",
       "packet_rows": 4,
@@ -18,36 +48,6 @@
       "packet_rows": 4,
       "portfolio_rows": 6,
       "run_id": "run_20260428_013936",
-      "target_state": false,
-      "trade_rows": 6
-    },
-    {
-      "decision_rows": 0,
-      "grant_briefing": false,
-      "mtime": "2026-04-28T01:27:13.304304+00:00",
-      "packet_rows": 0,
-      "portfolio_rows": 0,
-      "run_id": "run_20260428_012713",
-      "target_state": false,
-      "trade_rows": 0
-    },
-    {
-      "decision_rows": 4,
-      "grant_briefing": false,
-      "mtime": "2026-04-27T04:12:44.073883+00:00",
-      "packet_rows": 4,
-      "portfolio_rows": 4,
-      "run_id": "run_20260427_041051",
-      "target_state": false,
-      "trade_rows": 4
-    },
-    {
-      "decision_rows": 6,
-      "grant_briefing": false,
-      "mtime": "2026-04-27T03:40:08.178285+00:00",
-      "packet_rows": 4,
-      "portfolio_rows": 6,
-      "run_id": "run_20260427_033820",
       "target_state": false,
       "trade_rows": 6
     }
@@ -175,6 +175,6 @@
   ],
   "state_dir_exists": true,
   "table_count": 11,
-  "timestamp": "2026-04-28T02:17:51.395395+00:00",
+  "timestamp": "2026-04-28T03:33:17.168568+00:00",
   "verdict": "warehouse_has_data"
 }

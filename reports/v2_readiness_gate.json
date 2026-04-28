@@ -1,0 +1,76 @@
+{
+  "checks": [
+    {
+      "detail": "not proven in latest report",
+      "name": "ML readiness",
+      "status": "FAIL"
+    },
+    {
+      "detail": "warehouse_has_data",
+      "name": "Warehouse persistence",
+      "status": "OK"
+    },
+    {
+      "detail": "no missing traces, but latest run may have zero decisions",
+      "name": "Decision traces",
+      "status": "WARN"
+    },
+    {
+      "detail": "usage rows found",
+      "name": "Token/cost telemetry",
+      "status": "OK"
+    },
+    {
+      "detail": "governance chain report exists",
+      "name": "Governance smoke",
+      "status": "WARN"
+    },
+    {
+      "detail": "process group timeout appears wired",
+      "name": "Process supervisor",
+      "status": "OK"
+    },
+    {
+      "detail": "post-run reports wired",
+      "name": "Auto post-run reports",
+      "status": "OK"
+    }
+  ],
+  "fail_count": 1,
+  "generated_at": "2026-04-28T03:33:17.261943+00:00",
+  "ok_count": 4,
+  "overall": "NOT_READY_YET",
+  "refreshed": [
+    {
+      "name": "db_status",
+      "ok": true,
+      "output": "Warehouse: /opt/openclaw/.openclaw/workspace/data/warehouse.sqlite\nTable counts:\n  companies: 4 rows\n  runs: 17 rows\n  ticks: 31 rows\n  trades: 28 rows\n  features: 28 rows\n  results: 17 rows\nTotal runs: 17\nLatest run: company_001 (paper_live) @ 2026-04-28T01:39:37.122473+00:00\n",
+      "returncode": 0
+    },
+    {
+      "name": "decision_trace_report",
+      "ok": true,
+      "output": "ACC Decision Trace Report\n=========================\nRun: run_20260428_025706\nDecision rows: 0\nRows without trace: 0\n\nActions:\n\nML:\n- ml_active_rows: 0\n- ml_score_rows: 0\n- avg_ml_feature_coverage: None\n- coverage_rows: 0\n\nEvidence winners:\n\nPattern gate demotions estimate: 0\nBootstrap recoveries estimate: 0\nFlat SELL blocks estimate: 0\nLow-margin rows estimate: 0\n\nTop trace stages:\n\nTop WAIT/skip reasons:\n\nExamples:\n\nReport saved to: /opt/openclaw/.openclaw/workspace/reports/decision_trace_report_run_20260428_025706.txt\nLatest report saved to: /opt/openclaw/.openclaw/workspace/reports/decision_trace_report_latest.txt\n",
+      "returncode": 0
+    },
+    {
+      "name": "ml_readiness_report",
+      "ok": true,
+      "output": "ACC ML Readiness Report\n========================\nRun: run_20260428_025706\nVerdict: unknown_no_recent_decisions\n\nModel:\n- path: /opt/openclaw/.openclaw/workspace/models/ml_model.pkl\n- exists: True\n- loads: True\n- error: None\n- class: RandomForestClassifier\n- n_features_in: 19\n\nLive feature count: 19\nTraining feature count: 19\nFeatures match exactly: True\nMissing from live: []\nExtra in live: []\n\nRecent decisions:\n- rows: 0\n- ml_score_rows: 0\n- ml_active_rows: 0\n- ml_influenced_or_traced_rows: 0\n- avg_feature_coverage: None\n- coverage_rows: 0\n\nFeature order:\n- live: ema_fast, ema_slow, ema_spread, rsi, price_change_1, price_change_2, price_change_3, momentum_3, slope_3, pattern_three_rising, pattern_three_falling, pattern_reversal_after_two_decline, pattern_reversal_after_two_rise, pattern_short_momentum_burst, pattern_short_exhaustion, higher_highs, higher_lows, lower_highs, lower_lows\n- train: ema_fast, ema_slow, ema_spread, rsi, price_change_1, price_change_2, price_change_3, momentum_3, slope_3, pattern_three_rising, pattern_three_falling, pattern_reversal_after_two_decline, pattern_reversal_after_two_rise, pattern_short_momentum_burst, pattern_short_exhaustion, higher_highs, higher_lows, lower_highs, lower_lows\n\nReport saved to: /opt/openclaw/.openclaw/workspace/reports/ml_readiness_report.txt\n",
+      "returncode": 0
+    },
+    {
+      "name": "warehouse_audit",
+      "ok": true,
+      "output": "WAREHOUSE AUDIT\n===============\nVerdict: warehouse_has_data\nSQLite files: 1\nTables: 11 | non-empty: 11\nData dir exists: True\nState dir exists: True\nSearched dirs:\n- /opt/openclaw/.openclaw/workspace/data\n- /opt/openclaw/.openclaw/workspace/state\n\nLatest runs:\n- run_20260428_025706: decisions=0 trades=0 portfolio=0 packets=0 target=True grant=True\n- run_20260428_024521: decisions=0 trades=0 portfolio=0 packets=0 target=False grant=False\n- run_20260428_021955: decisions=0 trades=0 portfolio=0 packets=8 target=False grant=False\n- run_20260428_021002: decisions=0 trades=0 portfolio=0 packets=4 target=False grant=False\n- run_20260428_013936: decisions=6 trades=6 portfolio=6 packets=4 target=False grant=False\n\nSQLite tables:\n- /opt/openclaw/.openclaw/workspace/data/warehouse.sqlite error=None\n  - analytics_companies: rows=4\n  - companies: rows=4\n  - company_performance: rows=4\n  - evaluations: rows=17\n  - features: rows=28\n  - results: rows=17\n  - runs: rows=17\n  - sqlite_sequence: rows=8\n  - ticks: rows=31\n  - trade_facts: rows=28\n  - trades: rows=28\n  - latest_company_results: view\n  - latest_run_summary: view\n  - leaderboard_basis: view\n\nWrote: /opt/openclaw/.openclaw/workspace/reports/warehouse_audit.json\nWrote: /opt/openclaw/.openclaw/workspace/reports/warehouse_audit.txt\n",
+      "returncode": 0
+    },
+    {
+      "name": "ledger_usage_summary",
+      "ok": true,
+      "output": "ACC Ledger Usage Summary\n========================\nGenerated: 2026-04-28T03:33:17.242918+00:00\nVerdict: usage_found\nRuns scanned: 20\nUsage rows: 1032\n\nTotals:\n- calls: 1032\n- prompt_tokens: 0\n- completion_tokens: 0\n- total_tokens: 0\n- estimated_cost: 0.000000\n\nBy agent\n--------\nbianca_company_001: calls=58 tokens=0 cost=0.000000\nvera_company_001: calls=58 tokens=0 cost=0.000000\nlucian_company_001: calls=58 tokens=0 cost=0.000000\norion_company_001: calls=58 tokens=0 cost=0.000000\niris_company_001: calls=58 tokens=0 cost=0.000000\niris_company_002: calls=58 tokens=0 cost=0.000000\norion_company_002: calls=62 tokens=0 cost=0.000000\nbianca_company_002: calls=60 tokens=0 cost=0.000000\nlucian_company_002: calls=60 tokens=0 cost=0.000000\nvera_company_002: calls=62 tokens=0 cost=0.000000\niris_company_003: calls=50 tokens=0 cost=0.000000\norion_company_003: calls=50 tokens=0 cost=0.000000\nlucian_company_003: calls=50 tokens=0 cost=0.000000\nbianca_company_003: calls=50 tokens=0 cost=0.000000\nvera_company_003: calls=50 tokens=0 cost=0.000000\n\nBy model\n--------\nopenclaw_agent:bianca_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:vera_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:lucian_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:orion_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:iris_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:iris_company_002: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:orion_company_002: calls=62 tokens=0 cost=0.000000\nopenclaw_agent:bianca_company_002: calls=60 tokens=0 cost=0.000000\nopenclaw_agent:lucian_company_002: calls=60 tokens=0 cost=0.000000\nopenclaw_agent:vera_company_002: calls=62 tokens=0 cost=0.000000\nopenclaw_agent:iris_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:orion_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:lucian_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:bianca_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:vera_company_003: calls=50 tokens=0 cost=0.000000\n\nBy provider\n-----------\nopenclaw_bridge: calls=1032 tokens=0 cost=0.000000\n\nWrote: /opt/openclaw/.openclaw/workspace/reports/ledger_usage_summary.json\nWrote: /opt/openclaw/.openclaw/workspace/reports/ledger_usage_summary.txt\n",
+      "returncode": 0
+    }
+  ],
+  "warn_count": 2
+}

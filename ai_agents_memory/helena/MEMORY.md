@@ -9,3 +9,4 @@ _Agent-local durable memory._
 - 2026-04-27: [helena:run_20260427_033820] Full portfolio coverage is not enough if equity remains uncomputed.
 - 2026-04-27: [helena:run_20260427_033820] Repeated BUY-only execution needs restraint checks, even when margins look strong.
 - 2026-04-27: [helena:run_20260427_033820] Strong evidence margins should not replace auditable decision breadth.
+- 2026-04-28: [helena:run_20260428_025706] Completed risk review; see state/helena_reviews for details.

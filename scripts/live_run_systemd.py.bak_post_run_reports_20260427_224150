@@ -84,112 +84,6 @@ def run_warehouse_ingest(run_id: str, run_dir: Path) -> None:
         print(f"WARNING: warehouse ingest failed for {run_id}: {exc!r}", flush=True)
 
 
-def run_post_run_reports(run_id: str, run_dir: Path) -> None:
-    """Run standard proof reports after warehouse ingest."""
-    if os.environ.get("ACC_SKIP_POST_RUN_REPORTS", "").strip().lower() in {"1", "true", "yes", "on"}:
-        print(f"Post-run reports skipped for {run_id}", flush=True)
-        update_metadata(run_dir, post_run_reports={"status": "skipped", "skipped_at": utc_now()})
-        return
-
-    reports = [
-        ("decision_trace_report", [sys.executable, "tools/decision_trace_report.py"]),
-        ("ml_readiness_report", [sys.executable, "tools/ml_readiness_report.py"]),
-        ("warehouse_audit", [sys.executable, "tools/warehouse_audit.py"]),
-    ]
-
-    log_path = run_dir / "logs" / "post_run_reports.log"
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-
-    env = os.environ.copy()
-    env.setdefault("PYTHONNOUSERSITE", "1")
-    report_timeout = env_int("ACC_POST_RUN_REPORT_TIMEOUT_SECONDS", 120)
-
-    results: list[dict[str, Any]] = []
-
-    print(f"Post-run reports starting for {run_id}", flush=True)
-
-    with log_path.open("a", encoding="utf-8") as log:
-        log.write(f"[{utc_now()}] post-run reports starting for {run_id}\n")
-
-        for name, cmd in reports:
-            started = utc_now()
-            log.write(f"\n[{started}] RUN {name}: {' '.join(cmd)}\n")
-
-            try:
-                completed = subprocess.run(
-                    cmd,
-                    cwd=str(ROOT),
-                    env=env,
-                    text=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    timeout=report_timeout,
-                )
-
-                output = completed.stdout or ""
-                log.write(output)
-                if output and not output.endswith("\n"):
-                    log.write("\n")
-
-                ok = completed.returncode == 0
-                ended = utc_now()
-
-                log.write(f"[{ended}] DONE {name}: returncode={completed.returncode}\n")
-
-                results.append({
-                    "name": name,
-                    "returncode": completed.returncode,
-                    "started_at": started,
-                    "ended_at": ended,
-                    "ok": ok,
-                })
-
-                status = "OK" if ok else f"FAILED rc={completed.returncode}"
-                print(f"Post-run report {name}: {status}", flush=True)
-
-            except subprocess.TimeoutExpired as exc:
-                ended = utc_now()
-                log.write(f"[{ended}] TIMEOUT {name}: {exc!r}\n")
-                results.append({
-                    "name": name,
-                    "returncode": None,
-                    "started_at": started,
-                    "ended_at": ended,
-                    "ok": False,
-                    "timeout": True,
-                })
-                print(f"WARNING: post-run report {name} timed out", flush=True)
-
-            except Exception as exc:
-                ended = utc_now()
-                log.write(f"[{ended}] ERROR {name}: {exc!r}\n")
-                results.append({
-                    "name": name,
-                    "returncode": None,
-                    "started_at": started,
-                    "ended_at": ended,
-                    "ok": False,
-                    "error": repr(exc),
-                })
-                print(f"WARNING: post-run report {name} failed: {exc!r}", flush=True)
-
-    ok_count = sum(1 for result in results if result.get("ok"))
-
-    update_metadata(
-        run_dir,
-        post_run_reports={
-            "status": "completed" if ok_count == len(results) else "completed_with_failures",
-            "completed_at": utc_now(),
-            "ok_count": ok_count,
-            "total": len(results),
-            "log_path": str(log_path),
-            "results": results,
-        },
-    )
-
-    print(f"Post-run reports completed for {run_id}: {ok_count}/{len(results)} OK", flush=True)
-
-
 def terminate_process_group(proc: subprocess.Popen[Any], *, term_grace_seconds: int) -> None:
     """Terminate/kill the worker process group without killing this supervisor."""
     if proc.poll() is not None:
@@ -320,7 +214,6 @@ def supervisor_main() -> int:
             terminate_process_group(proc, term_grace_seconds=term_grace_seconds)
     finally:
         run_warehouse_ingest(run_id, run_dir)
-        run_post_run_reports(run_id, run_dir)
         update_metadata(run_dir, supervisor_completed_at=utc_now(), supervisor_exit_code=exit_code)
 
     return exit_code

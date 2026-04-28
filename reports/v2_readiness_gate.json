@@ -21,6 +21,11 @@
       "status": "OK"
     },
     {
+      "detail": "token budget guard normal/caution",
+      "name": "Token budget guard",
+      "status": "OK"
+    },
+    {
       "detail": "governance chain report exists",
       "name": "Governance smoke",
       "status": "WARN"
@@ -37,8 +42,8 @@
     }
   ],
   "fail_count": 1,
-  "generated_at": "2026-04-28T03:33:17.261943+00:00",
-  "ok_count": 4,
+  "generated_at": "2026-04-28T03:44:32.018742+00:00",
+  "ok_count": 5,
   "overall": "NOT_READY_YET",
   "refreshed": [
     {
@@ -68,7 +73,13 @@
     {
       "name": "ledger_usage_summary",
       "ok": true,
-      "output": "ACC Ledger Usage Summary\n========================\nGenerated: 2026-04-28T03:33:17.242918+00:00\nVerdict: usage_found\nRuns scanned: 20\nUsage rows: 1032\n\nTotals:\n- calls: 1032\n- prompt_tokens: 0\n- completion_tokens: 0\n- total_tokens: 0\n- estimated_cost: 0.000000\n\nBy agent\n--------\nbianca_company_001: calls=58 tokens=0 cost=0.000000\nvera_company_001: calls=58 tokens=0 cost=0.000000\nlucian_company_001: calls=58 tokens=0 cost=0.000000\norion_company_001: calls=58 tokens=0 cost=0.000000\niris_company_001: calls=58 tokens=0 cost=0.000000\niris_company_002: calls=58 tokens=0 cost=0.000000\norion_company_002: calls=62 tokens=0 cost=0.000000\nbianca_company_002: calls=60 tokens=0 cost=0.000000\nlucian_company_002: calls=60 tokens=0 cost=0.000000\nvera_company_002: calls=62 tokens=0 cost=0.000000\niris_company_003: calls=50 tokens=0 cost=0.000000\norion_company_003: calls=50 tokens=0 cost=0.000000\nlucian_company_003: calls=50 tokens=0 cost=0.000000\nbianca_company_003: calls=50 tokens=0 cost=0.000000\nvera_company_003: calls=50 tokens=0 cost=0.000000\n\nBy model\n--------\nopenclaw_agent:bianca_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:vera_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:lucian_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:orion_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:iris_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:iris_company_002: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:orion_company_002: calls=62 tokens=0 cost=0.000000\nopenclaw_agent:bianca_company_002: calls=60 tokens=0 cost=0.000000\nopenclaw_agent:lucian_company_002: calls=60 tokens=0 cost=0.000000\nopenclaw_agent:vera_company_002: calls=62 tokens=0 cost=0.000000\nopenclaw_agent:iris_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:orion_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:lucian_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:bianca_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:vera_company_003: calls=50 tokens=0 cost=0.000000\n\nBy provider\n-----------\nopenclaw_bridge: calls=1032 tokens=0 cost=0.000000\n\nWrote: /opt/openclaw/.openclaw/workspace/reports/ledger_usage_summary.json\nWrote: /opt/openclaw/.openclaw/workspace/reports/ledger_usage_summary.txt\n",
+      "output": "ACC Ledger Usage Summary\n========================\nGenerated: 2026-04-28T03:44:31.947033+00:00\nVerdict: usage_found\nRuns scanned: 20\nUsage rows: 1032\n\nTotals:\n- calls: 1032\n- prompt_tokens: 0\n- completion_tokens: 0\n- total_tokens: 0\n- estimated_cost: 0.000000\n\nBy agent\n--------\nbianca_company_001: calls=58 tokens=0 cost=0.000000\nvera_company_001: calls=58 tokens=0 cost=0.000000\nlucian_company_001: calls=58 tokens=0 cost=0.000000\norion_company_001: calls=58 tokens=0 cost=0.000000\niris_company_001: calls=58 tokens=0 cost=0.000000\niris_company_002: calls=58 tokens=0 cost=0.000000\norion_company_002: calls=62 tokens=0 cost=0.000000\nbianca_company_002: calls=60 tokens=0 cost=0.000000\nlucian_company_002: calls=60 tokens=0 cost=0.000000\nvera_company_002: calls=62 tokens=0 cost=0.000000\niris_company_003: calls=50 tokens=0 cost=0.000000\norion_company_003: calls=50 tokens=0 cost=0.000000\nlucian_company_003: calls=50 tokens=0 cost=0.000000\nbianca_company_003: calls=50 tokens=0 cost=0.000000\nvera_company_003: calls=50 tokens=0 cost=0.000000\n\nBy model\n--------\nopenclaw_agent:bianca_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:vera_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:lucian_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:orion_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:iris_company_001: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:iris_company_002: calls=58 tokens=0 cost=0.000000\nopenclaw_agent:orion_company_002: calls=62 tokens=0 cost=0.000000\nopenclaw_agent:bianca_company_002: calls=60 tokens=0 cost=0.000000\nopenclaw_agent:lucian_company_002: calls=60 tokens=0 cost=0.000000\nopenclaw_agent:vera_company_002: calls=62 tokens=0 cost=0.000000\nopenclaw_agent:iris_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:orion_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:lucian_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:bianca_company_003: calls=50 tokens=0 cost=0.000000\nopenclaw_agent:vera_company_003: calls=50 tokens=0 cost=0.000000\n\nBy provider\n-----------\nopenclaw_bridge: calls=1032 tokens=0 cost=0.000000\n\nWrote: /opt/openclaw/.openclaw/workspace/reports/ledger_usage_summary.json\nWrote: /opt/openclaw/.openclaw/workspace/reports/ledger_usage_summary.txt\n",
+      "returncode": 0
+    },
+    {
+      "name": "token_budget_guard",
+      "ok": true,
+      "output": "ACC Token Budget Guard\n======================\nGenerated: 2026-04-28T03:44:32.005508+00:00\nStage: NORMAL\nBudget USD: 1.000000\nEstimated cost: 0.000000\nBudget used: 0.00%\nCalls: 1032\nTotal tokens: 0\n\nRecommendation: Budget use is below caution threshold.\n\nDegradation actions:\n- normal_cost_discipline\n- continue_telemetry\n\nThresholds:\n- 70%: CAUTION\n- 80%: DEGRADED\n- 90%: RESTRICTED\n- 98%: EMERGENCY\n\nWrote: /opt/openclaw/.openclaw/workspace/reports/token_budget_guard.json\nWrote: /opt/openclaw/.openclaw/workspace/reports/token_budget_guard.txt\n",
       "returncode": 0
     }
   ],

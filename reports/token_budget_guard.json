@@ -1,0 +1,21 @@
+{
+  "budget_usd": 1.0,
+  "budget_used_percent": 0.0,
+  "calls": 1032.0,
+  "degradation_actions": [
+    "normal_cost_discipline",
+    "continue_telemetry"
+  ],
+  "estimated_cost": 0.0,
+  "generated_at": "2026-04-28T03:44:32.005508+00:00",
+  "recommendation": "Budget use is below caution threshold.",
+  "source": "reports/ledger_usage_summary.json",
+  "stage": "NORMAL",
+  "thresholds": {
+    "caution": 70,
+    "degraded": 80,
+    "emergency": 98,
+    "restricted": 90
+  },
+  "total_tokens": 0.0
+}

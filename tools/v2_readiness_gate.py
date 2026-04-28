@@ -64,6 +64,7 @@ def main() -> int:
             ("ml_readiness_report", [sys.executable, "tools/ml_readiness_report.py"]),
             ("warehouse_audit", [sys.executable, "tools/warehouse_audit.py"]),
             ("ledger_usage_summary", [sys.executable, "tools/ledger_usage_summary.py"]),
+            ("token_budget_guard", [sys.executable, "tools/token_budget_guard.py", "--no-refresh"]),
         ]
         for name, cmd in commands:
             refreshed.append(run_cmd(name, cmd))
@@ -72,6 +73,7 @@ def main() -> int:
     warehouse = read_text(REPORTS / "warehouse_audit.txt")
     decision = read_text(REPORTS / "decision_trace_report_latest.txt")
     ledger = read_text(REPORTS / "ledger_usage_summary.txt")
+    token_guard = read_text(REPORTS / "token_budget_guard.txt")
     governance = read_text(REPORTS / "v2_governance_smoke_latest.txt")
 
     checks: list[dict[str, Any]] = []
@@ -104,6 +106,28 @@ def main() -> int:
     })
 
     gov_ok = "Result:" in governance and "/5 OK" in governance
+    guard_ok = "Stage: NORMAL" in token_guard or "Stage: CAUTION" in token_guard
+    guard_warn = any(stage in token_guard for stage in ("Stage: DEGRADED", "Stage: RESTRICTED"))
+    guard_emergency = "Stage: EMERGENCY" in token_guard
+    if guard_emergency:
+        guard_status = "FAIL"
+        guard_detail = "token budget emergency"
+    elif guard_warn:
+        guard_status = "WARN"
+        guard_detail = "token budget degradation active"
+    elif guard_ok:
+        guard_status = "OK"
+        guard_detail = "token budget guard normal/caution"
+    else:
+        guard_status = "WARN"
+        guard_detail = "token budget guard report missing or unclear"
+
+    checks.append({
+        "name": "Token budget guard",
+        "status": guard_status,
+        "detail": guard_detail,
+    })
+
     checks.append({
         "name": "Governance smoke",
         "status": status(gov_ok, warn=bool(governance)),

@@ -1,14 +1,15 @@
 ACC V2 Readiness Gate
 =====================
-Generated: 2026-04-28T03:33:17.261943+00:00
+Generated: 2026-04-28T03:44:32.018742+00:00
 Overall: NOT_READY_YET
-OK=4 WARN=2 FAIL=1
+OK=5 WARN=2 FAIL=1
 
 Checks:
 - FAIL: ML readiness — not proven in latest report
 - OK: Warehouse persistence — warehouse_has_data
 - WARN: Decision traces — no missing traces, but latest run may have zero decisions
 - OK: Token/cost telemetry — usage rows found
+- OK: Token budget guard — token budget guard normal/caution
 - WARN: Governance smoke — governance chain report exists
 - OK: Process supervisor — process group timeout appears wired
 - OK: Auto post-run reports — post-run reports wired
@@ -19,6 +20,7 @@ Refresh commands:
 - OK: ml_readiness_report rc=0
 - OK: warehouse_audit rc=0
 - OK: ledger_usage_summary rc=0
+- OK: token_budget_guard rc=0
 
 Wrote: /opt/openclaw/.openclaw/workspace/reports/v2_readiness_gate.json
 Wrote: /opt/openclaw/.openclaw/workspace/reports/v2_readiness_gate.txt

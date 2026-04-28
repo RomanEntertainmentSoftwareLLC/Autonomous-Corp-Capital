@@ -1,0 +1,24 @@
+ACC Token Budget Guard
+======================
+Generated: 2026-04-28T03:44:32.005508+00:00
+Stage: NORMAL
+Budget USD: 1.000000
+Estimated cost: 0.000000
+Budget used: 0.00%
+Calls: 1032
+Total tokens: 0
+
+Recommendation: Budget use is below caution threshold.
+
+Degradation actions:
+- normal_cost_discipline
+- continue_telemetry
+
+Thresholds:
+- 70%: CAUTION
+- 80%: DEGRADED
+- 90%: RESTRICTED
+- 98%: EMERGENCY
+
+Wrote: /opt/openclaw/.openclaw/workspace/reports/token_budget_guard.json
+Wrote: /opt/openclaw/.openclaw/workspace/reports/token_budget_guard.txt

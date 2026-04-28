@@ -1,6 +1,6 @@
 ACC ML Readiness Report
 ========================
-Run: run_20260428_035900
+Run: run_20260428_040408
 Verdict: ready_or_active
 Decision source: candidate_decisions
 

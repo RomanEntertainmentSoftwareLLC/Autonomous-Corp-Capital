@@ -1,23 +1,23 @@
 ACC V2 Triple Gate
 ==================
-Generated: 2026-04-28T03:53:33.183042+00:00
+Generated: 2026-04-28T04:27:01.870249+00:00
 
 Refresh:
 - OK: ledger_usage_summary rc=0
 - OK: token_budget_guard rc=0
-- FAIL: v2_readiness_gate rc=1
+- OK: v2_readiness_gate rc=0
 - OK: v2_governance_smoke_dry_run rc=0
 
 Latest Run:
-- run_id: run_20260428_025706
+- run_id: run_20260428_040408
 - verdict: latest_run_timed_out
 - metadata_status: timed_out
 - decisions: 0
 - trades: 0
 - portfolio: 0
 - company_packets: 0
-- ledger_usage: 15
-- bridge_usage: 15
+- ledger_usage: 20
+- bridge_usage: 20
 
 Wrote: /opt/openclaw/.openclaw/workspace/reports/v2_triple_gate.json
 Wrote: /opt/openclaw/.openclaw/workspace/reports/v2_triple_gate.txt

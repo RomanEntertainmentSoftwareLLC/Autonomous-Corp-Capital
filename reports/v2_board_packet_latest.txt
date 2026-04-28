@@ -1,20 +1,20 @@
 ACC V2 Triple Gate Board Packet
 ===============================
-Generated: 2026-04-28T03:53:33.183042+00:00
+Generated: 2026-04-28T04:27:01.870249+00:00
 
 Executive Summary:
-- V2 readiness overall: NOT_READY_YET
+- V2 readiness overall: READY_FOR_SHORT_PAPER_PROOF
 - Latest run verdict: latest_run_timed_out
-- Latest run id: run_20260428_025706
+- Latest run id: run_20260428_040408
 - Latest run artifacts: decisions=0 trades=0 portfolio=0 packets=0
 
 Readiness Checks:
-- FAIL: ML readiness
+- OK: ML readiness
 - OK: Warehouse persistence
-- WARN: Decision traces
+- OK: Decision traces
 - OK: Token/cost telemetry
 - OK: Token budget guard
-- WARN: Governance smoke
+- OK: Governance smoke
 - OK: Process supervisor
 - OK: Auto post-run reports
 

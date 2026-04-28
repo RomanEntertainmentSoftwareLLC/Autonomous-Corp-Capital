@@ -1,0 +1,108 @@
+{
+  "chain_order": [
+    "ledger",
+    "helena",
+    "axiom",
+    "vivienne",
+    "yam_yam",
+    "grant_cardone"
+  ],
+  "ended_at": "2026-04-28T03:26:04.239229+00:00",
+  "mode": "dry_run",
+  "ok_count": 6,
+  "results": [
+    {
+      "cmd": [
+        "/usr/bin/python3",
+        "tools/ledger_cost_review.py",
+        "--dry-run"
+      ],
+      "ended_at": "2026-04-28T03:26:03.744020+00:00",
+      "mode": "dry_run",
+      "name": "ledger",
+      "ok": true,
+      "output": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/ledger_reviews/run_20260428_025706_ledger_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/ledger_reviews/run_20260428_025706_ledger_prompt.txt\n",
+      "returncode": 0,
+      "script": "tools/ledger_cost_review.py",
+      "started_at": "2026-04-28T03:26:03.640420+00:00"
+    },
+    {
+      "cmd": [
+        "/usr/bin/python3",
+        "tools/helena_risk_review.py",
+        "--dry-run"
+      ],
+      "ended_at": "2026-04-28T03:26:03.834951+00:00",
+      "mode": "dry_run",
+      "name": "helena",
+      "ok": true,
+      "output": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/helena_reviews/run_20260428_025706_helena_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/helena_reviews/run_20260428_025706_helena_prompt.txt\n",
+      "returncode": 0,
+      "script": "tools/helena_risk_review.py",
+      "started_at": "2026-04-28T03:26:03.744155+00:00"
+    },
+    {
+      "cmd": [
+        "/usr/bin/python3",
+        "tools/axiom_evaluator_review.py",
+        "--dry-run"
+      ],
+      "ended_at": "2026-04-28T03:26:03.936164+00:00",
+      "mode": "dry_run",
+      "name": "axiom",
+      "ok": true,
+      "output": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/axiom_reviews/run_20260428_025706_axiom_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/axiom_reviews/run_20260428_025706_axiom_prompt.txt\n",
+      "returncode": 0,
+      "script": "tools/axiom_evaluator_review.py",
+      "started_at": "2026-04-28T03:26:03.835048+00:00"
+    },
+    {
+      "cmd": [
+        "/usr/bin/python3",
+        "tools/vivienne_financial_review.py",
+        "--dry-run"
+      ],
+      "ended_at": "2026-04-28T03:26:04.017062+00:00",
+      "mode": "dry_run",
+      "name": "vivienne",
+      "ok": true,
+      "output": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/vivienne_reviews/run_20260428_025706_vivienne_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/vivienne_reviews/run_20260428_025706_vivienne_prompt.txt\n",
+      "returncode": 0,
+      "script": "tools/vivienne_financial_review.py",
+      "started_at": "2026-04-28T03:26:03.936244+00:00"
+    },
+    {
+      "cmd": [
+        "/usr/bin/python3",
+        "tools/yam_yam_executive_review.py",
+        "--dry-run"
+      ],
+      "ended_at": "2026-04-28T03:26:04.121921+00:00",
+      "mode": "dry_run",
+      "name": "yam_yam",
+      "ok": true,
+      "output": "Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/executive_reviews/run_20260428_025706_yam_yam_prompt.txt\n",
+      "returncode": 0,
+      "script": "tools/yam_yam_executive_review.py",
+      "started_at": "2026-04-28T03:26:04.017155+00:00"
+    },
+    {
+      "cmd": [
+        "/usr/bin/python3",
+        "tools/grant_speech_review.py",
+        "--dry-run"
+      ],
+      "ended_at": "2026-04-28T03:26:04.239115+00:00",
+      "mode": "dry_run",
+      "name": "grant_cardone",
+      "ok": true,
+      "output": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/grant_speeches/run_20260428_025706_grant_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/grant_speeches/run_20260428_025706_grant_prompt.txt\nListeners: none\n",
+      "returncode": 0,
+      "script": "tools/grant_speech_review.py",
+      "started_at": "2026-04-28T03:26:04.122010+00:00"
+    }
+  ],
+  "started_at": "2026-04-28T03:26:03.640318+00:00",
+  "success": true,
+  "total": 6
+}

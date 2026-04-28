@@ -1,0 +1,40 @@
+ACC V2 Governance Smoke
+=======================
+Started: 2026-04-28T03:26:03.640318+00:00
+Ended: 2026-04-28T03:26:04.239229+00:00
+Mode: dry_run
+Result: 6/6 OK
+
+Chain:
+- ledger: OK rc=0 script=tools/ledger_cost_review.py
+- helena: OK rc=0 script=tools/helena_risk_review.py
+- axiom: OK rc=0 script=tools/axiom_evaluator_review.py
+- vivienne: OK rc=0 script=tools/vivienne_financial_review.py
+- yam_yam: OK rc=0 script=tools/yam_yam_executive_review.py
+- grant_cardone: OK rc=0 script=tools/grant_speech_review.py
+
+Output excerpts:
+
+## ledger
+Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/ledger_reviews/run_20260428_025706_ledger_context.json
+Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/ledger_reviews/run_20260428_025706_ledger_prompt.txt
+
+## helena
+Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/helena_reviews/run_20260428_025706_helena_context.json
+Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/helena_reviews/run_20260428_025706_helena_prompt.txt
+
+## axiom
+Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/axiom_reviews/run_20260428_025706_axiom_context.json
+Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/axiom_reviews/run_20260428_025706_axiom_prompt.txt
+
+## vivienne
+Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/vivienne_reviews/run_20260428_025706_vivienne_context.json
+Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/vivienne_reviews/run_20260428_025706_vivienne_prompt.txt
+
+## yam_yam
+Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/executive_reviews/run_20260428_025706_yam_yam_prompt.txt
+
+## grant_cardone
+Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/grant_speeches/run_20260428_025706_grant_context.json
+Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/grant_speeches/run_20260428_025706_grant_prompt.txt
+Listeners: none

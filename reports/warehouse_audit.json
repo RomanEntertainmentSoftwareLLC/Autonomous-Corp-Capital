@@ -2,6 +2,36 @@
   "data_dir_exists": true,
   "latest_runs": [
     {
+      "decision_rows": 0,
+      "grant_briefing": false,
+      "mtime": "2026-04-28T01:27:13.304304+00:00",
+      "packet_rows": 0,
+      "portfolio_rows": 0,
+      "run_id": "run_20260428_012713",
+      "target_state": false,
+      "trade_rows": 0
+    },
+    {
+      "decision_rows": 4,
+      "grant_briefing": false,
+      "mtime": "2026-04-27T04:12:44.073883+00:00",
+      "packet_rows": 4,
+      "portfolio_rows": 4,
+      "run_id": "run_20260427_041051",
+      "target_state": false,
+      "trade_rows": 4
+    },
+    {
+      "decision_rows": 6,
+      "grant_briefing": false,
+      "mtime": "2026-04-27T03:40:08.178285+00:00",
+      "packet_rows": 4,
+      "portfolio_rows": 6,
+      "run_id": "run_20260427_033820",
+      "target_state": false,
+      "trade_rows": 6
+    },
+    {
       "decision_rows": 12,
       "grant_briefing": false,
       "mtime": "2026-04-27T02:43:29.132696+00:00",
@@ -19,36 +49,6 @@
       "portfolio_rows": 10,
       "run_id": "run_20260421_022922",
       "target_state": true,
-      "trade_rows": 10
-    },
-    {
-      "decision_rows": 10,
-      "grant_briefing": true,
-      "mtime": "2026-04-20T04:01:06.738817+00:00",
-      "packet_rows": 8,
-      "portfolio_rows": 10,
-      "run_id": "run_20260420_034819",
-      "target_state": true,
-      "trade_rows": 10
-    },
-    {
-      "decision_rows": 0,
-      "grant_briefing": false,
-      "mtime": "2026-04-20T03:44:00.195113+00:00",
-      "packet_rows": 0,
-      "portfolio_rows": 0,
-      "run_id": "run_20260420_034400",
-      "target_state": false,
-      "trade_rows": 0
-    },
-    {
-      "decision_rows": 10,
-      "grant_briefing": true,
-      "mtime": "2026-04-20T03:07:40.480208+00:00",
-      "packet_rows": 12,
-      "portfolio_rows": 10,
-      "run_id": "run_20260420_030740",
-      "target_state": false,
       "trade_rows": 10
     }
   ],
@@ -80,11 +80,11 @@
           "type": "table"
         },
         "evaluations": {
-          "rows": 5,
+          "rows": 13,
           "type": "table"
         },
         "features": {
-          "rows": 12,
+          "rows": 22,
           "type": "table"
         },
         "latest_company_results": {
@@ -100,11 +100,11 @@
           "type": "view"
         },
         "results": {
-          "rows": 5,
+          "rows": 13,
           "type": "table"
         },
         "runs": {
-          "rows": 5,
+          "rows": 13,
           "type": "table"
         },
         "sqlite_sequence": {
@@ -112,15 +112,15 @@
           "type": "table"
         },
         "ticks": {
-          "rows": 15,
+          "rows": 25,
           "type": "table"
         },
         "trade_facts": {
-          "rows": 12,
+          "rows": 22,
           "type": "table"
         },
         "trades": {
-          "rows": 12,
+          "rows": 22,
           "type": "table"
         }
       },
@@ -139,19 +139,19 @@
           "type": "table"
         },
         "evaluations": {
-          "rows": 5,
+          "rows": 13,
           "type": "table"
         },
         "features": {
-          "rows": 12,
+          "rows": 22,
           "type": "table"
         },
         "results": {
-          "rows": 5,
+          "rows": 13,
           "type": "table"
         },
         "runs": {
-          "rows": 5,
+          "rows": 13,
           "type": "table"
         },
         "sqlite_sequence": {
@@ -159,15 +159,15 @@
           "type": "table"
         },
         "ticks": {
-          "rows": 15,
+          "rows": 25,
           "type": "table"
         },
         "trade_facts": {
-          "rows": 12,
+          "rows": 22,
           "type": "table"
         },
         "trades": {
-          "rows": 12,
+          "rows": 22,
           "type": "table"
         }
       }
@@ -175,6 +175,6 @@
   ],
   "state_dir_exists": true,
   "table_count": 11,
-  "timestamp": "2026-04-27T03:23:48.185762+00:00",
+  "timestamp": "2026-04-28T01:31:21.359993+00:00",
   "verdict": "warehouse_has_data"
 }

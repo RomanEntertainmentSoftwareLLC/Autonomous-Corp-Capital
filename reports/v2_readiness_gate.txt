@@ -1,8 +1,8 @@
 ACC V2 Readiness Gate
 =====================
-Generated: 2026-04-28T04:05:50.760528+00:00
+Generated: 2026-04-28T04:11:53.105282+00:00
 Overall: READY_FOR_SHORT_PAPER_PROOF
-OK=8 WARN=0 FAIL=0
+OK=9 WARN=0 FAIL=0
 
 Checks:
 - OK: ML readiness — ready_or_active
@@ -11,6 +11,7 @@ Checks:
 - OK: Token/cost telemetry — usage rows found
 - OK: Token budget guard — token budget guard normal/caution
 - OK: Governance smoke — governance chain report exists
+- OK: Live-trade safety — paper default-safe and explicit live flag gated
 - OK: Process supervisor — process group timeout appears wired
 - OK: Auto post-run reports — post-run reports wired
 
@@ -21,6 +22,7 @@ Refresh commands:
 - OK: warehouse_audit rc=0
 - OK: ledger_usage_summary rc=0
 - OK: token_budget_guard rc=0
+- OK: live_trade_safety_audit rc=0
 
 Wrote: /opt/openclaw/.openclaw/workspace/reports/v2_readiness_gate.json
 Wrote: /opt/openclaw/.openclaw/workspace/reports/v2_readiness_gate.txt

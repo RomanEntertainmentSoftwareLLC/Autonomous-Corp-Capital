@@ -1,0 +1,48 @@
+{
+  "checks": [
+    {
+      "detail": "scripts/live_run_systemd.py exposes explicit --live-trade flag",
+      "name": "supervisor_has_live_trade_flag",
+      "ok": true
+    },
+    {
+      "detail": "supervisor defaults to paper and checks live-trade gate first",
+      "name": "paper_default_safe",
+      "ok": true
+    },
+    {
+      "detail": "live trading requires ACC_ENABLE_LIVE_TRADING",
+      "name": "requires_enable_env",
+      "ok": true
+    },
+    {
+      "detail": "live trading requires exact real-money confirmation phrase",
+      "name": "requires_confirm_phrase",
+      "ok": true
+    },
+    {
+      "detail": "supervisor passes explicit live-trade request to worker child",
+      "name": "worker_receives_live_trade",
+      "ok": true
+    },
+    {
+      "detail": "worker child receives LIVE_RUN_MODE based on explicit supervisor mode",
+      "name": "worker_mode_env_set",
+      "ok": true
+    },
+    {
+      "detail": "tools/live_run.py has explicit --live-trade flags for legacy/internal CLI",
+      "name": "legacy_live_run_has_flag",
+      "ok": true
+    },
+    {
+      "detail": "tools/live_run.py refuses env-only LIVE_RUN_MODE=live without flag",
+      "name": "legacy_live_run_blocks_env_only_live",
+      "ok": true
+    }
+  ],
+  "fail_count": 0,
+  "generated_at": "2026-04-28T04:11:53.096990+00:00",
+  "ok_count": 8,
+  "verdict": "live_trade_default_safe"
+}

@@ -1,0 +1,18 @@
+ACC Live Trade Safety Audit
+===========================
+Generated: 2026-04-28T04:11:53.096990+00:00
+Verdict: live_trade_default_safe
+OK=8 FAIL=0
+
+Checks:
+- OK: supervisor_has_live_trade_flag — scripts/live_run_systemd.py exposes explicit --live-trade flag
+- OK: paper_default_safe — supervisor defaults to paper and checks live-trade gate first
+- OK: requires_enable_env — live trading requires ACC_ENABLE_LIVE_TRADING
+- OK: requires_confirm_phrase — live trading requires exact real-money confirmation phrase
+- OK: worker_receives_live_trade — supervisor passes explicit live-trade request to worker child
+- OK: worker_mode_env_set — worker child receives LIVE_RUN_MODE based on explicit supervisor mode
+- OK: legacy_live_run_has_flag — tools/live_run.py has explicit --live-trade flags for legacy/internal CLI
+- OK: legacy_live_run_blocks_env_only_live — tools/live_run.py refuses env-only LIVE_RUN_MODE=live without flag
+
+Wrote: /opt/openclaw/.openclaw/workspace/reports/live_trade_safety_audit.json
+Wrote: /opt/openclaw/.openclaw/workspace/reports/live_trade_safety_audit.txt

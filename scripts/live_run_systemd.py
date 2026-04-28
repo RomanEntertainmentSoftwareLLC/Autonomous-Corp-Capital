@@ -30,6 +30,7 @@ from tools.ingest_results_to_db import ingest_live_run
 
 
 TERMINAL_STATUSES = {"completed", "stopped", "timed_out", "interrupted", "failed"}
+LIVE_TRADE_CONFIRM_PHRASE = "I_UNDERSTAND_THIS_IS_REAL_MONEY"
 
 
 def utc_now() -> str:
@@ -229,11 +230,50 @@ def worker_child_main(args: argparse.Namespace) -> int:
         args.run_id,
         duration_hours=float(args.duration_hours or 0.0),
         virtual_currency=args.virtual_currency,
+        live_trade=bool(args.live_trade),
     )
     return 0
 
 
-def supervisor_main() -> int:
+
+def env_bool(name: str, default: bool = False) -> bool:
+    raw = os.getenv(name)
+    if raw is None or raw == "":
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def live_trade_requested_is_authorized() -> tuple[bool, list[str]]:
+    """Return whether live trading is explicitly authorized by operator gates."""
+    failures: list[str] = []
+
+    if not env_bool("ACC_ENABLE_LIVE_TRADING", False):
+        failures.append("ACC_ENABLE_LIVE_TRADING must be set to 1/true/yes/on")
+
+    confirm = os.getenv("ACC_LIVE_TRADE_CONFIRM", "")
+    if confirm != LIVE_TRADE_CONFIRM_PHRASE:
+        failures.append(f"ACC_LIVE_TRADE_CONFIRM must equal {LIVE_TRADE_CONFIRM_PHRASE!r}")
+
+    return (not failures), failures
+
+
+def assert_live_trade_safety(live_trade: bool) -> None:
+    """Fail closed unless live trading was deliberately requested and confirmed."""
+    if not live_trade:
+        return
+
+    ok, failures = live_trade_requested_is_authorized()
+    if not ok:
+        details = "; ".join(failures)
+        raise SystemExit(
+            "Refusing live trading. Paper is the default-safe mode. "
+            f"To proceed, pass --live-trade and satisfy safety gates: {details}"
+        )
+
+
+
+def supervisor_main(live_trade: bool = False) -> int:
+    assert_live_trade_safety(live_trade)
     duration_hours = env_float("ACC_DURATION_HOURS", 24.0)
     virtual_currency = env_float("ACC_VIRTUAL_CURRENCY", 250.0)
     timeout_grace_seconds = env_int("ACC_RUN_HARD_TIMEOUT_GRACE_SECONDS", 120)
@@ -254,7 +294,14 @@ def supervisor_main() -> int:
 
     meta = {
         "run_id": run_id,
-        "mode": "paper",
+        "mode": "live" if live_trade else "paper",
+        "live_trade_requested": bool(live_trade),
+        "live_trade_safety": {
+            "requires_flag": "--live-trade",
+            "requires_env": "ACC_ENABLE_LIVE_TRADING",
+            "requires_confirmation_env": "ACC_LIVE_TRADE_CONFIRM",
+            "confirmation_phrase": LIVE_TRADE_CONFIRM_PHRASE,
+        },
         "symbols": symbols,
         "duration_hours": duration_hours,
         "hard_timeout_seconds": hard_timeout_seconds,
@@ -270,7 +317,8 @@ def supervisor_main() -> int:
     (run_dir / "run.pid").write_text(str(os.getpid()), encoding="utf-8")
     write_current_run(run_id, os.getpid())
 
-    print(f"Systemd live-data paper run starting: {run_id}", flush=True)
+    mode_label = "LIVE-TRADE" if live_trade else "paper"
+    print(f"Systemd live-data {mode_label} run starting: {run_id}", flush=True)
     print(f"Logs at: {run_dir / 'logs' / 'run.log'}", flush=True)
     if hard_timeout_seconds is None:
         print("Hard timeout: disabled because ACC_DURATION_HOURS <= 0", flush=True)
@@ -288,6 +336,8 @@ def supervisor_main() -> int:
     ]
     if virtual_currency is not None:
         child_cmd.extend(["--virtual-currency", str(virtual_currency)])
+    if live_trade:
+        child_cmd.append("--live-trade")
 
     proc: subprocess.Popen[Any] | None = None
     exit_code = 0
@@ -295,6 +345,7 @@ def supervisor_main() -> int:
         update_metadata(run_dir, status="running", supervisor_started_worker_at=utc_now())
         child_env = os.environ.copy()
         child_env.setdefault("PYTHONNOUSERSITE", "1")
+        child_env["LIVE_RUN_MODE"] = "live" if live_trade else "paper"
         child_env.setdefault("ACC_SKIP_CHILD_POST_RUN_GOVERNANCE", "1")
         proc = subprocess.Popen(child_cmd, cwd=str(ROOT), env=child_env, start_new_session=True)
         write_current_run(run_id, proc.pid, pgid=proc.pid)
@@ -336,6 +387,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--run-id", help=argparse.SUPPRESS)
     parser.add_argument("--duration-hours", type=float, default=0.0, help=argparse.SUPPRESS)
     parser.add_argument("--virtual-currency", type=float, default=None, help=argparse.SUPPRESS)
+    parser.add_argument("--live-trade", action="store_true", help="Explicitly request real-money live trading; requires env safety gates.")
     return parser.parse_args()
 
 
@@ -345,7 +397,7 @@ def main() -> int:
         if not args.run_id:
             raise SystemExit("--worker-child requires --run-id")
         return worker_child_main(args)
-    return supervisor_main()
+    return supervisor_main(live_trade=bool(args.live_trade))
 
 
 if __name__ == "__main__":

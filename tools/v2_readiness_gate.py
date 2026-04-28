@@ -65,6 +65,7 @@ def main() -> int:
             ("warehouse_audit", [sys.executable, "tools/warehouse_audit.py"]),
             ("ledger_usage_summary", [sys.executable, "tools/ledger_usage_summary.py"]),
             ("token_budget_guard", [sys.executable, "tools/token_budget_guard.py", "--no-refresh"]),
+            ("live_trade_safety_audit", [sys.executable, "tools/live_trade_safety_audit.py"]),
         ]
         for name, cmd in commands:
             refreshed.append(run_cmd(name, cmd))
@@ -74,6 +75,7 @@ def main() -> int:
     decision = read_text(REPORTS / "decision_trace_report_latest.txt")
     ledger = read_text(REPORTS / "ledger_usage_summary.txt")
     token_guard = read_text(REPORTS / "token_budget_guard.txt")
+    live_trade_safety = read_text(REPORTS / "live_trade_safety_audit.txt")
     governance = read_text(REPORTS / "v2_governance_smoke_latest.txt")
 
     checks: list[dict[str, Any]] = []
@@ -135,6 +137,13 @@ def main() -> int:
     })
 
     live_run_text = read_text(ROOT / "scripts" / "live_run_systemd.py")
+    live_safe_ok = "Verdict: live_trade_default_safe" in live_trade_safety
+    checks.append({
+        "name": "Live-trade safety",
+        "status": status(live_safe_ok),
+        "detail": "paper default-safe and explicit live flag gated" if live_safe_ok else "live-trade safety audit missing or incomplete",
+    })
+
     checks.append({
         "name": "Process supervisor",
         "status": status("terminate_process_group" in live_run_text and "start_new_session=True" in live_run_text),

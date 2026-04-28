@@ -166,11 +166,24 @@ def _direction_from_score(value: Any) -> int:
 
 
 def _promote_wait_candidate(candidate: Dict[str, Any]) -> bool:
+    """Promote a WAIT candidate only when strict bullish evidence is confirmed.
+
+    Earlier versions allowed a ranked WAIT candidate to become BUY when policy
+    and ML scores aligned or a real-OHLC bootstrap looked confident. That made
+    operator reports show final BUY actions even when weighted evidence_winner
+    was WAIT. For V2 trading discipline, the selector may only promote WAIT
+    when explicit pattern/3-candle confirmation agrees with the bullish signal.
+    """
     if str(candidate.get("decision") or "").upper() != "WAIT":
         return False
     if float(candidate.get("position_state") or 0.0) > 0:
         return False
     if float(candidate.get("ranking_score") or 0.0) <= 0.0:
+        return False
+
+    evidence_winner = str(candidate.get("evidence_winner") or "").upper()
+    if evidence_winner == "WAIT":
+        candidate["decision_promotion_blocked_reason"] = "evidence_winner_wait"
         return False
 
     signal_votes = []
@@ -181,33 +194,30 @@ def _promote_wait_candidate(candidate: Dict[str, Any]) -> bool:
         if direction:
             signal_votes.append(direction)
     if not signal_votes:
+        candidate["decision_promotion_blocked_reason"] = "missing_signal_votes"
         return False
     signal_dir = signal_votes[0]
     if any(direction != signal_dir for direction in signal_votes[1:]):
+        candidate["decision_promotion_blocked_reason"] = "signal_votes_disagree"
         return False
     if signal_dir <= 0:
+        candidate["decision_promotion_blocked_reason"] = "non_bullish_signal"
         return False
 
-    evidence_votes = []
     pattern_confirmation = candidate.get("pattern_confirmation") or {}
     pattern_dir = _direction_from_score(candidate.get("pattern_dir"))
-    if pattern_confirmation.get("satisfied") and pattern_dir:
-        evidence_votes.append(pattern_dir)
+    if not pattern_confirmation.get("satisfied") or pattern_dir <= 0:
+        candidate["decision_promotion_blocked_reason"] = "missing_bullish_pattern_confirmation"
+        return False
+
     orion_bias = _direction_from_score(candidate.get("orion_bias"))
-    if candidate.get("orion_bias_applied") and orion_bias:
-        evidence_votes.append(orion_bias)
-    if not evidence_votes:
-        candle_source = str(candidate.get("candle_source") or "").lower()
-        candle_confidence = float(candidate.get("candle_confidence") or 0.0)
-        if candle_source != "real_ohlc" or candle_confidence < 0.7:
-            return False
-        evidence_votes.append(signal_dir)
-    if not any(direction == signal_dir for direction in evidence_votes):
+    if candidate.get("orion_bias_applied") and orion_bias < 0:
+        candidate["decision_promotion_blocked_reason"] = "orion_adverse_bias"
         return False
 
     candidate["decision"] = "BUY"
     candidate["decision_promoted_from"] = "WAIT"
-    candidate["decision_promotion_reason"] = "aligned_signal_evidence"
+    candidate["decision_promotion_reason"] = "strict_bullish_pattern_confirmation"
     return True
 
 

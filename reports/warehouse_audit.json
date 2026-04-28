@@ -2,6 +2,16 @@
   "data_dir_exists": true,
   "latest_runs": [
     {
+      "decision_rows": 0,
+      "grant_briefing": false,
+      "mtime": "2026-04-28T02:11:53.220788+00:00",
+      "packet_rows": 4,
+      "portfolio_rows": 0,
+      "run_id": "run_20260428_021002",
+      "target_state": false,
+      "trade_rows": 0
+    },
+    {
       "decision_rows": 6,
       "grant_briefing": false,
       "mtime": "2026-04-28T01:41:29.038658+00:00",
@@ -40,16 +50,6 @@
       "run_id": "run_20260427_033820",
       "target_state": false,
       "trade_rows": 6
-    },
-    {
-      "decision_rows": 12,
-      "grant_briefing": false,
-      "mtime": "2026-04-27T02:43:29.132696+00:00",
-      "packet_rows": 8,
-      "portfolio_rows": 12,
-      "run_id": "run_20260427_023911",
-      "target_state": false,
-      "trade_rows": 12
     }
   ],
   "nonempty_table_count": 11,
@@ -175,6 +175,6 @@
   ],
   "state_dir_exists": true,
   "table_count": 11,
-  "timestamp": "2026-04-28T01:46:04.513547+00:00",
+  "timestamp": "2026-04-28T02:17:51.395395+00:00",
   "verdict": "warehouse_has_data"
 }

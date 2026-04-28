@@ -19,6 +19,7 @@ EXIT_STOP_LOSS_PCT = float(os.environ.get("ACC_EXIT_STOP_LOSS_PCT", "0.015"))
 EXIT_TAKE_PROFIT_PCT = float(os.environ.get("ACC_EXIT_TAKE_PROFIT_PCT", "0.02"))
 EXIT_MAX_HOLD_TICKS = int(os.environ.get("ACC_EXIT_MAX_HOLD_TICKS", "18"))
 EXIT_NEGATIVE_SIGNAL_MULTIPLIER = float(os.environ.get("ACC_EXIT_NEGATIVE_SIGNAL_MULTIPLIER", "0.6"))
+ACC_ALLOW_REAL_OHLC_BOOTSTRAP = os.environ.get("ACC_ALLOW_REAL_OHLC_BOOTSTRAP", "0").strip().lower() in {"1", "true", "yes"}
 
 ROOT = Path(__file__).resolve().parent.parent
 ML_MODEL_PATH = ROOT / "models" / "ml_model.pkl"
@@ -758,7 +759,8 @@ def build_decision(
         # The decision_path_trace records this explicitly so Axiom/operator
         # review can decide later whether this behavior is useful or reckless.
         real_ohlc_bootstrap = (
-            pattern_result["matched_context"]["candle_source"] == "real_ohlc"
+            ACC_ALLOW_REAL_OHLC_BOOTSTRAP
+            and pattern_result["matched_context"]["candle_source"] == "real_ohlc"
             and float(pattern_result["matched_context"]["candle_confidence"] or 0.0) >= 0.7
             and adjusted_signal_score != 0.0
         )
@@ -787,7 +789,8 @@ def build_decision(
         triggered=pattern_recovery_triggered,
         mode=pattern_recovery_mode,
         demoted_by_pattern_gate=demoted_by_pattern_gate,
-        reason="pattern alignment or real-OHLC bootstrap can re-promote WAIT after gate review",
+        real_ohlc_bootstrap_allowed=ACC_ALLOW_REAL_OHLC_BOOTSTRAP,
+        reason="pattern alignment can re-promote WAIT after gate review; real-OHLC bootstrap is disabled by default unless ACC_ALLOW_REAL_OHLC_BOOTSTRAP=1",
     )
 
     forced_exit_reason = ""

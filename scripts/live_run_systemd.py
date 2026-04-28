@@ -92,6 +92,7 @@ def run_post_run_reports(run_id: str, run_dir: Path) -> None:
         return
 
     reports = [
+        ("db_status", [sys.executable, "tools/db_status.py"]),
         ("decision_trace_report", [sys.executable, "tools/decision_trace_report.py"]),
         ("ml_readiness_report", [sys.executable, "tools/ml_readiness_report.py"]),
         ("warehouse_audit", [sys.executable, "tools/warehouse_audit.py"]),

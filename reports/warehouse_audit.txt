@@ -10,11 +10,11 @@ Searched dirs:
 - /opt/openclaw/.openclaw/workspace/state
 
 Latest runs:
+- run_20260429_012515: decisions=0 trades=0 portfolio=0 packets=4 target=True grant=True
 - run_20260428_040408: decisions=0 trades=0 portfolio=0 packets=0 target=True grant=True
 - run_20260428_035900: decisions=0 trades=0 portfolio=0 packets=0 target=False grant=False
 - run_20260428_025706: decisions=0 trades=0 portfolio=0 packets=0 target=True grant=True
 - run_20260428_024521: decisions=0 trades=0 portfolio=0 packets=0 target=False grant=False
-- run_20260428_021955: decisions=0 trades=0 portfolio=0 packets=8 target=False grant=False
 
 SQLite tables:
 - /opt/openclaw/.openclaw/workspace/data/warehouse.sqlite error=None

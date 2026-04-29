@@ -1,6 +1,6 @@
 ACC V2 Triple Gate
 ==================
-Generated: 2026-04-29T01:19:42.417292+00:00
+Generated: 2026-04-29T01:44:22.462794+00:00
 
 Refresh:
 - OK: ledger_usage_summary rc=0
@@ -9,13 +9,13 @@ Refresh:
 - OK: v2_governance_smoke_dry_run rc=0
 
 Latest Run:
-- run_id: run_20260428_040408
-- verdict: latest_run_timed_out
-- metadata_status: timed_out
+- run_id: run_20260429_012515
+- verdict: latest_run_packets_only_no_decisions
+- metadata_status: completed
 - decisions: 0
 - trades: 0
 - portfolio: 0
-- company_packets: 0
+- company_packets: 4
 - ledger_usage: 20
 - bridge_usage: 20
 

@@ -1,6 +1,6 @@
 ACC V2 Readiness Gate
 =====================
-Generated: 2026-04-29T01:19:45.810313+00:00
+Generated: 2026-04-29T01:44:38.063788+00:00
 Overall: READY_FOR_SHORT_PAPER_PROOF
 OK=9 WARN=0 FAIL=0
 

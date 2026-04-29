@@ -4,6 +4,16 @@
     {
       "decision_rows": 0,
       "grant_briefing": true,
+      "mtime": "2026-04-29T01:27:06.959433+00:00",
+      "packet_rows": 4,
+      "portfolio_rows": 0,
+      "run_id": "run_20260429_012515",
+      "target_state": true,
+      "trade_rows": 0
+    },
+    {
+      "decision_rows": 0,
+      "grant_briefing": true,
       "mtime": "2026-04-28T04:04:08.257988+00:00",
       "packet_rows": 0,
       "portfolio_rows": 0,
@@ -38,16 +48,6 @@
       "packet_rows": 0,
       "portfolio_rows": 0,
       "run_id": "run_20260428_024521",
-      "target_state": false,
-      "trade_rows": 0
-    },
-    {
-      "decision_rows": 0,
-      "grant_briefing": false,
-      "mtime": "2026-04-28T02:23:58.189696+00:00",
-      "packet_rows": 8,
-      "portfolio_rows": 0,
-      "run_id": "run_20260428_021955",
       "target_state": false,
       "trade_rows": 0
     }
@@ -175,6 +175,6 @@
   ],
   "state_dir_exists": true,
   "table_count": 11,
-  "timestamp": "2026-04-29T01:19:45.431640+00:00",
+  "timestamp": "2026-04-29T01:44:35.870526+00:00",
   "verdict": "warehouse_has_data"
 }

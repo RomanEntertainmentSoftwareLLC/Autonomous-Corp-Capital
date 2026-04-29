@@ -1,12 +1,12 @@
 ACC V2 Triple Gate Board Packet
 ===============================
-Generated: 2026-04-29T01:19:42.417292+00:00
+Generated: 2026-04-29T01:44:22.462794+00:00
 
 Executive Summary:
 - V2 readiness overall: READY_FOR_SHORT_PAPER_PROOF
-- Latest run verdict: latest_run_timed_out
-- Latest run id: run_20260428_040408
-- Latest run artifacts: decisions=0 trades=0 portfolio=0 packets=0
+- Latest run verdict: latest_run_packets_only_no_decisions
+- Latest run id: run_20260429_012515
+- Latest run artifacts: decisions=0 trades=0 portfolio=0 packets=4
 
 Readiness Checks:
 - OK: ML readiness
@@ -19,7 +19,7 @@ Readiness Checks:
 - OK: Auto post-run reports
 
 Operating Judgment:
-- Latest cycle timed out. Supervisor worked, but worker graceful shutdown still needs improvement.
+- Latest cycle produced packets but no decisions. This may be cautious behavior or over-strict gating; inspect before assuming failure.
 - Token budget guard is not blocking expansion, but keep calls disciplined.
 
 Recommended Next Actions:

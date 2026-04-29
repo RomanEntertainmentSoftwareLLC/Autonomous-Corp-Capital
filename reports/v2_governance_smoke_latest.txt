@@ -1,7 +1,7 @@
 ACC V2 Governance Smoke
 =======================
-Started: 2026-04-29T01:19:41.563256+00:00
-Ended: 2026-04-29T01:19:42.395684+00:00
+Started: 2026-04-29T01:44:17.292640+00:00
+Ended: 2026-04-29T01:44:22.335014+00:00
 Mode: dry_run
 Result: 5/5 OK
 
@@ -15,20 +15,20 @@ Chain:
 Output excerpts:
 
 ## ledger
-Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/ledger_reviews/run_20260428_040408_ledger_context.json
-Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/ledger_reviews/run_20260428_040408_ledger_prompt.txt
+Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/ledger_reviews/run_20260429_012515_ledger_context.json
+Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/ledger_reviews/run_20260429_012515_ledger_prompt.txt
 
 ## helena
-Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/helena_reviews/run_20260428_040408_helena_context.json
-Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/helena_reviews/run_20260428_040408_helena_prompt.txt
+Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/helena_reviews/run_20260429_012515_helena_context.json
+Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/helena_reviews/run_20260429_012515_helena_prompt.txt
 
 ## axiom
-Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/axiom_reviews/run_20260428_040408_axiom_context.json
-Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/axiom_reviews/run_20260428_040408_axiom_prompt.txt
+Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/axiom_reviews/run_20260429_012515_axiom_context.json
+Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/axiom_reviews/run_20260429_012515_axiom_prompt.txt
 
 ## vivienne
-Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/vivienne_reviews/run_20260428_040408_vivienne_context.json
-Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/vivienne_reviews/run_20260428_040408_vivienne_prompt.txt
+Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/vivienne_reviews/run_20260429_012515_vivienne_context.json
+Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/vivienne_reviews/run_20260429_012515_vivienne_prompt.txt
 
 ## yam_yam
-Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/executive_reviews/run_20260428_040408_yam_yam_prompt.txt
+Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/executive_reviews/run_20260429_012515_yam_yam_prompt.txt

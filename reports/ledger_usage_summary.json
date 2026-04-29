@@ -1,14 +1,14 @@
 {
   "by_agent": {
     "bianca_company_001": {
-      "calls": 58.0,
+      "calls": 60.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     },
     "bianca_company_002": {
-      "calls": 60.0,
+      "calls": 62.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
@@ -22,21 +22,21 @@
       "total_tokens": 0.0
     },
     "bianca_company_004": {
-      "calls": 38.0,
+      "calls": 40.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     },
     "iris_company_001": {
-      "calls": 58.0,
+      "calls": 60.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     },
     "iris_company_002": {
-      "calls": 58.0,
+      "calls": 60.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
@@ -50,21 +50,21 @@
       "total_tokens": 0.0
     },
     "iris_company_004": {
-      "calls": 38.0,
+      "calls": 40.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     },
     "lucian_company_001": {
-      "calls": 58.0,
+      "calls": 60.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     },
     "lucian_company_002": {
-      "calls": 60.0,
+      "calls": 62.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
@@ -78,14 +78,14 @@
       "total_tokens": 0.0
     },
     "lucian_company_004": {
-      "calls": 38.0,
+      "calls": 40.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     },
     "orion_company_001": {
-      "calls": 58.0,
+      "calls": 60.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
@@ -106,14 +106,14 @@
       "total_tokens": 0.0
     },
     "orion_company_004": {
-      "calls": 38.0,
+      "calls": 40.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     },
     "vera_company_001": {
-      "calls": 58.0,
+      "calls": 60.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
@@ -134,7 +134,7 @@
       "total_tokens": 0.0
     },
     "vera_company_004": {
-      "calls": 38.0,
+      "calls": 40.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
@@ -143,14 +143,14 @@
   },
   "by_model": {
     "openclaw_agent:bianca_company_001": {
-      "calls": 58.0,
+      "calls": 60.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     },
     "openclaw_agent:bianca_company_002": {
-      "calls": 60.0,
+      "calls": 62.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
@@ -164,21 +164,21 @@
       "total_tokens": 0.0
     },
     "openclaw_agent:bianca_company_004": {
-      "calls": 38.0,
+      "calls": 40.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     },
     "openclaw_agent:iris_company_001": {
-      "calls": 58.0,
+      "calls": 60.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     },
     "openclaw_agent:iris_company_002": {
-      "calls": 58.0,
+      "calls": 60.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
@@ -192,21 +192,21 @@
       "total_tokens": 0.0
     },
     "openclaw_agent:iris_company_004": {
-      "calls": 38.0,
+      "calls": 40.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     },
     "openclaw_agent:lucian_company_001": {
-      "calls": 58.0,
+      "calls": 60.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     },
     "openclaw_agent:lucian_company_002": {
-      "calls": 60.0,
+      "calls": 62.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
@@ -220,14 +220,14 @@
       "total_tokens": 0.0
     },
     "openclaw_agent:lucian_company_004": {
-      "calls": 38.0,
+      "calls": 40.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     },
     "openclaw_agent:orion_company_001": {
-      "calls": 58.0,
+      "calls": 60.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
@@ -248,14 +248,14 @@
       "total_tokens": 0.0
     },
     "openclaw_agent:orion_company_004": {
-      "calls": 38.0,
+      "calls": 40.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     },
     "openclaw_agent:vera_company_001": {
-      "calls": 58.0,
+      "calls": 60.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
@@ -276,7 +276,7 @@
       "total_tokens": 0.0
     },
     "openclaw_agent:vera_company_004": {
-      "calls": 38.0,
+      "calls": 40.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
@@ -285,15 +285,17 @@
   },
   "by_provider": {
     "openclaw_bridge": {
-      "calls": 1032.0,
+      "calls": 1058.0,
       "completion_tokens": 0.0,
       "estimated_cost": 0.0,
       "prompt_tokens": 0.0,
       "total_tokens": 0.0
     }
   },
-  "generated_at": "2026-04-28T03:33:17.242918+00:00",
+  "generated_at": "2026-04-29T01:19:45.586607+00:00",
   "run_dirs_scanned": [
+    "run_20260428_040408",
+    "run_20260428_035900",
     "run_20260428_025706",
     "run_20260428_024521",
     "run_20260428_021955",
@@ -311,21 +313,19 @@
     "run_20260420_023841",
     "run_20260420_020804",
     "run_20260420_020425",
-    "run_20260417_023209",
-    "run_20260417_022222",
-    "run_20260417_015422"
+    "run_20260417_023209"
   ],
   "source_counts": {
-    "bridge_usage.jsonl": 516,
-    "ledger_usage.jsonl": 516
+    "bridge_usage.jsonl": 529,
+    "ledger_usage.jsonl": 529
   },
   "totals": {
-    "calls": 1032,
+    "calls": 1058,
     "completion_tokens": 0.0,
     "estimated_cost": 0.0,
     "prompt_tokens": 0.0,
     "total_tokens": 0.0
   },
-  "usage_rows": 1032,
+  "usage_rows": 1058,
   "verdict": "usage_found"
 }

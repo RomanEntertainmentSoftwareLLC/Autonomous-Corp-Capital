@@ -6,7 +6,7 @@
     "vivienne",
     "yam_yam"
   ],
-  "ended_at": "2026-04-28T04:27:01.858539+00:00",
+  "ended_at": "2026-04-29T01:19:42.395684+00:00",
   "mode": "dry_run",
   "ok_count": 5,
   "results": [
@@ -16,14 +16,14 @@
         "tools/ledger_cost_review.py",
         "--dry-run"
       ],
-      "ended_at": "2026-04-28T04:27:01.507284+00:00",
+      "ended_at": "2026-04-29T01:19:41.700909+00:00",
       "mode": "dry_run",
       "name": "ledger",
       "ok": true,
       "output": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/ledger_reviews/run_20260428_040408_ledger_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/ledger_reviews/run_20260428_040408_ledger_prompt.txt\n",
       "returncode": 0,
       "script": "tools/ledger_cost_review.py",
-      "started_at": "2026-04-28T04:27:01.392603+00:00"
+      "started_at": "2026-04-29T01:19:41.563299+00:00"
     },
     {
       "cmd": [
@@ -31,14 +31,14 @@
         "tools/helena_risk_review.py",
         "--dry-run"
       ],
-      "ended_at": "2026-04-28T04:27:01.592494+00:00",
+      "ended_at": "2026-04-29T01:19:41.860708+00:00",
       "mode": "dry_run",
       "name": "helena",
       "ok": true,
       "output": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/helena_reviews/run_20260428_040408_helena_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/helena_reviews/run_20260428_040408_helena_prompt.txt\n",
       "returncode": 0,
       "script": "tools/helena_risk_review.py",
-      "started_at": "2026-04-28T04:27:01.507314+00:00"
+      "started_at": "2026-04-29T01:19:41.700948+00:00"
     },
     {
       "cmd": [
@@ -46,14 +46,14 @@
         "tools/axiom_evaluator_review.py",
         "--dry-run"
       ],
-      "ended_at": "2026-04-28T04:27:01.686421+00:00",
+      "ended_at": "2026-04-29T01:19:42.067064+00:00",
       "mode": "dry_run",
       "name": "axiom",
       "ok": true,
       "output": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/axiom_reviews/run_20260428_040408_axiom_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/axiom_reviews/run_20260428_040408_axiom_prompt.txt\n",
       "returncode": 0,
       "script": "tools/axiom_evaluator_review.py",
-      "started_at": "2026-04-28T04:27:01.592521+00:00"
+      "started_at": "2026-04-29T01:19:41.860787+00:00"
     },
     {
       "cmd": [
@@ -61,14 +61,14 @@
         "tools/vivienne_financial_review.py",
         "--dry-run"
       ],
-      "ended_at": "2026-04-28T04:27:01.764820+00:00",
+      "ended_at": "2026-04-29T01:19:42.207894+00:00",
       "mode": "dry_run",
       "name": "vivienne",
       "ok": true,
       "output": "Dry run. Context saved to: /opt/openclaw/.openclaw/workspace/state/vivienne_reviews/run_20260428_040408_vivienne_context.json\nDry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/vivienne_reviews/run_20260428_040408_vivienne_prompt.txt\n",
       "returncode": 0,
       "script": "tools/vivienne_financial_review.py",
-      "started_at": "2026-04-28T04:27:01.686466+00:00"
+      "started_at": "2026-04-29T01:19:42.067124+00:00"
     },
     {
       "cmd": [
@@ -76,17 +76,17 @@
         "tools/yam_yam_executive_review.py",
         "--dry-run"
       ],
-      "ended_at": "2026-04-28T04:27:01.858510+00:00",
+      "ended_at": "2026-04-29T01:19:42.395649+00:00",
       "mode": "dry_run",
       "name": "yam_yam",
       "ok": true,
       "output": "Dry run. Prompt saved to: /opt/openclaw/.openclaw/workspace/state/executive_reviews/run_20260428_040408_yam_yam_prompt.txt\n",
       "returncode": 0,
       "script": "tools/yam_yam_executive_review.py",
-      "started_at": "2026-04-28T04:27:01.764845+00:00"
+      "started_at": "2026-04-29T01:19:42.207932+00:00"
     }
   ],
-  "started_at": "2026-04-28T04:27:01.392570+00:00",
+  "started_at": "2026-04-29T01:19:41.563256+00:00",
   "success": true,
   "total": 5
 }

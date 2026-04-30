@@ -26,6 +26,8 @@ from tools.live_orchestra import orchestrate
 from tools.live_paper_portfolio import PortfolioState
 from tools.rpg_state import apply_runtime_packet_rpg_updates, format_runtime_rpg_event
 from tools.live_universe import target_symbol_list
+from tools.market_weather import build_market_weather_dict
+from tools.universe_ranker import rank_universe_candidates
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -154,6 +156,93 @@ def candidate_ranking_score(decision: Dict[str, Any]) -> float:
         if candle_source == "real_ohlc" and candle_confidence >= 0.7 and str(decision.get("decision") or "").upper() == "WAIT":
             return 0.0001
     return score
+
+
+
+
+def annotate_v3a_market_context(candidates: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Attach V3-A market/weather/ranking fields without changing decisions.
+
+    This is report-only trace enrichment. It must not mutate BUY/SELL/WAIT
+    decisions, ranking_score, execution_state, portfolio state, or agent calls.
+    """
+
+    weather = build_market_weather_dict(candidates)
+    ranked = rank_universe_candidates(candidates)
+
+    rank_by_key: Dict[tuple[str, str, int], Dict[str, Any]] = {}
+    seen: Dict[tuple[str, str], int] = {}
+    for row in ranked:
+        base_key = (str(row.get("company_id") or ""), str(row.get("symbol") or ""))
+        occurrence = seen.get(base_key, 0) + 1
+        seen[base_key] = occurrence
+        rank_by_key[(base_key[0], base_key[1], occurrence)] = row
+
+    seen.clear()
+    for candidate in candidates:
+        base_key = (str(candidate.get("company_id") or ""), str(candidate.get("symbol") or ""))
+        occurrence = seen.get(base_key, 0) + 1
+        seen[base_key] = occurrence
+        ranked_row = rank_by_key.get((base_key[0], base_key[1], occurrence), {})
+
+        candidate["v3a_market_regime"] = weather.get("market_regime")
+        candidate["v3a_risk_posture"] = weather.get("risk_posture")
+        candidate["v3a_best_posture"] = weather.get("best_posture")
+        candidate["v3a_market_weather"] = dict(weather)
+
+        candidate["v3a_universe_rank"] = ranked_row.get("universe_rank")
+        candidate["v3a_universe_rank_score"] = ranked_row.get("universe_rank_score")
+        candidate["v3a_rank_reasons"] = list(ranked_row.get("reasons") or [])
+
+    return weather
+
+
+def _v3a_wait_reason(candidate: Dict[str, Any]) -> str | None:
+    """Return a report-only WAIT reason without changing the decision."""
+
+    if str(candidate.get("decision") or "").upper() != "WAIT":
+        return None
+
+    existing = candidate.get("wait_reason")
+    if existing:
+        return str(existing)
+
+    regime = str(candidate.get("v3a_market_regime") or "")
+    if regime in {"broad_red_market", "volatility_shock"}:
+        return "WAIT_MARKET_HOSTILE"
+    if regime == "unknown":
+        return "WAIT_MARKET_CONTEXT_UNKNOWN"
+
+    demotion = str(candidate.get("decision_demotion_reason") or "")
+    if demotion == "max_open_positions":
+        return "WAIT_CAPITAL_OR_SLOT_LIMIT"
+    if demotion == "flat_account_sell_block":
+        return "WAIT_ALREADY_FLAT"
+
+    promotion_block = str(candidate.get("decision_promotion_blocked_reason") or "")
+    if promotion_block in {"missing_bullish_pattern_confirmation", "missing_signal_votes", "signal_votes_disagree"}:
+        return "WAIT_NEEDS_CONFIRMATION"
+    if promotion_block in {"evidence_winner_wait", "non_bullish_signal", "orion_adverse_bias"}:
+        return "WAIT_NO_EDGE"
+
+    skip_reason = str(candidate.get("skip_reason") or "")
+    if skip_reason == "hold_candidate":
+        return "WAIT_NO_EDGE"
+
+    if float(candidate.get("ranking_score") or 0.0) <= 0.0:
+        return "WAIT_NO_EDGE"
+
+    return "WAIT_NEEDS_CONFIRMATION"
+
+
+def annotate_v3a_wait_reasons(candidates: List[Dict[str, Any]]) -> None:
+    """Attach report-only wait_reason fields to WAIT candidate rows."""
+
+    for candidate in candidates:
+        reason = _v3a_wait_reason(candidate)
+        if reason:
+            candidate["wait_reason"] = reason
+            candidate.setdefault("wait_reason_detail", reason.lower())
 
 
 def _direction_from_score(value: Any) -> int:
@@ -2556,7 +2645,9 @@ def run_worker(run_id: str, duration_hours: float = 0.0, virtual_currency: float
                 candidate_decisions.append(decision)
 
         apply_orion_bias_before_ranking(candidate_decisions)
+        annotate_v3a_market_context(candidate_decisions)
         ranked_candidates = rank_and_select_candidates(candidate_decisions)
+        annotate_v3a_wait_reasons(ranked_candidates)
         record_candidate_audit(run_dir, timestamp, ranked_candidates)
         company_packets = apply_company_packets(ranked_candidates, now=_utcnow().replace(tzinfo=timezone.utc), run_id=run_id, cycle=cycle)
         for packet in company_packets.values():

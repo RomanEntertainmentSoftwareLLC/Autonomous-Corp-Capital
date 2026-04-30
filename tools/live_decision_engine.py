@@ -19,7 +19,7 @@ EXIT_STOP_LOSS_PCT = float(os.environ.get("ACC_EXIT_STOP_LOSS_PCT", "0.015"))
 EXIT_TAKE_PROFIT_PCT = float(os.environ.get("ACC_EXIT_TAKE_PROFIT_PCT", "0.02"))
 EXIT_MAX_HOLD_TICKS = int(os.environ.get("ACC_EXIT_MAX_HOLD_TICKS", "18"))
 EXIT_NEGATIVE_SIGNAL_MULTIPLIER = float(os.environ.get("ACC_EXIT_NEGATIVE_SIGNAL_MULTIPLIER", "0.6"))
-ACC_ALLOW_REAL_OHLC_BOOTSTRAP = os.environ.get("ACC_ALLOW_REAL_OHLC_BOOTSTRAP", "0").strip().lower() in {"1", "true", "yes"}
+ACC_ALLOW_REAL_OHLC_BOOTSTRAP = os.environ.get("ACC_ALLOW_REAL_OHLC_BOOTSTRAP", "1").strip().lower() in {"1", "true", "yes"}
 
 ROOT = Path(__file__).resolve().parent.parent
 ML_MODEL_PATH = ROOT / "models" / "ml_model.pkl"
@@ -741,6 +741,25 @@ def build_decision(
         detected_patterns=list(pattern_result.get("detected_patterns") or []),
         reason="BUY/SELL requires detected pattern confirmation unless later recovery deliberately re-promotes",
     )
+    if (
+        not demoted_by_pattern_gate
+        and decision in {"BUY", "SELL"}
+        and pattern_result["pattern_confirmation"].get("satisfied")
+        and int(pattern_result.get("pattern_dir") or 0) != 0
+        and (
+            (decision == "BUY" and int(pattern_result.get("pattern_dir") or 0) > 0)
+            or (decision == "SELL" and int(pattern_result.get("pattern_dir") or 0) < 0)
+        )
+    ):
+        notes = f"signal + pattern confirmation under {policy['policy_name']}"
+        scoring_method = "signal_plus_pattern"
+        _append_decision_trace(
+            decision_path_trace,
+            "pattern_confirmation_label",
+            decision=decision,
+            scoring_method=scoring_method,
+            reason="confirmed aligned pattern evidence labels the final decision path",
+        )
     pattern_recovery_before = decision
     pattern_recovery_triggered = False
     pattern_recovery_mode = None

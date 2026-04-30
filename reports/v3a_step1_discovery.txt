@@ -1,0 +1,61 @@
+ACC V3-A Step 1 Discovery
+==========================
+
+Scope:
+V3-A begins the Regime + Market Posture Layer.
+
+This discovery step is intentionally read-only. It does not change runtime behavior, trading decisions, live-paper execution, OpenClaw routing, Hermes routing, or agent behavior.
+
+Current serious runner:
+- scripts/live_run_systemd.py is the preferred supervised paper-proof runner.
+- tools/live_run.py is the deeper live-run controller and artifact producer.
+- trade-bot.py is legacy/compatibility until a cleanup audit proves otherwise.
+
+Current important runtime files:
+- scripts/live_run_systemd.py
+- tools/live_run.py
+- tools/live_decision_engine.py
+- tools/live_market_feed.py
+- tools/live_universe.py
+- tools/pattern_engine.py
+- tools/live_paper_portfolio.py
+
+Current important tests:
+- tests/test_live_runtime_audit.py
+- tests/test_pattern_engine.py
+- tests/test_live_portfolio.py
+- tests/test_bridge_runtime.py
+
+Current candidate flow observed:
+1. tools/live_run.py fetches market snapshots through tools/live_market_feed.py.
+2. tools/live_universe.py defines the watch/paper/real-money symbol universe.
+3. tools/live_run.py builds live candles through build_live_candle().
+4. tools/live_decision_engine.py builds per-company/per-symbol decision rows.
+5. tools/live_run.py computes candidate_ranking_score().
+6. Orion bias may be applied before ranking.
+7. rank_and_select_candidates() ranks and selects candidates.
+8. record_candidate_audit() writes artifacts/candidate_decisions.jsonl.
+9. apply_company_packets() builds company packets for agent context.
+10. Only executed BUY/SELL decisions are written to paper_decisions.jsonl.
+
+Safe V3-A attachment points for later batches:
+- Add regime/weather/rank fields to candidate audit rows.
+- Add wait_reason fields to candidate rows.
+- Add report-only V3-A summaries.
+- Only later, after tests, allow hostile market posture to demote new BUY entries.
+
+Batch 1 restriction:
+No runtime behavior changes. New modules must be importable, deterministic, side-effect-free, and token-free.
+
+Initial V3-A modules planned:
+- tools/market_regime.py
+- tools/market_weather.py
+- tools/universe_ranker.py
+
+Initial V3-A tests planned:
+- tests/test_market_regime.py
+- tests/test_market_weather.py
+- tests/test_universe_ranker.py
+
+Safety:
+Paper mode remains the default. V3-A Batch 1 must not affect real-money safety, broker calls, agent calls, or live-trade gates.

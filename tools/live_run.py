@@ -204,21 +204,29 @@ def _promote_wait_candidate(candidate: Dict[str, Any]) -> bool:
         candidate["decision_promotion_blocked_reason"] = "non_bullish_signal"
         return False
 
-    pattern_confirmation = candidate.get("pattern_confirmation") or {}
-    pattern_dir = _direction_from_score(candidate.get("pattern_dir"))
-    if not pattern_confirmation.get("satisfied") or pattern_dir <= 0:
-        candidate["decision_promotion_blocked_reason"] = "missing_bullish_pattern_confirmation"
-        return False
-
     orion_bias = _direction_from_score(candidate.get("orion_bias"))
     if candidate.get("orion_bias_applied") and orion_bias < 0:
         candidate["decision_promotion_blocked_reason"] = "orion_adverse_bias"
         return False
 
-    candidate["decision"] = "BUY"
-    candidate["decision_promoted_from"] = "WAIT"
-    candidate["decision_promotion_reason"] = "strict_bullish_pattern_confirmation"
-    return True
+    pattern_confirmation = candidate.get("pattern_confirmation") or {}
+    pattern_dir = _direction_from_score(candidate.get("pattern_dir"))
+    if pattern_confirmation.get("satisfied") and pattern_dir > 0:
+        candidate["decision"] = "BUY"
+        candidate["decision_promoted_from"] = "WAIT"
+        candidate["decision_promotion_reason"] = "strict_bullish_pattern_confirmation"
+        return True
+
+    candle_source = str(candidate.get("candle_source") or (candidate.get("matched_context") or {}).get("candle_source") or "").lower()
+    candle_confidence = float(candidate.get("candle_confidence") or (candidate.get("matched_context") or {}).get("candle_confidence") or 0.0)
+    if candle_source == "real_ohlc" and candle_confidence >= 0.7:
+        candidate["decision"] = "BUY"
+        candidate["decision_promoted_from"] = "WAIT"
+        candidate["decision_promotion_reason"] = "real_ohlc_bootstrap"
+        return True
+
+    candidate["decision_promotion_blocked_reason"] = "missing_bullish_pattern_confirmation"
+    return False
 
 
 

@@ -10,25 +10,25 @@ Searched dirs:
 - /opt/openclaw/.openclaw/workspace/state
 
 Latest runs:
+- run_20260430_034554: decisions=12 trades=12 portfolio=12 packets=8 target=False grant=False
+- run_20260430_024739: decisions=12 trades=12 portfolio=12 packets=8 target=False grant=False
 - run_20260429_012515: decisions=0 trades=0 portfolio=0 packets=4 target=True grant=True
 - run_20260428_040408: decisions=0 trades=0 portfolio=0 packets=0 target=True grant=True
 - run_20260428_035900: decisions=0 trades=0 portfolio=0 packets=0 target=False grant=False
-- run_20260428_025706: decisions=0 trades=0 portfolio=0 packets=0 target=True grant=True
-- run_20260428_024521: decisions=0 trades=0 portfolio=0 packets=0 target=False grant=False
 
 SQLite tables:
 - /opt/openclaw/.openclaw/workspace/data/warehouse.sqlite error=None
   - analytics_companies: rows=4
   - companies: rows=4
   - company_performance: rows=4
-  - evaluations: rows=17
-  - features: rows=28
-  - results: rows=17
-  - runs: rows=17
+  - evaluations: rows=21
+  - features: rows=40
+  - results: rows=21
+  - runs: rows=21
   - sqlite_sequence: rows=8
-  - ticks: rows=31
-  - trade_facts: rows=28
-  - trades: rows=28
+  - ticks: rows=43
+  - trade_facts: rows=40
+  - trades: rows=40
   - latest_company_results: view
   - latest_run_summary: view
   - leaderboard_basis: view

@@ -92,3 +92,46 @@ def test_v3a_text_report_contains_operator_sections(tmp_path):
     assert "Decision Counts" in text
     assert "Top Ranked Candidates" in text
     assert "BTC-USD" in text
+
+
+def test_v3a_regime_posture_report_runs_as_direct_script(tmp_path):
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    root = tmp_path
+    run_dir = root / "state" / "live_runs" / "run_direct"
+    write_jsonl(
+        run_dir / "artifacts" / "candidate_decisions.jsonl",
+        [
+            {
+                "company_id": "company_001",
+                "symbol": "BTC-USD",
+                "decision": "WAIT",
+                "change_pct": 0.001,
+                "policy_signal_score": 0.001,
+                "model_score": 0.55,
+                "wait_reason": "WAIT_NEEDS_CONFIRMATION",
+            }
+        ],
+    )
+
+    repo_root = Path(__file__).resolve().parents[1]
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "tools/v3a_regime_posture_report.py",
+            "--root",
+            str(root),
+            "--run-id",
+            "run_direct",
+        ],
+        cwd=repo_root,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+
+    assert completed.returncode == 0, completed.stdout
+    assert "ACC V3-A Regime + Market Posture Report" in completed.stdout
+    assert "BTC-USD" in completed.stdout

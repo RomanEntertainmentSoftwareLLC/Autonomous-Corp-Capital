@@ -917,7 +917,7 @@ def build_decision(
 
     result = DecisionResult(
         {
-            "timestamp": snapshot.get("timestamp") or datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+            "timestamp": snapshot.get("timestamp") or datetime.now(timezone.utc).isoformat(),
             "company_id": company_id,
             "symbol": snapshot.get("symbol"),
             "price": price,
@@ -931,7 +931,13 @@ def build_decision(
             "size_multiplier": float(policy["size_multiplier"]),
             "sizing_rationale": policy["sizing_rationale"],
             "notes": notes,
-            "scoring_method": scoring_method,
+            "scoring_method": (
+            "flat_account_sell_block"
+            if decision == "WAIT"
+            and float(snapshot.get("position_state") or 0.0) <= 0.0
+            and float(adjusted_signal_score or 0.0) < 0.0
+            else scoring_method
+        ),
             "decision_path_trace": decision_path_trace,
             "decision_trace_summary": " -> ".join(str(item.get("stage")) for item in decision_path_trace),
             "decision_evidence": evidence_result["decision_evidence"],

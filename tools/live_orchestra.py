@@ -17,7 +17,7 @@ BRANCH_PARTICIPANTS = {
 
 def branch_packet(run_dir: Path, role: str, summary: str, participants: List[str]) -> None:
     packet = {
-        "timestamp": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "role": role,
         "summary": summary,
         "participants": participants,

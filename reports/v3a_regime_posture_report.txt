@@ -1,0 +1,81 @@
+ACC V3-A Regime + Market Posture Report
+=======================================
+Generated at: 2026-04-30T03:55:31.317425+00:00
+Status: ok
+Run ID: run_20260430_034554
+Run dir: /opt/openclaw/.openclaw/workspace/state/live_runs/run_20260430_034554
+Candidate path: /opt/openclaw/.openclaw/workspace/state/live_runs/run_20260430_034554/artifacts/candidate_decisions.jsonl
+Candidate rows: 96
+
+Market Weather
+--------------
+Regime: uptrend
+Risk posture: selective_long
+Best posture: selective_long
+Breadth: green=72 red=16 total=96
+BTC direction: up
+ETH direction: up
+Volatility proxy: 0.020309
+
+Decision Counts
+---------------
+- BUY: 70
+- HOLD_POSITION: 6
+- WAIT: 20
+
+WAIT Reason Counts
+------------------
+- WAIT_NO_EDGE: 20
+
+Top Ranked Candidates
+---------------------
+1. DOGE-USD score=0.617599 company=company_003
+   - policy=0.020309
+   - ml=0.298690
+   - pattern=0.000000
+   - model_confidence=0.298600
+2. DOGE-USD score=0.61506 company=company_004
+   - policy=0.017770
+   - ml=0.298690
+   - pattern=0.000000
+   - model_confidence=0.298600
+3. DOGE-USD score=0.614214 company=company_001
+   - policy=0.016924
+   - ml=0.298690
+   - pattern=0.000000
+   - model_confidence=0.298600
+4. DOGE-USD score=0.611675 company=company_002
+   - policy=0.014385
+   - ml=0.298690
+   - pattern=0.000000
+   - model_confidence=0.298600
+5. PEPE-USD score=0.606665 company=company_003
+   - policy=0.009375
+   - ml=0.298690
+   - pattern=0.000000
+   - model_confidence=0.298600
+6. PEPE-USD score=0.606665 company=company_003
+   - policy=0.009375
+   - ml=0.298690
+   - pattern=0.000000
+   - model_confidence=0.298600
+7. PEPE-USD score=0.605493 company=company_004
+   - policy=0.008203
+   - ml=0.298690
+   - pattern=0.000000
+   - model_confidence=0.298600
+8. PEPE-USD score=0.605493 company=company_004
+   - policy=0.008203
+   - ml=0.298690
+   - pattern=0.000000
+   - model_confidence=0.298600
+9. PEPE-USD score=0.605103 company=company_001
+   - policy=0.007813
+   - ml=0.298690
+   - pattern=0.000000
+   - model_confidence=0.298600
+10. PEPE-USD score=0.605103 company=company_001
+   - policy=0.007813
+   - ml=0.298690
+   - pattern=0.000000
+   - model_confidence=0.298600

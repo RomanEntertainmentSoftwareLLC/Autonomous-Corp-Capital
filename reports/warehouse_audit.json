@@ -2,6 +2,26 @@
   "data_dir_exists": true,
   "latest_runs": [
     {
+      "decision_rows": 12,
+      "grant_briefing": false,
+      "mtime": "2026-04-30T03:49:43.135647+00:00",
+      "packet_rows": 8,
+      "portfolio_rows": 12,
+      "run_id": "run_20260430_034554",
+      "target_state": false,
+      "trade_rows": 12
+    },
+    {
+      "decision_rows": 12,
+      "grant_briefing": false,
+      "mtime": "2026-04-30T02:47:39.899683+00:00",
+      "packet_rows": 8,
+      "portfolio_rows": 12,
+      "run_id": "run_20260430_024739",
+      "target_state": false,
+      "trade_rows": 12
+    },
+    {
       "decision_rows": 0,
       "grant_briefing": true,
       "mtime": "2026-04-29T01:27:06.959433+00:00",
@@ -28,26 +48,6 @@
       "packet_rows": 0,
       "portfolio_rows": 0,
       "run_id": "run_20260428_035900",
-      "target_state": false,
-      "trade_rows": 0
-    },
-    {
-      "decision_rows": 0,
-      "grant_briefing": true,
-      "mtime": "2026-04-28T02:57:06.191388+00:00",
-      "packet_rows": 0,
-      "portfolio_rows": 0,
-      "run_id": "run_20260428_025706",
-      "target_state": true,
-      "trade_rows": 0
-    },
-    {
-      "decision_rows": 0,
-      "grant_briefing": false,
-      "mtime": "2026-04-28T02:45:21.355000+00:00",
-      "packet_rows": 0,
-      "portfolio_rows": 0,
-      "run_id": "run_20260428_024521",
       "target_state": false,
       "trade_rows": 0
     }
@@ -80,11 +80,11 @@
           "type": "table"
         },
         "evaluations": {
-          "rows": 17,
+          "rows": 21,
           "type": "table"
         },
         "features": {
-          "rows": 28,
+          "rows": 40,
           "type": "table"
         },
         "latest_company_results": {
@@ -100,11 +100,11 @@
           "type": "view"
         },
         "results": {
-          "rows": 17,
+          "rows": 21,
           "type": "table"
         },
         "runs": {
-          "rows": 17,
+          "rows": 21,
           "type": "table"
         },
         "sqlite_sequence": {
@@ -112,15 +112,15 @@
           "type": "table"
         },
         "ticks": {
-          "rows": 31,
+          "rows": 43,
           "type": "table"
         },
         "trade_facts": {
-          "rows": 28,
+          "rows": 40,
           "type": "table"
         },
         "trades": {
-          "rows": 28,
+          "rows": 40,
           "type": "table"
         }
       },
@@ -139,19 +139,19 @@
           "type": "table"
         },
         "evaluations": {
-          "rows": 17,
+          "rows": 21,
           "type": "table"
         },
         "features": {
-          "rows": 28,
+          "rows": 40,
           "type": "table"
         },
         "results": {
-          "rows": 17,
+          "rows": 21,
           "type": "table"
         },
         "runs": {
-          "rows": 17,
+          "rows": 21,
           "type": "table"
         },
         "sqlite_sequence": {
@@ -159,15 +159,15 @@
           "type": "table"
         },
         "ticks": {
-          "rows": 31,
+          "rows": 43,
           "type": "table"
         },
         "trade_facts": {
-          "rows": 28,
+          "rows": 40,
           "type": "table"
         },
         "trades": {
-          "rows": 28,
+          "rows": 40,
           "type": "table"
         }
       }
@@ -175,6 +175,6 @@
   ],
   "state_dir_exists": true,
   "table_count": 11,
-  "timestamp": "2026-04-29T01:44:35.870526+00:00",
+  "timestamp": "2026-04-30T03:50:00.324405+00:00",
   "verdict": "warehouse_has_data"
 }

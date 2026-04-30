@@ -7,7 +7,7 @@ import argparse
 import copy
 import json
 import math
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -135,7 +135,7 @@ def run_self_play(
         )
 
     run_summary = {
-        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "regime": regime,
         "seed": seed,
         "iterations": len(ticks),

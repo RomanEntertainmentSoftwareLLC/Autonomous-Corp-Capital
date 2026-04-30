@@ -36,7 +36,7 @@ class PortfolioState:
 
     def allocation_snapshot(self) -> None:
         payload = {
-            "timestamp": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "parent_total": self.parent_total,
             "reserve_amount": self.reserve,
             "deployable_amount": self.deployable,
@@ -105,7 +105,7 @@ class PortfolioState:
         unrealized = self._company_unrealized(company)
         self.parent_equity = self.reserve + sum(self.cash.values()) + sum(self.unrealized.values())
         return {
-            "timestamp": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "parent_equity": self.parent_equity,
             "company": company,
             "cash": self.cash.get(company, 0.0),
@@ -246,6 +246,6 @@ class PortfolioState:
         if changes:
             with (self.run_dir / "artifacts" / "allocation_state.json").open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps({
-                    "timestamp": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "changes": changes,
                 }) + "\n")

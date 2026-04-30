@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import shutil
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict
 import sys
@@ -81,7 +81,7 @@ def main() -> None:
     child_meta["lifecycle_state"] = "NEW"
     child_meta["last_fitness"] = None
     child_meta.setdefault("notes", "")
-    child_meta["notes"] += f"\nEvolved from {args.parent} at {datetime.utcnow().isoformat()}"
+    child_meta["notes"] += f"\nEvolved from {args.parent} at {datetime.now(timezone.utc).isoformat()}"
     save_metadata(args.child, child_meta)
 
     print(f"Evolved genome saved for {args.child}. Run the appropriate tests before backing this up.")

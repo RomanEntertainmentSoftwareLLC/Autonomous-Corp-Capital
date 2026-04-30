@@ -7,7 +7,7 @@ import argparse
 import json
 import sqlite3
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -548,7 +548,7 @@ def ingest_live_run(cursor: sqlite3.Cursor, run_dir: Path) -> None:
         return
 
     metadata = _run_metadata(run_dir)
-    fallback_timestamp = parse_timestamp(str(metadata.get("started_at") or datetime.utcnow().isoformat()))
+    fallback_timestamp = parse_timestamp(str(metadata.get("started_at") or datetime.now(timezone.utc).isoformat()))
     decision_rows = load_json_lines(artifacts / "paper_decisions.jsonl")
     trade_rows = load_json_lines(artifacts / "paper_trades.jsonl")
     portfolio_rows = load_json_lines(artifacts / "portfolio_state.jsonl")

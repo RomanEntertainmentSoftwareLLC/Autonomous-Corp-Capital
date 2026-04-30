@@ -272,10 +272,16 @@ def assert_live_trade_safety(live_trade: bool) -> None:
 
 
 
-def supervisor_main(live_trade: bool = False) -> int:
+def supervisor_main(
+    live_trade: bool = False,
+    duration_hours: float | None = None,
+    virtual_currency: float | None = None,
+) -> int:
     assert_live_trade_safety(live_trade)
-    duration_hours = env_float("ACC_DURATION_HOURS", 24.0)
-    virtual_currency = env_float("ACC_VIRTUAL_CURRENCY", 250.0)
+    if duration_hours is None:
+        duration_hours = env_float("ACC_DURATION_HOURS", 24.0)
+    if virtual_currency is None:
+        virtual_currency = env_float("ACC_VIRTUAL_CURRENCY", 250.0)
     timeout_grace_seconds = env_int("ACC_RUN_HARD_TIMEOUT_GRACE_SECONDS", 120)
     term_grace_seconds = env_int("ACC_RUN_TERMINATE_GRACE_SECONDS", 20)
 
@@ -385,7 +391,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run ACC live-data paper cycle under a supervising wrapper.")
     parser.add_argument("--worker-child", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--run-id", help=argparse.SUPPRESS)
-    parser.add_argument("--duration-hours", type=float, default=0.0, help=argparse.SUPPRESS)
+    parser.add_argument("--duration-hours", type=float, default=None, help=argparse.SUPPRESS)
     parser.add_argument("--virtual-currency", type=float, default=None, help=argparse.SUPPRESS)
     parser.add_argument("--live-trade", action="store_true", help="Explicitly request real-money live trading; requires env safety gates.")
     return parser.parse_args()
@@ -397,7 +403,11 @@ def main() -> int:
         if not args.run_id:
             raise SystemExit("--worker-child requires --run-id")
         return worker_child_main(args)
-    return supervisor_main(live_trade=bool(args.live_trade))
+    return supervisor_main(
+        live_trade=bool(args.live_trade),
+        duration_hours=args.duration_hours,
+        virtual_currency=args.virtual_currency,
+    )
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import argparse
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict
 
@@ -99,7 +99,7 @@ def main() -> None:
             total_allocated += amount
         treasury["unallocated_capital"] = max(0.0, allocatable - total_allocated)
     treasury["company_allocations"] = allocations
-    treasury["last_updated"] = datetime.utcnow().isoformat() + "Z"
+    treasury["last_updated"] = datetime.now(timezone.utc).isoformat()
     save_treasury(treasury)
 
     print("Treasury allocations:")

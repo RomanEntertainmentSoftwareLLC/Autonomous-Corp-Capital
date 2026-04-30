@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone, timedelta, timezone
 import json
 import signal
 
@@ -149,8 +149,8 @@ def test_orion_allowed_live_search_updates_governor(monkeypatch, tmp_path):
     state = json.loads(state_path.read_text())
     assert state["daily_used"] == 1
     assert state["monthly_used"] == 1
-    assert state["last_reset_day"] == datetime.utcnow().date().isoformat()
-    assert state["last_reset_month"] == datetime.utcnow().strftime("%Y-%m")
+    assert state["last_reset_day"] == datetime.now(timezone.utc).date().isoformat()
+    assert state["last_reset_month"] == datetime.now(timezone.utc).strftime("%Y-%m")
 
 
 

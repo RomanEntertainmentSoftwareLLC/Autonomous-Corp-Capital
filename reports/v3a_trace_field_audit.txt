@@ -1,0 +1,24 @@
+ACC V3-A Trace Field Audit
+==========================
+Generated at: 2026-04-30T03:50:21.183103+00:00
+Status: PASS
+Reason: all_required_v3a_trace_fields_present
+Run ID: run_20260430_034554
+Run dir: /opt/openclaw/.openclaw/workspace/state/live_runs/run_20260430_034554
+Candidate path: /opt/openclaw/.openclaw/workspace/state/live_runs/run_20260430_034554/artifacts/candidate_decisions.jsonl
+Candidate rows: 96
+
+Decision Counts
+---------------
+- BUY: 70
+- HOLD_POSITION: 6
+- WAIT: 20
+
+Missing V3-A Field Counts
+-------------------------
+- none
+
+WAIT Rows
+---------
+WAIT rows: 20
+WAIT rows missing wait_reason/wait_reason_detail fields: 0

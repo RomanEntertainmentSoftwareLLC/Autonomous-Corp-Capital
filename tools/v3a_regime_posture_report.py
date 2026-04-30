@@ -11,16 +11,19 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from tools.market_regime import classify_market_regime_dict
 from tools.market_weather import build_market_weather_dict
 from tools.universe_ranker import rank_universe_candidates
-
-ROOT = Path(__file__).resolve().parents[1]
 
 
 def _read_json(path: Path) -> Dict[str, Any]:

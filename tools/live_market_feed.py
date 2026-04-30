@@ -33,7 +33,7 @@ def fetch_market_data(symbols: List[str]) -> List[Dict[str, object]]:
         body = response.read().decode()
     data = json.loads(body)
     snapshots: List[Dict[str, object]] = []
-    timestamp = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
+    timestamp = datetime.now(timezone.utc).isoformat()
     for symbol in symbols:
         slug = COIN_ID_MAP.get(symbol, symbol).lower().replace("-usd","")
         price_info = data.get(slug)

@@ -8,7 +8,7 @@ import json
 import os
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict
 
@@ -67,7 +67,7 @@ def record_run(task_id: str, metadata: Dict[str, Any]) -> None:
         runs = json.loads(LOG_PATH.read_text())
     entry = {
         "task_id": task_id,
-        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "metadata": metadata,
     }
     runs.append(entry)
